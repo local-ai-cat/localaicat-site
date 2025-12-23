@@ -3,297 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local AI Cat - Your Purr-sonal AI Assistant</title>
-    <meta name="description" content="Chat with AI, completely offline. No cloud, no tracking, just you and your AI cat companion.">
+    <title>Local AI Cat - Private AI on Your Device</title>
+    <link rel="icon" href="assets/app-icon.png">
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Floating particles -->
-    <div class="particles" id="particles"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
 
-    <!-- Navigation -->
-    <nav class="nav">
-        <div class="nav-container">
-            <a href="index.html" class="logo">
-                <span class="logo-icon">🐱</span>
-                <span class="logo-text">Local AI Cat</span>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="assets/app-icon.png" alt="Local AI Cat">
+                <span>Local AI Cat</span>
             </a>
             <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#download">Download</a>
-                <a href="support.html">Support</a>
                 <a href="privacy.html">Privacy</a>
+                <a href="support.html">Support</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <span class="badge-emoji">✨</span>
-                <span>100% Local. 0% Cloud.</span>
-            </div>
-            <h1 class="hero-title">
-                Your AI Assistant<br/>
-                <span class="gradient-text">That Stays Home</span>
-            </h1>
-            <p class="hero-description">
-                Chat with powerful AI models right on your device.
-                No internet required. No data sent anywhere.
-                Just you and your purr-sonal AI companion.
-            </p>
-            <div class="hero-actions">
-                <a href="#download" class="btn btn-primary">
-                    <span>Download Free</span>
-                    <span class="btn-icon">→</span>
-                </a>
-                <button class="btn btn-secondary" id="tryChat">
-                    <span class="btn-icon">💬</span>
-                    <span>Try Chat Demo</span>
-                </button>
-            </div>
-            <div class="hero-stats">
-                <div class="stat">
-                    <div class="stat-value">100%</div>
-                    <div class="stat-label">Private</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">0kb</div>
-                    <div class="stat-label">Data Sent</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">Offline</div>
-                    <div class="stat-label">Works Anywhere</div>
-                </div>
-            </div>
+        <div class="badge">
+            <span class="dot"></span>
+            100% Private. 0% Cloud.
         </div>
-        <div class="hero-visual">
-            <div class="chat-preview">
-                <div class="chat-header">
-                    <div class="chat-dots">
-                        <span></span><span></span><span></span>
+
+        <img src="assets/app-icon.png" alt="Local AI Cat" class="hero-icon">
+
+        <h1>
+            Your AI Assistant<br>
+            <span class="gradient">That Stays Home</span>
+        </h1>
+
+        <p class="subtitle">
+            Chat with powerful AI models right on your device. No internet required.
+            No data sent anywhere. Complete privacy, complete control.
+        </p>
+
+        <a href="#download" class="btn">Download for iOS & Mac →</a>
+
+        <div class="stats">
+            <div><strong>0kb</strong><span>Data sent</span></div>
+            <div><strong>100%</strong><span>Offline</span></div>
+            <div><strong>∞</strong><span>Privacy</span></div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Why Local AI Cat?</h2>
+            <div class="feature-list">
+                <div class="feature">
+                    <div class="icon">🔒</div>
+                    <div>
+                        <h3>Completely Private</h3>
+                        <p>Your conversations never leave your device. No servers, no cloud, no tracking.</p>
                     </div>
-                    <div class="chat-title">Local AI Chat</div>
                 </div>
-                <div class="chat-messages">
-                    <div class="message user-message">
-                        <div class="message-content">Help me write a story about a space cat</div>
-                    </div>
-                    <div class="message ai-message">
-                        <div class="message-avatar">🐱</div>
-                        <div class="message-content">
-                            <div class="typing-indicator">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
+                <div class="feature">
+                    <div class="icon">✈️</div>
+                    <div>
+                        <h3>Works Offline</h3>
+                        <p>On a plane? In a basement? No problem. Works anywhere, no internet required.</p>
                     </div>
                 </div>
-            </div>
-            <div class="floating-badge badge-1">
-                <span class="badge-icon">🔒</span>
-                <span>Private</span>
-            </div>
-            <div class="floating-badge badge-2">
-                <span class="badge-icon">⚡</span>
-                <span>Fast</span>
-            </div>
-            <div class="floating-badge badge-3">
-                <span class="badge-icon">🎯</span>
-                <span>Accurate</span>
+                <div class="feature">
+                    <div class="icon">⚡</div>
+                    <div>
+                        <h3>Lightning Fast</h3>
+                        <p>Powered by Apple Silicon, responses are instant. No waiting for cloud servers.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="icon">🎙️</div>
+                    <div>
+                        <h3>Voice Transcription</h3>
+                        <p>Speak naturally with built-in Whisper transcription. All processing offline.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="icon">🧠</div>
+                    <div>
+                        <h3>Multiple Models</h3>
+                        <p>Choose from various AI models optimized for your device.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="section-header">
-            <h2 class="section-title">Why Local AI Cat?</h2>
-            <p class="section-description">Everything you need in a modern AI assistant, with none of the privacy concerns</p>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🔒</div>
-                <h3 class="feature-title">100% Private</h3>
-                <p class="feature-description">
-                    Your conversations never leave your device. No cloud. No servers. No tracking.
-                    What you chat about is yours alone.
-                </p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">✈️</div>
-                <h3 class="feature-title">Works Offline</h3>
-                <p class="feature-description">
-                    On a plane? In a basement? No problem. Local AI Cat works anywhere,
-                    no internet connection required.
-                </p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3 class="feature-title">Lightning Fast</h3>
-                <p class="feature-description">
-                    Powered by Apple Silicon, responses are instant. No waiting for cloud servers.
-                    Your device, your speed.
-                </p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">🎙️</div>
-                <h3 class="feature-title">Voice Transcription</h3>
-                <p class="feature-description">
-                    Speak naturally and watch your words appear. Built-in Whisper transcription
-                    works completely offline.
-                </p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">🧠</div>
-                <h3 class="feature-title">Multiple Models</h3>
-                <p class="feature-description">
-                    Choose from various AI models optimized for your device.
-                    From compact to capable, pick what fits your needs.
-                </p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3 class="feature-title">Custom Personality</h3>
-                <p class="feature-description">
-                    Create your own AI cat with unique personality traits.
-                    Make it yours with custom system prompts and styles.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Download Section -->
     <section class="download" id="download">
-        <div class="download-content">
-            <div class="download-text">
-                <h2 class="download-title">Ready to Chat?</h2>
-                <p class="download-description">
-                    Join thousands of users who've taken back control of their AI conversations.
-                    Download now and start chatting in minutes.
-                </p>
-                <div class="download-features">
-                    <div class="download-feature">
-                        <span class="check-icon">✓</span>
-                        <span>Free to download</span>
-                    </div>
-                    <div class="download-feature">
-                        <span class="check-icon">✓</span>
-                        <span>No account required</span>
-                    </div>
-                    <div class="download-feature">
-                        <span class="check-icon">✓</span>
-                        <span>Works on iPhone & Mac</span>
-                    </div>
-                </div>
-            </div>
-            <div class="download-buttons">
-                <a href="#" class="store-button">
-                    <div class="store-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 22C7.78997 22.05 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/>
-                        </svg>
-                    </div>
-                    <div class="store-text">
-                        <div class="store-label">Download on the</div>
-                        <div class="store-name">App Store</div>
-                    </div>
-                </a>
-            </div>
+        <div class="container">
+            <h2>Get Started</h2>
+            <p>Available for iPhone, iPad, and Mac with Apple Silicon</p>
+            <a href="#" class="btn btn-large">Download on the App Store</a>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <div class="footer-logo">
-                    <span class="logo-icon">🐱</span>
-                    <span class="logo-text">Local AI Cat</span>
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">
+                        <img src="assets/app-icon.png" alt="Local AI Cat">
+                        <span>Local AI Cat</span>
+                    </div>
+                    <p>Your private AI assistant</p>
                 </div>
-                <p class="footer-tagline">Your purr-sonal AI assistant that respects your privacy.</p>
+                <div>
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy</a>
+                    <a href="terms.html">Terms</a>
+                </div>
+                <div>
+                    <h4>Support</h4>
+                    <a href="support.html">Help</a>
+                    <a href="mailto:support@localaicat.com">Contact</a>
+                </div>
             </div>
-
-            <div class="footer-section">
-                <h4 class="footer-heading">Product</h4>
-                <a href="#features">Features</a>
-                <a href="#download">Download</a>
-                <a href="support.html">Support</a>
-            </div>
-
-            <div class="footer-section">
-                <h4 class="footer-heading">Legal</h4>
-                <a href="privacy.html">Privacy Policy</a>
-                <a href="terms.html">Terms of Service</a>
-            </div>
-
-            <div class="footer-section">
-                <h4 class="footer-heading">Connect</h4>
-                <a href="support.html">Contact Us</a>
-                <a href="https://github.com" target="_blank">GitHub</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2025 Local AI Cat. All rights reserved.</p>
-            <p class="footer-love">Made with 💜 and 🐱</p>
+            <p class="copyright">&copy; 2025 Local AI Cat</p>
         </div>
     </footer>
-
-    <!-- Chat Widget -->
-    <div class="chat-widget" id="chatWidget">
-        <div class="chat-widget-header">
-            <div class="chat-widget-avatar">🐱</div>
-            <div class="chat-widget-info">
-                <div class="chat-widget-name">Local AI Cat</div>
-                <div class="chat-widget-status">
-                    <span class="status-dot"></span>
-                    <span>Ready to chat</span>
-                </div>
-            </div>
-            <button class="chat-widget-close" id="closeChat">×</button>
-        </div>
-
-        <div class="chat-widget-messages" id="chatMessages">
-            <div class="chat-widget-message ai">
-                <div class="message-avatar">🐱</div>
-                <div class="message-bubble">
-                    Meow there! 👋 I'm your Local AI Cat. This is just a demo, but the real app
-                    runs completely offline on your device. Try asking me something!
-                </div>
-            </div>
-        </div>
-
-        <div class="chat-widget-input">
-            <input
-                type="text"
-                id="chatInput"
-                placeholder="Type a message... (try 'hello' or 'help')"
-                autocomplete="off"
-            >
-            <button class="chat-send-btn" id="sendMessage">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 1L9 11M19 1l-6 18-4-8-8-4 18-6z"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Chat Toggle Button -->
-    <button class="chat-toggle" id="chatToggle">
-        <span class="chat-toggle-icon">💬</span>
-        <span class="chat-toggle-text">Chat with me!</span>
-    </button>
-
-    <script src="script.js"></script>
 </body>
 </html>

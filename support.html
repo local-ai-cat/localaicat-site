@@ -4,423 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support - Local AI Cat</title>
+    <link rel="icon" href="assets/app-icon.png">
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        .support-page {
-            max-width: 1000px;
-            margin: 100px auto 60px;
-            padding: 0 var(--spacing-lg);
-        }
-
-        .support-header {
-            text-align: center;
-            margin-bottom: var(--spacing-2xl);
-        }
-
-        .support-title {
-            font-family: var(--font-display);
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .support-description {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .contact-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-2xl);
-        }
-
-        .contact-card {
-            background: var(--surface);
-            padding: var(--spacing-xl);
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--border-light);
-            text-align: center;
-            transition: all var(--transition-base);
-        }
-
-        .contact-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .contact-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .contact-title {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .contact-description {
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .contact-link {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            color: var(--primary);
-            font-weight: 600;
-            transition: var(--transition-base);
-        }
-
-        .contact-link:hover {
-            gap: var(--spacing-sm);
-        }
-
-        .faq-section {
-            background: var(--surface);
-            padding: var(--spacing-2xl);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
-        }
-
-        .faq-title {
-            font-family: var(--font-display);
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .faq-item {
-            border-bottom: 1px solid var(--border-light);
-            padding: var(--spacing-lg) 0;
-        }
-
-        .faq-item:last-child {
-            border-bottom: none;
-        }
-
-        .faq-question {
-            font-family: var(--font-display);
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .faq-question::before {
-            content: '🐾';
-            font-size: 1.5rem;
-        }
-
-        .faq-answer {
-            color: var(--text-secondary);
-            line-height: 1.7;
-            padding-left: 2.5rem;
-        }
-
-        .faq-answer ul {
-            margin: var(--spacing-sm) 0;
-            padding-left: var(--spacing-lg);
-        }
-
-        .faq-answer li {
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: var(--spacing-lg);
-            transition: var(--transition-base);
-        }
-
-        .back-link:hover {
-            gap: var(--spacing-sm);
-        }
+        .support { max-width: 900px; margin: 120px auto 60px; padding: 0 2rem; }
+        .support h1 { font-size: 3rem; margin-bottom: 2rem; text-align: center; }
+        .faq { background: rgba(22, 22, 31, 0.6); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+        .faq h3 { margin-bottom: 0.5rem; }
+        .faq p { color: var(--text-dim); }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-
-    <nav class="nav">
-        <div class="nav-container">
-            <a href="index.html" class="logo">
-                <span class="logo-icon">🐱</span>
-                <span class="logo-text">Local AI Cat</span>
-            </a>
-            <div class="nav-links">
-                <a href="index.html#features">Features</a>
-                <a href="index.html#download">Download</a>
-                <a href="support.html">Support</a>
-                <a href="privacy.html">Privacy</a>
-            </div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo"><img src="assets/app-icon.png" alt="Local AI Cat"><span>Local AI Cat</span></a>
+            <div class="nav-links"><a href="privacy.html">Privacy</a><a href="support.html">Support</a></div>
         </div>
     </nav>
-
-    <main class="support-page">
-        <a href="index.html" class="back-link">← Back to Home</a>
-
-        <div class="support-header">
-            <h1 class="support-title">How Can We Help?</h1>
-            <p class="support-description">
-                Need assistance? We're here to help! Check out our FAQs below or get in touch directly.
-            </p>
+    <main class="support">
+        <a href="/" style="color: var(--orange);">← Back</a>
+        <h1>Support</h1>
+        
+        <div class="faq">
+            <h3>Does it really work offline?</h3>
+            <p>Yes! 100% offline. Download AI models once, then everything works without internet - even on airplane mode.</p>
         </div>
 
-        <div class="contact-cards">
-            <div class="contact-card">
-                <div class="contact-icon">📧</div>
-                <h3 class="contact-title">Email Support</h3>
-                <p class="contact-description">
-                    Send us an email and we'll get back to you within 24-48 hours
-                </p>
-                <a href="mailto:support@localaicat.com" class="contact-link">
-                    <span>support@localaicat.com</span>
-                    <span>→</span>
-                </a>
-            </div>
-
-            <div class="contact-card">
-                <div class="contact-icon">💬</div>
-                <h3 class="contact-title">Live Chat</h3>
-                <p class="contact-description">
-                    Try our demo chat widget or reach out for quick questions
-                </p>
-                <button class="contact-link" id="openChatSupport">
-                    <span>Start Chat</span>
-                    <span>→</span>
-                </button>
-            </div>
-
-            <div class="contact-card">
-                <div class="contact-icon">🐙</div>
-                <h3 class="contact-title">GitHub</h3>
-                <p class="contact-description">
-                    Report bugs, request features, or contribute to development
-                </p>
-                <a href="https://github.com" target="_blank" class="contact-link">
-                    <span>View Repository</span>
-                    <span>→</span>
-                </a>
-            </div>
+        <div class="faq">
+            <h3>What devices are supported?</h3>
+            <p>iPhone (iOS 17.0+), iPad (iPadOS 17.0+), and Mac (macOS 14.0+) with Apple Silicon (M1+ or A14+).</p>
         </div>
 
-        <div class="faq-section">
-            <h2 class="faq-title">Frequently Asked Questions</h2>
+        <div class="faq">
+            <h3>Is it free?</h3>
+            <p>Yes! Core features including chat, voice transcription, and model management are completely free.</p>
+        </div>
 
-            <div class="faq-item">
-                <h3 class="faq-question">What devices does Local AI Cat support?</h3>
-                <p class="faq-answer">
-                    Local AI Cat works on:
-                </p>
-                <ul class="faq-answer">
-                    <li><strong>iPhone:</strong> iOS 17.0 or later (requires iPhone with Apple Silicon - iPhone 12 or newer recommended)</li>
-                    <li><strong>iPad:</strong> iPadOS 17.0 or later (M1/M2/M3/M4 chips for best performance)</li>
-                    <li><strong>Mac:</strong> macOS 14.0 or later (requires Apple Silicon - M1/M2/M3/M4)</li>
-                </ul>
-            </div>
+        <div class="faq">
+            <h3>Is my data private?</h3>
+            <p>Your conversations NEVER leave your device. No servers, no cloud, no tracking. Everything runs locally.</p>
+        </div>
 
-            <div class="faq-item">
-                <h3 class="faq-question">Does Local AI Cat really work offline?</h3>
-                <p class="faq-answer">
-                    Yes! 100% offline. All AI processing happens on your device. You'll need internet only once to download AI models, then everything works offline - even on airplane mode. Your conversations never touch the internet.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">How much storage do I need?</h3>
-                <p class="faq-answer">
-                    Storage requirements vary by AI model:
-                </p>
-                <ul class="faq-answer">
-                    <li><strong>Small models:</strong> 500MB - 1GB (faster, less capable)</li>
-                    <li><strong>Medium models:</strong> 2GB - 4GB (balanced performance)</li>
-                    <li><strong>Large models:</strong> 5GB+ (most capable, requires more space)</li>
-                </ul>
-                <p class="faq-answer">
-                    You can download multiple models and switch between them.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">Is Local AI Cat free?</h3>
-                <p class="faq-answer">
-                    Yes! Local AI Cat is free to download with core features included:
-                </p>
-                <ul class="faq-answer">
-                    <li>Basic chat with AI models</li>
-                    <li>Voice transcription</li>
-                    <li>Model management</li>
-                    <li>Complete privacy protection</li>
-                </ul>
-                <p class="faq-answer">
-                    Premium features (like advanced models or custom personalities) are available through an optional subscription.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">How does voice transcription work?</h3>
-                <p class="faq-answer">
-                    Local AI Cat uses Whisper, an advanced speech recognition model, running entirely on your device. Just tap the microphone button, speak, and your words appear as text - all offline. No audio is ever sent to the cloud.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">Can I use Local AI Cat for commercial purposes?</h3>
-                <p class="faq-answer">
-                    Local AI Cat is licensed for personal, non-commercial use. If you're interested in commercial licensing, please contact us at business@localaicat.com.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">Why does my device get warm during AI processing?</h3>
-                <p class="faq-answer">
-                    AI models are computationally intensive, especially on-device processing. Your device's processor works hard to generate responses quickly, which can generate heat. This is normal and safe - your device has built-in thermal management. For best results, use on newer devices with Apple Silicon.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">Can I export my chat history?</h3>
-                <p class="faq-answer">
-                    Yes! You can export your conversations in multiple formats (text, JSON, etc.) directly from the app. Since all data is stored locally on your device, you have complete control over your data.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">How do I cancel my subscription?</h3>
-                <p class="faq-answer">
-                    Subscriptions are managed through the App Store:
-                </p>
-                <ul class="faq-answer">
-                    <li>Open <strong>Settings</strong> on your device</li>
-                    <li>Tap your name at the top</li>
-                    <li>Select <strong>Subscriptions</strong></li>
-                    <li>Find <strong>Local AI Cat</strong> and tap <strong>Cancel Subscription</strong></li>
-                </ul>
-                <p class="faq-answer">
-                    You'll retain access until the end of your current billing period.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">What makes Local AI Cat different from ChatGPT or other AI assistants?</h3>
-                <p class="faq-answer">
-                    Key differences:
-                </p>
-                <ul class="faq-answer">
-                    <li><strong>Privacy:</strong> Your conversations never leave your device (unlike cloud-based AI)</li>
-                    <li><strong>Offline:</strong> Works anywhere, no internet required</li>
-                    <li><strong>No tracking:</strong> We don't collect or analyze your data</li>
-                    <li><strong>Speed:</strong> Instant responses with no network latency</li>
-                    <li><strong>Control:</strong> Choose and customize AI models yourself</li>
-                </ul>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">Is my data really private?</h3>
-                <p class="faq-answer">
-                    Absolutely! Unlike cloud-based AI services:
-                </p>
-                <ul class="faq-answer">
-                    <li>Your chats NEVER leave your device</li>
-                    <li>We CAN'T see your conversations (even if we wanted to)</li>
-                    <li>No servers, no cloud storage, no data transmission</li>
-                    <li>Everything runs locally on your device</li>
-                </ul>
-                <p class="faq-answer">
-                    Read our <a href="privacy.html" style="color: var(--primary); font-weight: 600;">Privacy Policy</a> for full details.
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">The app is slow on my device. What can I do?</h3>
-                <p class="faq-answer">
-                    Try these optimization tips:
-                </p>
-                <ul class="faq-answer">
-                    <li>Use smaller AI models (they're faster but less capable)</li>
-                    <li>Close other apps to free up memory</li>
-                    <li>Ensure your device has sufficient storage space</li>
-                    <li>Update to the latest iOS/macOS version</li>
-                    <li>Restart your device if performance degrades over time</li>
-                </ul>
-                <p class="faq-answer">
-                    Note: Older devices may experience slower performance. For best results, use devices with Apple Silicon (M1+ or A14+).
-                </p>
-            </div>
-
-            <div class="faq-item">
-                <h3 class="faq-question">Still have questions?</h3>
-                <p class="faq-answer">
-                    We're here to help! Email us at <strong>support@localaicat.com</strong> or use the contact options above. We typically respond within 24-48 hours. Meow! 🐱
-                </p>
-            </div>
+        <div class="faq">
+            <h3>Need more help?</h3>
+            <p>Email us at <strong>support@localaicat.com</strong></p>
         </div>
     </main>
-
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <div class="footer-logo">
-                    <span class="logo-icon">🐱</span>
-                    <span class="logo-text">Local AI Cat</span>
-                </div>
-                <p class="footer-tagline">Your purr-sonal AI assistant that respects your privacy.</p>
-            </div>
-
-            <div class="footer-section">
-                <h4 class="footer-heading">Product</h4>
-                <a href="index.html#features">Features</a>
-                <a href="index.html#download">Download</a>
-                <a href="support.html">Support</a>
-            </div>
-
-            <div class="footer-section">
-                <h4 class="footer-heading">Legal</h4>
-                <a href="privacy.html">Privacy Policy</a>
-                <a href="terms.html">Terms of Service</a>
-            </div>
-
-            <div class="footer-section">
-                <h4 class="footer-heading">Connect</h4>
-                <a href="support.html">Contact Us</a>
-                <a href="https://github.com" target="_blank">GitHub</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2025 Local AI Cat. All rights reserved.</p>
-            <p class="footer-love">Made with 💜 and 🐱</p>
+    <footer>
+        <div class="container">
+            <p class="copyright">&copy; 2025 Local AI Cat</p>
         </div>
     </footer>
-
-    <script src="script.js"></script>
-    <script>
-        // Open chat widget from support page
-        document.getElementById('openChatSupport').addEventListener('click', () => {
-            const chatWidget = document.getElementById('chatWidget');
-            const chatToggle = document.getElementById('chatToggle');
-            chatWidget.classList.add('active');
-            chatToggle.style.display = 'none';
-            document.getElementById('chatInput').focus();
-        });
-    </script>
 </body>
 </html>

@@ -148,83 +148,101 @@ footer a:hover { color: var(--orange); }
 
 .floating-cat {
     position: absolute;
-    width: 80px;
-    height: auto;
-    opacity: 0.15;
-    animation: drift 30s ease-in-out infinite;
-}
-
-.floating-cat:nth-child(1) {
-    top: 15%;
-    left: 5%;
-    animation-duration: 35s;
-    animation-delay: 0s;
-}
-
-.floating-cat:nth-child(2) {
-    top: 60%;
-    right: 8%;
-    animation-duration: 28s;
-    animation-delay: -10s;
-    transform: scaleX(-1);
-}
-
-.floating-cat:nth-child(3) {
-    bottom: 20%;
-    left: 15%;
-    animation-duration: 32s;
-    animation-delay: -5s;
     width: 60px;
+    height: auto;
+    opacity: 0.2;
 }
 
-.floating-cat:nth-child(4) {
-    top: 40%;
-    right: 20%;
-    animation-duration: 40s;
+/* Cat 1: Flies left to right across top */
+.floating-cat:nth-child(1) {
+    top: 12%;
+    animation: fly-right 25s linear infinite;
+}
+
+/* Cat 2: Flies right to left across middle */
+.floating-cat:nth-child(2) {
+    top: 45%;
+    animation: fly-left 30s linear infinite;
+    animation-delay: -8s;
+}
+
+/* Cat 3: Flies left to right across bottom */
+.floating-cat:nth-child(3) {
+    top: 75%;
+    width: 50px;
+    animation: fly-right 35s linear infinite;
     animation-delay: -15s;
-    width: 70px;
-    transform: scaleX(-1);
 }
 
-@keyframes drift {
-    0%, 100% { 
-        transform: translate(0, 0) rotate(0deg); 
-    }
-    25% { 
-        transform: translate(20px, -15px) rotate(2deg); 
-    }
-    50% { 
-        transform: translate(-10px, 10px) rotate(-1deg); 
-    }
-    75% { 
-        transform: translate(15px, 5px) rotate(1deg); 
-    }
-}
-
-.floating-cat:nth-child(2),
+/* Cat 4: Diagonal flight */
 .floating-cat:nth-child(4) {
-    animation-name: drift-flip;
+    width: 55px;
+    animation: fly-diagonal 28s linear infinite;
+    animation-delay: -5s;
 }
 
-@keyframes drift-flip {
-    0%, 100% { 
-        transform: scaleX(-1) translate(0, 0) rotate(0deg); 
+@keyframes fly-right {
+    0% {
+        left: -100px;
+        transform: scaleX(1) translateY(0) rotate(0deg);
     }
-    25% { 
-        transform: scaleX(-1) translate(20px, -15px) rotate(2deg); 
+    25% {
+        transform: scaleX(1) translateY(-30px) rotate(-3deg);
     }
-    50% { 
-        transform: scaleX(-1) translate(-10px, 10px) rotate(-1deg); 
+    50% {
+        transform: scaleX(1) translateY(20px) rotate(2deg);
     }
-    75% { 
-        transform: scaleX(-1) translate(15px, 5px) rotate(1deg); 
+    75% {
+        transform: scaleX(1) translateY(-15px) rotate(-2deg);
+    }
+    100% {
+        left: calc(100% + 100px);
+        transform: scaleX(1) translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes fly-left {
+    0% {
+        right: -100px;
+        left: auto;
+        transform: scaleX(-1) translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: scaleX(-1) translateY(25px) rotate(3deg);
+    }
+    50% {
+        transform: scaleX(-1) translateY(-20px) rotate(-2deg);
+    }
+    75% {
+        transform: scaleX(-1) translateY(15px) rotate(2deg);
+    }
+    100% {
+        right: calc(100% + 100px);
+        left: auto;
+        transform: scaleX(-1) translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes fly-diagonal {
+    0% {
+        left: -100px;
+        top: 80%;
+        transform: scaleX(1) rotate(-5deg);
+    }
+    50% {
+        transform: scaleX(1) rotate(5deg);
+    }
+    100% {
+        left: calc(100% + 100px);
+        top: 15%;
+        transform: scaleX(1) rotate(-5deg);
     }
 }
 
 @media (max-width: 768px) {
-    .floating-cat { 
-        width: 50px; 
-        opacity: 0.1;
+    .floating-cat {
+        width: 40px;
+        opacity: 0.15;
     }
     .floating-cat:nth-child(3),
     .floating-cat:nth-child(4) {

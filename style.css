@@ -19,6 +19,7 @@ body {
     min-height: 100vh;
 }
 a { color: inherit; text-decoration: none; }
+main:focus { outline: none; }
 
 /* Skip Link for Accessibility */
 .skip-link {
@@ -111,8 +112,8 @@ a:focus-visible,
 .container { max-width: 1000px; margin: 0 auto; padding: 0 2rem; }
 
 /* Nav */
-nav { position: fixed; top: 0; width: 100%; z-index: 100; padding: 1rem 0; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-nav .container { display: flex; justify-content: space-between; align-items: center; }
+.site-nav { position: fixed; top: 0; width: 100%; z-index: 100; padding: 1rem 0; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.site-nav .container { display: flex; justify-content: space-between; align-items: center; }
 .logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
 .logo img { width: 32px; height: 32px; border-radius: 8px; }
 .nav-links { display: flex; gap: 2rem; }
@@ -149,8 +150,8 @@ h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 700; line-height: 1.1; 
 
 /* Stats */
 .stats { display: flex; gap: 3rem; margin-top: 3rem; flex-wrap: wrap; justify-content: center; }
-.stats div { text-align: center; }
-.stats dd { display: block; font-size: 2.5rem; background: linear-gradient(135deg, #FF8A5C, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; order: -1; }
+.stats div { display: flex; flex-direction: column; text-align: center; }
+.stats dd { display: block; font-size: 2.5rem; background: linear-gradient(135deg, #FF8A5C, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; order: -1; margin: 0; }
 .stats dt { display: block; font-size: 0.875rem; color: #606070; margin-top: 0.25rem; font-weight: normal; }
 
 /* Features */
@@ -171,6 +172,7 @@ h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 700; line-height: 1.1; 
 /* Footer */
 footer { padding: 4rem 0 2rem; border-top: 1px solid var(--border); margin-top: 4rem; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+.footer-nav { position: static; width: auto; padding: 0; background: none; backdrop-filter: none; border: 0; }
 .footer-logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 1rem; }
 .footer-logo img { width: 32px; height: 32px; border-radius: 8px; }
 footer h4 { font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; color: #606070; }

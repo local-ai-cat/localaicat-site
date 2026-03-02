@@ -61,7 +61,7 @@
         <img src="assets/cat.gif" alt="" class="floating-cat" aria-hidden="true">
     </div>
 
-    <nav>
+    <nav class="site-nav">
         <div class="container">
             <a href="/" class="logo">
                 <img src="assets/app-icon.png" alt="Local AI Cat">
@@ -74,7 +74,8 @@
         </div>
     </nav>
 
-    <section class="hero" id="main">
+    <main id="main" tabindex="-1">
+    <section class="hero">
         <div class="badge">
             <span class="dot"></span>
             100% Private. 0% Cloud.
@@ -106,35 +107,35 @@
             <h2>Why Local AI Cat?</h2>
             <div class="feature-list">
                 <div class="feature">
-                    <div class="icon">🔒</div>
+                    <div class="icon" aria-hidden="true">🔒</div>
                     <div>
                         <h3>Completely Private</h3>
                         <p>Your conversations never leave your device. No servers, no cloud, no tracking.</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="icon">✈️</div>
+                    <div class="icon" aria-hidden="true">✈️</div>
                     <div>
                         <h3>Works Offline</h3>
                         <p>On a plane? In a basement? No problem. Works anywhere, no internet required.</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="icon">⚡</div>
+                    <div class="icon" aria-hidden="true">⚡</div>
                     <div>
                         <h3>Lightning Fast</h3>
                         <p>Powered by Apple Silicon, responses are instant. No waiting for cloud servers.</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="icon">🎙️</div>
+                    <div class="icon" aria-hidden="true">🎙️</div>
                     <div>
                         <h3>Voice Transcription</h3>
                         <p>Speak naturally with built-in Whisper transcription. All processing offline.</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="icon">🧠</div>
+                    <div class="icon" aria-hidden="true">🧠</div>
                     <div>
                         <h3>Multiple Models</h3>
                         <p>Choose from various AI models optimized for your device.</p>
@@ -160,6 +161,7 @@
             </a>
         </div>
     </section>
+    </main>
 
     <footer>
         <div class="container">
@@ -171,13 +173,13 @@
                     </div>
                     <p>Your private AI assistant</p>
                 </div>
-                <nav aria-label="Legal">
+                <nav class="footer-nav" aria-label="Legal">
                     <h4>Legal</h4>
                     <a href="privacy.html">Privacy</a>
                     <a href="terms.html">Terms</a>
                     <a href="licenses.html">Licenses</a>
                 </nav>
-                <nav aria-label="Support">
+                <nav class="footer-nav" aria-label="Support">
                     <h4>Support</h4>
                     <a href="support.html">Help</a>
                     <a href="mailto:support@localaicat.com">Contact</a>

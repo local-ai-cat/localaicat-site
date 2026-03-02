@@ -3,59 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Privacy policy for Local AI Cat. Learn how on-device AI keeps your conversations private and what optional Apple services may process.">
     <title>Privacy - Local AI Cat</title>
     <link rel="icon" href="assets/app-icon.png">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .legal { max-width: 800px; margin: 120px auto 60px; padding: 0 2rem; }
-        .legal h1 { font-size: 3rem; margin-bottom: 1rem; }
-        .legal h2 { color: var(--orange); margin: 2rem 0 1rem; }
-        .legal p, .legal li { color: var(--text-dim); margin-bottom: 1rem; }
-        .highlight { background: rgba(255, 107, 53, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid var(--orange); margin: 2rem 0; }
-    </style>
 </head>
 <body>
-    <nav>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <div class="bg-gradient">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <nav class="site-nav">
         <div class="container">
             <a href="/" class="logo"><img src="assets/app-icon.png" alt="Local AI Cat"><span>Local AI Cat</span></a>
-            <div class="nav-links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="licenses.html">Licenses</a><a href="support.html">Support</a></div>
+            <div class="nav-links"><a href="privacy.html" aria-current="page">Privacy</a><a href="terms.html">Terms</a><a href="licenses.html">Licenses</a><a href="support.html">Support</a></div>
         </div>
     </nav>
-    <main class="legal">
-        <a href="/" style="color: var(--orange);">← Back</a>
-        <h1>Privacy Policy</h1>
-        <p style="color: #606070;">Last updated: January 2025</p>
-        
-        <div class="highlight">
-            <p style="color: var(--text); margin: 0;"><strong>🔒 TL;DR:</strong> Local AI Cat runs completely on your device. We don't collect, store, or transmit any of your data or conversations. Your privacy is 100% protected because your data never leaves your device.</p>
+    <main class="content-page" id="main" tabindex="-1">
+        <div class="page-shell">
+            <header class="page-hero">
+                <a href="/" class="page-back">← Back to home</a>
+                <p class="page-kicker">Privacy</p>
+                <h1 class="page-title">Privacy Policy</h1>
+                <p class="page-meta">Last updated: January 2025</p>
+                <p class="page-intro">Local AI Cat is designed around on-device AI. The default experience keeps your chats, models, and voice inputs on your own hardware instead of routing them through our servers.</p>
+                <div class="page-callout">
+                    <p><strong>TL;DR:</strong> We do not collect, store, or transmit your conversations. Your data stays on your device unless you explicitly enable an Apple-provided cloud transcription option.</p>
+                </div>
+            </header>
+
+            <div class="content-stack">
+                <section class="content-card">
+                    <h2>Our Privacy Philosophy</h2>
+                    <p>Privacy is not an add-on for Local AI Cat. The app is built so core AI chat and transcription features can run locally, giving you full control over your content.</p>
+                </section>
+
+                <section class="content-card">
+                    <h2>What We Do Not Collect</h2>
+                    <ul>
+                        <li>Chat content or conversations</li>
+                        <li>Voice recordings or transcriptions</li>
+                        <li>Personal information</li>
+                        <li>Usage analytics</li>
+                        <li>Device information or location</li>
+                    </ul>
+                </section>
+
+                <section class="content-grid">
+                    <section class="content-card">
+                        <h2>Data Storage</h2>
+                        <p>All app data is stored locally on your device. Deleting the app removes the stored data from that device.</p>
+                    </section>
+
+                    <section class="content-card">
+                        <h2>Apple Enhanced Transcription</h2>
+                        <p>This optional feature uses Apple servers to improve transcription accuracy and is off by default.</p>
+                        <p>If you enable it, audio processing is governed by Apple's privacy policy. We do not receive or store that audio.</p>
+                    </section>
+                </section>
+
+                <section class="content-card">
+                    <h2>Questions</h2>
+                    <p>For privacy questions, email <strong><a class="text-link" href="mailto:privacy@localaicat.com">privacy@localaicat.com</a></strong>.</p>
+                </section>
+            </div>
         </div>
-
-        <h2>Our Privacy Philosophy</h2>
-        <p>At Local AI Cat, privacy isn't just a feature - it's the foundation. Unlike cloud-based AI, our app runs entirely on your device.</p>
-        
-        <h2>What We DON'T Collect</h2>
-        <ul>
-            <li>Chat content or conversations</li>
-            <li>Voice recordings or transcriptions</li>
-            <li>Personal information</li>
-            <li>Usage data or analytics</li>
-            <li>Device information or location</li>
-        </ul>
-
-        <h2>Data Storage</h2>
-        <p>All data is stored locally on your device. Delete the app to remove all data permanently.</p>
-
-        <h2>Apple Enhanced Transcription</h2>
-        <p>Local AI Cat offers an optional "Apple Enhanced Transcription" feature that uses Apple's servers for improved accuracy. This feature is <strong>off by default</strong>.</p>
-        <p>If you choose to enable it, your audio may be processed by Apple's servers. This is governed by Apple's privacy policy, not ours. We have no access to this data - it's strictly between you and Apple.</p>
-        <p>For maximum privacy, keep this setting disabled and use our built-in offline Whisper transcription.</p>
-
-        <h2>Contact</h2>
-        <p>Questions? Email <strong>privacy@localaicat.com</strong></p>
     </main>
     <footer>
         <div class="container">
-            <p class="copyright">&copy; 2025 Local AI Cat</p>
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">
+                        <img src="assets/app-icon.png" alt="Local AI Cat">
+                        <span>Local AI Cat</span>
+                    </div>
+                    <p>Your private AI assistant</p>
+                </div>
+                <nav class="footer-nav" aria-label="Legal">
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy</a>
+                    <a href="terms.html">Terms</a>
+                    <a href="licenses.html">Licenses</a>
+                </nav>
+                <nav class="footer-nav" aria-label="Support">
+                    <h4>Support</h4>
+                    <a href="support.html">Help</a>
+                    <a href="mailto:support@localaicat.com">Contact</a>
+                </nav>
+            </div>
+            <p class="copyright">&copy; 2026 Local AI Cat</p>
         </div>
     </footer>
 </body>

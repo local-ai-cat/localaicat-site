@@ -3,11 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Private AI chat that runs entirely on your device. No cloud, no data sharing. For iPhone, iPad, and Mac with Apple Silicon.">
+    <link rel="canonical" href="https://localaicat.com/">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Local AI Cat - Private AI on Your Device">
+    <meta property="og:description" content="Private AI chat that runs entirely on your device. No cloud, no data sharing. For iPhone, iPad, and Mac with Apple Silicon.">
+    <meta property="og:image" content="https://localaicat.com/assets/app-icon.png">
+    <meta property="og:url" content="https://localaicat.com/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Local AI Cat - Private AI on Your Device">
+    <meta name="twitter:description" content="Private AI chat that runs entirely on your device. No cloud, no data sharing. For iPhone, iPad, and Mac with Apple Silicon.">
+    <meta name="twitter:image" content="https://localaicat.com/assets/app-icon.png">
+
     <title>Local AI Cat - Private AI on Your Device</title>
     <link rel="icon" href="assets/app-icon.png">
     <link rel="stylesheet" href="style.css">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Local AI Cat",
+        "description": "Private AI chat that runs entirely on your device. No cloud, no data sharing.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "iOS 17+, macOS 14+",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "url": "https://localaicat.com/",
+        "image": "https://localaicat.com/assets/app-icon.png",
+        "installUrl": "https://apps.apple.com/app/local-ai-chat/id6741502386"
+    }
+    </script>
 </head>
 <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
     <!-- Animated Background -->
     <div class="bg-gradient">
         <div class="blob blob-1"></div>
@@ -17,10 +55,10 @@
 
     <!-- Floating Cats -->
     <div class="floating-cats">
-        <img src="assets/cat.gif" alt="" class="floating-cat">
-        <img src="assets/cat.gif" alt="" class="floating-cat">
-        <img src="assets/cat.gif" alt="" class="floating-cat">
-        <img src="assets/cat.gif" alt="" class="floating-cat">
+        <img src="assets/cat.gif" alt="" class="floating-cat" aria-hidden="true">
+        <img src="assets/cat.gif" alt="" class="floating-cat" aria-hidden="true">
+        <img src="assets/cat.gif" alt="" class="floating-cat" aria-hidden="true">
+        <img src="assets/cat.gif" alt="" class="floating-cat" aria-hidden="true">
     </div>
 
     <nav>
@@ -36,7 +74,7 @@
         </div>
     </nav>
 
-    <section class="hero">
+    <section class="hero" id="main">
         <div class="badge">
             <span class="dot"></span>
             100% Private. 0% Cloud.
@@ -56,11 +94,11 @@
 
         <a href="https://apps.apple.com/app/local-ai-chat/id6741502386" class="btn">Download for iOS & Mac →</a>
 
-        <div class="stats">
-            <div><strong>0kb</strong><span>Data sent</span></div>
-            <div><strong>100%</strong><span>Offline</span></div>
-            <div><strong>∞</strong><span>Privacy</span></div>
-        </div>
+        <dl class="stats">
+            <div><dt>Data sent</dt><dd>0kb</dd></div>
+            <div><dt>Offline</dt><dd>100%</dd></div>
+            <div><dt>Privacy</dt><dd>∞</dd></div>
+        </dl>
     </section>
 
     <section class="features">
@@ -110,7 +148,16 @@
         <div class="container">
             <h2>Get Started</h2>
             <p>Available for iPhone, iPad, and Mac with Apple Silicon</p>
-            <a href="https://apps.apple.com/app/local-ai-chat/id6741502386" class="btn btn-large">Download on the App Store</a>
+            <a href="https://apps.apple.com/app/local-ai-chat/id6741502386" class="app-store-badge" aria-label="Download on the App Store">
+                <svg viewBox="0 0 120 40" width="150" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="120" height="40" rx="6" fill="#000"/>
+                    <text x="42" y="12" fill="#fff" font-size="6" font-family="-apple-system, system-ui, sans-serif">Download on the</text>
+                    <text x="42" y="26" fill="#fff" font-size="12" font-weight="600" font-family="-apple-system, system-ui, sans-serif">App Store</text>
+                    <g fill="#fff" transform="translate(10, 7) scale(0.55)">
+                        <path d="M22.5 35.26c-1.74 0-3.28-.89-4.12-2.37l-9.77-17.04c-.85-1.48-.85-3.25 0-4.73.84-1.48 2.38-2.37 4.12-2.37h19.54c1.74 0 3.28.89 4.12 2.37.85 1.48.85 3.25 0 4.73l-9.77 17.04c-.84 1.48-2.38 2.37-4.12 2.37z"/>
+                    </g>
+                </svg>
+            </a>
         </div>
     </section>
 
@@ -124,19 +171,19 @@
                     </div>
                     <p>Your private AI assistant</p>
                 </div>
-                <div>
+                <nav aria-label="Legal">
                     <h4>Legal</h4>
                     <a href="privacy.html">Privacy</a>
                     <a href="terms.html">Terms</a>
                     <a href="licenses.html">Licenses</a>
-                </div>
-                <div>
+                </nav>
+                <nav aria-label="Support">
                     <h4>Support</h4>
                     <a href="support.html">Help</a>
                     <a href="mailto:support@localaicat.com">Contact</a>
-                </div>
+                </nav>
             </div>
-            <p class="copyright">&copy; 2025 Local AI Cat</p>
+            <p class="copyright">&copy; 2026 Local AI Cat</p>
         </div>
     </footer>
 </body>

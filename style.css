@@ -20,6 +20,40 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 
+/* Skip Link for Accessibility */
+.skip-link {
+    position: absolute;
+    top: -50px;
+    left: 16px;
+    background: var(--orange);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    z-index: 1000;
+    transition: top 0.3s;
+    font-weight: 600;
+}
+.skip-link:focus {
+    top: 16px;
+}
+
+/* Focus Styles for Accessibility */
+a:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+}
+
+.nav-links a:focus-visible {
+    outline-offset: 4px;
+}
+
+.logo:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 4px;
+    border-radius: 8px;
+}
+
 /* Animated Gradient Blobs */
 .bg-gradient {
     position: fixed;
@@ -100,11 +134,24 @@ h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 700; line-height: 1.1; 
 .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4); }
 .btn-large { padding: 1rem 3rem; font-size: 1.125rem; }
 
+/* App Store Badge */
+.app-store-badge {
+    display: inline-block;
+    transition: transform 0.3s, opacity 0.3s;
+}
+.app-store-badge:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+.app-store-badge svg {
+    display: block;
+}
+
 /* Stats */
 .stats { display: flex; gap: 3rem; margin-top: 3rem; flex-wrap: wrap; justify-content: center; }
 .stats div { text-align: center; }
-.stats strong { display: block; font-size: 2.5rem; background: linear-gradient(135deg, #FF8A5C, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.stats span { display: block; font-size: 0.875rem; color: #606070; margin-top: 0.25rem; }
+.stats dd { display: block; font-size: 2.5rem; background: linear-gradient(135deg, #FF8A5C, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; order: -1; }
+.stats dt { display: block; font-size: 0.875rem; color: #606070; margin-top: 0.25rem; font-weight: normal; }
 
 /* Features */
 .features { padding: 4rem 0; }

@@ -105,14 +105,16 @@ export function HomeExperience() {
         businessImgRef.current.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
       }
 
-      // Menu bar brand icon
+      // Menu bar brand icon — same crossfade as hero
       const brandPersonal = document.querySelector<HTMLElement>(".brandIconImagePersonal");
       const brandBusiness = document.querySelector<HTMLElement>(".brandIconImageBusiness");
       if (brandPersonal && brandBusiness) {
         brandPersonal.style.transition = "none";
         brandBusiness.style.transition = "none";
         brandPersonal.style.opacity = `${1 - bizFactor}`;
+        brandPersonal.style.transform = `scale(${0.98 + 0.02 * (1 - bizFactor)})`;
         brandBusiness.style.opacity = `${bizFactor}`;
+        brandBusiness.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
       }
     },
     []
@@ -140,6 +142,7 @@ export function HomeExperience() {
         .forEach((el) => {
           el.style.transition = "";
           el.style.opacity = "";
+          el.style.transform = "";
         });
 
       if (dragState.current.dragging) {

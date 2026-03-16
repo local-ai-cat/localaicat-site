@@ -1358,9 +1358,9 @@ h3 {
   }
 
   .brandIcon {
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
   }
 
   .brandText {
@@ -1368,12 +1368,17 @@ h3 {
   }
 
   .brandText strong {
-    font-size: 13px;
+    font-size: 15px;
     white-space: nowrap;
   }
 
   .brandTaglines {
-    display: none;
+    display: block;
+    height: 1em;
+  }
+
+  .brandTagline {
+    font-size: 11px;
   }
 
   .siteNavDesktop {

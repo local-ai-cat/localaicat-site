@@ -202,6 +202,92 @@ body[data-home-mode="business"] .brandTaglineBusiness {
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* Mobile nav — hidden on desktop */
+.mobileNavWrap {
+  display: none;
+}
+
+.hamburgerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.hamburgerButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hamburgerIcon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 20px;
+}
+
+.hamburgerIcon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--muted-strong);
+  border-radius: 2px;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.hamburgerIconOpen span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburgerIconOpen span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburgerIconOpen span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.mobileNavDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(18, 18, 18, 0.95);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  animation: dropdownIn 150ms ease;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mobileNavDropdown a {
+  padding: 12px 16px;
+  color: var(--muted-strong);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.mobileNavDropdown a:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .pageFrame {
   width: min(var(--max-width), 100%);
   margin: 0 auto;
@@ -1260,14 +1346,14 @@ h3 {
   }
 
   .siteHeaderInner {
-    padding: 8px 12px;
-    gap: 10px;
+    padding: 8px 8px 8px 12px;
+    gap: 8px;
     border-radius: 18px;
     flex-wrap: nowrap;
   }
 
   .brandMark {
-    gap: 0;
+    gap: 8px;
     flex-shrink: 0;
   }
 
@@ -1278,18 +1364,26 @@ h3 {
   }
 
   .brandText {
+    display: flex;
+  }
+
+  .brandText strong {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .brandTaglines {
     display: none;
   }
 
-  .siteNav {
-    gap: 0;
-    flex-wrap: nowrap;
+  .siteNavDesktop {
+    display: none;
   }
 
-  .siteNav a {
-    font-size: 13px;
-    padding: 8px 10px;
-    white-space: nowrap;
+  .mobileNavWrap {
+    display: block;
+    position: relative;
+    margin-left: auto;
   }
 
   .heroActions,

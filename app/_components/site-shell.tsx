@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { MobileNav } from "./mobile-nav";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -58,13 +59,15 @@ export function SiteShell({
             </span>
           </Link>
 
-          <nav aria-label="Primary" className="siteNav">
+          <nav aria-label="Primary" className="siteNav siteNavDesktop">
             {links.map((link) => (
               <Link href={link.href} key={link.href}>
                 {link.label}
               </Link>
             ))}
           </nav>
+
+          <MobileNav links={links} />
         </div>
       </header>
 

@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/assets/cat-business.png"
   },
+  other: {
+    "theme-color": "#090909"
+  },
   openGraph: {
     title: "Local AI Cat - Private On-Device AI",
     description:

@@ -22,6 +22,7 @@
 
 html {
   scroll-behavior: smooth;
+  background: #090909;
 }
 
 html,
@@ -180,7 +181,6 @@ body[data-home-mode="business"] .brandTaglineBusiness {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
   justify-content: flex-end;
 }
 
@@ -1252,25 +1252,44 @@ h3 {
 
 @media (max-width: 760px) {
   .siteHeader {
-    padding: 14px 14px 0;
+    padding: 10px 10px 0;
   }
 
   .siteHeaderInner {
-    padding: 10px 14px;
-    gap: 12px;
+    padding: 8px 12px;
+    gap: 8px;
+    border-radius: 20px;
   }
 
   .brandMark {
     gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .brandIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .brandTaglines {
+    display: none;
+  }
+
+  .brandText strong {
+    font-size: 13px;
+    white-space: nowrap;
   }
 
   .siteNav {
-    gap: 4px;
+    gap: 2px;
+    flex-wrap: nowrap;
   }
 
   .siteNav a {
-    font-size: 13px;
-    padding: 6px 10px;
+    font-size: 12px;
+    padding: 6px 8px;
+    white-space: nowrap;
   }
 
   .heroActions,
@@ -1279,18 +1298,25 @@ h3 {
     align-items: stretch;
   }
 
-  .brandIcon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+  .homeHero {
+    padding: 20px;
   }
 
-  .brandTaglines {
-    display: none;
+  .homeHeroMinimal {
+    min-height: auto;
   }
 
-  .brandText strong {
-    font-size: 14px;
+  .homeHeroCompact {
+    padding: 16px;
+  }
+
+  .heroMinimalFrameCompact {
+    gap: 14px;
+  }
+
+  .heroControlStack {
+    gap: 10px;
+    margin-top: 10px;
   }
 
   .pageFrame,
@@ -1324,16 +1350,12 @@ h3 {
   }
 
   .heroImageFrame {
-    min-height: min(50vh, 360px);
-    border-radius: 20px;
+    min-height: min(44vh, 300px);
+    border-radius: 16px;
   }
 
   .heroImageFrameCompact {
-    min-height: min(44vh, 320px);
-  }
-
-  .homeHeroCompact {
-    padding: 22px;
+    min-height: min(40vh, 280px);
   }
 
   .floatingCats {

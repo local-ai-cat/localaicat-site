@@ -92,8 +92,10 @@ export function HomeExperience() {
       sliderRef.current.style.transition = "none";
       sliderRef.current.style.transform = `translateX(${clamped}px)`;
 
-      // Crossfade cat images based on drag progress
-      const bizFactor = clamped / trackWidth; // 0 = personal, 1 = business
+      // Crossfade images based on drag progress (0 = personal, 1 = business)
+      const bizFactor = clamped / trackWidth;
+
+      // Hero cat images
       if (personalImgRef.current && businessImgRef.current) {
         personalImgRef.current.style.transition = "none";
         businessImgRef.current.style.transition = "none";
@@ -101,6 +103,16 @@ export function HomeExperience() {
         personalImgRef.current.style.transform = `scale(${0.98 + 0.02 * (1 - bizFactor)})`;
         businessImgRef.current.style.opacity = `${bizFactor}`;
         businessImgRef.current.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
+      }
+
+      // Menu bar brand icon
+      const brandPersonal = document.querySelector<HTMLElement>(".brandIconImagePersonal");
+      const brandBusiness = document.querySelector<HTMLElement>(".brandIconImageBusiness");
+      if (brandPersonal && brandBusiness) {
+        brandPersonal.style.transition = "none";
+        brandBusiness.style.transition = "none";
+        brandPersonal.style.opacity = `${1 - bizFactor}`;
+        brandBusiness.style.opacity = `${bizFactor}`;
       }
     },
     []
@@ -116,14 +128,19 @@ export function HomeExperience() {
       sliderRef.current.style.transition = "";
       sliderRef.current.style.transform = "";
 
-      // Reset image inline styles so CSS classes take over
-      [personalImgRef.current, businessImgRef.current].forEach((img) => {
-        if (img) {
-          img.style.transition = "";
-          img.style.opacity = "";
-          img.style.transform = "";
+      // Reset all inline styles so CSS classes take over
+      [personalImgRef.current, businessImgRef.current].forEach((el) => {
+        if (el) {
+          el.style.transition = "";
+          el.style.opacity = "";
+          el.style.transform = "";
         }
       });
+      document.querySelectorAll<HTMLElement>(".brandIconImagePersonal, .brandIconImageBusiness")
+        .forEach((el) => {
+          el.style.transition = "";
+          el.style.opacity = "";
+        });
 
       if (dragState.current.dragging) {
         const dx = e.clientX - dragState.current.startX;
@@ -150,6 +167,12 @@ export function HomeExperience() {
 
   useEffect(() => {
     document.body.dataset.homeMode = mode;
+
+    // Update favicon to match mode
+    const favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (favicon) {
+      favicon.href = mode === "business" ? "/assets/cat-business.png" : "/assets/cat-personal.png";
+    }
 
     return () => {
       delete document.body.dataset.homeMode;

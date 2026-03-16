@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   description:
     "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
   icons: {
-    icon: "/assets/app-icon.png"
+    icon: "/assets/cat-business.png"
   },
   openGraph: {
     title: "Local AI Cat - Private On-Device AI",

@@ -1252,17 +1252,42 @@ h3 {
     padding: 14px 14px 0;
   }
 
-  .siteHeaderInner,
-  .brandMark,
-  .siteNav,
+  .siteHeaderInner {
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .brandMark {
+    gap: 8px;
+  }
+
+  .siteNav {
+    gap: 4px;
+  }
+
+  .siteNav a {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
   .heroActions,
   .bottomActions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .brandText span {
-    white-space: normal;
+  .brandIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .brandTaglines {
+    display: none;
+  }
+
+  .brandText strong {
+    font-size: 14px;
   }
 
   .pageFrame,
@@ -1296,7 +1321,12 @@ h3 {
   }
 
   .heroImageFrame {
-    min-height: 360px;
+    min-height: min(50vh, 360px);
+    border-radius: 20px;
+  }
+
+  .heroImageFrameCompact {
+    min-height: min(44vh, 320px);
   }
 
   .homeHeroCompact {

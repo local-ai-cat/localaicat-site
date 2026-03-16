@@ -69,8 +69,6 @@ export function HomeExperience() {
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       dragState.current = { startX: e.clientX, startMode: mode, dragging: false };
-      switchRef.current?.setPointerCapture(e.pointerId);
-      e.preventDefault();
     },
     [mode]
   );
@@ -79,7 +77,10 @@ export function HomeExperience() {
     (e: React.PointerEvent) => {
       if (!dragState.current || !sliderRef.current || !switchRef.current) return;
       const dx = e.clientX - dragState.current.startX;
-      if (Math.abs(dx) > 4) dragState.current.dragging = true;
+      if (!dragState.current.dragging && Math.abs(dx) > 6) {
+        dragState.current.dragging = true;
+        switchRef.current.setPointerCapture(e.pointerId);
+      }
       if (!dragState.current.dragging) return;
 
       const trackWidth = switchRef.current.offsetWidth / 2 - 4;
@@ -216,10 +217,7 @@ export function HomeExperience() {
               <button
                 aria-selected={mode === "personal"}
                 className={mode === "personal" ? "isActive" : undefined}
-                onClick={(e) => {
-                  if (dragState.current?.dragging) { e.preventDefault(); return; }
-                  setMode("personal");
-                }}
+                onClick={() => setMode("personal")}
                 role="tab"
                 type="button"
               >
@@ -228,10 +226,7 @@ export function HomeExperience() {
               <button
                 aria-selected={mode === "business"}
                 className={mode === "business" ? "isActive" : undefined}
-                onClick={(e) => {
-                  if (dragState.current?.dragging) { e.preventDefault(); return; }
-                  setMode("business");
-                }}
+                onClick={() => setMode("business")}
                 role="tab"
                 type="button"
               >

@@ -148,18 +148,22 @@ body[data-home-mode="business"] .brandIconImageBusiness {
 .brandTaglines {
   position: relative;
   display: block;
-  min-height: 1.25rem;
+  height: 1.1em;
+  overflow: visible;
 }
 
 .brandTagline {
   position: absolute;
-  inset: 0 auto auto 0;
+  top: 0;
+  left: 0;
   white-space: nowrap;
   opacity: 0;
   transform: translateY(4px);
   transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+    opacity 280ms ease,
+    transform 280ms ease;
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .brandTaglinePersonal {

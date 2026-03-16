@@ -1365,6 +1365,7 @@ h3 {
 
   .brandText {
     display: flex;
+    overflow: hidden;
   }
 
   .brandText strong {
@@ -1375,10 +1376,14 @@ h3 {
   .brandTaglines {
     display: block;
     height: 1em;
+    overflow: hidden;
   }
 
   .brandTagline {
     font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .siteNavDesktop {

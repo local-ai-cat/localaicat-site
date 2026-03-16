@@ -35,7 +35,7 @@ export const metadata: Metadata = {
       "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
     url: getSiteUrl(),
     siteName: "Local AI Cat",
-    images: ["/assets/cat-business.png"],
+    images: [{ url: "/assets/og-share.png", width: 1200, height: 630 }],
     type: "website"
   },
   twitter: {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "Local AI Cat - Private On-Device AI",
     description:
       "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
-    images: ["/assets/cat-business.png"]
+    images: [{ url: "/assets/og-share.png", width: 1200, height: 630 }]
   }
 };
 

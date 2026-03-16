@@ -64,6 +64,8 @@ export function HomeExperience() {
   const detailsRef = useRef<HTMLElement | null>(null);
   const switchRef = useRef<HTMLDivElement | null>(null);
   const sliderRef = useRef<HTMLSpanElement | null>(null);
+  const personalImgRef = useRef<HTMLImageElement | null>(null);
+  const businessImgRef = useRef<HTMLImageElement | null>(null);
   const dragState = useRef<{ startX: number; startMode: Mode; dragging: boolean } | null>(null);
 
   const handlePointerDown = useCallback(
@@ -89,6 +91,17 @@ export function HomeExperience() {
 
       sliderRef.current.style.transition = "none";
       sliderRef.current.style.transform = `translateX(${clamped}px)`;
+
+      // Crossfade cat images based on drag progress
+      const bizFactor = clamped / trackWidth; // 0 = personal, 1 = business
+      if (personalImgRef.current && businessImgRef.current) {
+        personalImgRef.current.style.transition = "none";
+        businessImgRef.current.style.transition = "none";
+        personalImgRef.current.style.opacity = `${1 - bizFactor}`;
+        personalImgRef.current.style.transform = `scale(${0.98 + 0.02 * (1 - bizFactor)})`;
+        businessImgRef.current.style.opacity = `${bizFactor}`;
+        businessImgRef.current.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
+      }
     },
     []
   );
@@ -102,6 +115,15 @@ export function HomeExperience() {
 
       sliderRef.current.style.transition = "";
       sliderRef.current.style.transform = "";
+
+      // Reset image inline styles so CSS classes take over
+      [personalImgRef.current, businessImgRef.current].forEach((img) => {
+        if (img) {
+          img.style.transition = "";
+          img.style.opacity = "";
+          img.style.transform = "";
+        }
+      });
 
       if (dragState.current.dragging) {
         const dx = e.clientX - dragState.current.startX;
@@ -176,26 +198,34 @@ export function HomeExperience() {
 
         <div className="heroMinimalFrame heroMinimalFrameCompact">
           <div className="heroImageFrame heroImageFrameCompact">
-            <Image
-              alt="Local AI Cat personal mark"
+            <span
               className={`heroCatImage heroCatImagePersonal ${
                 mode === "personal" ? "isVisible" : ""
               }`}
-              src="/assets/cat-personal.png"
-              fill
-              sizes="(max-width: 760px) 100vw, 720px"
-              priority
-            />
-            <Image
-              alt="Local AI Cat business mark"
+              ref={personalImgRef}
+            >
+              <Image
+                alt="Local AI Cat personal mark"
+                src="/assets/cat-personal.png"
+                fill
+                sizes="(max-width: 760px) 100vw, 720px"
+                priority
+              />
+            </span>
+            <span
               className={`heroCatImage heroCatImageBusiness ${
                 mode === "business" ? "isVisible" : ""
               }`}
-              src="/assets/cat-business.png"
-              fill
-              sizes="(max-width: 760px) 100vw, 720px"
-              priority
-            />
+              ref={businessImgRef}
+            >
+              <Image
+                alt="Local AI Cat business mark"
+                src="/assets/cat-business.png"
+                fill
+                sizes="(max-width: 760px) 100vw, 720px"
+                priority
+              />
+            </span>
           </div>
 
           <div className="heroControlStack heroControlStackCentered">

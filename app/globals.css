@@ -1257,38 +1257,34 @@ h3 {
 
   .siteHeaderInner {
     padding: 8px 12px;
-    gap: 8px;
-    border-radius: 20px;
+    gap: 10px;
+    border-radius: 18px;
+    flex-wrap: nowrap;
   }
 
   .brandMark {
-    gap: 8px;
+    gap: 0;
     flex-shrink: 0;
   }
 
   .brandIcon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
   }
 
-  .brandTaglines {
+  .brandText {
     display: none;
   }
 
-  .brandText strong {
-    font-size: 13px;
-    white-space: nowrap;
-  }
-
   .siteNav {
-    gap: 2px;
+    gap: 0;
     flex-wrap: nowrap;
   }
 
   .siteNav a {
-    font-size: 12px;
-    padding: 6px 8px;
+    font-size: 13px;
+    padding: 8px 10px;
     white-space: nowrap;
   }
 

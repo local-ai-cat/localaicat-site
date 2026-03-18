@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 type ContentPageProps = {
@@ -21,9 +20,6 @@ export function ContentPage({
   return (
     <section className="contentPage">
       <div className="contentHero">
-        <Link className="contentBack" href="/">
-          Back to home
-        </Link>
         <p className="contentKicker">{kicker}</p>
         <h1 className="contentTitle">{title}</h1>
         {meta ? <p className="contentMeta">{meta}</p> : null}

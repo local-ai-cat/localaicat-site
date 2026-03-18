@@ -1,41 +1,42 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
+import { DownloadExperience } from "./download-experience";
+import {
+  getAppStoreUrl,
+  getDirectDownloadFilename,
+  getDirectDownloadSha256,
+  getDirectDownloadUrl,
+  getDirectDownloadVersion,
+  getDirectInstallScriptCommand,
+  getHomebrewInstallCommand
+} from "../../lib/env";
 
 export const metadata: Metadata = {
   title: "Download",
   description:
-    "Choose your install path for Local AI Cat: App Store for simple Apple billing or direct download for the full Mac experience."
+    "Download Local AI Cat: direct build for macOS or App Store for iPhone, iPad, and Mac."
 };
+
+const DEFAULT_BREW_CMD = "brew install --cask local-ai-cat";
 
 export default function DownloadPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
-        intro="Choose your install path first, then continue to download and pricing."
+        intro="The base app is free on both paths. Install first, upgrade when you're ready."
         kicker="Download"
-        title="Choose a path"
+        title="Get started"
       >
-        <div className="routeGrid">
-          <section className="routeCard routeCardStrong">
-            <p className="routeEyebrow">Direct download</p>
-            <h3>Full Mac path.</h3>
-            <p>Direct billing, full macOS features, then pricing on the next page.</p>
-            <Link className="planButton" href="/download/direct">
-              Continue to direct download
-            </Link>
-          </section>
-
-          <section className="routeCard">
-            <p className="routeEyebrow">App Store</p>
-            <h3>Simple install.</h3>
-            <p>Apple billing, full iPhone and iPad support, then pricing on the next page.</p>
-            <Link className="planButton" href="/download/app-store">
-              Continue to App Store
-            </Link>
-          </section>
-        </div>
+        <DownloadExperience
+          appStoreUrl={getAppStoreUrl()}
+          downloadUrl={getDirectDownloadUrl()}
+          filename={getDirectDownloadFilename()}
+          homebrewCmd={getHomebrewInstallCommand() || DEFAULT_BREW_CMD}
+          scriptCmd={getDirectInstallScriptCommand()}
+          sha256={getDirectDownloadSha256()}
+          version={getDirectDownloadVersion()}
+        />
       </ContentPage>
     </SiteShell>
   );

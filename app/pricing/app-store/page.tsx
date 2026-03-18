@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function AppStorePricingPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
         intro="App Store pricing is the same core catalog, with billing and purchase management handled by Apple."
         kicker="Pricing"

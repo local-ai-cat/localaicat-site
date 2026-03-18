@@ -35,8 +35,8 @@ export const businessPlans = [
     cadence: "/seat/year",
     note: "Seat-based access for small teams.",
     bullets: ["Minimum 2 seats", "Seat billing", "Built on the direct-download build"],
-    ctaHref: "/contact",
-    ctaLabel: "Talk to us"
+    ctaHref: "/team",
+    ctaLabel: "Get started"
   },
   {
     name: "Enterprise",

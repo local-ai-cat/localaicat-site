@@ -8,15 +8,18 @@ export type BuySlug =
   | "team-annual";
 
 const checkoutUrls: Record<BuySlug, string | undefined> = {
-  "pro-monthly": process.env.PADDLE_CHECKOUT_URL_PRO_MONTHLY,
-  "pro-annual": process.env.PADDLE_CHECKOUT_URL_PRO_ANNUAL,
-  "developer-mode": process.env.PADDLE_CHECKOUT_URL_DEVELOPER_MODE,
-  "team-annual": process.env.PADDLE_CHECKOUT_URL_TEAM_ANNUAL
+  "pro-monthly": process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY,
+  "pro-annual": process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL,
+  "developer-mode": process.env.POLAR_CHECKOUT_URL_DEVELOPER_MODE,
+  "team-annual": process.env.POLAR_CHECKOUT_URL_TEAM_ANNUAL
 };
 
-export function getCheckoutUrl(slug: BuySlug) {
-  const value = checkoutUrls[slug];
+function optionalValue(value: string | undefined) {
   return value && value.trim().length > 0 ? value : null;
+}
+
+export function getCheckoutUrl(slug: BuySlug) {
+  return optionalValue(checkoutUrls[slug]);
 }
 
 export function getSiteUrl() {
@@ -28,27 +31,66 @@ export function getAppStoreUrl() {
 }
 
 export function getDirectDownloadUrl() {
-  const value = process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_URL;
-  return value && value.trim().length > 0 ? value : null;
+  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_URL);
+}
+
+export function getDirectDownloadVersion() {
+  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_VERSION);
+}
+
+export function getDirectDownloadFilename() {
+  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_FILENAME);
+}
+
+export function getDirectDownloadSha256() {
+  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_SHA256);
+}
+
+export function getHomebrewTap() {
+  return optionalValue(process.env.NEXT_PUBLIC_HOMEBREW_TAP);
+}
+
+export function getHomebrewCask() {
+  return optionalValue(process.env.NEXT_PUBLIC_HOMEBREW_CASK);
+}
+
+export function getHomebrewInstallCommand() {
+  const cask = getHomebrewCask();
+
+  if (!cask) {
+    return null;
+  }
+
+  const tap = getHomebrewTap();
+  return tap
+    ? `brew tap ${tap}\nbrew install --cask ${cask}`
+    : `brew install --cask ${cask}`;
 }
 
 export function getCustomerPortalUrl() {
-  const value = process.env.PADDLE_CUSTOMER_PORTAL_URL;
-  return value && value.trim().length > 0 ? value : null;
+  return optionalValue(process.env.POLAR_CUSTOMER_PORTAL_URL);
 }
 
-export function getPaddleEnvironment() {
-  return process.env.PADDLE_ENVIRONMENT === "production"
-    ? "production"
-    : "sandbox";
+export function getPolarAdminKey() {
+  return optionalValue(process.env.POLAR_ADMIN_KEY);
 }
 
-export function getConfiguredProductIds() {
-  return {
-    proMonthly: process.env.PADDLE_PRODUCT_PRO_MONTHLY || null,
-    proAnnual: process.env.PADDLE_PRODUCT_PRO_ANNUAL || null,
-    developerMode: process.env.PADDLE_PRODUCT_DEVELOPER_MODE || null,
-    teamAnnual: process.env.PADDLE_PRODUCT_TEAM_ANNUAL || null
+export function getPolarApiBaseUrl() {
+  return process.env.POLAR_API_BASE_URL || "https://api.polar.sh";
+}
+
+export function getPolarProductId(slug: "team-annual" | "pro-annual") {
+  const ids: Record<string, string | undefined> = {
+    "team-annual": process.env.POLAR_PRODUCT_ID_TEAM_ANNUAL,
+    "pro-annual": process.env.POLAR_PRODUCT_ID_PRO_ANNUAL
   };
+  return optionalValue(ids[slug]);
 }
 
+export function getDirectInstallScriptUrl() {
+  return `${getSiteUrl().replace(/\/$/, "")}/install/direct`;
+}
+
+export function getDirectInstallScriptCommand() {
+  return `curl -fsSL ${getDirectInstallScriptUrl()} | sh`;
+}

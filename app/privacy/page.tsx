@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 
@@ -58,11 +59,22 @@ export default function PrivacyPage() {
         <section className="contentCard">
           <h2>Direct download and billing</h2>
           <p>
-            The direct-download and business path may introduce Paddle purchase,
+            The direct-download and business path may introduce purchase,
             entitlement, or billing records needed to manage subscriptions,
             Developer Mode, Team access, or Enterprise rollout. Those records
             should be limited to commerce and entitlement state, not your chat
             content.
+          </p>
+        </section>
+
+        <section className="contentCard">
+          <h2>Open-source licenses</h2>
+          <p>
+            Local AI Cat uses open-source libraries. See the full list on our{" "}
+            <Link className="textLink" href="/licenses">
+              third-party licenses
+            </Link>{" "}
+            page.
           </p>
         </section>
 

@@ -1,22 +1,19 @@
 # Local AI Chat Site
 
-Next.js marketing, checkout, and entitlement backend for the direct-download
-Local AI Chat path.
+Next.js marketing and checkout site for the direct-download Local AI Chat path.
 
 ## Stack
 
 - Next.js App Router
-- Paddle Billing
-- Postgres
-- Railway for app + database hosting
+- Polar (checkout, billing, license keys, customer portal)
+- Vercel (hosting)
 
 ## What this app handles
 
 - Public product site with personal/business split
-- Direct-download pricing and Paddle checkout links
-- Paddle billing management entrypoint
-- Paddle webhook verification
-- Postgres-backed entitlement snapshots
+- Direct-download pricing and Polar checkout links
+- Direct install script at `/install/direct`
+- Billing management entrypoint (links to Polar customer portal)
 - Health/status endpoint at `/api/health`
 
 ## Required environment variables
@@ -25,49 +22,44 @@ Copy `.env.example` and fill these in:
 
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_DIRECT_DOWNLOAD_URL`
-- `PADDLE_ENVIRONMENT`
-- `PADDLE_API_KEY`
-- `PADDLE_WEBHOOK_SECRET`
-- `PADDLE_CUSTOMER_PORTAL_URL`
-- `PADDLE_PRODUCT_PRO_MONTHLY`
-- `PADDLE_PRODUCT_PRO_ANNUAL`
-- `PADDLE_PRODUCT_DEVELOPER_MODE`
-- `PADDLE_PRODUCT_TEAM_ANNUAL`
-- `PADDLE_CHECKOUT_URL_PRO_MONTHLY`
-- `PADDLE_CHECKOUT_URL_PRO_ANNUAL`
-- `PADDLE_CHECKOUT_URL_DEVELOPER_MODE`
-- `PADDLE_CHECKOUT_URL_TEAM_ANNUAL`
-- `DATABASE_URL`
+- `NEXT_PUBLIC_DIRECT_DOWNLOAD_VERSION`
+- `NEXT_PUBLIC_DIRECT_DOWNLOAD_FILENAME`
+- `NEXT_PUBLIC_DIRECT_DOWNLOAD_SHA256`
+- `POLAR_CHECKOUT_URL_PRO_MONTHLY`
+- `POLAR_CHECKOUT_URL_PRO_ANNUAL`
+- `POLAR_CHECKOUT_URL_DEVELOPER_MODE`
+- `POLAR_CHECKOUT_URL_TEAM_ANNUAL`
+- `POLAR_CUSTOMER_PORTAL_URL`
 
-## Paddle setup notes
+Optional distribution variables:
 
-1. Create products for:
+- `NEXT_PUBLIC_HOMEBREW_TAP`
+- `NEXT_PUBLIC_HOMEBREW_CASK`
+
+If `NEXT_PUBLIC_DIRECT_DOWNLOAD_URL` is configured, the site also serves a shell
+installer at `/install/direct` that downloads and installs the current direct build.
+
+## Polar setup notes
+
+1. Products are configured in the Polar dashboard:
    - Pro Monthly
    - Pro Annual
    - Developer Mode
-   - Team Annual
-2. Copy the product IDs into the `PADDLE_PRODUCT_*` variables.
-3. Copy the hosted checkout links into the `PADDLE_CHECKOUT_URL_*` variables.
-4. Enable the Paddle customer portal and paste its URL into
-   `PADDLE_CUSTOMER_PORTAL_URL`.
-5. Configure a webhook endpoint:
+   - Team Annual (seat-based)
+2. Enable license key benefits on each product in the Polar dashboard.
+3. Copy the hosted checkout links into the `POLAR_CHECKOUT_URL_*` variables.
+4. Copy the customer portal URL into `POLAR_CUSTOMER_PORTAL_URL`.
 
-   `https://<your-domain>/api/paddle/webhook`
+Polar handles webhooks, entitlements, license key generation, and customer
+portal natively. No backend database or webhook processing is needed on this
+site.
 
-6. Set the webhook secret in `PADDLE_WEBHOOK_SECRET`.
+The direct-download app remains free to install. Polar is only used for
+upgrades, billing management, and license keys that the app validates locally.
 
-Recommended webhook events:
-
-- `subscription.created`
-- `subscription.activated`
-- `subscription.updated`
-- `subscription.past_due`
-- `subscription.paused`
-- `subscription.resumed`
-- `subscription.canceled`
-- `subscription.trialing`
-- `transaction.completed`
-- `transaction.paid`
+The success page also supports `license_key`, `licenseKey`, or `key` query
+parameters and can deep-link into the app with
+`localaichat://activate-license?...` for direct activation handoff.
 
 ## Local development
 
@@ -80,34 +72,23 @@ To run the production build locally:
 
 ```bash
 pnpm build
-PORT=3000 pnpm start
+pnpm start
 ```
 
-## Railway deployment
+## Vercel deployment
 
-This app is designed to run as:
+This site is deployed via Vercel's GitHub integration:
 
-- one Railway service for Next.js
-- one Railway Postgres service
+1. Connect the GitHub repo in the Vercel dashboard
+2. Set the root directory to `localaicat-site`
+3. Framework preset: Next.js (auto-detected)
+4. Add environment variables in the Vercel dashboard
+5. Pushes to `main` auto-deploy to production
 
-Deploy from the `localaicat-site` directory:
-
-```bash
-railway init -n localaicat-site
-railway add -d postgres
-railway up
-```
-
-After the first deploy:
-
-1. Create a Railway domain with `railway domain`
-2. Set `NEXT_PUBLIC_SITE_URL` to that domain
-3. Add the Paddle env vars in Railway
-4. Redeploy with `railway up`
+Preview deployments are created for each pull request.
 
 ## Health check
 
 - `GET /api/health`
 
-This returns config state plus current entitlement summary when a database is
-available.
+Returns build commit SHA and timestamp.

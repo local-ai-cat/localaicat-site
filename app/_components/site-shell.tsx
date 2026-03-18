@@ -2,10 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { MobileNav } from "./mobile-nav";
+import { ScrollHeader } from "./scroll-header";
+import { SiteMode } from "./site-mode";
 
 type SiteShellProps = {
   children: ReactNode;
   navMode?: "default" | "legal";
+  /** Force brand icon/tagline to a specific mode on deterministic pages */
+  siteMode?: "personal" | "business";
 };
 
 const navLinks =
@@ -25,13 +29,15 @@ const legalLinks =
 
 export function SiteShell({
   children,
-  navMode = "default"
+  navMode = "default",
+  siteMode
 }: SiteShellProps) {
   const links = navMode === "legal" ? legalLinks : navLinks;
 
   return (
     <>
-      <header className="siteHeader">
+      <SiteMode force={siteMode} />
+      <ScrollHeader>
         <div className="siteHeaderInner">
           <Link className="brandMark" href="/">
             <span className="brandIcon">
@@ -40,14 +46,14 @@ export function SiteShell({
                 className="brandIconImage brandIconImagePersonal"
                 src="/assets/cat-personal.png"
                 fill
-                sizes="58px"
+                sizes="42px"
               />
               <Image
                 alt="Local AI Cat business mark"
                 className="brandIconImage brandIconImageBusiness"
                 src="/assets/cat-business.png"
                 fill
-                sizes="58px"
+                sizes="42px"
               />
             </span>
             <span className="brandText">
@@ -69,7 +75,7 @@ export function SiteShell({
 
           <MobileNav links={links} />
         </div>
-      </header>
+      </ScrollHeader>
 
       <div className="pageFrame">
         <main>{children}</main>
@@ -79,13 +85,12 @@ export function SiteShell({
         <div className="siteFooterInner">
           <div>
             <p className="footerTitle">Local AI Cat</p>
-            <p className="footerText">Private AI for people. Serious local AI for teams.</p>
+            <p className="footerText">AI that stays at home.</p>
           </div>
 
           <nav aria-label="Footer" className="footerLinks">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
-            <Link href="/licenses">Licenses</Link>
             <Link href="/support">Support</Link>
           </nav>
         </div>

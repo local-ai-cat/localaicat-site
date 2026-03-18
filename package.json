@@ -1,23 +1,22 @@
 {
   "name": "localaicat-site",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/prepare-standalone.mjs",
-    "start": "node .next/standalone/server.js"
+    "build": "next build",
+    "start": "next start",
+    "deploy:staging": "./scripts/deploy.sh staging",
+    "deploy:prod": "./scripts/deploy.sh prod",
+    "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
-    "@paddle/paddle-node-sdk": "^3.6.0",
     "next": "^16.1.6",
-    "pg": "^8.20.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "zod": "^4.3.6"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@types/pg": "^8.18.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "typescript": "^5.9.3"

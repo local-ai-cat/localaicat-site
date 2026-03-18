@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function DirectPricingPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
         intro="Direct pricing covers the full Mac path, plus the route for Team and Enterprise."
         kicker="Pricing"
@@ -21,7 +21,9 @@ export default function DirectPricingPage() {
         <section className="contentCard contentCardTight">
           <h2>Base app is free</h2>
           <p>
-            Both the direct build and the App Store build keep the base experience free. Paid plans unlock early access and additional features.
+            Both the direct build and the App Store build keep the base experience free. Install first,
+            then buy only if you want paid features. Direct purchases unlock in-app through a Polar
+            license key.
           </p>
         </section>
 

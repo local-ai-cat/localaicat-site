@@ -3,63 +3,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DragToggle } from "./drag-toggle";
+import { persistSiteMode } from "./site-mode";
 
 type Mode = "personal" | "business";
-type PersonalPath = "direct" | "app-store";
-type BusinessPath = "team" | "enterprise";
 
-const personalPanels = {
-  direct: {
-    eyebrow: "Direct download",
-    title: "Get the full experience.",
-    summary: "Base experience is free. Paid upgrades unlock early access and the fuller Mac path.",
-    price: "Free base app. £4/mo or £40/yr for Pro.",
-    detail: "Developer Mode adds £10 one-time.",
-    primaryHref: "/download/direct",
-    primaryLabel: "Open direct path",
-    secondaryHref: "/pricing/direct",
-    secondaryLabel: "View direct pricing"
-  },
-  "app-store": {
-    eyebrow: "App Store",
-    title: "Stay in the sandbox.",
-    summary: "Base experience is free here too. Paid upgrades stay in Apple billing and the sandboxed path.",
-    price: "Free base app. £4/mo or £40/yr for Pro.",
-    detail: "Developer Mode adds £10 one-time.",
-    primaryHref: "/download/app-store",
-    primaryLabel: "Open App Store path",
-    secondaryHref: "/pricing/app-store",
-    secondaryLabel: "View App Store pricing"
+function getInitialMode(): Mode {
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("site-mode");
+    if (stored === "personal" || stored === "business") return stored;
   }
-} as const;
-
-const businessPanels = {
-  team: {
-    eyebrow: "Team",
-    title: "Roll out the direct build.",
-    summary: "Seat-based access for small teams that want the full Mac path.",
-    price: "from £40/seat/year",
-    detail: "Minimum 2 seats. Direct rollout, direct billing, and support.",
-    primaryHref: "/pricing/direct",
-    primaryLabel: "View Team pricing",
-    secondaryHref: "/contact",
-    secondaryLabel: "Talk to us"
-  },
-  enterprise: {
-    eyebrow: "Enterprise",
-    title: "Bring procurement with you.",
-    summary: "Deployment, invoicing, packaging, and rollout support.",
-    price: "custom",
-    detail: "For serious cat business.",
-    primaryHref: "/contact",
-    primaryLabel: "Contact sales"
-  }
-} as const;
+  return "business";
+}
 
 export function HomeExperience() {
-  const [mode, setMode] = useState<Mode>("business");
-  const [personalPath, setPersonalPath] = useState<PersonalPath>("direct");
-  const [businessPath, setBusinessPath] = useState<BusinessPath>("team");
+  const [mode, setMode] = useState<Mode>(getInitialMode);
+  const [personalPath, setPersonalPath] = useState<"direct" | "appstore">("direct");
+  const [businessPath, setBusinessPath] = useState<"team" | "enterprise">("team");
   const [detailsVisible, setDetailsVisible] = useState(false);
   const detailsRef = useRef<HTMLElement | null>(null);
   const switchRef = useRef<HTMLDivElement | null>(null);
@@ -92,10 +52,8 @@ export function HomeExperience() {
       sliderRef.current.style.transition = "none";
       sliderRef.current.style.transform = `translateX(${clamped}px)`;
 
-      // Crossfade images based on drag progress (0 = personal, 1 = business)
       const bizFactor = clamped / trackWidth;
 
-      // Hero cat images
       if (personalImgRef.current && businessImgRef.current) {
         personalImgRef.current.style.transition = "none";
         businessImgRef.current.style.transition = "none";
@@ -105,7 +63,12 @@ export function HomeExperience() {
         businessImgRef.current.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
       }
 
-      // Menu bar brand icon — same crossfade as hero
+      const floatingCats = document.querySelector<HTMLElement>(".floatingCats");
+      if (floatingCats) {
+        floatingCats.style.transition = "none";
+        floatingCats.style.opacity = `${1 - bizFactor}`;
+      }
+
       const brandPersonal = document.querySelector<HTMLElement>(".brandIconImagePersonal");
       const brandBusiness = document.querySelector<HTMLElement>(".brandIconImageBusiness");
       if (brandPersonal && brandBusiness) {
@@ -130,7 +93,6 @@ export function HomeExperience() {
       sliderRef.current.style.transition = "";
       sliderRef.current.style.transform = "";
 
-      // Reset all inline styles so CSS classes take over
       [personalImgRef.current, businessImgRef.current].forEach((el) => {
         if (el) {
           el.style.transition = "";
@@ -138,6 +100,11 @@ export function HomeExperience() {
           el.style.transform = "";
         }
       });
+      const floatingCats = document.querySelector<HTMLElement>(".floatingCats");
+      if (floatingCats) {
+        floatingCats.style.transition = "";
+        floatingCats.style.opacity = "";
+      }
       document.querySelectorAll<HTMLElement>(".brandIconImagePersonal, .brandIconImageBusiness")
         .forEach((el) => {
           el.style.transition = "";
@@ -160,7 +127,7 @@ export function HomeExperience() {
   );
 
   useEffect(() => {
-    ["/assets/cat-personal.png", "/assets/cat-business.png", "/assets/cat.gif"].forEach(
+    ["/assets/cat-personal.png", "/assets/cat-business.png", "/assets/cat.webp"].forEach(
       (src) => {
         const img = new window.Image();
         img.src = src;
@@ -169,24 +136,16 @@ export function HomeExperience() {
   }, []);
 
   useEffect(() => {
-    document.body.dataset.homeMode = mode;
-
-    // Update favicon to match mode
+    persistSiteMode(mode);
     const favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
     if (favicon) {
       favicon.href = mode === "business" ? "/assets/cat-business.png" : "/assets/cat-personal.png";
     }
-
-    return () => {
-      delete document.body.dataset.homeMode;
-    };
   }, [mode]);
 
   useEffect(() => {
     const node = detailsRef.current;
-    if (!node) {
-      return;
-    }
+    if (!node) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -195,63 +154,63 @@ export function HomeExperience() {
           observer.disconnect();
         }
       },
-      {
-        threshold: 0.16,
-        rootMargin: "0px 0px -10% 0px"
-      }
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
     );
 
     observer.observe(node);
-
     return () => observer.disconnect();
   }, []);
 
-  const activePersonalPanel = personalPanels[personalPath];
-  const activeBusinessPanel = businessPanels[businessPath];
-
   return (
     <div className={`homeMode homeMode${mode === "personal" ? "Personal" : "Business"}`}>
+      {/* ── Hero ── */}
       <section className="homeHero homeHeroCompact">
-        {/* Floating cat GIF is 5.1MB - should be converted to WebP for better performance */}
-        {mode === "personal" ? (
-          <div aria-hidden="true" className="floatingCats">
-            <Image alt="" className="floatingCat floatingCatOne" src="/assets/cat.gif" width={60} height={60} unoptimized />
-            <Image alt="" className="floatingCat floatingCatTwo" src="/assets/cat.gif" width={64} height={64} unoptimized />
-            <Image alt="" className="floatingCat floatingCatThree" src="/assets/cat.gif" width={52} height={52} unoptimized />
-            <Image alt="" className="floatingCat floatingCatFour" src="/assets/cat.gif" width={58} height={58} unoptimized />
-          </div>
-        ) : null}
+        <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt="" className="floatingCat floatingCatOne" src="/assets/cat.webp" width={56} height={56} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt="" className="floatingCat floatingCatTwo" src="/assets/cat.webp" width={60} height={60} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt="" className="floatingCat floatingCatThree" src="/assets/cat.webp" width={48} height={48} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt="" className="floatingCat floatingCatFour" src="/assets/cat.webp" width={54} height={54} />
+        </div>
 
         <div className="heroMinimalFrame heroMinimalFrameCompact">
           <div className="heroImageFrame heroImageFrameCompact">
             <span
-              className={`heroCatImage heroCatImagePersonal ${
-                mode === "personal" ? "isVisible" : ""
-              }`}
+              className={`heroCatImage ${mode === "personal" ? "isVisible" : ""}`}
               ref={personalImgRef}
             >
               <Image
                 alt="Local AI Cat personal mark"
                 src="/assets/cat-personal.png"
                 fill
-                sizes="(max-width: 760px) 100vw, 720px"
+                sizes="(max-width: 760px) 100vw, 640px"
                 priority
               />
             </span>
             <span
-              className={`heroCatImage heroCatImageBusiness ${
-                mode === "business" ? "isVisible" : ""
-              }`}
+              className={`heroCatImage ${mode === "business" ? "isVisible" : ""}`}
               ref={businessImgRef}
             >
               <Image
                 alt="Local AI Cat business mark"
                 src="/assets/cat-business.png"
                 fill
-                sizes="(max-width: 760px) 100vw, 720px"
+                sizes="(max-width: 760px) 100vw, 640px"
                 priority
               />
             </span>
+          </div>
+
+          <div className="heroHeadline">
+            <h1>{mode === "personal" ? "Private AI.\nYour device." : "Serious local AI\nfor teams."}</h1>
+            <p className="heroTagline">
+              {mode === "personal"
+                ? "On-device chat, transcription, and models. No cloud. No tracking. Just you and your cat."
+                : "Secure AI, transcription, window management and wellness."}
+            </p>
           </div>
 
           <div className="heroControlStack heroControlStackCentered">
@@ -273,7 +232,7 @@ export function HomeExperience() {
               <button
                 aria-selected={mode === "personal"}
                 className={mode === "personal" ? "isActive" : undefined}
-                onClick={() => setMode("personal")}
+                onClick={() => setMode(mode === "personal" ? "business" : "personal")}
                 role="tab"
                 type="button"
               >
@@ -282,7 +241,7 @@ export function HomeExperience() {
               <button
                 aria-selected={mode === "business"}
                 className={mode === "business" ? "isActive" : undefined}
-                onClick={() => setMode("business")}
+                onClick={() => setMode(mode === "business" ? "personal" : "business")}
                 role="tab"
                 type="button"
               >
@@ -290,204 +249,121 @@ export function HomeExperience() {
               </button>
             </div>
 
-            <a
-              aria-label="Jump to the next section"
-              className="heroJumpIcon"
-              href="#download-paths"
-            >
-              <svg aria-hidden="true" fill="none" height="22" viewBox="0 0 24 24" width="22">
-                <path
-                  d="M12 5v14M6 13l6 6 6-6"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                />
-              </svg>
-            </a>
+            <svg aria-hidden="true" className="heroScrollHint" fill="none" height="20" viewBox="0 0 24 24" width="20">
+              <path
+                d="M12 5v14M6 13l6 6 6-6"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
           </div>
         </div>
       </section>
 
+      {/* ── Paths section ── */}
       <section
         className={`detailBand detailBandMinimal sectionReveal ${detailsVisible ? "isVisible" : ""}`}
         id="download-paths"
         ref={detailsRef}
       >
-        <div className="sectionHeading sectionHeadingNarrow sectionHeadingCentered">
+        <div className="sectionHeading sectionHeadingCentered">
           <p className="sectionEyebrow">
-            {mode === "personal" ? "Choose your install." : "Choose your path."}
+            {mode === "personal" ? "Choose your path" : "Two lanes"}
           </p>
-          <h2>{mode === "personal" ? "Free to start." : "Two business lanes."}</h2>
-          <p className="detailIntro">
-            {mode === "personal"
-              ? "Both paths include the free base experience. Paid plans unlock early access and additional features."
-              : "Team is the self-serve path. Enterprise is the sales-led path."}
-          </p>
+          <h2>{mode === "personal" ? "Free to start." : "Team or Enterprise."}</h2>
         </div>
 
         {mode === "personal" ? (
-          <div className="selectionFlow">
-            <div
-              aria-label="Install path"
-              className="pathSwitch pathSwitchWide pathSwitchCentered sectionChildReveal"
-              role="tablist"
-            >
-              <button
-                aria-selected={personalPath === "direct"}
-                className={personalPath === "direct" ? "isActive" : undefined}
-                onClick={() => setPersonalPath("direct")}
-                role="tab"
-                type="button"
-              >
-                Get the full experience
-              </button>
-              <button
-                aria-selected={personalPath === "app-store"}
-                className={personalPath === "app-store" ? "isActive" : undefined}
-                onClick={() => setPersonalPath("app-store")}
-                role="tab"
-                type="button"
-              >
-                Stay in the sandbox
-              </button>
-            </div>
-
-            <article className="revealPanel sectionChildReveal" key={personalPath}>
-              <p className="routeEyebrow">{activePersonalPanel.eyebrow}</p>
-              <div className="revealPanelHeader">
-                <h3>{activePersonalPanel.title}</h3>
-                <p className="revealPanelPrice">{activePersonalPanel.price}</p>
-              </div>
-              <p className="revealPanelSummary">{activePersonalPanel.summary}</p>
-              <p className="revealPanelDetail">{activePersonalPanel.detail}</p>
-              <div className="routeActions">
-                <Link className="planButton" href={activePersonalPanel.primaryHref}>
-                  {activePersonalPanel.primaryLabel}
-                </Link>
-                <Link className="secondaryButton" href={activePersonalPanel.secondaryHref}>
-                  {activePersonalPanel.secondaryLabel}
-                </Link>
-              </div>
-            </article>
-
-            <div className="compareTable sectionChildReveal">
-              <div className="compareHeader">Compare</div>
-              <div className="compareHeader">Direct download</div>
-              <div className="compareHeader">App Store</div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Base experience</div>
-                <div className="compareCell">Free</div>
-                <div className="compareCell">Free</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Paid upgrades</div>
-                <div className="compareCell">Early access and additional features via Pro + Developer Mode</div>
-                <div className="compareCell">Early access and additional features via Pro + Developer Mode</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Mac experience</div>
-                <div className="compareCell">Full feature set</div>
-                <div className="compareCell">Simpler sandboxed path</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Best for</div>
-                <div className="compareCell">Power users, direct billing, fuller Mac access</div>
-                <div className="compareCell">Easiest install, iPhone, and iPad</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Business route</div>
-                <div className="compareCell">Team and Enterprise live here</div>
-                <div className="compareCell">Not the business path</div>
-              </div>
+          <div className="toggleCardSection sectionChildReveal">
+            <DragToggle
+              labels={["Full experience", "App Store"]}
+              onChange={setPersonalPath}
+              options={["direct", "appstore"] as const}
+              size="compact"
+              value={personalPath}
+            />
+            <div className="toggleCardPanel">
+              {personalPath === "direct" ? (
+                <article className="toggleCard" key="direct">
+                  <p className="dualCardEyebrow">Direct download</p>
+                  <h3>Full experience.</h3>
+                  <p className="dualCardBody">Direct billing, full macOS features, power user path.</p>
+                  <ul className="dualCardList">
+                    <li>Full feature set on Mac</li>
+                    <li>Pro: £4/mo or £40/yr</li>
+                    <li>Developer Mode: £10 one-time</li>
+                    <li>Team &amp; Enterprise live here</li>
+                  </ul>
+                  <div className="dualCardActions">
+                    <Link className="planButton" href="/download/direct">Download</Link>
+                    <Link className="secondaryButton" href="/pricing/direct">Pricing</Link>
+                  </div>
+                </article>
+              ) : (
+                <article className="toggleCard" key="appstore">
+                  <p className="dualCardEyebrow">App Store</p>
+                  <h3>Simple install.</h3>
+                  <p className="dualCardBody">Apple billing, sandboxed path. iPhone, iPad, and Mac.</p>
+                  <ul className="dualCardList">
+                    <li>Easiest install path</li>
+                    <li>Pro: £4/mo or £40/yr</li>
+                    <li>Developer Mode: £10 one-time</li>
+                    <li>Best for iPhone &amp; iPad</li>
+                  </ul>
+                  <div className="dualCardActions">
+                    <Link className="planButton" href="/download/app-store">App Store</Link>
+                    <Link className="secondaryButton" href="/pricing/app-store">Pricing</Link>
+                  </div>
+                </article>
+              )}
             </div>
           </div>
         ) : (
-          <div className="selectionFlow">
-            <div
-              aria-label="Business path"
-              className="pathSwitch pathSwitchWide pathSwitchCentered sectionChildReveal"
-              role="tablist"
-            >
-              <button
-                aria-selected={businessPath === "team"}
-                className={businessPath === "team" ? "isActive" : undefined}
-                onClick={() => setBusinessPath("team")}
-                role="tab"
-                type="button"
-              >
-                Team
-              </button>
-              <button
-                aria-selected={businessPath === "enterprise"}
-                className={businessPath === "enterprise" ? "isActive" : undefined}
-                onClick={() => setBusinessPath("enterprise")}
-                role="tab"
-                type="button"
-              >
-                Enterprise
-              </button>
-            </div>
-
-            <article className="revealPanel sectionChildReveal" key={businessPath}>
-              <p className="routeEyebrow">{activeBusinessPanel.eyebrow}</p>
-              <div className="revealPanelHeader">
-                <h3>{activeBusinessPanel.title}</h3>
-                <p className="revealPanelPrice">{activeBusinessPanel.price}</p>
-              </div>
-              <p className="revealPanelSummary">{activeBusinessPanel.summary}</p>
-              <p className="revealPanelDetail">{activeBusinessPanel.detail}</p>
-              <div className="routeActions">
-                <Link className="planButton" href={activeBusinessPanel.primaryHref}>
-                  {activeBusinessPanel.primaryLabel}
-                </Link>
-                {"secondaryHref" in activeBusinessPanel && activeBusinessPanel.secondaryHref ? (
-                  <Link className="secondaryButton" href={activeBusinessPanel.secondaryHref}>
-                    {activeBusinessPanel.secondaryLabel}
-                  </Link>
-                ) : null}
-              </div>
-            </article>
-
-            <div className="compareTable sectionChildReveal">
-              <div className="compareHeader">Compare</div>
-              <div className="compareHeader">Team</div>
-              <div className="compareHeader">Enterprise</div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Minimum</div>
-                <div className="compareCell">2 seats</div>
-                <div className="compareCell">Custom</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Billing</div>
-                <div className="compareCell">Self-serve direct billing</div>
-                <div className="compareCell">Sales-led invoicing and procurement</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Deployment</div>
-                <div className="compareCell">Direct app rollout</div>
-                <div className="compareCell">Packaging, rollout, and managed support</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Best for</div>
-                <div className="compareCell">Small teams</div>
-                <div className="compareCell">Procurement-heavy organizations</div>
-              </div>
-
-              <div className="compareRow">
-                <div className="compareCell compareLabel">Support</div>
-                <div className="compareCell">Standard support</div>
-                <div className="compareCell">Custom onboarding and support scope</div>
-              </div>
+          <div className="toggleCardSection sectionChildReveal">
+            <DragToggle
+              labels={["Team", "Enterprise"]}
+              onChange={setBusinessPath}
+              options={["team", "enterprise"] as const}
+              size="compact"
+              value={businessPath}
+            />
+            <div className="toggleCardPanel">
+              {businessPath === "team" ? (
+                <article className="toggleCard" key="team">
+                  <p className="dualCardEyebrow">Team</p>
+                  <h3>Self-serve rollout.</h3>
+                  <p className="dualCardPrice">from £40/seat/year</p>
+                  <p className="dualCardBody">Seat-based access for small teams that want the full Mac path.</p>
+                  <ul className="dualCardList">
+                    <li>Minimum 2 seats</li>
+                    <li>Direct app rollout</li>
+                    <li>Self-serve billing</li>
+                    <li>Standard support</li>
+                  </ul>
+                  <div className="dualCardActions">
+                    <Link className="planButton" href="/team">Get started</Link>
+                    <Link className="secondaryButton" href="/pricing/direct">View pricing</Link>
+                  </div>
+                </article>
+              ) : (
+                <article className="toggleCard" key="enterprise">
+                  <p className="dualCardEyebrow">Enterprise</p>
+                  <h3>Sales-led path.</h3>
+                  <p className="dualCardPrice">custom</p>
+                  <p className="dualCardBody">Deployment, invoicing, packaging, and rollout support.</p>
+                  <ul className="dualCardList">
+                    <li>Custom seat count</li>
+                    <li>Managed rollout &amp; packaging</li>
+                    <li>Procurement &amp; invoicing</li>
+                    <li>Custom onboarding</li>
+                  </ul>
+                  <div className="dualCardActions">
+                    <Link className="planButton" href="/contact">Contact sales</Link>
+                  </div>
+                </article>
+              )}
             </div>
           </div>
         )}

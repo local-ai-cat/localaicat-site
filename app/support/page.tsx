@@ -12,7 +12,7 @@ const supportItems = [
   {
     question: "Does it really work offline?",
     answer:
-      "Yes. Once models are downloaded, chat and local transcription continue to work without an internet connection."
+      "Yes. Once models are downloaded, chat and local transcription work without an internet connection."
   },
   {
     question: "What devices are supported?",
@@ -20,34 +20,34 @@ const supportItems = [
       "iPhone with iOS 17+, iPad with iPadOS 17+, and Mac with macOS 14+ on Apple Silicon."
   },
   {
-    question: "What is the difference between App Store and direct download?",
+    question: "App Store or direct download?",
     answer:
-      "The App Store route is the easiest install. The direct-download route is where Paddle billing, Team plans, Enterprise rollout, and the fuller Mac capability set belong."
+      "App Store is the easiest install with Apple billing. Direct download gets you full macOS features (like window management), web billing, and is the foundation for Team and Enterprise. The base app is free on both."
   },
   {
     question: "What is Developer Mode?",
     answer:
-      "Developer Mode is a separate one-time add-on that can be bought alone or stacked on top of Pro."
+      "A one-time add-on for power users. It can be bought alone or stacked on Pro. Available on both App Store and direct paths."
   },
   {
-    question: "How should teams and enterprises buy?",
+    question: "How do teams buy?",
     answer:
-      "Small groups should use Team when available. Organizations needing invoicing, procurement, deployment help, or rollout support should contact Enterprise."
+      "Use the Team checkout page for self-serve seat-based billing (min 2 seats, volume discounts at 11+). For Enterprise with invoicing, MDM, or custom rollout, contact serious@localaicat.com."
   },
   {
     question: "Need human help?",
     answer:
-      "Email support@localaicat.com and include your platform, app version, and whether you are using the App Store or direct-download build."
+      "Email support@localaicat.com with your platform, app version, and whether you're on the App Store or direct build."
   }
 ] as const;
 
 export default function SupportPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
-        intro="Answers to the most common questions about offline use, supported devices, billing paths, and the difference between App Store and direct-download builds."
+        intro="Common questions about offline use, devices, billing, and the difference between install paths."
         kicker="Support"
-        title="Help for Local AI Cat"
+        title="FAQ"
       >
         <section className="supportGrid">
           {supportItems.map((item) => (

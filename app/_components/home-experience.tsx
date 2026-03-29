@@ -290,14 +290,14 @@ export function HomeExperience() {
                   <p className="dualCardEyebrow">Outdoor Cat</p>
                   <h3>Direct download for Mac.</h3>
                   <p className="dualCardBody">
-                    Web billing, full macOS features, and the path for Team and Enterprise.
+                    Web billing and the full macOS feature set, including desktop tools that are limited in the App Store build.
                   </p>
                   <ul className="dualCardList">
                     <li>Mac-only direct build</li>
                     <li>Full macOS desktop feature set</li>
                     <li>Pro: £4/mo or £40/yr</li>
                     <li>Developer Mode: £10 one-time</li>
-                    <li>Team &amp; Enterprise live here</li>
+                    <li>Best for full Mac use</li>
                   </ul>
                   <div className="dualCardActions">
                     <Link className="planButton" href="/download/direct">Download</Link>
@@ -341,10 +341,11 @@ export function HomeExperience() {
                   <p className="dualCardEyebrow">Team</p>
                   <h3>Self-serve rollout.</h3>
                   <p className="dualCardPrice">from £40/seat/year</p>
-                  <p className="dualCardBody">Seat-based access for small teams that want the full Mac path.</p>
+                  <p className="dualCardBody">Seat-based access for small teams that want the full Mac feature set and more granular security controls.</p>
                   <ul className="dualCardList">
                     <li>Minimum 2 seats</li>
                     <li>Direct app rollout</li>
+                    <li>Can stay fully local without iCloud</li>
                     <li>Self-serve billing</li>
                     <li>Standard support</li>
                   </ul>
@@ -358,9 +359,10 @@ export function HomeExperience() {
                   <p className="dualCardEyebrow">Enterprise</p>
                   <h3>Sales-led path.</h3>
                   <p className="dualCardPrice">custom</p>
-                  <p className="dualCardBody">Deployment, invoicing, packaging, and rollout support.</p>
+                  <p className="dualCardBody">Deployment, invoicing, packaging, rollout support, and more granular security controls.</p>
                   <ul className="dualCardList">
                     <li>Custom seat count</li>
+                    <li>Fully local-only rollout options</li>
                     <li>Managed rollout &amp; packaging</li>
                     <li>Procurement &amp; invoicing</li>
                     <li>Custom onboarding</li>

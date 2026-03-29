@@ -39,8 +39,8 @@ export function DownloadExperience({
         <p className="downloadPathEyebrow">Outdoor Cat</p>
         <h3>Direct download for Mac.</h3>
         <p className="downloadPathBody">
-          Web billing, full macOS desktop features, and the foundation for Team
-          and Enterprise.
+          Web billing and the full macOS feature set, including desktop tools
+          that are limited in the sandboxed App Store build.
         </p>
 
         <div className="installToggle">

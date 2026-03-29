@@ -22,7 +22,7 @@ const supportItems = [
   {
     question: "Indoor Cat or Outdoor Cat?",
     answer:
-      "Indoor Cat is the App Store build: easiest install, Apple billing, and support for iPhone, iPad, and Mac. Outdoor Cat is the direct-download Mac build: web billing, full macOS desktop features like window management, and the path for Team and Enterprise. The base app is free on both."
+      "Indoor Cat is the App Store build: easiest install, Apple billing, and support for iPhone, iPad, and Mac. Outdoor Cat is the direct-download Mac build: web billing and the full macOS feature set, including desktop features like window management that are limited in the sandboxed App Store build. The base app is free on both."
   },
   {
     question: "What is Developer Mode?",

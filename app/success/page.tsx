@@ -126,9 +126,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </ol>
           )}
           <p>
-            If you later open the App Store build on the same iCloud account,
-            access may appear automatically after entitlement sync. If it does
-            not, paste the same license key there.
+            If you later use Indoor Cat on the same Apple account, paste the
+            same license key there too. Any entitlement sync is treated as a
+            convenience, not the primary activation path.
           </p>
         </section>
 

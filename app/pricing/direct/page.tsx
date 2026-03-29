@@ -7,30 +7,30 @@ import { businessPlans, directPlans } from "../../../lib/catalog";
 export const metadata: Metadata = {
   title: "Direct Pricing",
   description:
-    "Pricing for the Local AI Cat direct-download build, including Pro, Developer Mode, Team, and Enterprise plans."
+    "Pricing for the Local AI Cat Outdoor Cat direct-download build, including Pro, Developer Mode, Team, and Enterprise plans."
 };
 
 export default function DirectPricingPage() {
   return (
     <SiteShell>
       <ContentPage
-        intro="Direct pricing covers the full Mac path, plus the route for Team and Enterprise."
-        kicker="Pricing"
-        title="Direct pricing"
+        intro="Outdoor Cat pricing covers the full Mac direct-download path, plus the route for Team and Enterprise."
+        kicker="Outdoor Cat"
+        title="Direct-download pricing"
       >
         <section className="contentCard contentCardTight">
           <h2>Base app is free</h2>
           <p>
-            Both the direct build and the App Store build keep the base experience free. Install first,
-            then buy only if you want paid features. Direct purchases unlock in-app through a Polar
-            license key.
+            Both Outdoor Cat and Indoor Cat keep the base experience free.
+            Install first, then buy only if you want paid features. Outdoor Cat
+            purchases unlock in-app through a Polar license key.
           </p>
         </section>
 
         <section className="pricingBand pricingBandInline">
           <div className="sectionHeading">
             <p className="sectionEyebrow">Personal</p>
-            <h2>Direct plans.</h2>
+            <h2>Outdoor Cat plans.</h2>
           </div>
 
           <div className="planGrid planGridDirect">

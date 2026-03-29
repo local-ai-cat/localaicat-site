@@ -40,9 +40,9 @@ export default function ManagePage() {
           <h2>License keys</h2>
           <p>
             After purchasing on the web, you receive a license key. Paste it
-            into the app under Settings to activate Pro or Developer Mode. If
-            you use iCloud, access can sync across your Apple devices
-            automatically.
+            into the app under Settings to activate Pro or Developer Mode.
+            Manual key entry is the primary path for Outdoor Cat and also works
+            in Indoor Cat if you use the App Store build later.
           </p>
         </section>
 

@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: "Direct Download",
   description:
-    "Download the Local AI Cat direct build for macOS. Full features, direct billing, and the path for Team and Enterprise."
+    "Download the Local AI Cat Outdoor Cat build for macOS. Full desktop features, web billing, and the path for Team and Enterprise."
 };
 
 export default function DirectDownloadPage() {
@@ -29,11 +29,15 @@ export default function DirectDownloadPage() {
     <SiteShell>
       <ContentPage
         intro="Install the free macOS build. Upgrade to Pro or Developer Mode on the web when you're ready, then activate your license key in Settings."
-        kicker="Direct Download"
-        title="Direct path"
+        kicker="Outdoor Cat"
+        title="Direct download for Mac"
       >
         <section className="contentCard contentCardTight">
           <h2>Download</h2>
+          <p>
+            Outdoor Cat is the direct-download Mac build. It uses web billing and
+            includes the full macOS desktop feature set.
+          </p>
           <div className="routeActions">
             {downloadUrl ? (
               <a className="planButton" href={downloadUrl}>

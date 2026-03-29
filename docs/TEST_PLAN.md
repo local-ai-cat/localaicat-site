@@ -1,6 +1,6 @@
 # Local AI Cat Site — Test Plan
 
-Last updated: 2026-03-18
+Last updated: 2026-03-28
 
 ## Environments
 
@@ -39,20 +39,9 @@ Last updated: 2026-03-18
 
 ## 2. Home Page (`/`)
 
-### 2.1 Personal Mode (default)
-- [ ] Cat personal image loads and is visible
-- [ ] Headline: "Private AI.\nYour device."
-- [ ] Tagline: "...Just you and your cat."
-- [ ] Floating cats animate across screen
-- [ ] Floating cats visible on mobile (smaller, subtler)
-- [ ] Scroll hint arrow bounces gently
-- [ ] "Choose your path" section: Direct download + App Store cards
-- [ ] Section reveal animates on scroll into view
-
-### 2.2 Business Mode
-- [ ] Click "Business" tab — mode switches
-- [ ] Cat business image crossfades in
-- [ ] Headline: "Serious local AI\nfor teams."
+### 2.1 Business Mode (default)
+- [ ] Cat business image loads and is visible on first visit
+- [ ] Headline: "Serious local AI.\nFor teams."
 - [ ] Tagline: "Secure AI, transcription, window management and wellness."
 - [ ] Floating cats fade out
 - [ ] Brand icon in header swaps to business
@@ -62,6 +51,16 @@ Last updated: 2026-03-18
 - [ ] Team card "View pricing" → `/pricing/direct`
 - [ ] Enterprise card "Contact sales" → `/contact`
 
+### 2.2 Personal Mode
+- [ ] Cat personal image loads and is visible
+- [ ] Headline: "Private AI.\nYour device."
+- [ ] Tagline: "...Just you and your cat."
+- [ ] Floating cats animate across screen
+- [ ] Floating cats visible on mobile (smaller, subtler)
+- [ ] Scroll hint arrow bounces gently
+- [ ] "Choose your path" section: Outdoor Cat + Indoor Cat cards
+- [ ] Section reveal animates on scroll into view
+
 ### 2.3 Mode Switch Drag
 - [ ] Drag slider right → switches to business
 - [ ] Drag slider left → switches to personal
@@ -70,8 +69,8 @@ Last updated: 2026-03-18
 - [ ] Works on touch devices
 
 ### 2.4 Personal Mode Cards
-- [ ] Direct download card: "Download" → `/download/direct`, "Pricing" → `/pricing/direct`
-- [ ] App Store card: "App Store" → `/download/app-store`, "Pricing" → `/pricing/app-store`
+- [ ] Outdoor Cat card: "Download" → `/download/direct`, "Pricing" → `/pricing/direct`
+- [ ] Indoor Cat card: "App Store" → `/download/app-store`, "Pricing" → `/pricing/app-store`
 
 ---
 
@@ -80,8 +79,8 @@ Last updated: 2026-03-18
 ### 3.1 Seat Picker
 - [ ] Default: 2 seats
 - [ ] Minus button disabled at 2
-- [ ] Plus button works up to 50
-- [ ] Direct input accepts numbers 2–50
+- [ ] Plus button works up to 100
+- [ ] Direct input accepts numbers 2–100
 - [ ] Input clamps to min/max on blur
 - [ ] Spinner arrows hidden (number input)
 
@@ -153,7 +152,7 @@ Last updated: 2026-03-18
 ### 5.3 Without License Key
 - [ ] Shows manual 4-step activation instructions
 - [ ] No "Open app" button shown
-- [ ] iCloud entitlement sync note present
+- [ ] Manual-key-first note is present for Indoor Cat / Outdoor Cat crossover
 
 ### 5.4 Continue Section
 - [ ] "Download direct build" → `/download/direct`
@@ -172,7 +171,7 @@ Last updated: 2026-03-18
 ## 7. Manage Page (`/manage`)
 - [ ] Shows Polar customer portal link (if `POLAR_CUSTOMER_PORTAL_URL` set)
 - [ ] Lists management features (payment, subscriptions, invoices, licenses)
-- [ ] Explains licensing model clearly
+- [ ] Explains the manual-key-first licensing model clearly
 
 ---
 
@@ -207,7 +206,8 @@ Last updated: 2026-03-18
 
 ### 9.3 App Store Download (`/download/app-store`)
 - [ ] "Open App Store" links to configured URL
-- [ ] iPhone/iPad and Mac sections present
+- [ ] Indoor Cat explains Apple billing and website key redemption
+- [ ] "Good to know" section is present
 - [ ] Links to `/pricing/app-store`
 
 ---
@@ -220,8 +220,8 @@ Last updated: 2026-03-18
 - [ ] All answers are substantive (no placeholder text)
 
 ### 10.2 Contact (`/contact`)
-- [ ] Team section: `team@localaicat.com`
 - [ ] Enterprise section: `serious@localaicat.com`
+- [ ] Support section: `support@localaicat.com`
 - [ ] Clear distinction between self-serve and sales-led
 
 ### 10.3 Privacy (`/privacy`)

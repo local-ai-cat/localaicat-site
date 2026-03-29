@@ -12,7 +12,7 @@ const TIERS: Tier[] = [
 ];
 
 const MIN_SEATS = 2;
-const MAX_SEATS = 50;
+const MAX_SEATS = 100;
 
 function pricePerSeat(seats: number): number {
   for (const tier of TIERS) {

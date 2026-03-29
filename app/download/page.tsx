@@ -24,7 +24,7 @@ export default function DownloadPage() {
   return (
     <SiteShell>
       <ContentPage
-        intro="The base app is free on both paths. Install first, upgrade when you're ready."
+        intro="The base app is free on both paths. Choose Indoor Cat for the App Store route or Outdoor Cat for the full Mac direct-download route."
         kicker="Download"
         title="Get started"
       >

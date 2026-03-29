@@ -48,12 +48,44 @@ export default function TermsPage() {
         </section>
 
         <section className="contentCard">
+          <h2>Billing, cancellation, and refunds</h2>
+          <p>
+            Indoor Cat purchases are handled by Apple and follow Apple&apos;s
+            billing, cancellation, and refund flows. Outdoor Cat direct web
+            purchases are handled through Polar. Direct subscriptions renew
+            until cancelled, and cancelling stops future billing while access
+            continues through the paid period.
+          </p>
+          <p>
+            For direct one-time purchases such as Developer Mode, refunds are
+            generally not offered after activation or use except where required
+            by law, or where the product is faulty or materially not as
+            described. For help with a direct order, contact{" "}
+            <a className="textLink" href="mailto:support@localaicat.com">
+              support@localaicat.com
+            </a>
+            .
+          </p>
+        </section>
+
+        <section className="contentCard">
           <h2>App Store versus direct download</h2>
           <p>
             The App Store and direct-download versions may differ in billing
-            flows and available macOS capability sets. Direct-download and
-            business builds may expose features or deployment paths that are not
-            available in the sandboxed App Store build.
+            flows, install paths, and available macOS capability sets.
+            Outdoor Cat and business builds may expose desktop features or
+            deployment paths that are not available in the sandboxed Indoor Cat
+            build.
+          </p>
+        </section>
+
+        <section className="contentCard">
+          <h2>Service posture</h2>
+          <p>
+            Local AI Cat is provided on an as-available basis. We aim for a
+            reliable product, but updates, models, third-party services, and
+            billing integrations can change over time. Nothing here limits any
+            rights you have under applicable consumer law.
           </p>
         </section>
 

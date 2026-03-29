@@ -7,22 +7,23 @@ import { getAppStoreUrl } from "../../../lib/env";
 export const metadata: Metadata = {
   title: "App Store Download",
   description:
-    "Download Local AI Cat from the App Store for iPhone, iPad, and Mac with Apple billing."
+    "Download the Local AI Cat Indoor Cat build from the App Store for iPhone, iPad, and Mac with Apple billing."
 };
 
 export default function AppStoreDownloadPage() {
   return (
     <SiteShell>
       <ContentPage
-        intro="The simplest install path. Apple handles billing, updates, and family sharing."
-        kicker="App Store"
-        title="Apple path"
+        intro="Indoor Cat is the App Store route. Apple handles billing, updates, and purchase restore."
+        kicker="Indoor Cat"
+        title="App Store for iPhone, iPad, and Mac"
       >
         <section className="contentCard contentCardTight">
           <h2>Get the app</h2>
           <p>
-            Available for iPhone, iPad, and Mac. Upgrade to Pro or Developer
-            Mode inside the app through Apple billing.
+            Indoor Cat is available for iPhone, iPad, and Mac. Upgrade to Pro
+            or Developer Mode inside the app through Apple billing, or redeem
+            an existing website license key from Settings.
           </p>
           <div className="routeActions">
             <a className="planButton" href={getAppStoreUrl()}>
@@ -38,16 +39,20 @@ export default function AppStoreDownloadPage() {
           <h2>Good to know</h2>
           <ul>
             <li>
-              The Mac App Store build runs sandboxed — some macOS features like
-              window management for other apps are only in the{" "}
+              The Mac App Store build runs sandboxed, so some desktop features
+              like window management for other apps are only in{" "}
               <Link className="textLink" href="/download/direct">
-                direct build
+                Outdoor Cat
               </Link>
               .
             </li>
             <li>
-              Team and Enterprise plans use the direct-download path with web
-              billing.
+              Team and Enterprise use the Outdoor Cat direct-download path with
+              web billing.
+            </li>
+            <li>
+              App Store subscription cancellation and refund requests go
+              through Apple, not the website billing portal.
             </li>
           </ul>
         </section>

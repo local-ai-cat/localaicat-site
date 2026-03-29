@@ -34,13 +34,13 @@ export function DownloadExperience({
 
   return (
     <div className="downloadPaths">
-      {/* ─── Full Mac path ─── */}
+      {/* ─── Outdoor Cat / direct path ─── */}
       <article className="downloadPath downloadPathStrong">
-        <p className="downloadPathEyebrow">Direct download</p>
-        <h3>Full Mac path.</h3>
+        <p className="downloadPathEyebrow">Outdoor Cat</p>
+        <h3>Direct download for Mac.</h3>
         <p className="downloadPathBody">
-          Direct billing, full macOS features, and the foundation for Team and
-          Enterprise.
+          Web billing, full macOS desktop features, and the foundation for Team
+          and Enterprise.
         </p>
 
         <div className="installToggle">
@@ -100,13 +100,13 @@ export function DownloadExperience({
         </div>
       </article>
 
-      {/* ─── App Store path ─── */}
+      {/* ─── Indoor Cat / App Store path ─── */}
       <article className="downloadPath">
-        <p className="downloadPathEyebrow">App Store</p>
-        <h3>Simple install.</h3>
+        <p className="downloadPathEyebrow">Indoor Cat</p>
+        <h3>App Store for iPhone, iPad, and Mac.</h3>
         <p className="downloadPathBody">
-          Apple billing, sandboxed. Best for iPhone, iPad, and a quick Mac
-          install.
+          Apple billing and the simplest install path. On Mac, sandboxing
+          limits some desktop features such as controlling other app windows.
         </p>
         <div className="downloadPathActions">
           <a className="planButton" href={appStoreUrl}>

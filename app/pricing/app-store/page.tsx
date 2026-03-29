@@ -7,20 +7,24 @@ import { appStorePlans } from "../../../lib/catalog";
 export const metadata: Metadata = {
   title: "App Store Pricing",
   description:
-    "Local AI Cat App Store pricing with Apple billing. View plans for iPhone, iPad, and Mac."
+    "Local AI Cat Indoor Cat App Store pricing with Apple billing. View plans for iPhone, iPad, and Mac."
 };
 
 export default function AppStorePricingPage() {
   return (
     <SiteShell>
       <ContentPage
-        intro="App Store pricing is the same core catalog, with billing and purchase management handled by Apple."
-        kicker="Pricing"
+        intro="Indoor Cat pricing uses the same core catalog, with billing and purchase management handled by Apple."
+        kicker="Indoor Cat"
         title="App Store pricing"
       >
         <section className="contentCard contentCardTight">
           <h2>Apple handles billing</h2>
-          <p>The App Store is the simplest route for Apple billing and install flow.</p>
+          <p>
+            Indoor Cat is the simplest route for Apple billing and install flow
+            across iPhone, iPad, and Mac. Apple also handles cancellation,
+            billing support, and refund requests for App Store purchases.
+          </p>
           <div className="routeActions">
             <a className="planButton" href={getAppStoreUrl()}>
               Open App Store listing
@@ -28,10 +32,19 @@ export default function AppStorePricingPage() {
           </div>
         </section>
 
+        <section className="contentCard contentCardTight">
+          <h2>Already bought on the web?</h2>
+          <p>
+            If you already unlocked Outdoor Cat on the site, Indoor Cat can
+            redeem the same license key in Settings. Apple billing is only
+            required if you want to buy inside the App Store build itself.
+          </p>
+        </section>
+
         <section className="pricingBand pricingBandInline">
           <div className="sectionHeading">
             <p className="sectionEyebrow">Catalog</p>
-            <h2>App Store plans.</h2>
+            <h2>Indoor Cat plans.</h2>
           </div>
 
           <div className="planGrid planGridDirect">

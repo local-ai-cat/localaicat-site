@@ -46,7 +46,7 @@ ARCHIVE_PATH="$TMP_DIR/LocalAIChatDirect.zip"
 UNPACK_DIR="$TMP_DIR/unpacked"
 mkdir -p "$UNPACK_DIR"
 
-echo "Downloading Local AI Chat from $SITE_URL"
+echo "Downloading Local AI Cat from $SITE_URL"
 /usr/bin/curl -fsSL "$DOWNLOAD_URL" -o "$ARCHIVE_PATH"
 /usr/bin/ditto -x -k "$ARCHIVE_PATH" "$UNPACK_DIR"
 

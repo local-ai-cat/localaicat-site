@@ -278,7 +278,7 @@ export function HomeExperience() {
         {mode === "personal" ? (
           <div className="toggleCardSection sectionChildReveal">
             <DragToggle
-              labels={["Full experience", "App Store"]}
+              labels={["Outdoor Cat", "Indoor Cat"]}
               onChange={setPersonalPath}
               options={["direct", "appstore"] as const}
               size="compact"
@@ -287,11 +287,14 @@ export function HomeExperience() {
             <div className="toggleCardPanel">
               {personalPath === "direct" ? (
                 <article className="toggleCard" key="direct">
-                  <p className="dualCardEyebrow">Direct download</p>
-                  <h3>Full experience.</h3>
-                  <p className="dualCardBody">Direct billing, full macOS features, power user path.</p>
+                  <p className="dualCardEyebrow">Outdoor Cat</p>
+                  <h3>Direct download for Mac.</h3>
+                  <p className="dualCardBody">
+                    Web billing, full macOS features, and the path for Team and Enterprise.
+                  </p>
                   <ul className="dualCardList">
-                    <li>Full feature set on Mac</li>
+                    <li>Mac-only direct build</li>
+                    <li>Full macOS desktop feature set</li>
                     <li>Pro: £4/mo or £40/yr</li>
                     <li>Developer Mode: £10 one-time</li>
                     <li>Team &amp; Enterprise live here</li>
@@ -303,11 +306,14 @@ export function HomeExperience() {
                 </article>
               ) : (
                 <article className="toggleCard" key="appstore">
-                  <p className="dualCardEyebrow">App Store</p>
-                  <h3>Simple install.</h3>
-                  <p className="dualCardBody">Apple billing, sandboxed path. iPhone, iPad, and Mac.</p>
+                  <p className="dualCardEyebrow">Indoor Cat</p>
+                  <h3>App Store for iPhone, iPad, and Mac.</h3>
+                  <p className="dualCardBody">
+                    Apple billing and the simplest install path. On Mac, sandboxing limits some desktop features.
+                  </p>
                   <ul className="dualCardList">
-                    <li>Easiest install path</li>
+                    <li>iPhone, iPad, and Mac</li>
+                    <li>Apple billing and restore flow</li>
                     <li>Pro: £4/mo or £40/yr</li>
                     <li>Developer Mode: £10 one-time</li>
                     <li>Best for iPhone &amp; iPad</li>

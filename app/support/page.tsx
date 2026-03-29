@@ -20,9 +20,9 @@ const supportItems = [
       "iPhone with iOS 17+, iPad with iPadOS 17+, and Mac with macOS 14+ on Apple Silicon."
   },
   {
-    question: "App Store or direct download?",
+    question: "Indoor Cat or Outdoor Cat?",
     answer:
-      "App Store is the easiest install with Apple billing. Direct download gets you full macOS features (like window management), web billing, and is the foundation for Team and Enterprise. The base app is free on both."
+      "Indoor Cat is the App Store build: easiest install, Apple billing, and support for iPhone, iPad, and Mac. Outdoor Cat is the direct-download Mac build: web billing, full macOS desktop features like window management, and the path for Team and Enterprise. The base app is free on both."
   },
   {
     question: "What is Developer Mode?",
@@ -37,7 +37,7 @@ const supportItems = [
   {
     question: "Need human help?",
     answer:
-      "Email support@localaicat.com with your platform, app version, and whether you're on the App Store or direct build."
+      "Email support@localaicat.com with your platform, app version, and whether you're on Indoor Cat (App Store) or Outdoor Cat (direct download)."
   }
 ] as const;
 

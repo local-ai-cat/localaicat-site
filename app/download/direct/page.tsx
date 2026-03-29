@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: "Direct Download",
   description:
-    "Download the Local AI Cat Outdoor Cat build for macOS. Full desktop features, web billing, and the path for Team and Enterprise."
+    "Download the Local AI Cat Outdoor Cat build for macOS. Full desktop features and web billing."
 };
 
 export default function DirectDownloadPage() {

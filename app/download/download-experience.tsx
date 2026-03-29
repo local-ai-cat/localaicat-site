@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-type InstallMethod = "pkg" | "brew" | "script";
+type InstallMethod = "dmg" | "brew" | "script";
 
 type DownloadExperienceProps = {
   downloadUrl: string | null;
@@ -24,10 +24,10 @@ export function DownloadExperience({
   scriptCmd,
   appStoreUrl
 }: DownloadExperienceProps) {
-  const [method, setMethod] = useState<InstallMethod>("pkg");
+  const [method, setMethod] = useState<InstallMethod>("dmg");
 
   const methods: { id: InstallMethod; label: string }[] = [
-    { id: "pkg", label: ".pkg" },
+    { id: "dmg", label: ".dmg" },
     { id: "brew", label: "Homebrew" },
     { id: "script", label: "Script" }
   ];
@@ -57,14 +57,14 @@ export function DownloadExperience({
         </div>
 
         <div className="installPanel">
-          {method === "pkg" && (
+          {method === "dmg" && (
             <>
               <a
                 className="planButton"
                 href={downloadUrl || "#"}
                 {...(downloadUrl ? {} : { "aria-disabled": true })}
               >
-                Download .pkg
+                Download .dmg
               </a>
               {(version || filename || sha256) && (
                 <ul className="installMeta">

@@ -47,8 +47,11 @@ export default function AppStoreDownloadPage() {
               .
             </li>
             <li>
-              Team and Enterprise use the Outdoor Cat direct-download path with
-              web billing.
+              Need the full macOS desktop feature set? Try the{" "}
+              <Link className="textLink" href="/download/direct">
+                Outdoor Cat
+              </Link>{" "}
+              direct-download build.
             </li>
             <li>
               App Store subscription cancellation and refund requests go

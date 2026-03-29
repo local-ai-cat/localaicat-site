@@ -35,7 +35,7 @@ deploy_to() {
 
   info "Deploying to $label ($domain)..."
   local output
-  if output=$(cd "$PROJECT_DIR" && vercel deploy --prod --scope "$SCOPE" --yes 2>&1); then
+  if output=$(cd "$PROJECT_DIR" && npx vercel deploy --prod --scope "$SCOPE" --yes 2>&1); then
     ok "$label deployed: $(echo "$output" | tail -1)"
     info "Verify: https://$domain"
   else

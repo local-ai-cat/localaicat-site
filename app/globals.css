@@ -557,13 +557,14 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 /* ─── Floating cats ─── */
 
 .floatingCats {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.6s ease;
   overflow: hidden;
   z-index: 0;
+  contain: layout style paint;
 }
 
 .floatingCatsVisible {

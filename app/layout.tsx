@@ -27,8 +27,7 @@ export const metadata: Metadata = {
     icon: "/assets/cat-business.png"
   },
   other: {
-    "theme-color": "#090909",
-    "apple-itunes-app": "app-id=6741502386"
+    "theme-color": "#090909"
   },
   openGraph: {
     title: "Local AI Cat - Private On-Device AI",
@@ -55,6 +54,9 @@ export default function RootLayout({
 }>) {
   return (
     <html className={`${displayFont.variable} ${bodyFont.variable}`} lang="en">
+      <head>
+        <meta name="apple-itunes-app" content="app-id=6741502386" />
+      </head>
       <body>{children}</body>
     </html>
   );

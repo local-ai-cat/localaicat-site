@@ -2009,8 +2009,17 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   }
 
   .floatingCats {
-    display: none;
+    display: block;
   }
+
+  .floatingCat {
+    opacity: 0.12;
+  }
+
+  .floatingCatOne { width: 36px; }
+  .floatingCatTwo { width: 40px; }
+  .floatingCatThree { width: 32px; }
+  .floatingCatFour { width: 34px; }
 
   .detailBand {
     padding: 36px 0 0;

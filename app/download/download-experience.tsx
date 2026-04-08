@@ -109,8 +109,12 @@ export function DownloadExperience({
           limits some desktop features such as controlling other app windows.
         </p>
         <div className="downloadPathActions">
-          <a className="planButton" href={appStoreUrl}>
-            Open App Store
+          <a href={appStoreUrl}>
+            <img
+              src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/en-us?size=250x83"
+              alt="Download on the Mac App Store"
+              style={{ height: 48 }}
+            />
           </a>
           <Link className="secondaryButton" href="/pricing/app-store">
             See pricing

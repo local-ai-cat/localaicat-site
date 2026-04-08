@@ -27,7 +27,8 @@ export const metadata: Metadata = {
     icon: "/assets/cat-business.png"
   },
   other: {
-    "theme-color": "#090909"
+    "theme-color": "#090909",
+    "apple-itunes-app": "app-id=6741502386"
   },
   openGraph: {
     title: "Local AI Cat - Private On-Device AI",

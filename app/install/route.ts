@@ -1,4 +1,4 @@
-import { getDirectDownloadUrl, getSiteUrl } from "../../../lib/env";
+import { getDirectDownloadUrl, getSiteUrl } from "../../lib/env";
 
 function shellQuote(value: string) {
   return `'${value.replace(/'/g, `'\"'\"'`)}'`;

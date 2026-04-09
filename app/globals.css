@@ -1387,8 +1387,12 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-dim);
-  overflow-x: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
 }
 
 .copyButton {

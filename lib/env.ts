@@ -15,7 +15,8 @@ const checkoutUrls: Record<BuySlug, string | undefined> = {
 };
 
 function optionalValue(value: string | undefined) {
-  return value && value.trim().length > 0 ? value : null;
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : null;
 }
 
 export function getCheckoutUrl(slug: BuySlug) {

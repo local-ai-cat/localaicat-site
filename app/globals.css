@@ -1595,7 +1595,7 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 
 .downloadPaths {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0;
 }
 
@@ -1604,9 +1604,13 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   border-bottom: 1px solid var(--line);
 }
 
-.downloadPathStrong {
+.downloadPath:first-child {
   padding-right: 32px;
   border-right: 1px solid var(--line);
+}
+
+.downloadPath:last-child {
+  padding-left: 32px;
 }
 
 .downloadPath:not(.downloadPathStrong) {

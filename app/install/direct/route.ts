@@ -5,7 +5,7 @@ function shellQuote(value: string) {
 }
 
 export function GET() {
-  const directDownloadUrl = getDirectDownloadUrl();
+  const directDownloadUrl = getDirectDownloadUrl()?.trim();
 
   if (!directDownloadUrl) {
     return new Response(

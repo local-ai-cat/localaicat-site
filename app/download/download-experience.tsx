@@ -106,7 +106,10 @@ export function DownloadExperience({
           )}
 
           {method === "brew" && (
-            <CopyBlock command={homebrewCmd} />
+            <div className="comingSoon">
+              <CopyBlock command={homebrewCmd} />
+              <p className="comingSoonLabel">Coming soon</p>
+            </div>
           )}
 
           {method === "script" && (

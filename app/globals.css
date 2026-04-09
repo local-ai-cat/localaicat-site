@@ -1412,6 +1412,21 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   color: var(--text);
 }
 
+.comingSoon {
+  position: relative;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.comingSoonLabel {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .downloadStack {
   display: flex;
   flex-direction: column;

@@ -27,7 +27,6 @@ export function GET() {
 set -eu
 
 DOWNLOAD_URL=${shellQuote(directDownloadUrl)}
-SITE_URL=${shellQuote(siteURL)}
 TMP_DIR=$(mktemp -d)
 TARGET_DIR="/Applications"
 
@@ -46,10 +45,15 @@ fi
 DMG_PATH="$TMP_DIR/LocalAIChatDirect.dmg"
 MOUNT_POINT=""
 
-echo "Downloading Local AI Cat from $SITE_URL..."
-/usr/bin/curl -fsSL "$DOWNLOAD_URL" -o "$DMG_PATH"
+echo ""
+echo "  /\\\\_/\\\\  "
+echo " ( o.o ) Local AI Cat"
+echo "  > ^ <  Outdoor Cat Installer"
+echo ""
+echo "==> Downloading..."
+/usr/bin/curl -fL --progress-bar "$DOWNLOAD_URL" -o "$DMG_PATH"
 
-echo "Mounting..."
+echo "==> Mounting... *paws at disk*"
 HDIUTIL_OUT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly)
 MOUNT_POINT=$(echo "$HDIUTIL_OUT" | grep -o '/Volumes/.*' | head -1)
 
@@ -62,18 +66,22 @@ for candidate in "$MOUNT_POINT"/*.app; do
 done
 
 if [ -z "$APP_PATH" ]; then
-  echo "No app bundle found in DMG." >&2
+  echo "==> Meow! No app bundle found in DMG." >&2
   exit 1
 fi
 
 APP_NAME=$(basename "$APP_PATH")
 DESTINATION_PATH="$TARGET_DIR/$APP_NAME"
-echo "Installing $APP_NAME to $TARGET_DIR..."
+echo "==> Installing to $TARGET_DIR... *knocks things off desk*"
 /bin/rm -rf "$DESTINATION_PATH"
 /bin/cp -R "$APP_PATH" "$DESTINATION_PATH"
 /usr/bin/xattr -cr "$DESTINATION_PATH"
 
-echo "Installed! Launching..."
+echo ""
+echo "  /\\\\_/\\\\  "
+echo " ( ^.^ ) Installed! Launching..."
+echo "  > ^ <  meow~"
+echo ""
 /usr/bin/open "$DESTINATION_PATH"
 `;
 

@@ -89,7 +89,7 @@ export function getPolarProductId(slug: "team-annual" | "pro-annual") {
 }
 
 export function getDirectInstallScriptUrl() {
-  return `${getSiteUrl().replace(/\/$/, "")}/install/direct`;
+  return `${getSiteUrl().replace(/\/$/, "")}/install`;
 }
 
 export function getDirectInstallScriptCommand() {

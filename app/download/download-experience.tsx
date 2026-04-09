@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-
-type InstallMethod = "dmg" | "brew" | "script";
 
 type DownloadExperienceProps = {
   downloadUrl: string | null;
@@ -18,20 +15,11 @@ type DownloadExperienceProps = {
 export function DownloadExperience({
   downloadUrl,
   version,
-  filename,
   sha256,
   homebrewCmd,
   scriptCmd,
   appStoreUrl
 }: DownloadExperienceProps) {
-  const [method, setMethod] = useState<InstallMethod>("dmg");
-
-  const methods: { id: InstallMethod; label: string }[] = [
-    { id: "dmg", label: ".dmg" },
-    { id: "brew", label: "Homebrew" },
-    { id: "script", label: "Script" }
-  ];
-
   return (
     <div className="downloadPaths">
       {/* ─── Outdoor Cat / direct path ─── */}
@@ -43,53 +31,41 @@ export function DownloadExperience({
           that are limited in the sandboxed App Store build.
         </p>
 
-        <div className="installToggle">
-          {methods.map((m) => (
-            <button
-              className={`installToggleBtn${method === m.id ? " installToggleBtnActive" : ""}`}
-              key={m.id}
-              onClick={() => setMethod(m.id)}
-              type="button"
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+        <div className="downloadStack">
+          <a
+            className="planButton"
+            href={downloadUrl || "#"}
+            {...(downloadUrl ? {} : { "aria-disabled": true })}
+          >
+            Download .dmg
+          </a>
 
-        <div className="installPanel">
-          {method === "dmg" && (
-            <>
-              <a
-                className="planButton"
-                href={downloadUrl || "#"}
-                {...(downloadUrl ? {} : { "aria-disabled": true })}
-              >
-                Download .dmg
-              </a>
-              {(version || filename || sha256) && (
-                <ul className="installMeta">
-                  {version && <li>Version {version}</li>}
-                  {filename && <li>{filename}</li>}
-                  {sha256 && (
-                    <li>
-                      SHA-256: <code>{sha256}</code>
-                    </li>
-                  )}
-                </ul>
-              )}
-            </>
+          {version && (
+            <p className="downloadVersion">Version {version}</p>
           )}
 
-          {method === "brew" && (
-            <pre className="commandBlock">
-              <code>{homebrewCmd}</code>
-            </pre>
+          {scriptCmd && (
+            <div className="commandSection">
+              <p className="commandLabel">Or install via script:</p>
+              <pre className="commandBlock">
+                <code>{scriptCmd}</code>
+              </pre>
+            </div>
           )}
 
-          {method === "script" && (
-            <pre className="commandBlock">
-              <code>{scriptCmd}</code>
-            </pre>
+          {homebrewCmd && (
+            <div className="commandSection">
+              <p className="commandLabel">Or via Homebrew:</p>
+              <pre className="commandBlock">
+                <code>{homebrewCmd}</code>
+              </pre>
+            </div>
+          )}
+
+          {sha256 && (
+            <p className="downloadSha">
+              SHA-256: <code>{sha256}</code>
+            </p>
           )}
         </div>
 
@@ -116,9 +92,6 @@ export function DownloadExperience({
               style={{ height: 48 }}
             />
           </a>
-          <Link className="secondaryButton" href="/pricing/app-store">
-            See pricing
-          </Link>
         </div>
       </article>
     </div>

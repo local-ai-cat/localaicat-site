@@ -33,6 +33,7 @@ TARGET_DIR="/Applications"
 
 cleanup() {
   rm -rf "$TMP_DIR"
+  /usr/bin/hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
 }
 
 trap cleanup EXIT
@@ -42,16 +43,17 @@ if [ ! -w "$TARGET_DIR" ]; then
   mkdir -p "$TARGET_DIR"
 fi
 
-ARCHIVE_PATH="$TMP_DIR/LocalAIChatDirect.zip"
-UNPACK_DIR="$TMP_DIR/unpacked"
-mkdir -p "$UNPACK_DIR"
+DMG_PATH="$TMP_DIR/LocalAIChatDirect.dmg"
+MOUNT_POINT=""
 
-echo "Downloading Local AI Cat from $SITE_URL"
-/usr/bin/curl -fsSL "$DOWNLOAD_URL" -o "$ARCHIVE_PATH"
-/usr/bin/ditto -x -k "$ARCHIVE_PATH" "$UNPACK_DIR"
+echo "Downloading Local AI Cat from $SITE_URL..."
+/usr/bin/curl -fsSL "$DOWNLOAD_URL" -o "$DMG_PATH"
+
+echo "Mounting..."
+MOUNT_POINT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly | tail -1 | awk '{print $NF}')
 
 APP_PATH=""
-for candidate in "$UNPACK_DIR"/*.app; do
+for candidate in "$MOUNT_POINT"/*.app; do
   if [ -d "$candidate" ]; then
     APP_PATH="$candidate"
     break
@@ -59,16 +61,18 @@ for candidate in "$UNPACK_DIR"/*.app; do
 done
 
 if [ -z "$APP_PATH" ]; then
-  echo "No app bundle was found in the downloaded archive." >&2
+  echo "No app bundle found in DMG." >&2
   exit 1
 fi
 
 APP_NAME=$(basename "$APP_PATH")
 DESTINATION_PATH="$TARGET_DIR/$APP_NAME"
+echo "Installing $APP_NAME to $TARGET_DIR..."
 /bin/rm -rf "$DESTINATION_PATH"
-/usr/bin/ditto "$APP_PATH" "$DESTINATION_PATH"
+/bin/cp -R "$APP_PATH" "$DESTINATION_PATH"
+/usr/bin/xattr -cr "$DESTINATION_PATH"
 
-echo "Installed $APP_NAME to $TARGET_DIR"
+echo "Installed! Launching..."
 /usr/bin/open "$DESTINATION_PATH"
 `;
 

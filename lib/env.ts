@@ -24,11 +24,11 @@ export function getCheckoutUrl(slug: BuySlug) {
 }
 
 export function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://localaicat.com";
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://localaicat.com").trim();
 }
 
 export function getAppStoreUrl() {
-  return process.env.NEXT_PUBLIC_APP_STORE_URL || DEFAULT_APP_STORE_URL;
+  return (process.env.NEXT_PUBLIC_APP_STORE_URL || DEFAULT_APP_STORE_URL).trim();
 }
 
 export function getDirectDownloadUrl() {

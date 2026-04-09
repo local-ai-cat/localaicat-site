@@ -49,12 +49,12 @@ export function DownloadExperience({
   scriptCmd,
   appStoreUrl
 }: DownloadExperienceProps) {
-  const [method, setMethod] = useState<InstallMethod>("dmg");
+  const [method, setMethod] = useState<InstallMethod>("script");
 
   const methods: { id: InstallMethod; label: string }[] = [
-    { id: "dmg", label: ".dmg" },
+    { id: "script", label: "Script (cutest)" },
     { id: "brew", label: "Homebrew" },
-    { id: "script", label: "Script" }
+    { id: "dmg", label: ".dmg" }
   ];
 
   return (

@@ -2,6 +2,32 @@
 
 import { useState } from "react";
 
+function CopyBlock({ command }: { command: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(command);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="commandBlockWrap">
+      <pre className="commandBlock">
+        <code>{command}</code>
+      </pre>
+      <button
+        className="copyButton"
+        onClick={handleCopy}
+        type="button"
+        aria-label="Copy to clipboard"
+      >
+        {copied ? "Copied!" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
 type InstallMethod = "dmg" | "brew" | "script";
 
 type DownloadExperienceProps = {
@@ -80,15 +106,11 @@ export function DownloadExperience({
           )}
 
           {method === "brew" && (
-            <pre className="commandBlock">
-              <code>{homebrewCmd}</code>
-            </pre>
+            <CopyBlock command={homebrewCmd} />
           )}
 
           {method === "script" && (
-            <pre className="commandBlock">
-              <code>{scriptCmd}</code>
-            </pre>
+            <CopyBlock command={scriptCmd} />
           )}
         </div>
       </article>

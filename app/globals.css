@@ -1375,15 +1375,41 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   line-height: 1.7;
 }
 
+.commandBlockWrap {
+  position: relative;
+  margin: 14px 0 0;
+}
+
 .commandBlock {
-  margin: 6px 0 0;
-  padding: 14px 16px;
+  margin: 0;
+  padding: 14px 70px 14px 16px;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-dim);
   overflow-x: auto;
-  white-space: pre-wrap;
+  white-space: nowrap;
+}
+
+.copyButton {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.copyButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
 }
 
 .downloadStack {

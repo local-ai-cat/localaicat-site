@@ -50,7 +50,8 @@ echo "Downloading Local AI Cat from $SITE_URL..."
 /usr/bin/curl -fsSL "$DOWNLOAD_URL" -o "$DMG_PATH"
 
 echo "Mounting..."
-MOUNT_POINT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly | tail -1 | awk '{print $NF}')
+HDIUTIL_OUT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly)
+MOUNT_POINT=$(echo "$HDIUTIL_OUT" | grep -o '/Volumes/.*' | head -1)
 
 APP_PATH=""
 for candidate in "$MOUNT_POINT"/*.app; do

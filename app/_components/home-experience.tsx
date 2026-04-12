@@ -18,7 +18,7 @@ function getInitialMode(): Mode {
 
 export function HomeExperience() {
   const [mode, setMode] = useState<Mode>(getInitialMode);
-  const [personalPath, setPersonalPath] = useState<"direct" | "appstore">("direct");
+  const [personalPath, setPersonalPath] = useState<"direct" | "appstore">("appstore");
   const [businessPath, setBusinessPath] = useState<"team" | "enterprise">("team");
   const [detailsVisible, setDetailsVisible] = useState(false);
   const detailsRef = useRef<HTMLElement | null>(null);
@@ -278,14 +278,40 @@ export function HomeExperience() {
         {mode === "personal" ? (
           <div className="toggleCardSection sectionChildReveal">
             <DragToggle
-              labels={["Outdoor Cat", "Indoor Cat"]}
+              labels={["Indoor Cat", "Outdoor Cat"]}
               onChange={setPersonalPath}
-              options={["direct", "appstore"] as const}
+              options={["appstore", "direct"] as const}
               size="compact"
               value={personalPath}
             />
             <div className="toggleCardPanel">
-              {personalPath === "direct" ? (
+              {personalPath === "appstore" ? (
+                <article className="toggleCard" key="appstore">
+                  <p className="dualCardEyebrow">Indoor Cat</p>
+                  <h3>App Store for iPhone, iPad, and Mac.</h3>
+                  <p className="dualCardBody">
+                    Apple billing and the simplest install path. On Mac, sandboxing limits some desktop features — for the full macOS experience, we recommend{" "}
+                    <button
+                      className="inlineToggleLink"
+                      onClick={() => setPersonalPath("direct")}
+                      type="button"
+                    >
+                      Outdoor Cat
+                    </button>.
+                  </p>
+                  <ul className="dualCardList">
+                    <li>iPhone, iPad, and Mac</li>
+                    <li>Apple billing and restore flow</li>
+                    <li>Pro: £4/mo or £40/yr</li>
+                    <li>Developer Mode: £10 one-time</li>
+                    <li>Best for iPhone &amp; iPad</li>
+                  </ul>
+                  <div className="dualCardActions">
+                    <Link className="planButton" href="/download/app-store">App Store</Link>
+                    <Link className="secondaryButton" href="/pricing/app-store">Pricing</Link>
+                  </div>
+                </article>
+              ) : (
                 <article className="toggleCard" key="direct">
                   <p className="dualCardEyebrow">Outdoor Cat</p>
                   <h3>Direct download for Mac.</h3>
@@ -302,25 +328,6 @@ export function HomeExperience() {
                   <div className="dualCardActions">
                     <Link className="planButton" href="/download/direct">Download</Link>
                     <Link className="secondaryButton" href="/pricing/direct">Pricing</Link>
-                  </div>
-                </article>
-              ) : (
-                <article className="toggleCard" key="appstore">
-                  <p className="dualCardEyebrow">Indoor Cat</p>
-                  <h3>App Store for iPhone, iPad, and Mac.</h3>
-                  <p className="dualCardBody">
-                    Apple billing and the simplest install path. On Mac, sandboxing limits some desktop features.
-                  </p>
-                  <ul className="dualCardList">
-                    <li>iPhone, iPad, and Mac</li>
-                    <li>Apple billing and restore flow</li>
-                    <li>Pro: £4/mo or £40/yr</li>
-                    <li>Developer Mode: £10 one-time</li>
-                    <li>Best for iPhone &amp; iPad</li>
-                  </ul>
-                  <div className="dualCardActions">
-                    <Link className="planButton" href="/download/app-store">App Store</Link>
-                    <Link className="secondaryButton" href="/pricing/app-store">Pricing</Link>
                   </div>
                 </article>
               )}

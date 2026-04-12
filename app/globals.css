@@ -205,6 +205,20 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   color: var(--text);
 }
 
+.siteNav a.navCta {
+  color: var(--bg);
+  background: var(--text);
+  border-radius: 20px;
+  padding: 7px 18px;
+  margin-left: 6px;
+  font-weight: 600;
+  transition: opacity 150ms ease;
+}
+
+.siteNav a.navCta:hover {
+  opacity: 0.85;
+}
+
 /* Mobile nav — hidden on desktop */
 .mobileNavWrap {
   display: none;

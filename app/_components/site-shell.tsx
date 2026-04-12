@@ -14,9 +14,10 @@ type SiteShellProps = {
 
 const navLinks =
   [
-    { href: "/download", label: "Download" },
+    { href: "/pricing", label: "Pricing" },
     { href: "/manage", label: "Manage" },
-    { href: "/support", label: "Support" }
+    { href: "/support", label: "Support" },
+    { href: "/download", label: "Download", cta: true }
   ] as const;
 
 const legalLinks =
@@ -67,7 +68,11 @@ export function SiteShell({
 
           <nav aria-label="Primary" className="siteNav siteNavDesktop">
             {links.map((link) => (
-              <Link href={link.href} key={link.href}>
+              <Link
+                className={"cta" in link && link.cta ? "navCta" : undefined}
+                href={link.href}
+                key={link.href}
+              >
                 {link.label}
               </Link>
             ))}

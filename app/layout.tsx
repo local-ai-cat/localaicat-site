@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { getSiteUrl } from "../lib/env";
 import "./globals.css";
@@ -57,7 +58,10 @@ export default function RootLayout({
       <head>
         <meta name="apple-itunes-app" content="app-id=6741502386" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

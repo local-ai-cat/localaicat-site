@@ -1,5 +1,6 @@
 const DEFAULT_APP_STORE_URL =
   "https://apps.apple.com/app/local-ai-chat/id6741502386";
+const DEFAULT_CUSTOMER_PORTAL_URL = "https://polar.sh/local-ai-cat/portal";
 
 export type BuySlug =
   | "pro-monthly"
@@ -77,7 +78,26 @@ export function getHomebrewInstallCommand() {
 }
 
 export function getCustomerPortalUrl() {
-  return optionalValue(process.env.POLAR_CUSTOMER_PORTAL_URL);
+  const configured = optionalValue(process.env.POLAR_CUSTOMER_PORTAL_URL);
+
+  if (!configured) {
+    return DEFAULT_CUSTOMER_PORTAL_URL;
+  }
+
+  try {
+    const url = new URL(configured);
+    if (
+      url.hostname === "polar.sh" &&
+      /^\/[^/]+\/portal\/?$/.test(url.pathname) &&
+      url.pathname !== "/local-ai-cat/portal"
+    ) {
+      return DEFAULT_CUSTOMER_PORTAL_URL;
+    }
+  } catch {
+    return DEFAULT_CUSTOMER_PORTAL_URL;
+  }
+
+  return configured;
 }
 
 export function getPolarAdminKey() {

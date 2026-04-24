@@ -42,7 +42,7 @@ fi
 print_banner() {
   printf "\\n"
   printf "  %s/%s\\\\_%s/%s\\\\%s\\n" "$PINK" "$BLUE" "$PINK" "$BLUE" "$RESET"
-  printf " %s(%s %so%s.%so %s)%s  %sLocal AI Cat%s\\n" "$TEXT" "$BLUE" "$TEXT" "$BLUE" "$TEXT" "$BLUE" "$RESET" "$TEXT" "$RESET"
+  printf " %s(%s %so%s.%so %s)%s %sLocal%s %sAI%s %sCat%s\\n" "$TEXT" "$BLUE" "$TEXT" "$BLUE" "$TEXT" "$BLUE" "$RESET" "$TEXT" "$RESET" "$BLUE" "$RESET" "$PINK" "$RESET"
   printf "  %s>%s %s^%s %s<%s  %sOutdoor Cat%s" "$CYAN" "$RESET" "$TEXT" "$RESET" "$CYAN" "$RESET" "$BLUE" "$RESET"
   if [ -n "$RELEASE_META" ]; then
     printf " · %s%s%s" "$TEXT" "$RELEASE_META" "$RESET"

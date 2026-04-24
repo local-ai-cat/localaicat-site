@@ -22,7 +22,6 @@ Copy `.env.example` and fill these in:
 
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_DIRECT_DOWNLOAD_URL`
-- `NEXT_PUBLIC_DIRECT_DOWNLOAD_VERSION`
 - `NEXT_PUBLIC_DIRECT_DOWNLOAD_FILENAME`
 - `NEXT_PUBLIC_DIRECT_DOWNLOAD_SHA256`
 - `POLAR_CHECKOUT_URL_PRO_MONTHLY`
@@ -33,11 +32,18 @@ Copy `.env.example` and fill these in:
 
 Optional distribution variables:
 
+- `NEXT_PUBLIC_DIRECT_DOWNLOAD_VERSION`
+- `NEXT_PUBLIC_DIRECT_DOWNLOAD_BUILD`
+- `NEXT_PUBLIC_DIRECT_DOWNLOAD_PUBLISHED_AT`
 - `NEXT_PUBLIC_HOMEBREW_TAP`
 - `NEXT_PUBLIC_HOMEBREW_CASK`
 
 If `NEXT_PUBLIC_DIRECT_DOWNLOAD_URL` is configured, the site also serves a shell
 installer at `/install/direct` that downloads and installs the current direct build.
+For GitHub `releases/latest/download/...` URLs, the installer now derives
+version/build/date from the live `appcast.xml` automatically. Set the optional
+release metadata vars only if you need to override that or if you host the DMG
+outside GitHub Releases.
 
 ## Polar setup notes
 

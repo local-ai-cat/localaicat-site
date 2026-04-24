@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 import { getCustomerPortalUrl, getPolarAdminKey, getPolarApiBaseUrl } from "../../lib/env";
+import { SuccessActivationCard } from "./success-activation-card";
 
 export const metadata: Metadata = {
   title: "Purchase Complete",
@@ -16,11 +17,6 @@ type SuccessPageProps = {
 
 function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function activationLinkFor(licenseKey: string) {
-  const params = new URLSearchParams({ license_key: licenseKey });
-  return `localaichat://activate-license?${params.toString()}`;
 }
 
 async function lookupLicenseKey(checkoutId: string): Promise<string | null> {
@@ -79,7 +75,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
     }
   }
 
-  const activationLink = licenseKey ? activationLinkFor(licenseKey) : null;
+  const checkoutId = firstValue(resolvedSearchParams?.checkout_id);
 
   return (
     <SiteShell>
@@ -88,49 +84,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         kicker="Success"
         title="You're all set"
       >
-        <section className="contentCard">
-          <h2>Next steps</h2>
-          {activationLink ? (
-            <>
-              <p>
-                Your license key is ready. Click the button below on the same
-                Mac where the app is installed to activate instantly.
-              </p>
-              <div className="routeActions">
-                <a className="planButton" href={activationLink}>
-                  Open app and activate
-                </a>
-              </div>
-              <p>
-                You can also find your license key in the customer portal or
-                purchase confirmation email for manual activation on other
-                devices.
-              </p>
-            </>
-          ) : (
-            <ol className="contentOrderedList">
-              <li>
-                Find your license key in the customer portal or purchase
-                confirmation email.
-              </li>
-              <li>
-                Open the app and go to Settings, then choose Activate License.
-              </li>
-              <li>
-                Paste the key to unlock Pro or Developer Mode on this device.
-              </li>
-              <li>
-                Keep the confirmation email for billing support and future
-                device setup.
-              </li>
-            </ol>
-          )}
-          <p>
-            If you later use Indoor Cat on the same Apple account, paste the
-            same license key there too. Any entitlement sync is treated as a
-            convenience, not the primary activation path.
-          </p>
-        </section>
+        <SuccessActivationCard
+          checkoutId={checkoutId}
+          initialLicenseKey={licenseKey}
+        />
 
         <section className="contentCard">
           <h2>Continue</h2>

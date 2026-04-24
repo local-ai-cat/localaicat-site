@@ -39,6 +39,14 @@ export function getDirectDownloadVersion() {
   return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_VERSION);
 }
 
+export function getDirectDownloadBuild() {
+  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_BUILD);
+}
+
+export function getDirectDownloadPublishedAt() {
+  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_PUBLISHED_AT);
+}
+
 export function getDirectDownloadFilename() {
   return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_FILENAME);
 }

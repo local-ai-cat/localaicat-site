@@ -31,9 +31,19 @@ export type ActivationTokenConsumeResult =
       status: "used" | "expired" | "missing";
     };
 
+export type ActivationTokenStatusResult =
+  | {
+      status: "pending";
+      record: PersistedActivationTokenRecord;
+    }
+  | {
+      status: "used" | "expired" | "missing";
+    };
+
 export interface ActivationTokenStore {
   save(record: Omit<PersistedActivationTokenRecord, "createdAt" | "usedAt">): Promise<void>;
   consume(tokenHash: string, now?: Date): Promise<ActivationTokenConsumeResult>;
+  status(tokenHash: string, now?: Date): Promise<ActivationTokenStatusResult>;
 }
 
 type ActivationTokenIssueResult = {
@@ -120,6 +130,28 @@ class UpstashActivationTokenStore implements ActivationTokenStore {
       record: deserializeRecord(record)
     };
   }
+
+  async status(tokenHash: string, now = new Date()): Promise<ActivationTokenStatusResult> {
+    const usedMarker = await this.redis.exists(usedKeyFor(tokenHash));
+    if (usedMarker) {
+      return { status: "used" };
+    }
+
+    const record = await this.redis.get<SerializedActivationTokenRecord>(keyFor(tokenHash));
+    if (!record) {
+      return { status: "missing" };
+    }
+
+    const deserialized = deserializeRecord(record);
+    if (deserialized.expiresAt <= now) {
+      return { status: "expired" };
+    }
+
+    return {
+      status: "pending",
+      record: deserialized
+    };
+  }
 }
 
 class MemoryActivationTokenStore implements ActivationTokenStore {
@@ -155,6 +187,26 @@ class MemoryActivationTokenStore implements ActivationTokenStore {
     this.records.set(tokenHash, existing);
     return {
       status: "consumed",
+      record: existing
+    };
+  }
+
+  async status(tokenHash: string, now = new Date()): Promise<ActivationTokenStatusResult> {
+    const existing = this.records.get(tokenHash);
+    if (!existing) {
+      return { status: "missing" };
+    }
+
+    if (existing.usedAt) {
+      return { status: "used" };
+    }
+
+    if (existing.expiresAt <= now) {
+      return { status: "expired" };
+    }
+
+    return {
+      status: "pending",
       record: existing
     };
   }

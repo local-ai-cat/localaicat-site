@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 import { getCustomerPortalUrl } from "../../lib/env";
+import { activationTokenExpiresAt } from "../../lib/activation-tokens";
 import { resolveCheckoutSuccessState } from "../../lib/polar-checkout";
 import { SuccessActivationCard } from "./success-activation-card";
 
@@ -41,6 +42,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
     firstValue(resolvedSearchParams?.activation_token) ||
     checkoutState?.activationToken ||
     undefined;
+  const activationTokenExpiry = activationToken
+    ? activationTokenExpiresAt(activationToken)?.toISOString() ?? checkoutState?.activationTokenExpiresAt ?? null
+    : checkoutState?.activationTokenExpiresAt ?? null;
 
   return (
     <SiteShell>
@@ -52,6 +56,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         <SuccessActivationCard
           checkoutId={checkoutId}
           initialActivationToken={activationToken}
+          initialTokenExpiresAt={activationTokenExpiry}
           customerPortalUrl={customerPortalUrl}
         />
 

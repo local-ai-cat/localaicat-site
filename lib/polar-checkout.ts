@@ -31,6 +31,7 @@ export type CheckoutSuccessState = {
   customerPortalUrl: string | null;
   licenseKey: string | null;
   activationToken: string | null;
+  activationTokenExpiresAt: string | null;
 };
 
 function isConfirmedCheckout(status: string | undefined) {
@@ -133,7 +134,8 @@ export async function resolveCheckoutSuccessState(
         customerId,
         customerPortalUrl: null,
         licenseKey: null,
-        activationToken: null
+        activationToken: null,
+        activationTokenExpiresAt: null
       };
     }
 
@@ -157,7 +159,8 @@ export async function resolveCheckoutSuccessState(
       customerId,
       customerPortalUrl,
       licenseKey,
-      activationToken: activationTokenRecord?.token ?? null
+      activationToken: activationTokenRecord?.token ?? null,
+      activationTokenExpiresAt: activationTokenRecord?.expiresAt.toISOString() ?? null
     };
   } catch {
     return null;

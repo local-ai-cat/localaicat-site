@@ -8,19 +8,21 @@ export type BuySlug =
   | "developer-mode"
   | "team-annual";
 
-const checkoutUrls: Record<BuySlug, string | undefined> = {
-  "pro-monthly": process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY,
-  "pro-annual": process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL,
-  "developer-mode": process.env.POLAR_CHECKOUT_URL_DEVELOPER_MODE,
-  "team-annual": process.env.POLAR_CHECKOUT_URL_TEAM_ANNUAL
-};
-
 function optionalValue(value: string | undefined) {
-  const trimmed = value?.trim();
+  const trimmed = value
+    ?.replace(/^(?:\\r|\\n)+|(?:\\r|\\n)+$/g, "")
+    .trim();
   return trimmed && trimmed.length > 0 ? trimmed : null;
 }
 
 export function getCheckoutUrl(slug: BuySlug) {
+  const checkoutUrls: Record<BuySlug, string | undefined> = {
+    "pro-monthly": process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY,
+    "pro-annual": process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL,
+    "developer-mode": process.env.POLAR_CHECKOUT_URL_DEVELOPER_MODE,
+    "team-annual": process.env.POLAR_CHECKOUT_URL_TEAM_ANNUAL
+  };
+
   return optionalValue(checkoutUrls[slug]);
 }
 
@@ -123,7 +125,8 @@ export function getActivationTokenRedisConfig() {
 }
 
 export function getPolarApiBaseUrl() {
-  return process.env.POLAR_API_BASE_URL || "https://api.polar.sh";
+  return optionalValue(process.env.POLAR_API_BASE_URL)?.replace(/\/+$/, "")
+    || "https://api.polar.sh";
 }
 
 export function getPolarProductId(slug: "team-annual" | "pro-annual") {

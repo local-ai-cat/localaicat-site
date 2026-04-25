@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-strip-types --test lib/activation-tokens.test.ts lib/activation-token-store.test.ts lib/activation-redeem.test.ts",
+    "test": "node --experimental-strip-types --test lib/*.test.ts",
     "deploy:staging": "./scripts/deploy.sh staging",
     "deploy:prod": "./scripts/deploy.sh prod",
     "deploy": "./scripts/deploy.sh"

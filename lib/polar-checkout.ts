@@ -1,8 +1,12 @@
 import { getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
-import { issuePersistentActivationToken } from "./activation-token-store.ts";
+import {
+  issuePersistentActivationToken,
+  type ActivationTokenStore
+} from "./activation-token-store.ts";
 
 type CheckoutLookupOptions = {
   includeCustomerPortalUrl?: boolean;
+  activationTokenStore?: ActivationTokenStore | null;
 };
 
 type PolarCheckout = {
@@ -11,12 +15,14 @@ type PolarCheckout = {
 };
 
 type PolarCustomerSession = {
+  token?: string;
   customer_portal_url?: string;
 };
 
 type PolarLicenseKey = {
   key?: string;
   status?: string;
+  created_at?: string;
 };
 
 export type CheckoutSuccessState = {
@@ -49,14 +55,13 @@ async function fetchCheckout(
 }
 
 async function lookupGrantedLicenseKey(
-  customerId: string,
-  adminKey: string,
+  customerSessionToken: string,
   apiBase: string
 ): Promise<string | null> {
   const response = await fetch(
-    `${apiBase}/v1/license-keys?customer_id=${customerId}&limit=10`,
+    `${apiBase}/v1/customer-portal/license-keys?limit=20`,
     {
-      headers: { Authorization: `Bearer ${adminKey}` },
+      headers: { Authorization: `Bearer ${customerSessionToken}` },
       cache: "no-store"
     }
   );
@@ -70,15 +75,22 @@ async function lookupGrantedLicenseKey(
     result?: PolarLicenseKey[];
   };
   const items = payload.items ?? payload.result ?? [];
-  const activeKey = items.find((item) => item.status === "granted" && item.key);
+  const activeKey = items
+    .filter((item) => item.status === "granted" && item.key)
+    .sort((left, right) => {
+      const leftCreatedAt = Date.parse(left.created_at ?? "");
+      const rightCreatedAt = Date.parse(right.created_at ?? "");
+      return (Number.isFinite(rightCreatedAt) ? rightCreatedAt : 0)
+        - (Number.isFinite(leftCreatedAt) ? leftCreatedAt : 0);
+    })[0];
   return activeKey?.key ?? null;
 }
 
-async function createCustomerPortalUrl(
+async function createCustomerSession(
   customerId: string,
   adminKey: string,
   apiBase: string
-): Promise<string | null> {
+): Promise<PolarCustomerSession | null> {
   const response = await fetch(`${apiBase}/v1/customer-sessions`, {
     method: "POST",
     headers: {
@@ -94,7 +106,7 @@ async function createCustomerPortalUrl(
   }
 
   const payload = (await response.json()) as PolarCustomerSession;
-  return payload.customer_portal_url ?? null;
+  return payload;
 }
 
 export async function resolveCheckoutSuccessState(
@@ -125,17 +137,20 @@ export async function resolveCheckoutSuccessState(
       };
     }
 
-    const licenseKey = await lookupGrantedLicenseKey(customerId, adminKey, apiBase);
+    const customerSession = await createCustomerSession(customerId, adminKey, apiBase);
+    const licenseKey = customerSession?.token
+      ? await lookupGrantedLicenseKey(customerSession.token, apiBase)
+      : null;
     const activationTokenRecord = licenseKey
       ? await issuePersistentActivationToken({
           checkoutId,
           customerId,
           licenseKey
-        })
+        }, options.activationTokenStore)
       : null;
     const customerPortalUrl = options.includeCustomerPortalUrl === false
       ? null
-      : await createCustomerPortalUrl(customerId, adminKey, apiBase);
+      : customerSession?.customer_portal_url ?? null;
 
     return {
       checkoutStatus,

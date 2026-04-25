@@ -1389,6 +1389,107 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   line-height: 1.7;
 }
 
+.successFlowCard {
+  gap: 18px;
+}
+
+.successFlowHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.successStateBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.successStateBadgeReady {
+  border-color: rgba(106, 160, 255, 0.38);
+  color: #9fc0ff;
+  background: rgba(106, 160, 255, 0.1);
+}
+
+.successStateBadgeWorking {
+  border-color: rgba(255, 210, 138, 0.38);
+  color: #ffd28a;
+  background: rgba(255, 210, 138, 0.08);
+}
+
+.successStateBadgeManual {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.successStatusList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.successStatusItem {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.successStatusItem strong {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+.successStatusItem p {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.successStatusItemComplete {
+  border-color: rgba(106, 160, 255, 0.28);
+  background: rgba(106, 160, 255, 0.08);
+}
+
+.successStatusItemWorking {
+  border-color: rgba(255, 210, 138, 0.28);
+  background: rgba(255, 210, 138, 0.08);
+}
+
+.successStatusItemWaiting {
+  opacity: 0.84;
+}
+
+.successLead,
+.successFootnote,
+.successKeyMeta {
+  max-width: 50rem;
+}
+
+.successKeyWrap {
+  max-width: 52rem;
+}
+
+.successKeyBlock {
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.successKeyMeta span {
+  color: var(--text);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
 .commandBlockWrap {
   position: relative;
   margin: 14px 0 0;
@@ -2210,6 +2311,15 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   .planButton {
     width: 100%;
     min-height: 48px;
+  }
+
+  .successFlowHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .successStatusList {
+    grid-template-columns: 1fr;
   }
 
   .heroActions,

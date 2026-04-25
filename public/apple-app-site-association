@@ -1,0 +1,21 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "599WAZ6282.pldev.Seek-Deep-Local-AI",
+        "paths": [
+          "/activate",
+          "/activate/*"
+        ]
+      },
+      {
+        "appID": "599WAZ6282.pldev.Seek-Deep-Local-AI.dev",
+        "paths": [
+          "/activate",
+          "/activate/*"
+        ]
+      }
+    ]
+  }
+}

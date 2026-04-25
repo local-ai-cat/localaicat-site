@@ -104,6 +104,21 @@ export function getPolarAdminKey() {
   return optionalValue(process.env.POLAR_ADMIN_KEY);
 }
 
+export function getActivationTokenSecret() {
+  return (
+    optionalValue(process.env.ACTIVATION_TOKEN_SECRET) ??
+    getPolarAdminKey()
+  );
+}
+
+export function getActivationTokenDatabaseUrl() {
+  return (
+    optionalValue(process.env.ACTIVATION_TOKEN_DATABASE_URL) ??
+    optionalValue(process.env.DATABASE_URL) ??
+    optionalValue(process.env.POSTGRES_URL)
+  );
+}
+
 export function getPolarApiBaseUrl() {
   return process.env.POLAR_API_BASE_URL || "https://api.polar.sh";
 }

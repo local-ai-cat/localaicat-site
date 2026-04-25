@@ -9,8 +9,15 @@ import { SuccessActivationCard } from "./success-activation-card";
 export const metadata: Metadata = {
   title: "Purchase Complete",
   description:
-    "Your Local AI Cat purchase is complete. Activate your license key and manage your billing from here."
+    "Your Local AI Cat purchase is complete. Open the app, finish activation, and manage your billing from here.",
+  robots: {
+    index: false,
+    follow: false
+  }
 };
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type SuccessPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -28,27 +35,23 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
     : null;
   const customerPortalUrl =
     checkoutState?.customerPortalUrl ?? getCustomerPortalUrl();
-
-  // Try direct license_key param first, then look up from checkout_id
-  let licenseKey =
-    firstValue(resolvedSearchParams?.license_key) ||
-    firstValue(resolvedSearchParams?.licenseKey) ||
-    firstValue(resolvedSearchParams?.key);
-
-  if (!licenseKey) {
-    licenseKey = checkoutState?.licenseKey ?? undefined;
-  }
+  const activationToken =
+    firstValue(resolvedSearchParams?.t) ||
+    firstValue(resolvedSearchParams?.token) ||
+    firstValue(resolvedSearchParams?.activation_token) ||
+    checkoutState?.activationToken ||
+    undefined;
 
   return (
     <SiteShell>
       <ContentPage
-        intro="Your purchase completed. Download the app if needed, then activate the issued license key in Settings."
+        intro="Your purchase completed. Download the app if needed, then hand the activation token into Outdoor Cat to claim the issued license."
         kicker="Success"
         title="You're all set"
       >
         <SuccessActivationCard
           checkoutId={checkoutId}
-          initialLicenseKey={licenseKey}
+          initialActivationToken={activationToken}
           customerPortalUrl={customerPortalUrl}
         />
 

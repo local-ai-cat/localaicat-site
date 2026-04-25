@@ -1,49 +1,57 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { activationLinkFor } from "../../lib/license-activation";
+import { activationLinkForToken } from "../../lib/license-activation";
 
 type SuccessActivationCardProps = {
   checkoutId?: string | null;
-  initialLicenseKey?: string | null;
+  initialActivationToken?: string | null;
   customerPortalUrl?: string | null;
+};
+
+type CheckoutActivationResponse = {
+  activation_token?: string;
+  expires_at?: string | null;
 };
 
 export function SuccessActivationCard({
   checkoutId,
-  initialLicenseKey,
+  initialActivationToken,
   customerPortalUrl
 }: SuccessActivationCardProps) {
-  const [licenseKey, setLicenseKey] = useState(initialLicenseKey ?? null);
-  const [isPolling, setIsPolling] = useState(Boolean(checkoutId) && !initialLicenseKey);
+  const [activationToken, setActivationToken] = useState(initialActivationToken ?? null);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(null);
+  const [isPolling, setIsPolling] = useState(Boolean(checkoutId) && !initialActivationToken);
   const [pollError, setPollError] = useState<string | null>(null);
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
-  const [didAttemptAutoOpen, setDidAttemptAutoOpen] = useState(Boolean(initialLicenseKey));
+  const [didAttemptAutoOpen, setDidAttemptAutoOpen] = useState(Boolean(initialActivationToken));
   const didAttemptOpenRef = useRef(false);
 
   const activationLink = useMemo(
-    () => (licenseKey ? activationLinkFor(licenseKey) : null),
-    [licenseKey]
+    () => (activationToken ? activationLinkForToken(activationToken) : null),
+    [activationToken]
   );
-  const statusTone = licenseKey ? "ready" : isPolling ? "working" : "manual";
-  const statusLabel = licenseKey
+  const statusTone = activationToken ? "ready" : isPolling ? "working" : "manual";
+  const statusLabel = activationToken
     ? "Ready to activate"
     : isPolling
       ? "Preparing activation"
       : "Manual fallback";
-  const keyPreview = licenseKey
-    ? `${licenseKey.slice(0, 10)}...${licenseKey.slice(-6)}`
+  const expiryLabel = tokenExpiresAt
+    ? new Date(tokenExpiresAt).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    })
     : null;
 
   useEffect(() => {
-    if (!checkoutId || licenseKey) {
+    if (!checkoutId || activationToken) {
       setIsPolling(false);
       return;
     }
 
     let cancelled = false;
     let attempts = 0;
-    const maxAttempts = 30;
+    const maxAttempts = 45;
 
     const lookup = async () => {
       attempts += 1;
@@ -58,9 +66,10 @@ export function SuccessActivationCard({
         }
 
         if (response.ok) {
-          const data = (await response.json()) as { license_key?: string };
-          if (data.license_key) {
-            setLicenseKey(data.license_key);
+          const data = (await response.json()) as CheckoutActivationResponse;
+          if (data.activation_token) {
+            setActivationToken(data.activation_token);
+            setTokenExpiresAt(data.expires_at ?? null);
             setIsPolling(false);
             setPollError(null);
             return;
@@ -68,13 +77,13 @@ export function SuccessActivationCard({
         }
 
         if (response.status !== 404 && response.status !== 422) {
-          setPollError("We couldn't confirm your license key automatically yet.");
+          setPollError("We couldn't prepare the activation handoff automatically yet.");
           setIsPolling(false);
           return;
         }
       } catch {
         if (!cancelled) {
-          setPollError("We couldn't confirm your license key automatically yet.");
+          setPollError("We couldn't prepare the activation handoff automatically yet.");
           setIsPolling(false);
         }
         return;
@@ -93,7 +102,7 @@ export function SuccessActivationCard({
     return () => {
       cancelled = true;
     };
-  }, [checkoutId, licenseKey]);
+  }, [checkoutId, activationToken]);
 
   useEffect(() => {
     if (!activationLink || didAttemptOpenRef.current) {
@@ -111,29 +120,14 @@ export function SuccessActivationCard({
     };
   }, [activationLink]);
 
-  async function copyLicenseKey() {
-    if (!licenseKey) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(licenseKey);
-      setCopyState("copied");
-      window.setTimeout(() => setCopyState("idle"), 1600);
-    } catch {
-      setCopyState("failed");
-      window.setTimeout(() => setCopyState("idle"), 2200);
-    }
-  }
-
   return (
     <section className="contentCard contentCardTight successFlowCard">
       <div className="successFlowHeader">
         <div>
           <h2>Open Outdoor Cat</h2>
           <p>
-            We confirm your checkout, fetch the issued license key, then pass it
-            into the app through a secure activation link.
+            We confirm your checkout, mint a short-lived activation token, then
+            hand it into the app without exposing the raw Polar license key here.
           </p>
         </div>
         <span className={`successStateBadge successStateBadge${statusTone[0].toUpperCase()}${statusTone.slice(1)}`}>
@@ -148,23 +142,23 @@ export function SuccessActivationCard({
         </div>
         <div
           className={`successStatusItem ${
-            licenseKey
+            activationToken
               ? "successStatusItemComplete"
               : isPolling
                 ? "successStatusItemWorking"
                 : "successStatusItemWaiting"
           }`}
         >
-          <strong>License key ready</strong>
+          <strong>Activation token ready</strong>
           <p>
-            {licenseKey
-              ? "Your key has been issued and is ready to hand into the app."
-              : "We’re checking Polar for the granted license key now."}
+            {activationToken
+              ? "Your one-time activation token is ready for Outdoor Cat."
+              : "We’re waiting for Polar to issue the license and mint the activation token now."}
           </p>
         </div>
         <div
           className={`successStatusItem ${
-            licenseKey
+            activationToken
               ? didAttemptAutoOpen
                 ? "successStatusItemWorking"
                 : "successStatusItemWaiting"
@@ -173,9 +167,9 @@ export function SuccessActivationCard({
         >
           <strong>Open app and activate</strong>
           <p>
-            {licenseKey
-              ? "We try to open Local AI Cat automatically. If the browser blocks it, use the button below."
-              : "Once the key is ready, we’ll try the native activation link automatically."}
+            {activationToken
+              ? "We try to open Local AI Cat automatically. If the browser blocks it, use the activation button below."
+              : "Once the token is ready, we’ll try the native activation link automatically."}
           </p>
         </div>
       </div>
@@ -183,27 +177,16 @@ export function SuccessActivationCard({
       {activationLink ? (
         <>
           <p className="successLead">
-            Your license key is ready. If Outdoor Cat is already open, switch
-            back to it after the browser prompt. If nothing happens, use the
-            activation button.
+            Your activation handoff is ready. If Outdoor Cat is already open,
+            switch back to it after the browser prompt. If nothing happens, use
+            the activation button below.
           </p>
 
-          {licenseKey ? (
-            <div className="commandBlockWrap successKeyWrap">
-              <pre className="commandBlock successKeyBlock">{licenseKey}</pre>
-              <button className="copyButton" onClick={copyLicenseKey} type="button">
-                {copyState === "copied"
-                  ? "Copied"
-                  : copyState === "failed"
-                    ? "Retry"
-                    : "Copy key"}
-              </button>
-            </div>
+          {expiryLabel ? (
+            <p className="successKeyMeta">
+              This activation handoff expires around <span>{expiryLabel}</span> and can only be used once.
+            </p>
           ) : null}
-
-          <p className="successKeyMeta">
-            Manual fallback key: <span>{keyPreview}</span>
-          </p>
 
           <div className="routeActions">
             <a className="planButton" href={activationLink}>
@@ -219,8 +202,8 @@ export function SuccessActivationCard({
       ) : isPolling ? (
         <>
           <p className="successLead">
-            Finalizing your license key now. Keep this page open for a few more
-            seconds and we’ll try to hand off to the app automatically.
+            Finalizing your activation token now. Keep this page open for a few
+            more seconds and we’ll try to hand off to the app automatically.
           </p>
           {customerPortalUrl ? (
             <div className="routeActions">
@@ -234,10 +217,10 @@ export function SuccessActivationCard({
         <>
           <p className="successLead">
             {pollError ??
-              "We couldn’t confirm the license key automatically yet, but the purchase should still be recoverable from your billing portal."}
+              "We couldn’t complete the automatic app handoff yet, but the purchase is still recoverable from your customer portal."}
           </p>
           <ol className="contentOrderedList">
-            <li>Open the customer portal and copy the issued license key.</li>
+            <li>Open the customer portal and reveal the issued license key.</li>
             <li>Open Outdoor Cat and go to Settings, then choose Activate License.</li>
             <li>Paste the key to unlock Pro or Developer Mode on this device.</li>
             <li>Keep the confirmation email for billing support and future device setup.</li>
@@ -256,9 +239,9 @@ export function SuccessActivationCard({
       )}
 
       <p className="successFootnote">
-        If you later use Indoor Cat on the same Apple account, the same license
-        key still works there. Any cross-device sync is convenience only, not
-        the primary activation path.
+        We keep the browser handoff token short-lived and single-use. Polar
+        remains the source of truth, and you can always recover the issued key
+        through the customer portal if the automatic handoff is interrupted.
       </p>
     </section>
   );

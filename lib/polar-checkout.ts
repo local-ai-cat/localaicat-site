@@ -1,4 +1,5 @@
-import { getPolarAdminKey, getPolarApiBaseUrl } from "./env";
+import { getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
+import { issuePersistentActivationToken } from "./activation-token-store.ts";
 
 type CheckoutLookupOptions = {
   includeCustomerPortalUrl?: boolean;
@@ -23,6 +24,7 @@ export type CheckoutSuccessState = {
   customerId: string | null;
   customerPortalUrl: string | null;
   licenseKey: string | null;
+  activationToken: string | null;
 };
 
 function isConfirmedCheckout(status: string | undefined) {
@@ -118,11 +120,19 @@ export async function resolveCheckoutSuccessState(
         checkoutStatus,
         customerId,
         customerPortalUrl: null,
-        licenseKey: null
+        licenseKey: null,
+        activationToken: null
       };
     }
 
     const licenseKey = await lookupGrantedLicenseKey(customerId, adminKey, apiBase);
+    const activationTokenRecord = licenseKey
+      ? await issuePersistentActivationToken({
+          checkoutId,
+          customerId,
+          licenseKey
+        })
+      : null;
     const customerPortalUrl = options.includeCustomerPortalUrl === false
       ? null
       : await createCustomerPortalUrl(customerId, adminKey, apiBase);
@@ -131,7 +141,8 @@ export async function resolveCheckoutSuccessState(
       checkoutStatus,
       customerId,
       customerPortalUrl,
-      licenseKey
+      licenseKey,
+      activationToken: activationTokenRecord?.token ?? null
     };
   } catch {
     return null;

@@ -138,16 +138,24 @@ Last updated: 2026-03-28
 
 ## 5. Success Page (`/success`)
 
-### 5.1 With License Key (from checkout_id)
+### 5.1 With Activation Token (from checkout_id)
 - [ ] Shows "Open app and activate" button
-- [ ] Button href is `localaichat://activate-license?license_key=...`
+- [ ] Button href is `localaichat://activate?t=...`
+- [ ] Activation token is not shown raw in the page UI
+- [ ] Raw Polar license key is not shown in the page UI
 - [ ] Shows portal/email reference text
 - [ ] Download, pricing, and portal links work
 
-### 5.2 With Direct License Key Param
-- [ ] `/success?license_key=abc123` → shows activation button
-- [ ] `/success?key=abc123` → also works
-- [ ] `/success?licenseKey=abc123` → also works
+### 5.2 Security of Activation Tokens
+- [ ] `/api/checkout/:checkout_id` returns `{ activation_token: "..." }`
+- [ ] `/api/checkout/:checkout_id` returns `Cache-Control: private, no-store, max-age=0`
+- [ ] `/api/checkout/:checkout_id` returns `expires_at`
+- [ ] `expires_at` is short-lived (target: <= 5 minutes from issuance)
+- [ ] `POST /api/activation/redeem` returns `{ license_key: "..." }`
+- [ ] `POST /api/activation/redeem` returns `Cache-Control: private, no-store, max-age=0`
+- [ ] Redeeming the same token twice returns `409`
+- [ ] Expired tokens are rejected
+- [ ] Tokens minted on one instance still reject replay on another instance
 
 ### 5.3 Without License Key
 - [ ] Shows manual 4-step activation instructions
@@ -260,8 +268,13 @@ Last updated: 2026-03-28
 - [ ] Seats clamped to 2–100
 
 ### 11.3 `/api/checkout/[id]` (GET)
-- [ ] Valid checkout_id → returns `{ license_key: "..." }`
+- [ ] Valid checkout_id → returns `{ activation_token: "..." }`
 - [ ] Invalid checkout_id → returns 404
+
+### 11.4 `/api/activation/redeem` (POST)
+- [ ] Valid token → returns `{ license_key: "..." }`
+- [ ] Reused token → returns 409
+- [ ] Expired token → returns 410
 - [ ] Unconfirmed checkout → returns 422
 - [ ] Missing admin key → returns 503
 

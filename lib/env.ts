@@ -111,12 +111,15 @@ export function getActivationTokenSecret() {
   );
 }
 
-export function getActivationTokenDatabaseUrl() {
-  return (
-    optionalValue(process.env.ACTIVATION_TOKEN_DATABASE_URL) ??
-    optionalValue(process.env.DATABASE_URL) ??
-    optionalValue(process.env.POSTGRES_URL)
-  );
+export function getActivationTokenRedisConfig() {
+  const url =
+    optionalValue(process.env.KV_REST_API_URL) ??
+    optionalValue(process.env.UPSTASH_REDIS_REST_URL);
+  const token =
+    optionalValue(process.env.KV_REST_API_TOKEN) ??
+    optionalValue(process.env.UPSTASH_REDIS_REST_TOKEN);
+
+  return url && token ? { url, token } : null;
 }
 
 export function getPolarApiBaseUrl() {

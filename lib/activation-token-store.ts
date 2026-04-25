@@ -1,13 +1,15 @@
-import { neon } from "@neondatabase/serverless";
+import { Redis } from "@upstash/redis";
 import {
   hashActivationToken,
   inspectActivationToken,
   issueActivationToken,
   type ActivationTokenPayload
 } from "./activation-tokens.ts";
-import { getActivationTokenDatabaseUrl } from "./env.ts";
+import { getActivationTokenRedisConfig } from "./env.ts";
 
-type NeonClient = ReturnType<typeof neon>;
+const KEY_PREFIX = "activation-token:";
+const USED_KEY_PREFIX = "activation-token-used:";
+const USED_TOMBSTONE_SECONDS = 15 * 60;
 
 export type PersistedActivationTokenRecord = {
   tokenHash: string;
@@ -40,192 +42,82 @@ type ActivationTokenIssueResult = {
   expiresAt: Date;
 };
 
-type ActivationTokenStoreRow = {
-  status: "consumed" | "used" | "expired" | "missing";
-  token_hash: string | null;
-  jti: string | null;
-  checkout_id: string | null;
-  customer_id: string | null;
-  license_key: string | null;
-  expires_at: Date | string | null;
-  created_at: Date | string | null;
-  used_at: Date | string | null;
+type SerializedActivationTokenRecord = {
+  tokenHash: string;
+  jti: string;
+  checkoutId: string;
+  customerId: string;
+  licenseKey: string;
+  expiresAt: string;
+  createdAt: string;
 };
 
-let schemaReady: Promise<void> | null = null;
+function keyFor(tokenHash: string) {
+  return `${KEY_PREFIX}${tokenHash}`;
+}
 
-function mapRow(row: {
-  token_hash: string;
-  jti: string;
-  checkout_id: string;
-  customer_id: string;
-  license_key: string;
-  expires_at: Date | string;
-  created_at: Date | string;
-  used_at: Date | string | null;
-}): PersistedActivationTokenRecord {
+function usedKeyFor(tokenHash: string) {
+  return `${USED_KEY_PREFIX}${tokenHash}`;
+}
+
+function serializeRecord(
+  record: Omit<PersistedActivationTokenRecord, "createdAt" | "usedAt">,
+  createdAt = new Date()
+): SerializedActivationTokenRecord {
   return {
-    tokenHash: row.token_hash,
-    jti: row.jti,
-    checkoutId: row.checkout_id,
-    customerId: row.customer_id,
-    licenseKey: row.license_key,
-    expiresAt: new Date(row.expires_at),
-    createdAt: new Date(row.created_at),
-    usedAt: row.used_at ? new Date(row.used_at) : null
+    tokenHash: record.tokenHash,
+    jti: record.jti,
+    checkoutId: record.checkoutId,
+    customerId: record.customerId,
+    licenseKey: record.licenseKey,
+    expiresAt: record.expiresAt.toISOString(),
+    createdAt: createdAt.toISOString()
   };
 }
 
-function makeNeonClient(): NeonClient | null {
-  const databaseUrl = getActivationTokenDatabaseUrl();
-  if (!databaseUrl) {
-    return null;
-  }
-
-  return neon(databaseUrl);
+function deserializeRecord(row: SerializedActivationTokenRecord): PersistedActivationTokenRecord {
+  return {
+    tokenHash: row.tokenHash,
+    jti: row.jti,
+    checkoutId: row.checkoutId,
+    customerId: row.customerId,
+    licenseKey: row.licenseKey,
+    expiresAt: new Date(row.expiresAt),
+    createdAt: new Date(row.createdAt),
+    usedAt: null
+  };
 }
 
-async function ensureSchema(client: NeonClient) {
-  schemaReady ??= (async () => {
-    await client`
-      CREATE TABLE IF NOT EXISTS activation_tokens (
-        token_hash TEXT PRIMARY KEY,
-        jti TEXT NOT NULL UNIQUE,
-        checkout_id TEXT NOT NULL,
-        customer_id TEXT NOT NULL,
-        license_key TEXT NOT NULL,
-        expires_at TIMESTAMPTZ NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        used_at TIMESTAMPTZ
-      )
-    `;
+class UpstashActivationTokenStore implements ActivationTokenStore {
+  private readonly redis: Redis;
 
-    await client`
-      CREATE INDEX IF NOT EXISTS activation_tokens_expires_at_idx
-      ON activation_tokens (expires_at)
-    `;
-  })();
-
-  await schemaReady;
-}
-
-class NeonActivationTokenStore implements ActivationTokenStore {
-  private readonly client: NeonClient;
-
-  constructor(client: NeonClient) {
-    this.client = client;
+  constructor(redis: Redis) {
+    this.redis = redis;
   }
 
   async save(record: Omit<PersistedActivationTokenRecord, "createdAt" | "usedAt">) {
-    await ensureSchema(this.client);
-
-    await this.client`
-      INSERT INTO activation_tokens (
-        token_hash,
-        jti,
-        checkout_id,
-        customer_id,
-        license_key,
-        expires_at
-      )
-      VALUES (
-        ${record.tokenHash},
-        ${record.jti},
-        ${record.checkoutId},
-        ${record.customerId},
-        ${record.licenseKey},
-        ${record.expiresAt.toISOString()}
-      )
-      ON CONFLICT (token_hash) DO NOTHING
-    `;
+    const now = Date.now();
+    const ttlSeconds = Math.max(1, Math.ceil((record.expiresAt.getTime() - now) / 1000));
+    await this.redis.set(keyFor(record.tokenHash), serializeRecord(record), {
+      ex: ttlSeconds,
+      nx: true
+    });
   }
 
-  async consume(tokenHash: string, now = new Date()): Promise<ActivationTokenConsumeResult> {
-    await ensureSchema(this.client);
-
-    const rows = (await this.client`
-      WITH updated AS (
-        UPDATE activation_tokens
-        SET used_at = ${now.toISOString()}
-        WHERE token_hash = ${tokenHash}
-          AND used_at IS NULL
-          AND expires_at > ${now.toISOString()}
-        RETURNING *
-      ),
-      existing AS (
-        SELECT *
-        FROM activation_tokens
-        WHERE token_hash = ${tokenHash}
-      )
-      SELECT
-        'consumed'::TEXT AS status,
-        token_hash,
-        jti,
-        checkout_id,
-        customer_id,
-        license_key,
-        expires_at,
-        created_at,
-        used_at
-      FROM updated
-      UNION ALL
-      SELECT
-        CASE
-          WHEN existing.used_at IS NOT NULL THEN 'used'
-          WHEN existing.expires_at <= ${now.toISOString()} THEN 'expired'
-          ELSE 'missing'
-        END AS status,
-        existing.token_hash,
-        existing.jti,
-        existing.checkout_id,
-        existing.customer_id,
-        existing.license_key,
-        existing.expires_at,
-        existing.created_at,
-        existing.used_at
-      FROM existing
-      WHERE NOT EXISTS (SELECT 1 FROM updated)
-      UNION ALL
-      SELECT
-        'missing'::TEXT AS status,
-        NULL::TEXT AS token_hash,
-        NULL::TEXT AS jti,
-        NULL::TEXT AS checkout_id,
-        NULL::TEXT AS customer_id,
-        NULL::TEXT AS license_key,
-        NULL::TIMESTAMPTZ AS expires_at,
-        NULL::TIMESTAMPTZ AS created_at,
-        NULL::TIMESTAMPTZ AS used_at
-      WHERE NOT EXISTS (SELECT 1 FROM updated)
-        AND NOT EXISTS (SELECT 1 FROM existing)
-      LIMIT 1
-    `) as ActivationTokenStoreRow[];
-
-    const row = rows[0];
-    if (!row || row.status === "missing") {
-      return { status: "missing" };
+  async consume(tokenHash: string): Promise<ActivationTokenConsumeResult> {
+    const record = await this.redis.getdel<SerializedActivationTokenRecord>(keyFor(tokenHash));
+    if (!record) {
+      const usedMarker = await this.redis.exists(usedKeyFor(tokenHash));
+      return usedMarker ? { status: "used" } : { status: "missing" };
     }
 
-    if (row.status === "used") {
-      return { status: "used" };
-    }
-
-    if (row.status === "expired") {
-      return { status: "expired" };
-    }
+    await this.redis.set(usedKeyFor(tokenHash), "1", {
+      ex: USED_TOMBSTONE_SECONDS
+    });
 
     return {
       status: "consumed",
-      record: mapRow({
-        token_hash: row.token_hash!,
-        jti: row.jti!,
-        checkout_id: row.checkout_id!,
-        customer_id: row.customer_id!,
-        license_key: row.license_key!,
-        expires_at: row.expires_at!,
-        created_at: row.created_at!,
-        used_at: row.used_at
-      })
+      record: deserializeRecord(record)
     };
   }
 }
@@ -273,12 +165,12 @@ export function createInMemoryActivationTokenStore(): ActivationTokenStore {
 }
 
 export function getActivationTokenStore(): ActivationTokenStore | null {
-  const client = makeNeonClient();
-  if (!client) {
+  const config = getActivationTokenRedisConfig();
+  if (!config) {
     return null;
   }
 
-  return new NeonActivationTokenStore(client);
+  return new UpstashActivationTokenStore(new Redis(config));
 }
 
 export function issueActivationTokenEnvelope(

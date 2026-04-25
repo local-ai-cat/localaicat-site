@@ -6,3 +6,4 @@ node_modules
 pnpm-debug.log*
 *.env.staging
 .env.vercel
+.env*.local

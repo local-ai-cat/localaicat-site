@@ -13,7 +13,7 @@
     "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
+    "@upstash/redis": "^1.37.0",
     "@vercel/speed-insights": "^2.0.0",
     "next": "^16.1.6",
     "react": "^19.2.4",

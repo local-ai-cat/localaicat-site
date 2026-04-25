@@ -31,7 +31,7 @@ Copy `.env.example` and fill these in:
 - `POLAR_CUSTOMER_PORTAL_URL`
 - `POLAR_ADMIN_KEY`
 - `ACTIVATION_TOKEN_SECRET`
-- `ACTIVATION_TOKEN_DATABASE_URL` (or `DATABASE_URL` / `POSTGRES_URL`)
+- `KV_REST_API_URL` and `KV_REST_API_TOKEN` from Vercel's Upstash for Redis integration
 
 Optional distribution variables:
 
@@ -60,9 +60,9 @@ outside GitHub Releases.
 4. Copy the customer portal URL into `POLAR_CUSTOMER_PORTAL_URL`.
 
 Polar handles license issuance, entitlements, and customer portal natively.
-This site still needs a durable database-backed activation token store so the
-browser-to-app handoff can stay short-lived, single-use, and safe on Vercel's
-stateless runtime model.
+This site uses a small Upstash Redis store for the browser-to-app activation
+handoff so tokens stay short-lived, single-use, and safe on Vercel's stateless
+runtime model.
 
 The direct-download app remains free to install. Polar is only used for
 upgrades, billing management, and license keys that the app validates locally.
@@ -77,8 +77,8 @@ For production, configure:
 
 - `ACTIVATION_TOKEN_SECRET` as a dedicated signing/encryption secret for the
   browser-to-app handoff tokens
-- `ACTIVATION_TOKEN_DATABASE_URL` (or `DATABASE_URL` / `POSTGRES_URL`) as a
-  Postgres-compatible database URL for one-time-use enforcement
+- `KV_REST_API_URL` and `KV_REST_API_TOKEN` from the Vercel Marketplace
+  `upstash/upstash-kv` integration for one-time-use enforcement
 
 If `ACTIVATION_TOKEN_SECRET` is omitted, the site falls back to `POLAR_ADMIN_KEY`
 for token crypto, which is acceptable for local development but not the cleanest

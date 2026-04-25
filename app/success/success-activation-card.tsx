@@ -6,11 +6,13 @@ import { activationLinkFor } from "../../lib/license-activation";
 type SuccessActivationCardProps = {
   checkoutId?: string | null;
   initialLicenseKey?: string | null;
+  customerPortalUrl?: string | null;
 };
 
 export function SuccessActivationCard({
   checkoutId,
-  initialLicenseKey
+  initialLicenseKey,
+  customerPortalUrl
 }: SuccessActivationCardProps) {
   const [licenseKey, setLicenseKey] = useState(initialLicenseKey ?? null);
   const [isPolling, setIsPolling] = useState(Boolean(checkoutId) && !initialLicenseKey);
@@ -30,7 +32,7 @@ export function SuccessActivationCard({
 
     let cancelled = false;
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 30;
 
     const lookup = async () => {
       attempts += 1;
@@ -72,7 +74,7 @@ export function SuccessActivationCard({
         return;
       }
 
-      window.setTimeout(lookup, 1500);
+      window.setTimeout(lookup, 2000);
     };
 
     void lookup();
@@ -110,6 +112,11 @@ export function SuccessActivationCard({
             <a className="planButton" href={activationLink}>
               Open app and activate
             </a>
+            {customerPortalUrl ? (
+              <a className="secondaryButton" href={customerPortalUrl}>
+                Open customer portal
+              </a>
+            ) : null}
           </div>
           <p>
             You can also find your license key in the customer portal or
@@ -126,10 +133,24 @@ export function SuccessActivationCard({
             Keep this page open. We&apos;ll try to open the app automatically as
             soon as the key is available.
           </p>
+          {customerPortalUrl ? (
+            <div className="routeActions">
+              <a className="secondaryButton" href={customerPortalUrl}>
+                Open customer portal
+              </a>
+            </div>
+          ) : null}
         </>
       ) : (
         <>
           {pollError ? <p>{pollError}</p> : null}
+          {customerPortalUrl ? (
+            <p>
+              Billing is ready in the customer portal now. If the license key is
+              still taking a moment to appear, open the portal below and copy it
+              from there.
+            </p>
+          ) : null}
           <ol className="contentOrderedList">
             <li>
               Find your license key in the customer portal or purchase
@@ -146,6 +167,13 @@ export function SuccessActivationCard({
               setup.
             </li>
           </ol>
+          {customerPortalUrl ? (
+            <div className="routeActions">
+              <a className="secondaryButton" href={customerPortalUrl}>
+                Open customer portal
+              </a>
+            </div>
+          ) : null}
         </>
       )}
       <p>

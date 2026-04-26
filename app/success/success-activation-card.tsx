@@ -108,6 +108,18 @@ export function SuccessActivationCard({
     let attempts = 0;
     const maxAttempts = 45;
 
+    // Retry on transient states. The race we're handling: Polar redirects to
+    // /success the moment checkout is confirmed, but the webhook → license →
+    // activation-token chain takes a few seconds to land. The API returns:
+    //   404 — license not yet issued
+    //   422 — checkout/customer not yet confirmed
+    //   503 — license exists but activation token not yet minted (or config)
+    //   5xx — transient infra
+    // Treat all of those as "keep waiting" until maxAttempts. Only give up on
+    // a 4xx that indicates a permanent client-side problem (bad checkout id).
+    const isTransient = (status: number) =>
+      status === 404 || status === 422 || status === 503 || status >= 500;
+
     const lookup = async () => {
       attempts += 1;
 
@@ -130,22 +142,17 @@ export function SuccessActivationCard({
             setPollError(null);
             return;
           }
-        }
-
-        if (response.status !== 404 && response.status !== 422) {
+        } else if (!isTransient(response.status)) {
           setPollError("We couldn't prepare the activation handoff automatically yet.");
           setIsPolling(false);
           return;
         }
       } catch {
-        if (!cancelled) {
-          setPollError("We couldn't prepare the activation handoff automatically yet.");
-          setIsPolling(false);
-        }
-        return;
+        // Network blip — fall through to retry until maxAttempts.
       }
 
       if (attempts >= maxAttempts) {
+        setPollError("We couldn't prepare the activation handoff automatically yet.");
         setIsPolling(false);
         return;
       }

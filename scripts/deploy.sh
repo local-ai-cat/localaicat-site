@@ -11,10 +11,10 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_JSON="$PROJECT_DIR/.vercel/project.json"
 
-SCOPE="phil-simcitydevs-projects"
+SCOPE="atlascodes"
 ORG_ID="team_7uzsygdbkRuhjIqBIAhNH3nl"
 PROD_ID="prj_MLzBd1dmIJdwfyf1dfGmY1v4hIi9"
-STAGING_ID="prj_GVThnNLbTBABfuaiJmz0AXvhdiyq"
+STAGING_ID="prj_kFvVJKcYuy33sFNDr2NTZs00nlyO"
 
 C='\033[0;36m' G='\033[0;32m' Y='\033[1;33m' R='\033[0;31m' N='\033[0m'
 info()  { echo -e "${C}▸${N} $1"; }

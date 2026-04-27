@@ -45,17 +45,16 @@ export async function GET(
     );
   }
 
-  if (!state.activationToken) {
-    return NextResponse.json(
-      { error: "Activation handoff is not configured." },
-      { status: 503, headers: noStoreHeaders }
-    );
-  }
-
+  // The activation token is best-effort. If it fails to mint we still return
+  // the license key so the page can show it for manual paste, then keep
+  // polling for the token in the background to enable the deep link.
   return NextResponse.json(
     {
-      activation_token: state.activationToken,
-      expires_at: activationTokenExpiresAt(state.activationToken)?.toISOString() ?? null
+      license_key: state.licenseKey,
+      activation_token: state.activationToken ?? null,
+      expires_at: state.activationToken
+        ? activationTokenExpiresAt(state.activationToken)?.toISOString() ?? null
+        : null
     },
     { headers: noStoreHeaders }
   );

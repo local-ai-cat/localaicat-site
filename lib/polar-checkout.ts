@@ -7,6 +7,13 @@ import {
 type CheckoutLookupOptions = {
   includeCustomerPortalUrl?: boolean;
   activationTokenStore?: ActivationTokenStore | null;
+  /**
+   * True when the calling viewer has already set the per-checkout reveal
+   * cookie (i.e. they are the original browser that landed on /success).
+   * When false on the first call, callers should set the cookie before
+   * returning the response so the same browser stays authorized.
+   */
+  viewerHasRevealCookie?: boolean;
 };
 
 type PolarCheckout = {
@@ -18,14 +25,19 @@ type PolarCheckout = {
 
 /**
  * Window during which the license key is exposed via the unauthenticated
- * /success?checkout_id=… URL. After this expires the page falls back to a
- * "use the customer portal" message — customers can always retrieve their
- * key from Polar directly.
+ * /success?checkout_id=… URL.
  *
- * 24h is generous enough for a customer to come back after closing the tab
- * but short enough that a leaked URL won't mint keys forever.
+ * Two layers of defence are stacked:
+ *  - Time gate: anything older than this window is hidden for everyone.
+ *  - Cookie bind: even within the window, only the original visitor's
+ *    browser (which got the HTTP-only reveal cookie on first call) can
+ *    see the key. A URL shared with someone else won't reveal it.
+ *
+ * 30 minutes nudges customers to claim immediately and bounds blast
+ * radius if a URL leaks. The legitimate customer can always retrieve
+ * the key from Polar's customer portal afterwards.
  */
-const REVEAL_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const REVEAL_WINDOW_MS = 30 * 60 * 1000;
 
 type PolarCustomerSession = {
   token?: string;
@@ -45,6 +57,10 @@ export type CheckoutSuccessState = {
   licenseKey: string | null;
   activationToken: string | null;
   activationTokenExpiresAt: string | null;
+  /** Wall-clock time at which the unauthenticated reveal expires (null = no key). */
+  revealExpiresAt: string | null;
+  /** Why a key is hidden, when applicable, for client-side messaging. */
+  revealBlockedReason: "expired" | "cookie_required" | null;
 };
 
 function isConfirmedCheckout(status: string | undefined) {
@@ -148,27 +164,47 @@ export async function resolveCheckoutSuccessState(
         customerPortalUrl: null,
         licenseKey: null,
         activationToken: null,
-        activationTokenExpiresAt: null
+        activationTokenExpiresAt: null,
+        revealExpiresAt: null,
+        revealBlockedReason: null
       };
     }
 
-    // Reveal-window gate: stop exposing the license key on the unauthenticated
-    // success URL once the checkout is older than REVEAL_WINDOW_MS. Customers
-    // can still recover the key from Polar's customer portal at any time.
+    // ── Reveal gates ──────────────────────────────────────────────
+    // (1) Time gate: hide the key for everyone once the checkout is older
+    //     than REVEAL_WINDOW_MS — bounds blast radius of a leaked URL.
     const checkoutTimestamp = Date.parse(
       checkout.modified_at ?? checkout.created_at ?? ""
     );
-    if (
-      Number.isFinite(checkoutTimestamp) &&
-      Date.now() - checkoutTimestamp > REVEAL_WINDOW_MS
-    ) {
+    const revealExpiry = Number.isFinite(checkoutTimestamp)
+      ? checkoutTimestamp + REVEAL_WINDOW_MS
+      : null;
+    if (revealExpiry !== null && Date.now() > revealExpiry) {
       return {
         checkoutStatus,
         customerId,
         customerPortalUrl: null,
         licenseKey: null,
         activationToken: null,
-        activationTokenExpiresAt: null
+        activationTokenExpiresAt: null,
+        revealExpiresAt: null,
+        revealBlockedReason: "expired"
+      };
+    }
+
+    // (2) Cookie gate: even within the time window, only the original
+    //     visitor's browser (the one that received the reveal cookie on
+    //     first call) gets the key. Sharing the URL elsewhere → no key.
+    if (options.viewerHasRevealCookie === false) {
+      return {
+        checkoutStatus,
+        customerId,
+        customerPortalUrl: null,
+        licenseKey: null,
+        activationToken: null,
+        activationTokenExpiresAt: null,
+        revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
+        revealBlockedReason: "cookie_required"
       };
     }
 
@@ -193,9 +229,28 @@ export async function resolveCheckoutSuccessState(
       customerPortalUrl,
       licenseKey,
       activationToken: activationTokenRecord?.token ?? null,
-      activationTokenExpiresAt: activationTokenRecord?.expiresAt.toISOString() ?? null
+      activationTokenExpiresAt: activationTokenRecord?.expiresAt.toISOString() ?? null,
+      revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
+      revealBlockedReason: null
     };
   } catch {
     return null;
   }
+}
+
+/**
+ * Stable cookie name for the per-checkout reveal binding. Hashing the
+ * checkout id keeps cookies short and doesn't echo the id back in
+ * Set-Cookie headers, which can be useful in logs.
+ */
+export function revealCookieNameForCheckout(checkoutId: string): string {
+  // Lightweight FNV-1a hash; collisions are not a security concern here —
+  // the cookie is just a per-browser flag scoped by name. We just want
+  // something stable and short that varies with the checkout id.
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < checkoutId.length; i++) {
+    hash ^= checkoutId.charCodeAt(i);
+    hash = (hash + ((hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24))) >>> 0;
+  }
+  return `lacat_v1_${hash.toString(16)}`;
 }

@@ -1,6 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { activationTokenExpiresAt } from "../../../../lib/activation-tokens";
-import { resolveCheckoutSuccessState } from "../../../../lib/polar-checkout";
+import {
+  REVEAL_WINDOW_MS,
+  resolveCheckoutSuccessState,
+  revealCookieNameForCheckout
+} from "../../../../lib/polar-checkout";
 
 export const runtime = "nodejs";
 
@@ -9,12 +13,16 @@ const noStoreHeaders = {
 };
 
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
+  const cookieName = revealCookieNameForCheckout(id);
+  const viewerHasRevealCookie = request.cookies.has(cookieName);
+
   const state = await resolveCheckoutSuccessState(id, {
-    includeCustomerPortalUrl: false
+    includeCustomerPortalUrl: false,
+    viewerHasRevealCookie
   });
 
   if (!state) {
@@ -38,6 +46,27 @@ export async function GET(
     );
   }
 
+  if (state.revealBlockedReason === "expired") {
+    return NextResponse.json(
+      {
+        error: "Reveal window has expired.",
+        reveal_blocked_reason: "expired"
+      },
+      { status: 410, headers: noStoreHeaders }
+    );
+  }
+
+  if (state.revealBlockedReason === "cookie_required") {
+    return NextResponse.json(
+      {
+        error: "Reveal cookie missing — recover the key via the customer portal.",
+        reveal_blocked_reason: "cookie_required",
+        reveal_expires_at: state.revealExpiresAt
+      },
+      { status: 403, headers: noStoreHeaders }
+    );
+  }
+
   if (!state.licenseKey) {
     return NextResponse.json(
       { error: "No active license keys found for this purchase." },
@@ -45,17 +74,31 @@ export async function GET(
     );
   }
 
-  // The activation token is best-effort. If it fails to mint we still return
-  // the license key so the page can show it for manual paste, then keep
-  // polling for the token in the background to enable the deep link.
-  return NextResponse.json(
+  const response = NextResponse.json(
     {
       license_key: state.licenseKey,
       activation_token: state.activationToken ?? null,
       expires_at: state.activationToken
         ? activationTokenExpiresAt(state.activationToken)?.toISOString() ?? null
-        : null
+        : null,
+      reveal_expires_at: state.revealExpiresAt
     },
     { headers: noStoreHeaders }
   );
+
+  // Bind the reveal to this browser. Subsequent requests from a different
+  // browser (or incognito) will lack this cookie and get 403'd above.
+  if (!viewerHasRevealCookie) {
+    response.cookies.set({
+      name: cookieName,
+      value: "1",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: Math.floor(REVEAL_WINDOW_MS / 1000),
+      path: "/"
+    });
+  }
+
+  return response;
 }

@@ -15,6 +15,9 @@ type CheckoutActivationResponse = {
   license_key?: string | null;
   activation_token?: string | null;
   expires_at?: string | null;
+  reveal_expires_at?: string | null;
+  reveal_blocked_reason?: "expired" | "cookie_required" | null;
+  error?: string;
 };
 
 type ActivationTokenStatusResponse =
@@ -61,6 +64,11 @@ export function SuccessActivationCard({
   const [didAttemptAutoOpen, setDidAttemptAutoOpen] = useState(Boolean(initialActivationToken));
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
   const [isLicenseRevealed, setIsLicenseRevealed] = useState(false);
+  const [revealExpiresAt, setRevealExpiresAt] = useState<string | null>(null);
+  const [revealBlockedReason, setRevealBlockedReason] = useState<
+    "expired" | "cookie_required" | null
+  >(null);
+  const [revealRemainingSeconds, setRevealRemainingSeconds] = useState<number | null>(null);
   const didAttemptOpenRef = useRef(false);
 
   // The deeplink now embeds the license key directly. Token-based
@@ -166,7 +174,8 @@ export function SuccessActivationCard({
 
       try {
         const response = await fetch(`/api/checkout/${checkoutId}`, {
-          cache: "no-store"
+          cache: "no-store",
+          credentials: "include"
         });
 
         if (cancelled) {
@@ -175,6 +184,9 @@ export function SuccessActivationCard({
 
         if (response.ok) {
           const data = (await response.json()) as CheckoutActivationResponse;
+          if (data.reveal_expires_at) {
+            setRevealExpiresAt(data.reveal_expires_at);
+          }
           if (data.license_key) {
             setLicenseKey(data.license_key);
           }
@@ -188,6 +200,17 @@ export function SuccessActivationCard({
           }
           // License key is in hand but token still minting — keep polling
           // quietly; the page already displays the key for manual paste.
+        } else if (response.status === 410 || response.status === 403) {
+          // Reveal window closed (410) or this browser isn't authorised
+          // (403, e.g. someone forwarded the URL). Stop polling and surface
+          // the dedicated copy.
+          const data = (await response.json().catch(() => ({}))) as CheckoutActivationResponse;
+          setRevealBlockedReason(data.reveal_blocked_reason ?? (response.status === 410 ? "expired" : "cookie_required"));
+          if (data.reveal_expires_at) {
+            setRevealExpiresAt(data.reveal_expires_at);
+          }
+          setIsPolling(false);
+          return;
         } else if (!isTransient(response.status)) {
           setPollError("We couldn't prepare the activation handoff automatically yet.");
           setIsPolling(false);
@@ -284,6 +307,28 @@ export function SuccessActivationCard({
     };
   }, [activationToken, isDismissed]);
 
+  // Countdown tick for the reveal window — exposes seconds remaining to
+  // the UI so we can prompt the user to claim immediately.
+  useEffect(() => {
+    if (!revealExpiresAt) {
+      setRevealRemainingSeconds(null);
+      return;
+    }
+    const tick = () => {
+      const remaining = Math.max(
+        0,
+        Math.ceil((new Date(revealExpiresAt).getTime() - Date.now()) / 1000)
+      );
+      setRevealRemainingSeconds(remaining);
+      if (remaining === 0) {
+        setRevealBlockedReason("expired");
+      }
+    };
+    tick();
+    const intervalId = window.setInterval(tick, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [revealExpiresAt]);
+
   useEffect(() => {
     if (!tokenExpiresAt || tokenStatus === "claimed") {
       setRemainingSeconds(null);
@@ -356,11 +401,45 @@ export function SuccessActivationCard({
             the deeplink doesn’t fire, reveal your license key and paste it
             into Settings → Activate License.
           </p>
+          {revealRemainingSeconds !== null && revealBlockedReason === null ? (
+            <p className="successFootnote" style={{ marginTop: "0.5rem" }}>
+              <strong>Claim soon:</strong> this page only shows your key for{" "}
+              {formatRemainingTime(revealRemainingSeconds)} more — recover later
+              from the customer portal if you need to.
+            </p>
+          ) : null}
         </div>
         <span className={`successStateBadge successStateBadge${headlineTone[0].toUpperCase()}${headlineTone.slice(1)}`}>
           {headlineLabel}
         </span>
       </div>
+
+      {revealBlockedReason === "expired" ? (
+        <p className="successLead">
+          The one-time reveal window for this page has closed. You can still
+          retrieve your license key from the{" "}
+          {customerPortalUrl ? (
+            <a className="textLink" href={customerPortalUrl}>customer portal</a>
+          ) : (
+            "customer portal"
+          )}{" "}
+          at any time.
+        </p>
+      ) : null}
+
+      {revealBlockedReason === "cookie_required" ? (
+        <p className="successLead">
+          This success URL was opened in a different browser than the one that
+          completed the purchase. For your security the license key is only
+          revealed to the original browser. Open the{" "}
+          {customerPortalUrl ? (
+            <a className="textLink" href={customerPortalUrl}>customer portal</a>
+          ) : (
+            "customer portal"
+          )}{" "}
+          to retrieve it.
+        </p>
+      ) : null}
 
       {licenseKey ? (
         <>

@@ -13,8 +13,6 @@ import {
   getDirectInstallScriptCommand,
   getHomebrewInstallCommand
 } from "../../lib/env";
-import { activationTokenExpiresAt } from "../../lib/activation-tokens";
-import { resolveCheckoutSuccessState } from "../../lib/polar-checkout";
 import { SuccessActivationCard } from "./success-activation-card";
 
 const DEFAULT_BREW_CMD = "brew install --cask local-ai-cat";
@@ -43,20 +41,11 @@ function firstValue(value: string | string[] | undefined) {
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const checkoutId = firstValue(resolvedSearchParams?.checkout_id);
-  const checkoutState = checkoutId
-    ? await resolveCheckoutSuccessState(checkoutId)
-    : null;
-  const customerPortalUrl =
-    checkoutState?.customerPortalUrl ?? getCustomerPortalUrl();
-  const activationToken =
-    firstValue(resolvedSearchParams?.t) ||
-    firstValue(resolvedSearchParams?.token) ||
-    firstValue(resolvedSearchParams?.activation_token) ||
-    checkoutState?.activationToken ||
-    undefined;
-  const activationTokenExpiry = activationToken
-    ? activationTokenExpiresAt(activationToken)?.toISOString() ?? checkoutState?.activationTokenExpiresAt ?? null
-    : checkoutState?.activationTokenExpiresAt ?? null;
+  // The license key is fetched client-side from /api/checkout/[id] so the
+  // reveal cookie can be bound to the original visitor's browser. Rendering
+  // the key into the server HTML would also bake it into proxy/browser
+  // caches, which we want to avoid.
+  const customerPortalUrl = getCustomerPortalUrl();
 
   return (
     <SiteShell>
@@ -67,9 +56,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       >
         <SuccessActivationCard
           checkoutId={checkoutId}
-          initialActivationToken={activationToken}
-          initialTokenExpiresAt={activationTokenExpiry}
-          initialLicenseKey={checkoutState?.licenseKey ?? null}
+          initialActivationToken={undefined}
+          initialTokenExpiresAt={null}
+          initialLicenseKey={null}
           customerPortalUrl={customerPortalUrl}
         />
 

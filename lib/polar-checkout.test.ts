@@ -103,7 +103,7 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
   // license key today. To bound the blast radius of a leaked URL we expose
   // the key only for a short window after the checkout is confirmed.
   const store = createInMemoryActivationTokenStore();
-  const staleTimestamp = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const staleTimestamp = new Date(Date.now() - 60 * 60 * 1000).toISOString(); // 1h old, > 30m gate
 
   globalThis.fetch = async (input) => {
     const url = input.toString();
@@ -136,11 +136,107 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
   };
 
   const state = await resolveCheckoutSuccessState("chk_old", {
-    activationTokenStore: store
+    activationTokenStore: store,
+    viewerHasRevealCookie: true
   });
 
   assert.equal(state?.checkoutStatus, "confirmed");
   assert.equal(state?.customerId, "cust_old", "customer id may still surface for portal links");
   assert.equal(state?.licenseKey, null, "license key must be hidden once the reveal window passes");
   assert.equal(state?.activationToken, null, "no token should be minted for stale checkouts");
+  assert.equal(state?.revealBlockedReason, "expired");
+});
+
+test("resolveCheckoutSuccessState refuses to reveal the key without the per-browser cookie", async () => {
+  // Even within the time window, a viewer who lacks the per-checkout
+  // reveal cookie (i.e. someone who received a forwarded URL) must not see
+  // the license key. Only the original browser that landed first qualifies.
+  const store = createInMemoryActivationTokenStore();
+  const freshTimestamp = new Date(Date.now() - 60 * 1000).toISOString(); // 60s old
+
+  globalThis.fetch = async (input) => {
+    const url = input.toString();
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_fresh") {
+      return Response.json({
+        status: "confirmed",
+        customer_id: "cust_fresh",
+        created_at: freshTimestamp,
+        modified_at: freshTimestamp
+      });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      return Response.json({
+        token: "polar_cst_fresh",
+        customer_portal_url: "https://polar.sh/portal/session"
+      }, { status: 201 });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=20") {
+      return Response.json({
+        items: [
+          {
+            key: "MEOW-PRO-FRESH",
+            status: "granted",
+            created_at: freshTimestamp
+          }
+        ]
+      });
+    }
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const stateForOuterViewer = await resolveCheckoutSuccessState("chk_fresh", {
+    activationTokenStore: store,
+    viewerHasRevealCookie: false
+  });
+
+  assert.equal(stateForOuterViewer?.licenseKey, null, "key must be hidden for viewers without the cookie");
+  assert.equal(stateForOuterViewer?.revealBlockedReason, "cookie_required");
+  assert.ok(stateForOuterViewer?.revealExpiresAt, "client should still see a countdown so it can prompt the legit viewer");
+});
+
+test("resolveCheckoutSuccessState reveals the license key to the cookie-bound viewer within the window", async () => {
+  // Sanity check: the original viewer with the cookie inside the window
+  // continues to see their key normally. This guards against a too-strict
+  // gate breaking the happy path.
+  const store = createInMemoryActivationTokenStore();
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+
+  globalThis.fetch = async (input) => {
+    const url = input.toString();
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_ok") {
+      return Response.json({
+        status: "confirmed",
+        customer_id: "cust_ok",
+        created_at: freshTimestamp,
+        modified_at: freshTimestamp
+      });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      return Response.json({
+        token: "polar_cst_ok",
+        customer_portal_url: "https://polar.sh/portal/session"
+      }, { status: 201 });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=20") {
+      return Response.json({
+        items: [
+          {
+            key: "MEOW-PRO-OK",
+            status: "granted",
+            created_at: freshTimestamp
+          }
+        ]
+      });
+    }
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const state = await resolveCheckoutSuccessState("chk_ok", {
+    activationTokenStore: store,
+    viewerHasRevealCookie: true
+  });
+
+  assert.equal(state?.licenseKey, "MEOW-PRO-OK");
+  assert.equal(state?.revealBlockedReason, null);
+  assert.ok(state?.revealExpiresAt);
 });

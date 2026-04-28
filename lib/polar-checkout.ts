@@ -27,17 +27,19 @@ type PolarCheckout = {
  * Window during which the license key is exposed via the unauthenticated
  * /success?checkout_id=… URL.
  *
- * Two layers of defence are stacked:
- *  - Time gate: anything older than this window is hidden for everyone.
- *  - Cookie bind: even within the window, only the original visitor's
- *    browser (which got the HTTP-only reveal cookie on first call) can
- *    see the key. A URL shared with someone else won't reveal it.
- *
- * 30 minutes nudges customers to claim immediately and bounds blast
- * radius if a URL leaks. The legitimate customer can always retrieve
- * the key from Polar's customer portal afterwards.
+ * Three layers stacked:
+ *  - Time gate (REVEAL_WINDOW_MS): anything older is hidden for everyone.
+ *  - First-visit grace (FIRST_VISIT_GRACE_MS): right after checkout completes,
+ *    we don't yet know which browser is the "original" one — Polar's redirect
+ *    lands without our reveal cookie. During this short grace any caller
+ *    receives the key AND gets the cookie set so subsequent requests are
+ *    bound to that browser.
+ *  - Cookie bind: after the grace expires, only the browser that received
+ *    the cookie during the grace window can keep seeing the key. A URL
+ *    shared elsewhere later → no reveal.
  */
 export const REVEAL_WINDOW_MS = 30 * 60 * 1000;
+export const FIRST_VISIT_GRACE_MS = 5 * 60 * 1000;
 
 type PolarCustomerSession = {
   token?: string;
@@ -192,10 +194,14 @@ export async function resolveCheckoutSuccessState(
       };
     }
 
-    // (2) Cookie gate: even within the time window, only the original
-    //     visitor's browser (the one that received the reveal cookie on
-    //     first call) gets the key. Sharing the URL elsewhere → no key.
-    if (options.viewerHasRevealCookie === false) {
+    // (2) Cookie gate: after the first-visit grace expires, only the
+    //     browser that has the reveal cookie keeps seeing the key. Within
+    //     the grace we treat any caller as the legitimate original visitor
+    //     and the route handler will set the cookie on the response.
+    const insideGrace = Number.isFinite(checkoutTimestamp)
+      ? Date.now() - checkoutTimestamp <= FIRST_VISIT_GRACE_MS
+      : false;
+    if (options.viewerHasRevealCookie === false && !insideGrace) {
       return {
         checkoutStatus,
         customerId,

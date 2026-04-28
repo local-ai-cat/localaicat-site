@@ -7,11 +7,13 @@ type SuccessActivationCardProps = {
   checkoutId?: string | null;
   initialActivationToken?: string | null;
   initialTokenExpiresAt?: string | null;
+  initialLicenseKey?: string | null;
   customerPortalUrl?: string | null;
 };
 
 type CheckoutActivationResponse = {
-  activation_token?: string;
+  license_key?: string | null;
+  activation_token?: string | null;
   expires_at?: string | null;
 };
 
@@ -41,8 +43,10 @@ export function SuccessActivationCard({
   checkoutId,
   initialActivationToken,
   initialTokenExpiresAt,
+  initialLicenseKey,
   customerPortalUrl
 }: SuccessActivationCardProps) {
+  const [licenseKey, setLicenseKey] = useState(initialLicenseKey ?? null);
   const [activationToken, setActivationToken] = useState(initialActivationToken ?? null);
   const [tokenExpiresAt, setTokenExpiresAt] = useState<string | null>(initialTokenExpiresAt ?? null);
   const [tokenStatus, setTokenStatus] = useState<ActivationTokenStatus>(
@@ -50,9 +54,12 @@ export function SuccessActivationCard({
   );
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [isDismissed, setIsDismissed] = useState(false);
-  const [isPolling, setIsPolling] = useState(Boolean(checkoutId) && !initialActivationToken);
+  const [isPolling, setIsPolling] = useState(
+    Boolean(checkoutId) && (!initialActivationToken || !initialLicenseKey)
+  );
   const [pollError, setPollError] = useState<string | null>(null);
   const [didAttemptAutoOpen, setDidAttemptAutoOpen] = useState(Boolean(initialActivationToken));
+  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
   const didAttemptOpenRef = useRef(false);
 
   const activationLink = useMemo(
@@ -98,6 +105,27 @@ export function SuccessActivationCard({
     window.location.assign(activationLink);
   };
 
+  const copyLicenseKey = async () => {
+    if (!licenseKey) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(licenseKey);
+      setCopyState("copied");
+      window.setTimeout(() => setCopyState("idle"), 2000);
+    } catch {
+      // Fall back to selecting the text element so the user can ⌘C.
+      const node = document.getElementById("success-license-key-value");
+      if (node) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!checkoutId || activationToken) {
       setIsPolling(false);
@@ -134,6 +162,9 @@ export function SuccessActivationCard({
 
         if (response.ok) {
           const data = (await response.json()) as CheckoutActivationResponse;
+          if (data.license_key) {
+            setLicenseKey(data.license_key);
+          }
           if (data.activation_token) {
             setActivationToken(data.activation_token);
             setTokenExpiresAt(data.expires_at ?? null);
@@ -142,6 +173,8 @@ export function SuccessActivationCard({
             setPollError(null);
             return;
           }
+          // License key is in hand but token still minting — keep polling
+          // quietly; the page already displays the key for manual paste.
         } else if (!isTransient(response.status)) {
           setPollError("We couldn't prepare the activation handoff automatically yet.");
           setIsPolling(false);
@@ -152,8 +185,12 @@ export function SuccessActivationCard({
       }
 
       if (attempts >= maxAttempts) {
-        setPollError("We couldn't prepare the activation handoff automatically yet.");
         setIsPolling(false);
+        // Don't surface an error if we already have the license key in hand —
+        // the page is fully usable via copy-paste at that point.
+        if (!licenseKey) {
+          setPollError("We couldn't prepare the activation handoff automatically yet.");
+        }
         return;
       }
 
@@ -276,156 +313,101 @@ export function SuccessActivationCard({
     return null;
   }
 
+  const headlineLabel = tokenStatus === "claimed"
+    ? "Activated"
+    : licenseKey
+      ? "License ready"
+      : isPolling
+        ? "Issuing license"
+        : "Manual recovery";
+  const headlineTone = tokenStatus === "claimed"
+    ? "claimed"
+    : licenseKey
+      ? "ready"
+      : isPolling
+        ? "working"
+        : "manual";
+
   return (
     <section className="contentCard contentCardTight successFlowCard">
       <div className="successFlowHeader">
         <div>
-          <h2>Open Outdoor Cat</h2>
+          <h2>Your license key</h2>
           <p>
-            We confirm your checkout, mint a short-lived activation token, then
-            hand it into the app without exposing the raw Polar license key here.
+            Copy your key below and paste it into Local AI Cat at Settings →
+            Activate License. If the app is already installed and registered as
+            a handler, the “Open in app” button will activate it for you.
           </p>
         </div>
-        <span className={`successStateBadge successStateBadge${statusTone[0].toUpperCase()}${statusTone.slice(1)}`}>
-          {statusLabel}
+        <span className={`successStateBadge successStateBadge${headlineTone[0].toUpperCase()}${headlineTone.slice(1)}`}>
+          {headlineLabel}
         </span>
       </div>
 
-      <div className="successStatusList">
-        <div className="successStatusItem successStatusItemComplete">
-          <strong>Checkout confirmed</strong>
-          <p>Polar sent us back to this success page with your completed checkout.</p>
+      {licenseKey ? (
+        <div className="successLicensePanel">
+          <span className="successLicenseLabel">License key</span>
+          <code id="success-license-key-value" className="successLicenseValue">{licenseKey}</code>
+          <button
+            type="button"
+            className="planButton planButtonPlain successLicenseCopyButton"
+            onClick={copyLicenseKey}
+          >
+            {copyState === "copied" ? "Copied ✓" : "Copy"}
+          </button>
         </div>
-        <div
-          className={`successStatusItem ${
-            tokenStatus === "claimed" || activationToken
-              ? "successStatusItemComplete"
-              : isPolling
-                ? "successStatusItemWorking"
-                : "successStatusItemWaiting"
-          }`}
+      ) : isPolling ? (
+        <p className="successLead">
+          Finalizing your license now — Polar usually takes a few seconds. Keep
+          this page open and your key will appear here.
+        </p>
+      ) : (
+        <p className="successLead">
+          {pollError ??
+            "We couldn’t fetch your license automatically. Use the customer portal below to retrieve it, or reopen this success link."}
+        </p>
+      )}
+
+      <div className="routeActions">
+        {activationLink && tokenStatus !== "expired" && tokenStatus !== "invalid" ? (
+          <button className="planButton" type="button" onClick={openActivationLink}>
+            Open in app
+          </button>
+        ) : null}
+        {customerPortalUrl ? (
+          <a className="secondaryButton" href={customerPortalUrl}>
+            Customer portal
+          </a>
+        ) : null}
+        {!licenseKey ? (
+          <a className="secondaryButton" href="/download/direct">
+            Download Outdoor Cat
+          </a>
+        ) : null}
+        <button
+          className="secondaryButton secondaryButtonPlain"
+          type="button"
+          onClick={() => setIsDismissed(true)}
         >
-          <strong>Activation token ready</strong>
-          <p>
-            {activationToken
-              ? "Your short-lived, one-time activation token is ready for Outdoor Cat."
-              : "We’re waiting for Polar to issue the license and mint the activation token now."}
-          </p>
-        </div>
-        <div
-          className={`successStatusItem ${
-            tokenStatus === "claimed"
-              ? "successStatusItemComplete"
-              : activationToken
-              ? didAttemptAutoOpen
-                ? "successStatusItemWorking"
-                : "successStatusItemWaiting"
-              : "successStatusItemWaiting"
-          }`}
-        >
-          <strong>Open app and activate</strong>
-          <p>
-            {tokenStatus === "claimed"
-              ? "Outdoor Cat claimed the activation token. This browser handoff will close itself."
-              : activationToken
-              ? "We try to open Local AI Cat automatically. If the browser blocks it, use the activation button below."
-              : "Once the token is ready, we’ll try the native activation link automatically."}
-          </p>
-        </div>
+          Dismiss
+        </button>
       </div>
 
       {tokenStatus === "claimed" ? (
-        <>
-          <div className="successClaimedPanel">
-            <strong>Activation claimed in Outdoor Cat.</strong>
-            <p>You can close this page, or continue to the customer portal if you need billing details.</p>
-          </div>
-          <div className="routeActions">
-            <button className="secondaryButton secondaryButtonPlain" type="button" onClick={() => setIsDismissed(true)}>
-              Dismiss
-            </button>
-            {customerPortalUrl ? (
-              <a className="secondaryButton" href={customerPortalUrl}>
-                Open customer portal
-              </a>
-            ) : null}
-          </div>
-        </>
-      ) : activationLink && tokenStatus !== "expired" && tokenStatus !== "invalid" ? (
-        <>
-          <p className="successLead">
-            Your activation handoff is ready. If Outdoor Cat is already open,
-            switch back to it after the browser prompt. If nothing happens, use
-            the activation button below.
-          </p>
-
-          {expiryLabel ? (
-            <div className="successCountdown">
-              <span>One-time token</span>
-              <strong>{countdownLabel ?? "Ready"}</strong>
-              <p>Expires around {expiryLabel}. If it expires, reopen this success link or use the customer portal.</p>
-            </div>
-          ) : null}
-
-          <div className="routeActions">
-            <button className="planButton planButtonPlain" type="button" onClick={openActivationLink}>
-              Open app and activate
-            </button>
-            {customerPortalUrl ? (
-              <a className="secondaryButton" href={customerPortalUrl}>
-                Open customer portal
-              </a>
-            ) : null}
-            <button className="secondaryButton secondaryButtonPlain" type="button" onClick={() => setIsDismissed(true)}>
-              Dismiss
-            </button>
-          </div>
-        </>
-      ) : isPolling ? (
-        <>
-          <p className="successLead">
-            Finalizing your activation token now. Keep this page open for a few
-            more seconds and we’ll try to hand off to the app automatically.
-          </p>
-          {customerPortalUrl ? (
-            <div className="routeActions">
-              <a className="secondaryButton" href={customerPortalUrl}>
-                Open customer portal
-              </a>
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <>
-          <p className="successLead">
-            {tokenStatus === "expired"
-              ? "That activation handoff expired before Outdoor Cat claimed it. Your purchase is still recoverable from the customer portal."
-              : pollError ??
-                "We couldn’t complete the automatic app handoff yet, but the purchase is still recoverable from your customer portal."}
-          </p>
-          <ol className="contentOrderedList">
-            <li>Open the customer portal and reveal the issued license key.</li>
-            <li>Open Outdoor Cat and go to Settings, then choose Activate License.</li>
-            <li>Paste the key to unlock Pro or Developer Mode on this device.</li>
-            <li>Keep the confirmation email for billing support and future device setup.</li>
-          </ol>
-          <div className="routeActions">
-            {customerPortalUrl ? (
-              <a className="planButton" href={customerPortalUrl}>
-                Open customer portal
-              </a>
-            ) : null}
-            <a className="secondaryButton" href="/download/direct">
-              Download Outdoor Cat
-            </a>
-          </div>
-        </>
-      )}
+        <p className="successLead" style={{ marginTop: "1rem" }}>
+          Local AI Cat claimed the activation. You can close this page.
+        </p>
+      ) : activationLink && expiryLabel ? (
+        <p className="successFootnote">
+          Activation handoff expires around {expiryLabel}
+          {countdownLabel ? ` (${countdownLabel})` : ""}. The license key above
+          stays valid — only the one-tap deep link is short-lived.
+        </p>
+      ) : null}
 
       <p className="successFootnote">
-        We keep the browser handoff token short-lived and single-use. Polar
-        remains the source of truth, and you can always recover the issued key
-        through the customer portal if the automatic handoff is interrupted.
+        Polar remains the source of truth for your subscription. You can always
+        recover the issued key through the customer portal.
       </p>
     </section>
   );

@@ -2,10 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
-import { getCustomerPortalUrl } from "../../lib/env";
+import { DownloadExperience } from "../download/download-experience";
+import {
+  getAppStoreUrl,
+  getCustomerPortalUrl,
+  getDirectDownloadFilename,
+  getDirectDownloadSha256,
+  getDirectDownloadUrl,
+  getDirectDownloadVersion,
+  getDirectInstallScriptCommand,
+  getHomebrewInstallCommand
+} from "../../lib/env";
 import { activationTokenExpiresAt } from "../../lib/activation-tokens";
 import { resolveCheckoutSuccessState } from "../../lib/polar-checkout";
 import { SuccessActivationCard } from "./success-activation-card";
+
+const DEFAULT_BREW_CMD = "brew install --cask local-ai-cat";
 
 export const metadata: Metadata = {
   title: "Purchase Complete",
@@ -57,18 +69,23 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           checkoutId={checkoutId}
           initialActivationToken={activationToken}
           initialTokenExpiresAt={activationTokenExpiry}
+          initialLicenseKey={checkoutState?.licenseKey ?? null}
           customerPortalUrl={customerPortalUrl}
         />
 
+        <DownloadExperience
+          appStoreUrl={getAppStoreUrl()}
+          downloadUrl={getDirectDownloadUrl()}
+          filename={getDirectDownloadFilename()}
+          homebrewCmd={getHomebrewInstallCommand() || DEFAULT_BREW_CMD}
+          scriptCmd={getDirectInstallScriptCommand()}
+          sha256={getDirectDownloadSha256()}
+          version={getDirectDownloadVersion()}
+        />
+
         <section className="contentCard">
-          <h2>Continue</h2>
+          <h2>Manage</h2>
           <div className="routeActions">
-            <Link className="planButton" href="/download/direct">
-              Download direct build
-            </Link>
-            <Link className="secondaryButton" href="/pricing/direct">
-              Compare direct plans
-            </Link>
             {customerPortalUrl ? (
               <a className="secondaryButton" href={customerPortalUrl}>
                 Open customer portal

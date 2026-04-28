@@ -12,7 +12,20 @@ type CheckoutLookupOptions = {
 type PolarCheckout = {
   status?: string;
   customer_id?: string;
+  created_at?: string;
+  modified_at?: string;
 };
+
+/**
+ * Window during which the license key is exposed via the unauthenticated
+ * /success?checkout_id=… URL. After this expires the page falls back to a
+ * "use the customer portal" message — customers can always retrieve their
+ * key from Polar directly.
+ *
+ * 24h is generous enough for a customer to come back after closing the tab
+ * but short enough that a leaked URL won't mint keys forever.
+ */
+const REVEAL_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 type PolarCustomerSession = {
   token?: string;
@@ -129,6 +142,26 @@ export async function resolveCheckoutSuccessState(
     const checkoutStatus = checkout.status ?? null;
     const customerId = checkout.customer_id ?? null;
     if (!isConfirmedCheckout(checkout.status) || !customerId) {
+      return {
+        checkoutStatus,
+        customerId,
+        customerPortalUrl: null,
+        licenseKey: null,
+        activationToken: null,
+        activationTokenExpiresAt: null
+      };
+    }
+
+    // Reveal-window gate: stop exposing the license key on the unauthenticated
+    // success URL once the checkout is older than REVEAL_WINDOW_MS. Customers
+    // can still recover the key from Polar's customer portal at any time.
+    const checkoutTimestamp = Date.parse(
+      checkout.modified_at ?? checkout.created_at ?? ""
+    );
+    if (
+      Number.isFinite(checkoutTimestamp) &&
+      Date.now() - checkoutTimestamp > REVEAL_WINDOW_MS
+    ) {
       return {
         checkoutStatus,
         customerId,

@@ -97,3 +97,50 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
     license_key: "LOCALAI-PRO-CURRENT"
   });
 });
+
+test("resolveCheckoutSuccessState redacts the license key after the reveal window expires", async () => {
+  // Anyone with the unauthenticated /success?checkout_id=… URL can fetch the
+  // license key today. To bound the blast radius of a leaked URL we expose
+  // the key only for a short window after the checkout is confirmed.
+  const store = createInMemoryActivationTokenStore();
+  const staleTimestamp = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
+  globalThis.fetch = async (input) => {
+    const url = input.toString();
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_old") {
+      return Response.json({
+        status: "confirmed",
+        customer_id: "cust_old",
+        created_at: staleTimestamp,
+        modified_at: staleTimestamp
+      });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      return Response.json({
+        token: "polar_cst_test",
+        customer_portal_url: "https://polar.sh/portal/session"
+      }, { status: 201 });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=20") {
+      return Response.json({
+        items: [
+          {
+            key: "MEOW-PRO-LEAKED",
+            status: "granted",
+            created_at: staleTimestamp
+          }
+        ]
+      });
+    }
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const state = await resolveCheckoutSuccessState("chk_old", {
+    activationTokenStore: store
+  });
+
+  assert.equal(state?.checkoutStatus, "confirmed");
+  assert.equal(state?.customerId, "cust_old", "customer id may still surface for portal links");
+  assert.equal(state?.licenseKey, null, "license key must be hidden once the reveal window passes");
+  assert.equal(state?.activationToken, null, "no token should be minted for stale checkouts");
+});

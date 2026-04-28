@@ -60,6 +60,7 @@ export function SuccessActivationCard({
   const [pollError, setPollError] = useState<string | null>(null);
   const [didAttemptAutoOpen, setDidAttemptAutoOpen] = useState(Boolean(initialActivationToken));
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+  const [isLicenseRevealed, setIsLicenseRevealed] = useState(false);
   const didAttemptOpenRef = useRef(false);
 
   const activationLink = useMemo(
@@ -332,11 +333,12 @@ export function SuccessActivationCard({
     <section className="contentCard contentCardTight successFlowCard">
       <div className="successFlowHeader">
         <div>
-          <h2>Your license key</h2>
+          <h2>Activate Local AI Cat</h2>
           <p>
-            Copy your key below and paste it into Local AI Cat at Settings →
-            Activate License. If the app is already installed and registered as
-            a handler, the “Open in app” button will activate it for you.
+            Tap <strong>Open in app</strong> below — if Local AI Cat is
+            installed it’ll claim the license automatically. If for any reason
+            the deeplink doesn’t fire, reveal your license key and paste it
+            into Settings → Activate License.
           </p>
         </div>
         <span className={`successStateBadge successStateBadge${headlineTone[0].toUpperCase()}${headlineTone.slice(1)}`}>
@@ -347,7 +349,17 @@ export function SuccessActivationCard({
       {licenseKey ? (
         <div className="successLicensePanel">
           <span className="successLicenseLabel">License key</span>
-          <code id="success-license-key-value" className="successLicenseValue">{licenseKey}</code>
+          <code id="success-license-key-value" className="successLicenseValue">
+            {isLicenseRevealed ? licenseKey : "••••-••••-••••-••••-••••"}
+          </code>
+          <button
+            type="button"
+            className="planButton planButtonPlain successLicenseCopyButton"
+            onClick={() => setIsLicenseRevealed((v) => !v)}
+            aria-pressed={isLicenseRevealed}
+          >
+            {isLicenseRevealed ? "Hide" : "Reveal"}
+          </button>
           <button
             type="button"
             className="planButton planButtonPlain successLicenseCopyButton"

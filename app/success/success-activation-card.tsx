@@ -102,8 +102,17 @@ export function SuccessActivationCard({
       return;
     }
 
+    // Use a hidden anchor click so we trigger the OS protocol handler
+    // without navigating the success page away. window.location.assign on
+    // a custom-scheme URL navigates the document and tears down state.
     setDidAttemptAutoOpen(true);
-    window.location.assign(activationLink);
+    const anchor = document.createElement("a");
+    anchor.href = activationLink;
+    anchor.rel = "noopener";
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   };
 
   const copyLicenseKey = async () => {
@@ -302,7 +311,15 @@ export function SuccessActivationCard({
     didAttemptOpenRef.current = true;
     setDidAttemptAutoOpen(true);
     const timeout = window.setTimeout(() => {
-      window.location.assign(activationLink);
+      // Hidden-anchor click instead of window.location.assign so we keep the
+      // success page mounted while the OS handles the protocol URL.
+      const anchor = document.createElement("a");
+      anchor.href = activationLink;
+      anchor.rel = "noopener";
+      anchor.style.display = "none";
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
     }, 300);
 
     return () => {
@@ -347,27 +364,44 @@ export function SuccessActivationCard({
       </div>
 
       {licenseKey ? (
-        <div className="successLicensePanel">
+        <>
           <span className="successLicenseLabel">License key</span>
-          <code id="success-license-key-value" className="successLicenseValue">
-            {isLicenseRevealed ? licenseKey : "••••-••••-••••-••••-••••"}
-          </code>
-          <button
-            type="button"
-            className="planButton planButtonPlain successLicenseCopyButton"
-            onClick={() => setIsLicenseRevealed((v) => !v)}
-            aria-pressed={isLicenseRevealed}
-          >
-            {isLicenseRevealed ? "Hide" : "Reveal"}
-          </button>
-          <button
-            type="button"
-            className="planButton planButtonPlain successLicenseCopyButton"
-            onClick={copyLicenseKey}
-          >
-            {copyState === "copied" ? "Copied ✓" : "Copy"}
-          </button>
-        </div>
+          <div className="commandBlockWrap">
+            <pre className="commandBlock">
+              <code id="success-license-key-value">
+                {isLicenseRevealed ? licenseKey : "•".repeat(licenseKey.length)}
+              </code>
+            </pre>
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                right: "10px",
+                transform: "translateY(-50%)",
+                display: "flex",
+                gap: "6px"
+              }}
+            >
+              <button
+                type="button"
+                className="copyButton"
+                style={{ position: "static", transform: "none" }}
+                onClick={() => setIsLicenseRevealed((v) => !v)}
+                aria-pressed={isLicenseRevealed}
+              >
+                {isLicenseRevealed ? "Hide" : "Reveal"}
+              </button>
+              <button
+                type="button"
+                className="copyButton"
+                style={{ position: "static", transform: "none" }}
+                onClick={copyLicenseKey}
+              >
+                {copyState === "copied" ? "Copied!" : "Copy"}
+              </button>
+            </div>
+          </div>
+        </>
       ) : isPolling ? (
         <p className="successLead">
           Finalizing your license now — Polar usually takes a few seconds. Keep

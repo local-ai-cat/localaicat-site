@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { activationLinkForToken } from "../../lib/license-activation";
+import { activationLinkForLicenseKey } from "../../lib/license-activation";
 
 type SuccessActivationCardProps = {
   checkoutId?: string | null;
@@ -63,9 +63,12 @@ export function SuccessActivationCard({
   const [isLicenseRevealed, setIsLicenseRevealed] = useState(false);
   const didAttemptOpenRef = useRef(false);
 
+  // The deeplink now embeds the license key directly. Token-based
+  // activation is still supported by the API but no longer used here —
+  // see lib/license-activation.ts for the deprecation note.
   const activationLink = useMemo(
-    () => (activationToken ? activationLinkForToken(activationToken) : null),
-    [activationToken]
+    () => (licenseKey ? activationLinkForLicenseKey(licenseKey) : null),
+    [licenseKey]
   );
   const statusTone =
     tokenStatus === "claimed"
@@ -331,20 +334,16 @@ export function SuccessActivationCard({
     return null;
   }
 
-  const headlineLabel = tokenStatus === "claimed"
-    ? "Activated"
-    : licenseKey
-      ? "License ready"
-      : isPolling
-        ? "Issuing license"
-        : "Manual recovery";
-  const headlineTone = tokenStatus === "claimed"
-    ? "claimed"
-    : licenseKey
-      ? "ready"
-      : isPolling
-        ? "working"
-        : "manual";
+  const headlineLabel = licenseKey
+    ? "License ready"
+    : isPolling
+      ? "Issuing license"
+      : "Manual recovery";
+  const headlineTone = licenseKey
+    ? "ready"
+    : isPolling
+      ? "working"
+      : "manual";
 
   return (
     <section className="contentCard contentCardTight successFlowCard">
@@ -415,7 +414,7 @@ export function SuccessActivationCard({
       )}
 
       <div className="routeActions">
-        {activationLink && tokenStatus !== "expired" && tokenStatus !== "invalid" ? (
+        {activationLink ? (
           <button className="planButton" type="button" onClick={openActivationLink}>
             Open in app
           </button>
@@ -438,18 +437,6 @@ export function SuccessActivationCard({
           Dismiss
         </button>
       </div>
-
-      {tokenStatus === "claimed" ? (
-        <p className="successLead" style={{ marginTop: "1rem" }}>
-          Local AI Cat claimed the activation. You can close this page.
-        </p>
-      ) : activationLink && expiryLabel ? (
-        <p className="successFootnote">
-          Activation handoff expires around {expiryLabel}
-          {countdownLabel ? ` (${countdownLabel})` : ""}. The license key above
-          stays valid — only the one-tap deep link is short-lived.
-        </p>
-      ) : null}
 
       <p className="successFootnote">
         Polar remains the source of truth for your subscription. You can always

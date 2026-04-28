@@ -379,28 +379,36 @@ export function SuccessActivationCard({
     return null;
   }
 
-  const headlineLabel = licenseKey
-    ? "License ready"
-    : isPolling
-      ? "Issuing license"
-      : "Manual recovery";
-  const headlineTone = licenseKey
-    ? "ready"
-    : isPolling
-      ? "working"
-      : "manual";
+  const headlineLabel = revealBlockedReason === "expired"
+    ? "Reveal closed"
+    : revealBlockedReason === "cookie_required"
+      ? "Different browser"
+      : licenseKey
+        ? "License ready"
+        : isPolling
+          ? "Issuing license"
+          : "Manual recovery";
+  const headlineTone = revealBlockedReason
+    ? "manual"
+    : licenseKey
+      ? "ready"
+      : isPolling
+        ? "working"
+        : "manual";
 
   return (
     <section className="contentCard contentCardTight successFlowCard">
       <div className="successFlowHeader">
         <div>
-          <h2>Activate Local AI Cat</h2>
-          <p>
-            Tap <strong>Open in app</strong> below — if Local AI Cat is
-            installed it’ll claim the license automatically. If for any reason
-            the deeplink doesn’t fire, reveal your license key and paste it
-            into Settings → Activate License.
-          </p>
+          <h2>{revealBlockedReason === null ? "Activate Local AI Cat" : "Use the customer portal"}</h2>
+          {revealBlockedReason === null ? (
+            <p>
+              Tap <strong>Open in app</strong> below — if Local AI Cat is
+              installed it’ll claim the license automatically. If for any reason
+              the deeplink doesn’t fire, reveal your license key and paste it
+              into Settings → Activate License.
+            </p>
+          ) : null}
           {revealRemainingSeconds !== null && revealBlockedReason === null ? (
             <p className="successFootnote" style={{ marginTop: "0.5rem" }}>
               <strong>Claim soon:</strong> this page only shows your key for{" "}
@@ -485,7 +493,7 @@ export function SuccessActivationCard({
           Finalizing your license now — Polar usually takes a few seconds. Keep
           this page open and your key will appear here.
         </p>
-      ) : (
+      ) : revealBlockedReason ? null : (
         <p className="successLead">
           {pollError ??
             "We couldn’t fetch your license automatically. Use the customer portal below to retrieve it, or reopen this success link."}
@@ -517,10 +525,12 @@ export function SuccessActivationCard({
         </button>
       </div>
 
-      <p className="successFootnote">
-        Polar remains the source of truth for your subscription. You can always
-        recover the issued key through the customer portal.
-      </p>
+      {revealBlockedReason ? null : (
+        <p className="successFootnote">
+          Polar remains the source of truth for your subscription. You can
+          always recover the issued key through the customer portal.
+        </p>
+      )}
     </section>
   );
 }

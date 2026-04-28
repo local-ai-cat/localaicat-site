@@ -767,7 +767,7 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .dualCard h3 {
   font-family: var(--font-display), serif;
   font-size: clamp(24px, 3vw, 32px);
-  line-height: 0.96;
+  line-height: 1.08;
   margin: 4px 0 0;
 }
 

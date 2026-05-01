@@ -42,7 +42,35 @@ test("redeemActivationToken returns the license key for a valid token", async ()
   assert.deepEqual(response.body, {
     checkout_id: "chk_valid",
     customer_id: "cust_valid",
-    license_key: "SD-PRO-VALID"
+    license_key: "SD-PRO-VALID",
+    plan: null,
+    renews_at: null
+  });
+});
+
+test("redeemActivationToken propagates plan and renews_at when present", async () => {
+  const store = createInMemoryActivationTokenStore();
+  const renewsAt = "2026-06-01T00:00:00.000Z";
+  const issued = await issuePersistentActivationToken(
+    {
+      checkoutId: "chk_pro_monthly",
+      customerId: "cust_pro_monthly",
+      licenseKey: "SD-PRO-MONTHLY",
+      plan: "pro-monthly",
+      renewsAt
+    },
+    store
+  );
+  assert.ok(issued);
+
+  const response = await redeemActivationToken(issued.token, { store });
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body, {
+    checkout_id: "chk_pro_monthly",
+    customer_id: "cust_pro_monthly",
+    license_key: "SD-PRO-MONTHLY",
+    plan: "pro-monthly",
+    renews_at: renewsAt
   });
 });
 

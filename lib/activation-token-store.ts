@@ -17,6 +17,10 @@ export type PersistedActivationTokenRecord = {
   checkoutId: string;
   customerId: string;
   licenseKey: string;
+  /** Plan slug ("pro-monthly" / "pro-annual" / "developer-mode") if known. */
+  plan: string | null;
+  /** ISO-8601 wall-clock time the subscription renews. Null for one-time / unknown. */
+  renewsAt: string | null;
   expiresAt: Date;
   createdAt: Date;
   usedAt: Date | null;
@@ -58,6 +62,10 @@ type SerializedActivationTokenRecord = {
   checkoutId: string;
   customerId: string;
   licenseKey: string;
+  /** Plan slug. Null for legacy records issued before plan tracking landed. */
+  plan?: string | null;
+  /** ISO-8601 renewal timestamp. Null for non-recurring/unknown/legacy. */
+  renewsAt?: string | null;
   expiresAt: string;
   createdAt: string;
 };
@@ -80,6 +88,8 @@ function serializeRecord(
     checkoutId: record.checkoutId,
     customerId: record.customerId,
     licenseKey: record.licenseKey,
+    plan: record.plan ?? null,
+    renewsAt: record.renewsAt ?? null,
     expiresAt: record.expiresAt.toISOString(),
     createdAt: createdAt.toISOString()
   };
@@ -92,6 +102,8 @@ function deserializeRecord(row: SerializedActivationTokenRecord): PersistedActiv
     checkoutId: row.checkoutId,
     customerId: row.customerId,
     licenseKey: row.licenseKey,
+    plan: row.plan ?? null,
+    renewsAt: row.renewsAt ?? null,
     expiresAt: new Date(row.expiresAt),
     createdAt: new Date(row.createdAt),
     usedAt: null
@@ -252,6 +264,8 @@ export async function issuePersistentActivationToken(
     checkoutId: string;
     customerId: string;
     licenseKey: string;
+    plan?: string | null;
+    renewsAt?: string | null;
     ttlSeconds?: number;
   },
   store: ActivationTokenStore | null = getActivationTokenStore()
@@ -275,6 +289,8 @@ export async function issuePersistentActivationToken(
     checkoutId: issued.payload.checkoutId,
     customerId: issued.payload.customerId,
     licenseKey: params.licenseKey,
+    plan: params.plan ?? null,
+    renewsAt: params.renewsAt ?? null,
     expiresAt: issued.expiresAt
   });
 

@@ -34,6 +34,7 @@ test.after(() => {
 test("resolveCheckoutSuccessState scopes license lookup through a customer session", async () => {
   const requestedUrls: string[] = [];
   const store = createInMemoryActivationTokenStore();
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
 
   globalThis.fetch = async (input, init) => {
     const url = input.toString();
@@ -44,7 +45,9 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
       assert.equal(headers?.Authorization, "Bearer polar_oat_test");
       return Response.json({
         status: "confirmed",
-        customer_id: "cust_123"
+        customer_id: "cust_123",
+        created_at: freshTimestamp,
+        modified_at: freshTimestamp
       });
     }
 
@@ -94,16 +97,90 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
   assert.deepEqual(redeemed.body, {
     checkout_id: "chk_123",
     customer_id: "cust_123",
-    license_key: "LOCALAI-PRO-CURRENT"
+    license_key: "LOCALAI-PRO-CURRENT",
+    plan: null,
+    renews_at: null
+  });
+});
+
+test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subscriptions", async () => {
+  const store = createInMemoryActivationTokenStore();
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+  const renewsAt = "2026-06-01T00:00:00.000Z";
+
+  globalThis.fetch = async (input, init) => {
+    const url = input.toString();
+    const headers = init?.headers as Record<string, string> | undefined;
+
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_recurring") {
+      return Response.json({
+        status: "confirmed",
+        customer_id: "cust_recurring",
+        subscription_id: "sub_recurring",
+        created_at: freshTimestamp,
+        modified_at: freshTimestamp
+      });
+    }
+
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      return Response.json({
+        token: "polar_cst_test",
+        customer_portal_url: "https://polar.sh/portal/session"
+      }, { status: 201 });
+    }
+
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=20") {
+      return Response.json({
+        items: [
+          {
+            key: "LOCALAI-PRO-MONTHLY",
+            status: "granted",
+            created_at: freshTimestamp
+          }
+        ]
+      });
+    }
+
+    if (url === "https://sandbox-api.polar.sh/v1/subscriptions/sub_recurring") {
+      assert.equal(headers?.Authorization, "Bearer polar_oat_test");
+      return Response.json({
+        id: "sub_recurring",
+        recurring_interval: "month",
+        current_period_end: renewsAt,
+        cancel_at_period_end: false,
+        status: "active"
+      });
+    }
+
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const state = await resolveCheckoutSuccessState("chk_recurring", {
+    activationTokenStore: store
+  });
+
+  assert.equal(state?.plan, "pro-monthly");
+  assert.equal(state?.renewsAt, renewsAt);
+  assert.ok(state?.activationToken);
+
+  const redeemed = await redeemActivationToken(state.activationToken, { store });
+  assert.equal(redeemed.status, 200);
+  assert.deepEqual(redeemed.body, {
+    checkout_id: "chk_recurring",
+    customer_id: "cust_recurring",
+    license_key: "LOCALAI-PRO-MONTHLY",
+    plan: "pro-monthly",
+    renews_at: renewsAt
   });
 });
 
 test("resolveCheckoutSuccessState redacts the license key after the reveal window expires", async () => {
-  // Anyone with the unauthenticated /success?checkout_id=… URL can fetch the
-  // license key today. To bound the blast radius of a leaked URL we expose
-  // the key only for a short window after the checkout is confirmed.
+  // The absolute ceiling is anchored to the checkout's immutable created_at
+  // so even a viewer holding a freshly minted cookie cannot extend the
+  // reveal past it. Use a checkout created 48h ago — past the 24h ceiling.
   const store = createInMemoryActivationTokenStore();
-  const staleTimestamp = new Date(Date.now() - 60 * 60 * 1000).toISOString(); // 1h old, > 30m gate
+  const staleCreated = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const staleModified = new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString();
 
   globalThis.fetch = async (input) => {
     const url = input.toString();
@@ -111,8 +188,8 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
       return Response.json({
         status: "confirmed",
         customer_id: "cust_old",
-        created_at: staleTimestamp,
-        modified_at: staleTimestamp
+        created_at: staleCreated,
+        modified_at: staleModified
       });
     }
     if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
@@ -127,7 +204,7 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
           {
             key: "MEOW-PRO-LEAKED",
             status: "granted",
-            created_at: staleTimestamp
+            created_at: staleCreated
           }
         ]
       });
@@ -137,7 +214,7 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
 
   const state = await resolveCheckoutSuccessState("chk_old", {
     activationTokenStore: store,
-    viewerHasRevealCookie: true
+    cookieIssuedAt: Date.now()
   });
 
   assert.equal(state?.checkoutStatus, "confirmed");
@@ -188,7 +265,7 @@ test("resolveCheckoutSuccessState refuses to reveal the key without the per-brow
 
   const stateForOuterViewer = await resolveCheckoutSuccessState("chk_post_grace", {
     activationTokenStore: store,
-    viewerHasRevealCookie: false
+    cookieIssuedAt: null
   });
 
   assert.equal(stateForOuterViewer?.licenseKey, null, "key must be hidden for viewers without the cookie past the grace");
@@ -236,7 +313,7 @@ test("resolveCheckoutSuccessState reveals the key during the first-visit grace e
 
   const state = await resolveCheckoutSuccessState("chk_just_now", {
     activationTokenStore: store,
-    viewerHasRevealCookie: false
+    cookieIssuedAt: null
   });
 
   assert.equal(state?.licenseKey, "MEOW-PRO-JUSTNOW", "first-visit grace must reveal the key to the legitimate visitor");
@@ -282,7 +359,7 @@ test("resolveCheckoutSuccessState reveals the license key to the cookie-bound vi
 
   const state = await resolveCheckoutSuccessState("chk_ok", {
     activationTokenStore: store,
-    viewerHasRevealCookie: true
+    cookieIssuedAt: Date.now()
   });
 
   assert.equal(state?.licenseKey, "MEOW-PRO-OK");

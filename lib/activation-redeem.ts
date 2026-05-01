@@ -18,6 +18,10 @@ export type ActivationRedeemResponse = {
         checkout_id: string;
         customer_id: string;
         license_key: string;
+        /** Plan slug ("pro-monthly" / "pro-annual" / "developer-mode"). Null for legacy. */
+        plan: string | null;
+        /** ISO-8601 wall-clock subscription renewal. Null for non-recurring/unknown. */
+        renews_at: string | null;
       }
     | {
         error: string;
@@ -79,7 +83,9 @@ export async function redeemActivationToken(
       body: {
         checkout_id: record.checkoutId,
         customer_id: record.customerId,
-        license_key: record.licenseKey
+        license_key: record.licenseKey,
+        plan: record.plan ?? null,
+        renews_at: record.renewsAt ?? null
       }
     };
   }

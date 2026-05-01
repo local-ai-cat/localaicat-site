@@ -8,12 +8,13 @@ type CheckoutLookupOptions = {
   includeCustomerPortalUrl?: boolean;
   activationTokenStore?: ActivationTokenStore | null;
   /**
-   * True when the calling viewer has already set the per-checkout reveal
-   * cookie (i.e. they are the original browser that landed on /success).
-   * When false on the first call, callers should set the cookie before
-   * returning the response so the same browser stays authorized.
+   * Wall-clock time (ms) recorded in the per-browser reveal cookie's signed
+   * payload. `null` means the caller has no valid cookie yet — first visit.
+   * The route handler decodes the signed cookie and passes its issuedAt
+   * here; if absent, the lookup may still succeed during the first-visit
+   * grace and the route mints a fresh cookie on the response.
    */
-  viewerHasRevealCookie?: boolean;
+  cookieIssuedAt?: number | null;
 };
 
 type PolarCheckout = {
@@ -21,25 +22,57 @@ type PolarCheckout = {
   customer_id?: string;
   created_at?: string;
   modified_at?: string;
+  subscription_id?: string | null;
+  product_id?: string | null;
+};
+
+type PolarSubscription = {
+  id?: string;
+  current_period_end?: string | null;
+  recurring_interval?: "month" | "year" | string | null;
+  cancel_at_period_end?: boolean | null;
+  status?: string;
+  product_id?: string | null;
 };
 
 /**
- * Window during which the license key is exposed via the unauthenticated
- * /success?checkout_id=… URL.
+ * Maps a Polar subscription's `recurring_interval` to the plan slug the app
+ * understands. For one-time purchases (`developer-mode`) Polar doesn't
+ * create a subscription, so this only fires for recurring checkouts.
+ */
+function planSlugForInterval(
+  interval: PolarSubscription["recurring_interval"]
+): "pro-monthly" | "pro-annual" | null {
+  switch (interval) {
+  case "month": return "pro-monthly";
+  case "year": return "pro-annual";
+  default: return null;
+  }
+}
+
+/**
+ * Window during which the license key is exposed from the short-lived
+ * /success?checkout_id=... bearer URL.
  *
  * Three layers stacked:
  *  - Time gate (REVEAL_WINDOW_MS): anything older is hidden for everyone.
- *  - First-visit grace (FIRST_VISIT_GRACE_MS): right after checkout completes,
- *    we don't yet know which browser is the "original" one — Polar's redirect
- *    lands without our reveal cookie. During this short grace any caller
- *    receives the key AND gets the cookie set so subsequent requests are
- *    bound to that browser.
+ *  - First-visit grace (FIRST_VISIT_GRACE_MS): Polar's success redirect lands
+ *    without our reveal cookie. During this short grace the success URL can
+ *    receive the key and gets the cookie set for subsequent polling/reloads.
  *  - Cookie bind: after the grace expires, only the browser that received
- *    the cookie during the grace window can keep seeing the key. A URL
- *    shared elsewhere later → no reveal.
+ *    a valid signed cookie can keep seeing the key. A URL shared elsewhere
+ *    later gets no reveal.
  */
 export const REVEAL_WINDOW_MS = 30 * 60 * 1000;
 export const FIRST_VISIT_GRACE_MS = 5 * 60 * 1000;
+
+/**
+ * Hard ceiling measured from the checkout's immutable `created_at`. Even a
+ * holder of a freshly minted, valid cookie cannot extend the reveal past
+ * this — protects against a long-tail leak where someone shares the URL
+ * during the first-visit grace and then slowly drains keys over many days.
+ */
+export const ABSOLUTE_REVEAL_CEILING_MS = 24 * 60 * 60 * 1000;
 
 type PolarCustomerSession = {
   token?: string;
@@ -63,6 +96,10 @@ export type CheckoutSuccessState = {
   revealExpiresAt: string | null;
   /** Why a key is hidden, when applicable, for client-side messaging. */
   revealBlockedReason: "expired" | "cookie_required" | null;
+  /** Plan slug ("pro-monthly", "pro-annual", "developer-mode") or null for legacy/unknown. */
+  plan: string | null;
+  /** ISO-8601 wall-clock time at which the subscription renews. Null for non-recurring or unknown. */
+  renewsAt: string | null;
 };
 
 function isConfirmedCheckout(status: string | undefined) {
@@ -118,6 +155,23 @@ async function lookupGrantedLicenseKey(
   return activeKey?.key ?? null;
 }
 
+async function fetchSubscription(
+  subscriptionId: string,
+  adminKey: string,
+  apiBase: string
+): Promise<PolarSubscription | null> {
+  const response = await fetch(`${apiBase}/v1/subscriptions/${subscriptionId}`, {
+    headers: { Authorization: `Bearer ${adminKey}` },
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return (await response.json()) as PolarSubscription;
+}
+
 async function createCustomerSession(
   customerId: string,
   adminKey: string,
@@ -168,19 +222,41 @@ export async function resolveCheckoutSuccessState(
         activationToken: null,
         activationTokenExpiresAt: null,
         revealExpiresAt: null,
-        revealBlockedReason: null
+        revealBlockedReason: null,
+        plan: null,
+        renewsAt: null
       };
     }
 
     // ── Reveal gates ──────────────────────────────────────────────
-    // (1) Time gate: hide the key for everyone once the checkout is older
-    //     than REVEAL_WINDOW_MS — bounds blast radius of a leaked URL.
-    const checkoutTimestamp = Date.parse(
+    // The per-viewer reveal window is anchored to the cookie's signed
+    // `issuedAt` (immutable, can't be reopened by Polar updating the
+    // checkout). For viewers who don't yet have a cookie we fall back to
+    // `modified_at` to gate whether they're inside the first-visit grace.
+    // `created_at` is the immutable absolute upper bound so even cookie
+    // holders cannot extend the reveal indefinitely.
+    const checkoutModifiedAt = Date.parse(
       checkout.modified_at ?? checkout.created_at ?? ""
     );
-    const revealExpiry = Number.isFinite(checkoutTimestamp)
-      ? checkoutTimestamp + REVEAL_WINDOW_MS
+    const checkoutCreatedAt = Date.parse(checkout.created_at ?? "");
+    const absoluteExpiry = Number.isFinite(checkoutCreatedAt)
+      ? checkoutCreatedAt + ABSOLUTE_REVEAL_CEILING_MS
       : null;
+    const revealStartedAt =
+      typeof options.cookieIssuedAt === "number"
+        ? options.cookieIssuedAt
+        : Number.isFinite(checkoutModifiedAt)
+          ? checkoutModifiedAt
+          : null;
+    const perViewerExpiry =
+      revealStartedAt !== null ? revealStartedAt + REVEAL_WINDOW_MS : null;
+    const revealExpiry = (() => {
+      if (perViewerExpiry === null) return absoluteExpiry;
+      if (absoluteExpiry === null) return perViewerExpiry;
+      return Math.min(perViewerExpiry, absoluteExpiry);
+    })();
+
+    // (1) Time gate: hide the key for everyone once either bound passes.
     if (revealExpiry !== null && Date.now() > revealExpiry) {
       return {
         checkoutStatus,
@@ -190,18 +266,20 @@ export async function resolveCheckoutSuccessState(
         activationToken: null,
         activationTokenExpiresAt: null,
         revealExpiresAt: null,
-        revealBlockedReason: "expired"
+        revealBlockedReason: "expired",
+        plan: null,
+        renewsAt: null
       };
     }
 
-    // (2) Cookie gate: after the first-visit grace expires, only the
-    //     browser that has the reveal cookie keeps seeing the key. Within
-    //     the grace we treat any caller as the legitimate original visitor
-    //     and the route handler will set the cookie on the response.
-    const insideGrace = Number.isFinite(checkoutTimestamp)
-      ? Date.now() - checkoutTimestamp <= FIRST_VISIT_GRACE_MS
+    // (2) Cookie gate: after the first-visit grace expires, only viewers
+    //     with a verified cookie continue to see the key. Within the grace
+    //     the Polar success redirect is treated as a short-lived bearer URL
+    //     and the route handler will mint a signed cookie.
+    const insideGrace = Number.isFinite(checkoutModifiedAt)
+      ? Date.now() - checkoutModifiedAt <= FIRST_VISIT_GRACE_MS
       : false;
-    if (options.viewerHasRevealCookie === false && !insideGrace) {
+    if (options.cookieIssuedAt == null && !insideGrace) {
       return {
         checkoutStatus,
         customerId,
@@ -210,7 +288,9 @@ export async function resolveCheckoutSuccessState(
         activationToken: null,
         activationTokenExpiresAt: null,
         revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
-        revealBlockedReason: "cookie_required"
+        revealBlockedReason: "cookie_required",
+        plan: null,
+        renewsAt: null
       };
     }
 
@@ -218,11 +298,25 @@ export async function resolveCheckoutSuccessState(
     const licenseKey = customerSession?.token
       ? await lookupGrantedLicenseKey(customerSession.token, apiBase)
       : null;
+
+    // Resolve plan + renewal date from the underlying subscription, when one
+    // exists (recurring purchases only — one-time products like
+    // Developer Mode never produce a subscription on Polar).
+    let plan: string | null = null;
+    let renewsAt: string | null = null;
+    if (licenseKey && checkout.subscription_id) {
+      const subscription = await fetchSubscription(checkout.subscription_id, adminKey, apiBase);
+      plan = planSlugForInterval(subscription?.recurring_interval);
+      renewsAt = subscription?.current_period_end ?? null;
+    }
+
     const activationTokenRecord = licenseKey
       ? await issuePersistentActivationToken({
           checkoutId,
           customerId,
-          licenseKey
+          licenseKey,
+          plan,
+          renewsAt
         }, options.activationTokenStore)
       : null;
     const customerPortalUrl = options.includeCustomerPortalUrl === false
@@ -237,26 +331,11 @@ export async function resolveCheckoutSuccessState(
       activationToken: activationTokenRecord?.token ?? null,
       activationTokenExpiresAt: activationTokenRecord?.expiresAt.toISOString() ?? null,
       revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
-      revealBlockedReason: null
+      revealBlockedReason: null,
+      plan,
+      renewsAt
     };
   } catch {
     return null;
   }
-}
-
-/**
- * Stable cookie name for the per-checkout reveal binding. Hashing the
- * checkout id keeps cookies short and doesn't echo the id back in
- * Set-Cookie headers, which can be useful in logs.
- */
-export function revealCookieNameForCheckout(checkoutId: string): string {
-  // Lightweight FNV-1a hash; collisions are not a security concern here —
-  // the cookie is just a per-browser flag scoped by name. We just want
-  // something stable and short that varies with the checkout id.
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < checkoutId.length; i++) {
-    hash ^= checkoutId.charCodeAt(i);
-    hash = (hash + ((hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24))) >>> 0;
-  }
-  return `lacat_v1_${hash.toString(16)}`;
 }

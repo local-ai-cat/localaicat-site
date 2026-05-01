@@ -1,0 +1,81 @@
+name: Deploy Staging
+
+# Vercel auto-deploy via the GitHub integration is NOT wired up for the
+# localaicat-site-staging project, so pushes to the staging branch were
+# silently going nowhere. This workflow does the deploy explicitly.
+#
+# One-time setup required (only the token — IDs below are not secret):
+#   1. Create a Vercel access token at vercel.com/account/tokens
+#      (scope: full account; name "GH Actions — staging deploy")
+#   2. Add it as a repo secret:
+#        gh secret set VERCEL_TOKEN -R local-ai-cat/localaicat-site
+#   3. Push anything to staging and this workflow takes over.
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: team_7uzsygdbkRuhjIqBIAhNH3nl
+  VERCEL_PROJECT_ID: prj_kFvVJKcYuy33sFNDr2NTZs00nlyO
+
+jobs:
+  deploy:
+    name: Deploy to meow.localaicat.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Verify token is configured
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN secret is missing. See workflow header for setup."
+            exit 1
+          fi
+
+      - name: Pull Vercel environment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+
+      - name: Build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token "$VERCEL_TOKEN"
+
+      - name: Deploy
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN")
+          echo "deploy_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed to $DEPLOY_URL"
+          echo "Aliased to meow.localaicat.com"
+
+      - name: Smoke test
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          for attempt in 1 2 3 4 5; do
+            HTTP=$(curl -sS -o /dev/null -w "%{http_code}" "$DEPLOY_URL/" || echo "000")
+            if [ "$HTTP" = "200" ]; then
+              echo "Deployment serving HTTP 200"
+              exit 0
+            fi
+            echo "Attempt $attempt: HTTP $HTTP - retrying in 4s"
+            sleep 4
+          done
+          echo "::error::Deployment did not serve HTTP 200 after 5 attempts"
+          exit 1

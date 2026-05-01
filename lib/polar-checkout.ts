@@ -172,6 +172,40 @@ async function fetchSubscription(
   return (await response.json()) as PolarSubscription;
 }
 
+/**
+ * Fallback for the case where a confirmed checkout doesn't yet expose its
+ * `subscription_id` (Polar can return the checkout as confirmed before the
+ * subscription_id field propagates). Lists the customer's active
+ * subscriptions and picks the most recently updated one.
+ */
+async function fetchLatestSubscriptionForCustomer(
+  customerId: string,
+  adminKey: string,
+  apiBase: string
+): Promise<PolarSubscription | null> {
+  const url = `${apiBase}/v1/subscriptions/?customer_id=${encodeURIComponent(customerId)}&active=true&limit=5`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${adminKey}` },
+    cache: "no-store"
+  });
+  if (!response.ok) return null;
+  const payload = (await response.json()) as {
+    items?: PolarSubscription[];
+    result?: PolarSubscription[];
+  };
+  const items = payload.items ?? payload.result ?? [];
+  if (items.length === 0) return null;
+  // Most recent first by current_period_end (renewals get pushed forward).
+  return items
+    .slice()
+    .sort((left, right) => {
+      const leftEnd = Date.parse(left.current_period_end ?? "");
+      const rightEnd = Date.parse(right.current_period_end ?? "");
+      return (Number.isFinite(rightEnd) ? rightEnd : 0)
+        - (Number.isFinite(leftEnd) ? leftEnd : 0);
+    })[0];
+}
+
 async function createCustomerSession(
   customerId: string,
   adminKey: string,
@@ -302,10 +336,17 @@ export async function resolveCheckoutSuccessState(
     // Resolve plan + renewal date from the underlying subscription, when one
     // exists (recurring purchases only — one-time products like
     // Developer Mode never produce a subscription on Polar).
+    //
+    // Prefer the checkout's own `subscription_id` when populated, but fall
+    // back to listing the customer's active subscriptions because Polar
+    // sometimes confirms a checkout before that field is filled in.
     let plan: string | null = null;
     let renewsAt: string | null = null;
-    if (licenseKey && checkout.subscription_id) {
-      const subscription = await fetchSubscription(checkout.subscription_id, adminKey, apiBase);
+    if (licenseKey) {
+      const subscription = checkout.subscription_id
+        ? await fetchSubscription(checkout.subscription_id, adminKey, apiBase)
+          ?? await fetchLatestSubscriptionForCustomer(customerId, adminKey, apiBase)
+        : await fetchLatestSubscriptionForCustomer(customerId, adminKey, apiBase);
       plan = planSlugForInterval(subscription?.recurring_interval);
       renewsAt = subscription?.current_period_end ?? null;
     }

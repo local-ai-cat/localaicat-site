@@ -174,6 +174,69 @@ test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subsc
   });
 });
 
+test("resolveCheckoutSuccessState falls back to customer subscription list when checkout.subscription_id is null", async () => {
+  const store = createInMemoryActivationTokenStore();
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+  const renewsAt = "2027-04-01T00:00:00.000Z";
+
+  globalThis.fetch = async (input) => {
+    const url = input.toString();
+
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_no_subid") {
+      return Response.json({
+        status: "confirmed",
+        customer_id: "cust_no_subid",
+        // subscription_id intentionally omitted — Polar sometimes hasn't
+        // populated it yet at the moment the success page polls.
+        created_at: freshTimestamp,
+        modified_at: freshTimestamp
+      });
+    }
+
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      return Response.json({
+        token: "polar_cst_test",
+        customer_portal_url: "https://polar.sh/portal/session"
+      }, { status: 201 });
+    }
+
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=20") {
+      return Response.json({
+        items: [
+          {
+            key: "LOCALAI-PRO-ANNUAL",
+            status: "granted",
+            created_at: freshTimestamp
+          }
+        ]
+      });
+    }
+
+    if (url.startsWith("https://sandbox-api.polar.sh/v1/subscriptions/?customer_id=")) {
+      return Response.json({
+        items: [
+          {
+            id: "sub_recent",
+            recurring_interval: "year",
+            current_period_end: renewsAt,
+            cancel_at_period_end: false,
+            status: "active"
+          }
+        ]
+      });
+    }
+
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const state = await resolveCheckoutSuccessState("chk_no_subid", {
+    activationTokenStore: store
+  });
+
+  assert.equal(state?.plan, "pro-annual");
+  assert.equal(state?.renewsAt, renewsAt);
+});
+
 test("resolveCheckoutSuccessState redacts the license key after the reveal window expires", async () => {
   // The absolute ceiling is anchored to the checkout's immutable created_at
   // so even a viewer holding a freshly minted cookie cannot extend the

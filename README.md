@@ -2,6 +2,16 @@
 
 Next.js marketing and checkout site for the direct-download Local AI Chat path.
 
+## Related Repositories
+
+- **Private app source**: [local-ai-cat/Local-AI-Chat](https://github.com/local-ai-cat/Local-AI-Chat)
+- **Direct-download releases**: [localaicat-site releases](https://github.com/local-ai-cat/localaicat-site/releases/latest)
+- **Product website**: [localaicat.com](https://localaicat.com)
+
+This repository hosts the public website and release artifacts for the Outdoor
+direct-download channel. App source, Xcode project generation, and App Store
+release automation live in the private app repository.
+
 ## Stack
 
 - Next.js App Router

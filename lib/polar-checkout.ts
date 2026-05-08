@@ -1,4 +1,5 @@
-import { getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { getActivationTokenSecret, getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
 import {
   issuePersistentActivationToken,
   type ActivationTokenStore
@@ -73,6 +74,55 @@ export const FIRST_VISIT_GRACE_MS = 5 * 60 * 1000;
  * during the first-visit grace and then slowly drains keys over many days.
  */
 export const ABSOLUTE_REVEAL_CEILING_MS = 24 * 60 * 60 * 1000;
+
+const REVEAL_COOKIE_VERSION = "v1";
+
+function revealCookieSignature(checkoutId: string, issuedAt: number) {
+  const secret = getActivationTokenSecret();
+  if (!secret) return null;
+  return createHmac("sha256", secret)
+    .update(`${checkoutId}.${issuedAt}`)
+    .digest("base64url");
+}
+
+export function revealCookieNameForCheckout(checkoutId: string) {
+  const digest = createHash("sha256")
+    .update(checkoutId)
+    .digest("base64url")
+    .slice(0, 24);
+  return `lac_reveal_${digest}`;
+}
+
+export function issueRevealCookieValue(checkoutId: string, issuedAt = Date.now()) {
+  const signature = revealCookieSignature(checkoutId, issuedAt);
+  if (!signature) return null;
+  return `${REVEAL_COOKIE_VERSION}.${issuedAt}.${signature}`;
+}
+
+export function parseRevealCookieValue(checkoutId: string, value: string | undefined) {
+  if (!value) return null;
+  const [version, issuedAtString, signature] = value.split(".");
+  if (version !== REVEAL_COOKIE_VERSION || !issuedAtString || !signature) return null;
+
+  const issuedAt = Number(issuedAtString);
+  if (!Number.isFinite(issuedAt) || issuedAt <= 0 || issuedAt > Date.now() + 60_000) {
+    return null;
+  }
+
+  const expected = revealCookieSignature(checkoutId, issuedAt);
+  if (!expected) return null;
+
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (
+    actualBuffer.length !== expectedBuffer.length ||
+    !timingSafeEqual(actualBuffer, expectedBuffer)
+  ) {
+    return null;
+  }
+
+  return issuedAt;
+}
 
 type PolarCustomerSession = {
   token?: string;

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { activationTokenExpiresAt } from "../../../../lib/activation-tokens";
 import {
+  issueRevealCookieValue,
+  parseRevealCookieValue,
   REVEAL_WINDOW_MS,
   resolveCheckoutSuccessState,
   revealCookieNameForCheckout
@@ -18,11 +20,11 @@ export async function GET(
 ) {
   const { id } = await context.params;
   const cookieName = revealCookieNameForCheckout(id);
-  const viewerHasRevealCookie = request.cookies.has(cookieName);
+  const cookieIssuedAt = parseRevealCookieValue(id, request.cookies.get(cookieName)?.value);
 
   const state = await resolveCheckoutSuccessState(id, {
     includeCustomerPortalUrl: false,
-    viewerHasRevealCookie
+    cookieIssuedAt
   });
 
   if (!state) {
@@ -88,16 +90,19 @@ export async function GET(
 
   // Bind the reveal to this browser. Subsequent requests from a different
   // browser (or incognito) will lack this cookie and get 403'd above.
-  if (!viewerHasRevealCookie) {
-    response.cookies.set({
-      name: cookieName,
-      value: "1",
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: Math.floor(REVEAL_WINDOW_MS / 1000),
-      path: "/"
-    });
+  if (cookieIssuedAt == null) {
+    const cookieValue = issueRevealCookieValue(id);
+    if (cookieValue) {
+      response.cookies.set({
+        name: cookieName,
+        value: cookieValue,
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        maxAge: Math.floor(REVEAL_WINDOW_MS / 1000),
+        path: "/"
+      });
+    }
   }
 
   return response;

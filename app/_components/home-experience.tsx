@@ -127,20 +127,33 @@ export function HomeExperience() {
   );
 
   useEffect(() => {
-    ["/assets/cat-personal.png", "/assets/cat-business.png", "/assets/cat.webp"].forEach(
-      (src) => {
-        const img = new window.Image();
-        img.src = src;
-      }
-    );
+    [
+      "/assets/cat-personal-favicon-32.png",
+      "/assets/cat-personal-favicon-180.png",
+      "/assets/cat-personal-favicon-192.png",
+      "/assets/cat-business-favicon-32.png",
+      "/assets/cat-business-favicon-180.png",
+      "/assets/cat-business-favicon-192.png",
+      "/assets/cat.webp"
+    ].forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
   }, []);
 
   useEffect(() => {
     persistSiteMode(mode);
-    const favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
-    if (favicon) {
-      favicon.href = mode === "business" ? "/assets/cat-business.png" : "/assets/cat-personal.png";
-    }
+    const stem = mode === "business" ? "cat-business-favicon" : "cat-personal-favicon";
+    const targets: Array<[string, string]> = [
+      ["link[rel='icon']", `/assets/${stem}-32.png`],
+      ["link[rel='shortcut icon']", `/assets/${stem}-32.png`],
+      ["link[rel='apple-touch-icon']", `/assets/${stem}-180.png`]
+    ];
+    targets.forEach(([selector, href]) => {
+      document.querySelectorAll<HTMLLinkElement>(selector).forEach((link) => {
+        link.href = href;
+      });
+    });
   }, [mode]);
 
   useEffect(() => {

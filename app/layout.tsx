@@ -25,7 +25,12 @@ export const metadata: Metadata = {
   description:
     "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
   icons: {
-    icon: "/assets/cat-business.png"
+    icon: [
+      { url: "/assets/cat-business-favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/assets/cat-business-favicon-192.png", type: "image/png", sizes: "192x192" }
+    ],
+    shortcut: [{ url: "/assets/cat-business-favicon-32.png", type: "image/png" }],
+    apple: [{ url: "/assets/cat-business-favicon-180.png", sizes: "180x180", type: "image/png" }]
   },
   other: {
     "theme-color": "#090909"

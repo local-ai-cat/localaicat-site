@@ -51,6 +51,14 @@ print_banner() {
   printf "\\n"
 }
 
+print_done_banner() {
+  printf "\\n"
+  printf "  %s/%s\\\\_%s/%s\\\\%s\\n" "$PINK" "$BLUE" "$PINK" "$BLUE" "$RESET"
+  printf " %s(%s %s^%s.%s^ %s)%s %sInstalled! Launching...%s\\n" "$TEXT" "$BLUE" "$TEXT" "$BLUE" "$TEXT" "$BLUE" "$RESET" "$TEXT" "$RESET"
+  printf "  %s>%s %s^%s %s<%s  %smeow~%s\\n" "$CYAN" "$RESET" "$TEXT" "$RESET" "$CYAN" "$RESET" "$PINK" "$RESET"
+  printf "\\n"
+}
+
 cleanup() {
   rm -rf "$TMP_DIR"
   /usr/bin/hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
@@ -94,11 +102,7 @@ echo "==> Installing to $TARGET_DIR... *knocks things off desk*"
 /bin/cp -R "$APP_PATH" "$DESTINATION_PATH"
 /usr/bin/xattr -cr "$DESTINATION_PATH"
 
-echo ""
-echo "  /\\\\_/\\\\  "
-echo " ( ^.^ ) Installed! Launching..."
-echo "  > ^ <  meow~"
-echo ""
+print_done_banner
 /usr/bin/open "$DESTINATION_PATH"
 `;
 }

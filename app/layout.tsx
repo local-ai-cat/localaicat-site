@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { getSiteUrl } from "../lib/env";
@@ -62,10 +63,13 @@ export default function RootLayout({
     <html className={`${displayFont.variable} ${bodyFont.variable}`} lang="en">
       <head>
         <meta name="apple-itunes-app" content="app-id=6741502386" />
+        <link rel="preconnect" href="https://app.chatwoot.com" />
+        <link rel="dns-prefetch" href="https://app.chatwoot.com" />
       </head>
       <body>
         {children}
         <SpeedInsights />
+        <Script src="/js/cookie-consent.js" strategy="afterInteractive" />
       </body>
     </html>
   );

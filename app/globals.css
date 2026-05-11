@@ -1568,12 +1568,12 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-dim);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   white-space: nowrap;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
 
 .copyButton {
@@ -1595,6 +1595,34 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .copyButton:hover {
   background: #2a2a2a;
   color: var(--text);
+}
+
+@media (max-width: 540px) {
+  .commandBlockWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .commandBlock {
+    padding: 12px 14px;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .commandBlock code {
+    font-size: 12px;
+  }
+
+  .copyButton {
+    position: static;
+    transform: none;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
 }
 
 .comingSoon {

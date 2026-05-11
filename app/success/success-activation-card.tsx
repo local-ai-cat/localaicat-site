@@ -74,9 +74,10 @@ export function SuccessActivationCard({
   // The deeplink now embeds the license key directly. Token-based
   // activation is still supported by the API but no longer used here —
   // see lib/license-activation.ts for the deprecation note.
+  const canUseLicenseKey = Boolean(licenseKey && !revealBlockedReason);
   const activationLink = useMemo(
-    () => (licenseKey ? activationLinkForLicenseKey(licenseKey) : null),
-    [licenseKey]
+    () => (canUseLicenseKey && licenseKey ? activationLinkForLicenseKey(licenseKey) : null),
+    [canUseLicenseKey, licenseKey]
   );
   const statusTone =
     tokenStatus === "claimed"
@@ -206,6 +207,8 @@ export function SuccessActivationCard({
           // the dedicated copy.
           const data = (await response.json().catch(() => ({}))) as CheckoutActivationResponse;
           setRevealBlockedReason(data.reveal_blocked_reason ?? (response.status === 410 ? "expired" : "cookie_required"));
+          setLicenseKey(null);
+          setActivationToken(null);
           if (data.reveal_expires_at) {
             setRevealExpiresAt(data.reveal_expires_at);
           }
@@ -322,6 +325,8 @@ export function SuccessActivationCard({
       setRevealRemainingSeconds(remaining);
       if (remaining === 0) {
         setRevealBlockedReason("expired");
+        setLicenseKey(null);
+        setActivationToken(null);
       }
     };
     tick();
@@ -449,7 +454,7 @@ export function SuccessActivationCard({
         </p>
       ) : null}
 
-      {licenseKey ? (
+      {canUseLicenseKey && licenseKey ? (
         <>
           <span className="successLicenseLabel">License key</span>
           <div className="commandBlockWrap">

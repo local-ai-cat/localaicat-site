@@ -4,9 +4,13 @@ import {
   issueRevealCookieValue,
   parseRevealCookieValue,
   REVEAL_WINDOW_MS,
-  resolveCheckoutSuccessState,
-  revealCookieNameForCheckout
+  resolveCheckoutSuccessState
 } from "../../../../lib/polar-checkout";
+import {
+  mintRevealCookieValue,
+  revealCookieName,
+  verifyRevealCookieValue
+} from "../../../../lib/reveal-cookie";
 
 export const runtime = "nodejs";
 
@@ -14,13 +18,36 @@ const noStoreHeaders = {
   "Cache-Control": "private, no-store, max-age=0"
 };
 
+function setRevealCookie(
+  response: NextResponse,
+  checkoutId: string,
+  cookieName: string,
+  hadValidCookie: boolean
+) {
+  // Bind every confirmed-checkout response to this browser, including the
+  // transient "license not yet issued" path so a polling client gets the
+  // cookie before the first-visit grace expires.
+  if (hadValidCookie) return;
+  response.cookies.set({
+    name: cookieName,
+    value: mintRevealCookieValue(checkoutId),
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: Math.floor(REVEAL_WINDOW_MS / 1000),
+    path: "/"
+  });
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  const cookieName = revealCookieNameForCheckout(id);
-  const cookieIssuedAt = parseRevealCookieValue(id, request.cookies.get(cookieName)?.value);
+  const cookieName = revealCookieName(id);
+  const cookieValue = request.cookies.get(cookieName)?.value;
+  const verified = verifyRevealCookieValue(id, cookieValue);
+  const cookieIssuedAt = verified?.issuedAt ?? null;
 
   const state = await resolveCheckoutSuccessState(id, {
     includeCustomerPortalUrl: false,
@@ -70,10 +97,15 @@ export async function GET(
   }
 
   if (!state.licenseKey) {
-    return NextResponse.json(
+    // License hasn't been issued by Polar yet (still propagating). Still
+    // bind this browser so the polling client doesn't fall out of the
+    // grace window unauthenticated.
+    const transient = NextResponse.json(
       { error: "No active license keys found for this purchase." },
       { status: 404, headers: noStoreHeaders }
     );
+    setRevealCookie(transient, id, cookieName, verified !== null);
+    return transient;
   }
 
   const response = NextResponse.json(
@@ -88,22 +120,6 @@ export async function GET(
     { headers: noStoreHeaders }
   );
 
-  // Bind the reveal to this browser. Subsequent requests from a different
-  // browser (or incognito) will lack this cookie and get 403'd above.
-  if (cookieIssuedAt == null) {
-    const cookieValue = issueRevealCookieValue(id);
-    if (cookieValue) {
-      response.cookies.set({
-        name: cookieName,
-        value: cookieValue,
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        maxAge: Math.floor(REVEAL_WINDOW_MS / 1000),
-        path: "/"
-      });
-    }
-  }
-
+  setRevealCookie(response, id, cookieName, verified !== null);
   return response;
 }

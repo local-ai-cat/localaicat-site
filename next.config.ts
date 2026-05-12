@@ -5,11 +5,14 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https:",
+      "script-src 'self' 'unsafe-inline' https://app.chatwoot.com",
+      "style-src 'self' 'unsafe-inline' https://app.chatwoot.com",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https://app.chatwoot.com",
+      "connect-src 'self' https: wss://app.chatwoot.com",
+      "frame-src 'self' https://app.chatwoot.com",
+      "media-src 'self' blob: https:",
+      "worker-src 'self' blob:",
       "frame-ancestors 'none'"
     ].join("; ")
   },

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /screenshots
 
 Sitemap: https://localaicat.com/sitemap.xml

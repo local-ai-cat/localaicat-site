@@ -2472,3 +2472,277 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Screenshot composer (internal /screenshots) ─── */
+
+.screenshotTool {
+  width: min(var(--max-width), 100%);
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+.screenshotToolHero {
+  margin-bottom: 40px;
+}
+
+.screenshotToolHero .contentTitle {
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.05;
+  margin: 8px 0 16px;
+}
+
+.screenshotToolHero .contentIntro {
+  color: var(--text-dim);
+  max-width: 56ch;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.screenshotToolBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 24px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 32px;
+  position: sticky;
+  top: 72px;
+  background: rgba(6, 6, 6, 0.92);
+  backdrop-filter: blur(14px);
+  z-index: 10;
+}
+
+.screenshotTabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.screenshotTab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+.screenshotTab:hover {
+  color: var(--text);
+}
+
+.screenshotTabActive {
+  background: var(--text);
+  color: #060606;
+}
+
+.screenshotActions {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.screenshotBtn {
+  appearance: none;
+  background: var(--accent);
+  color: #1a1308;
+  border: 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.screenshotBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.screenshotBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.screenshotBtnGhost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.screenshotGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 28px;
+}
+
+.screenshotSlot {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.screenshotSlotHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.screenshotSlotIndex {
+  font-family: var(--font-display), serif;
+  font-size: 18px;
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.screenshotSlotName {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.screenshotIconBtn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-faint);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.screenshotIconBtn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.screenshotPreview {
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--line);
+}
+
+.screenshotPreview canvas {
+  display: block;
+}
+
+.screenshotDrop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.screenshotDrop:hover,
+.screenshotDropActive {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.screenshotFieldGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.screenshotField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.screenshotField input[type="text"],
+.screenshotField select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.screenshotField input[type="text"]:focus,
+.screenshotField select:focus {
+  border-color: var(--accent);
+}
+
+.screenshotField input[type="range"] {
+  accent-color: var(--accent);
+  width: 100%;
+}
+
+.screenshotBgRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.screenshotBgChip {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+  background-size: cover;
+  outline: none;
+}
+
+.screenshotBgChipActive {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(232, 213, 176, 0.25);
+}
+
+@media (max-width: 720px) {
+  .screenshotToolBar {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .screenshotActions {
+    justify-content: stretch;
+  }
+
+  .screenshotActions .screenshotBtn,
+  .screenshotActions .screenshotBtnGhost {
+    flex: 1;
+  }
+}

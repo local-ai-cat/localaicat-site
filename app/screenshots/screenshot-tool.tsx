@@ -470,8 +470,8 @@ export function ScreenshotTool() {
   };
 
   const previewScale = useMemo(() => {
-    // Display preview at a manageable width.
-    const target = device === "iphone" ? 220 : 360;
+    // Display preview at a comfortable size for full-width slot cards.
+    const target = device === "iphone" ? 360 : 720;
     return target / currentSpec.width;
   }, [currentSpec.width, device]);
 
@@ -605,145 +605,149 @@ function SlotCard({
         ) : null}
       </div>
 
-      <div
-        className="screenshotPreview"
-        style={{ width: displayW, height: displayH }}
-      >
-        <canvas
-          ref={canvasRef}
+      <div className="screenshotSlotMain">
+        <div
+          className="screenshotPreview"
           style={{ width: displayW, height: displayH }}
-        />
-      </div>
+        >
+          <canvas
+            ref={canvasRef}
+            style={{ width: displayW, height: displayH }}
+          />
+        </div>
 
-      <label
-        className={
-          dragOver
-            ? "screenshotDrop screenshotDropActive"
-            : "screenshotDrop"
-        }
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleInput}
-          hidden
-        />
-        <span>
-          {slot.image ? "Replace image" : "Drop or choose image"}
-        </span>
-      </label>
-
-      <div className="screenshotFieldGroup">
-        <label className="screenshotField">
-          <span>Title above</span>
+        <label
+          className={
+            dragOver
+              ? "screenshotDrop screenshotDropActive"
+              : "screenshotDrop"
+          }
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+        >
           <input
-            type="text"
-            value={slot.titleAbove}
-            placeholder="Optional headline"
-            onChange={(e) => onUpdate({ titleAbove: e.target.value })}
+            type="file"
+            accept="image/*"
+            onChange={handleInput}
+            hidden
           />
-        </label>
-        <label className="screenshotField">
-          <span>Subtitle below</span>
-          <input
-            type="text"
-            value={slot.titleBelow}
-            placeholder="Optional caption"
-            onChange={(e) => onUpdate({ titleBelow: e.target.value })}
-          />
+          <span>
+            {slot.image ? "Replace image" : "Drop or choose image"}
+          </span>
         </label>
       </div>
 
-      <div className="screenshotFieldGroup">
-        <label className="screenshotField">
-          <span>Scale ({Math.round(slot.scale * 100)}%)</span>
-          <input
-            type="range"
-            min={0.4}
-            max={1}
-            step={0.01}
-            value={slot.scale}
-            onChange={(e) =>
-              onUpdate({ scale: Number(e.target.value) })
-            }
-          />
-        </label>
-        <label className="screenshotField">
-          <span>Vertical ({Math.round(slot.verticalOffset * 100)}%)</span>
-          <input
-            type="range"
-            min={-0.2}
-            max={0.2}
-            step={0.01}
-            value={slot.verticalOffset}
-            onChange={(e) =>
-              onUpdate({ verticalOffset: Number(e.target.value) })
-            }
-          />
-        </label>
-      </div>
+      <div className="screenshotSlotControls">
+        <div className="screenshotFieldGroup">
+          <label className="screenshotField">
+            <span>Title above</span>
+            <input
+              type="text"
+              value={slot.titleAbove}
+              placeholder="Optional headline"
+              onChange={(e) => onUpdate({ titleAbove: e.target.value })}
+            />
+          </label>
+          <label className="screenshotField">
+            <span>Subtitle below</span>
+            <input
+              type="text"
+              value={slot.titleBelow}
+              placeholder="Optional caption"
+              onChange={(e) => onUpdate({ titleBelow: e.target.value })}
+            />
+          </label>
+        </div>
 
-      <div className="screenshotFieldGroup">
-        <label className="screenshotField">
-          <span>Frame</span>
-          <select
-            value={slot.bezel}
-            onChange={(e) =>
-              onUpdate({ bezel: e.target.value as Slot["bezel"] })
-            }
-          >
-            <option value="rounded">Rounded corners</option>
-            <option value="frame">Rounded + bezel</option>
-            <option value="none">Edge to edge</option>
-          </select>
-        </label>
-        <label className="screenshotField">
-          <span>Text colour</span>
-          <select
-            value={slot.textColor}
-            onChange={(e) =>
-              onUpdate({ textColor: e.target.value as Slot["textColor"] })
-            }
-          >
-            <option value="light">Light text</option>
-            <option value="dark">Dark text</option>
-          </select>
-        </label>
-      </div>
+        <div className="screenshotFieldGroup">
+          <label className="screenshotField">
+            <span>Scale ({Math.round(slot.scale * 100)}%)</span>
+            <input
+              type="range"
+              min={0.4}
+              max={1}
+              step={0.01}
+              value={slot.scale}
+              onChange={(e) =>
+                onUpdate({ scale: Number(e.target.value) })
+              }
+            />
+          </label>
+          <label className="screenshotField">
+            <span>Vertical ({Math.round(slot.verticalOffset * 100)}%)</span>
+            <input
+              type="range"
+              min={-0.2}
+              max={0.2}
+              step={0.01}
+              value={slot.verticalOffset}
+              onChange={(e) =>
+                onUpdate({ verticalOffset: Number(e.target.value) })
+              }
+            />
+          </label>
+        </div>
 
-      <div className="screenshotBgRow" role="radiogroup" aria-label="Background">
-        {BACKGROUNDS.map((bg) => (
-          <button
-            key={bg.id}
-            type="button"
-            role="radio"
-            aria-checked={slot.bg === bg.id}
-            className={
-              slot.bg === bg.id
-                ? "screenshotBgChip screenshotBgChipActive"
-                : "screenshotBgChip"
-            }
-            style={{ background: bg.cssPreview }}
-            onClick={() => onUpdate({ bg: bg.id })}
-            title={bg.label}
-          />
-        ))}
-      </div>
+        <div className="screenshotFieldGroup">
+          <label className="screenshotField">
+            <span>Frame</span>
+            <select
+              value={slot.bezel}
+              onChange={(e) =>
+                onUpdate({ bezel: e.target.value as Slot["bezel"] })
+              }
+            >
+              <option value="rounded">Rounded corners</option>
+              <option value="frame">Rounded + bezel</option>
+              <option value="none">Edge to edge</option>
+            </select>
+          </label>
+          <label className="screenshotField">
+            <span>Text colour</span>
+            <select
+              value={slot.textColor}
+              onChange={(e) =>
+                onUpdate({ textColor: e.target.value as Slot["textColor"] })
+              }
+            >
+              <option value="light">Light text</option>
+              <option value="dark">Dark text</option>
+            </select>
+          </label>
+        </div>
 
-      <button
-        type="button"
-        className="screenshotBtn"
-        onClick={onExport}
-        disabled={!slot.image || busy}
-      >
-        {busy ? "Exporting…" : `Export ${spec.width} × ${spec.height}`}
-      </button>
+        <div className="screenshotBgRow" role="radiogroup" aria-label="Background">
+          {BACKGROUNDS.map((bg) => (
+            <button
+              key={bg.id}
+              type="button"
+              role="radio"
+              aria-checked={slot.bg === bg.id}
+              className={
+                slot.bg === bg.id
+                  ? "screenshotBgChip screenshotBgChipActive"
+                  : "screenshotBgChip"
+              }
+              style={{ background: bg.cssPreview }}
+              onClick={() => onUpdate({ bg: bg.id })}
+              title={bg.label}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          className="screenshotBtn"
+          onClick={onExport}
+          disabled={!slot.image || busy}
+        >
+          {busy ? "Exporting…" : `Export ${spec.width} × ${spec.height}`}
+        </button>
+      </div>
     </article>
   );
 }

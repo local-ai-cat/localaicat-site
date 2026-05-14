@@ -2580,8 +2580,8 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 }
 
 .screenshotGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 28px;
 }
 
@@ -2589,10 +2589,34 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 18px;
+  padding: 28px;
+  display: grid;
+  grid-template-columns: minmax(280px, auto) 1fr;
+  grid-template-areas:
+    "head head"
+    "main controls";
+  gap: 24px 32px;
+  align-items: start;
+}
+
+.screenshotSlotHead {
+  grid-area: head;
+}
+
+.screenshotSlotMain {
+  grid-area: main;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
+}
+
+.screenshotSlotControls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
 .screenshotSlotHead {
@@ -2728,6 +2752,17 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .screenshotBgChipActive {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(232, 213, 176, 0.25);
+}
+
+@media (max-width: 900px) {
+  .screenshotSlot {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "head"
+      "main"
+      "controls";
+    padding: 20px;
+  }
 }
 
 @media (max-width: 720px) {

@@ -2745,6 +2745,9 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   display: flex;
   flex-direction: column;
   gap: 28px;
+  max-width: 1120px;
+  margin-inline: auto;
+  width: 100%;
 }
 
 .screenshotSlot {
@@ -2759,6 +2762,20 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
     "main controls";
   gap: 24px 32px;
   align-items: start;
+}
+
+/* Mac is landscape-aspect, so stack the preview above the controls
+   instead of letting a wide canvas float next to a tall control column. */
+.screenshotSlot[data-device="mac"] {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "head"
+    "main"
+    "controls";
+}
+
+.screenshotSlot[data-device="mac"] .screenshotPreview {
+  margin-inline: auto;
 }
 
 .screenshotSlotHead {

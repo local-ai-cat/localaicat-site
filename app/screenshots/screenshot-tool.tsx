@@ -839,7 +839,8 @@ export function ScreenshotTool() {
 
   const previewScale = useMemo(() => {
     // Display preview at a comfortable size for full-width slot cards.
-    const target = device === "iphone" ? 360 : 720;
+    // Mac stacks above its controls so it can be wider; iPhone sits beside them.
+    const target = device === "iphone" ? 360 : 960;
     return target / currentSpec.width;
   }, [currentSpec.width, device]);
 
@@ -1051,7 +1052,7 @@ function SlotCard({
   const displayH = Math.round(spec.height * previewScale);
 
   return (
-    <article className="screenshotSlot">
+    <article className="screenshotSlot" data-device={spec.key}>
       <div className="screenshotSlotHead">
         <span className="screenshotSlotIndex">
           {String(index + 1).padStart(2, "0")}

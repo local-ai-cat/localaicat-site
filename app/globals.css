@@ -2514,6 +2514,168 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   z-index: 10;
 }
 
+.screenshotToolBody {
+  position: relative;
+}
+
+.screenshotToolBodyDropActive::before {
+  content: "Drop to import session";
+  position: fixed;
+  inset: 16px;
+  border: 2px dashed rgba(232, 213, 176, 0.6);
+  border-radius: 24px;
+  background: rgba(6, 6, 6, 0.72);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+
+.screenshotSessionBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.screenshotSessionHint {
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 60ch;
+}
+
+.screenshotSessionHint code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.screenshotSessionActions {
+  display: inline-flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.screenshotLocales {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.screenshotLocaleChipWrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.screenshotLocaleChip {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.screenshotLocaleChip:hover {
+  color: var(--text);
+}
+
+.screenshotLocaleChipActive {
+  background: var(--accent);
+  color: #1a1308;
+}
+
+.screenshotLocaleChipRemove {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  padding: 0 6px 0 2px;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.screenshotLocaleChipRemove:hover {
+  color: #ff8a8a;
+}
+
+.screenshotLocaleAdd {
+  appearance: none;
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--text-dim);
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.screenshotLocaleAdd:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.screenshotSlotNameField {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.screenshotSlotNameField input {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  padding: 6px 10px;
+  width: 100%;
+}
+
+.screenshotSlotNameField input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.screenshotSlotNameHint {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .screenshotTabs {
   display: inline-flex;
   gap: 4px;

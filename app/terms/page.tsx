@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 
@@ -16,6 +17,15 @@ export default function TermsPage() {
         kicker="Terms"
         meta="Last updated: March 2026"
         title="Terms of Service"
+        callout={
+          <p>
+            Lire cette page en{" "}
+            <Link className="textLink" href="/terms/fr">
+              français
+            </Link>
+            .
+          </p>
+        }
       >
         <div className="contentGrid">
           <section className="contentCard">

@@ -18,11 +18,20 @@ export default function PrivacyPage() {
         meta="Last updated: March 2026"
         title="Privacy Policy"
         callout={
-          <p>
-            <strong>TL;DR:</strong> We do not collect, store, or transmit your
-            conversations. Your data stays on your device unless you explicitly
-            choose an optional Apple-provided service.
-          </p>
+          <>
+            <p>
+              <strong>TL;DR:</strong> We do not collect, store, or transmit your
+              conversations. Your data stays on your device unless you
+              explicitly choose an optional Apple-provided service.
+            </p>
+            <p>
+              Lire cette page en{" "}
+              <Link className="textLink" href="/privacy/fr">
+                français
+              </Link>
+              .
+            </p>
+          </>
         }
       >
         <section className="contentCard">

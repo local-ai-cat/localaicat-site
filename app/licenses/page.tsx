@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 
@@ -9,6 +10,14 @@ export const metadata: Metadata = {
 };
 
 const packages = [
+  {
+    name: "Citadel",
+    repo: "https://github.com/orlandos-nl/Citadel"
+  },
+  {
+    name: "Jinja (swift-jinja)",
+    repo: "https://github.com/huggingface/swift-jinja.git"
+  },
   {
     name: "MenuBarExtraAccess",
     repo: "https://github.com/orchetect/MenuBarExtraAccess"
@@ -62,16 +71,16 @@ const packages = [
     repo: "https://github.com/apple/swift-crypto.git"
   },
   {
-    name: "Jinja (swift-jinja)",
-    repo: "https://github.com/huggingface/swift-jinja.git"
-  },
-  {
     name: "swift-markdown-ui",
     repo: "https://github.com/gonzalezreal/swift-markdown-ui"
   },
   {
     name: "swift-numerics",
     repo: "https://github.com/apple/swift-numerics"
+  },
+  {
+    name: "SwiftTerm",
+    repo: "https://github.com/migueldeicaza/SwiftTerm"
   },
   {
     name: "swift-transformers",
@@ -86,6 +95,77 @@ const packages = [
     repo: "https://github.com/ibireme/yyjson.git"
   }
 ] as const;
+
+const vendoredSource = [
+  {
+    name: "RoyalVNCKit",
+    detail:
+      "Swift VNC client by Royal Apps, vendored in-tree and built as part of the app. MIT License — Copyright (c) 2025 Royal Apps.",
+    repo: "https://github.com/royalapplications/royalvnc"
+  },
+  {
+    name: "CryptoSwift",
+    detail: "Marcin Krzyżanowski. Dependency of RoyalVNCKit.",
+    repo: "https://github.com/krzyzanowskim/CryptoSwift"
+  },
+  {
+    name: "zlib",
+    detail:
+      "Jean-loup Gailly & Mark Adler. zlib license. Dependency of RoyalVNCKit.",
+    repo: "https://github.com/madler/zlib"
+  },
+  {
+    name: "stb (Cstb)",
+    detail:
+      "Sean Barrett, packaged by Thomas Roughton. Public domain. Dependency of RoyalVNCKit.",
+    repo: "https://github.com/troughton/Cstb"
+  },
+  {
+    name: "D3DES",
+    detail:
+      "Richard Outerbridge. Public domain. Used by RoyalVNCKit for Apple Remote Desktop authentication.",
+    repo: null as string | null
+  }
+] as const;
+
+const codeContributions: ReadonlyArray<{
+  name: string;
+  detail: ReactNode;
+  repo: string;
+}> = [
+  {
+    name: "Closed-Display Mode (Clamshell Sleep Prevention)",
+    detail: "Based on the technique by Phil Dennis-Jordan.",
+    repo: "https://stackoverflow.com/questions/59594123"
+  },
+  {
+    name: "Window Management",
+    detail:
+      "Window snapping behaviour inspired by Rectangle — MIT License, Copyright (c) 2019 Ryan Hanson.",
+    repo: "https://github.com/rxhanson/Rectangle"
+  },
+  {
+    name: "Terminal 3D",
+    detail: (
+      <>
+        Our Terminal 3D mode was inspired by{" "}
+        <a className="textLink" href="https://github.com/orhun/ratty">
+          Ratty
+        </a>
+        , a GPU-rendered terminal with inline 3D graphics by Orhun Parmaksız —{" "}
+        <a
+          className="textLink"
+          href="https://github.com/orhun/ratty/blob/main/LICENSE"
+        >
+          MIT License
+        </a>
+        . Their rat chases pixels in a terminal; our cat watches it happen from
+        RealityKit. Thanks for the spark.
+      </>
+    ),
+    repo: "https://github.com/orhun/ratty"
+  }
+];
 
 export default function LicensesPage() {
   return (
@@ -104,6 +184,53 @@ export default function LicensesPage() {
                 <h3>{item.name}</h3>
                 <p>
                   Upstream repository:{" "}
+                  <a className="textLink" href={item.repo}>
+                    {item.repo}
+                  </a>
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="contentCard">
+          <h2>Vendored source</h2>
+          <p>
+            These projects are not consumed via Swift Package Manager — their
+            source ships in-tree as part of the Local AI Cat binary, so we
+            preserve their notices here.
+          </p>
+          <div className="licenseList">
+            {vendoredSource.map((item) => (
+              <div className="licenseItem" key={item.name}>
+                <h3>{item.name}</h3>
+                <p>{item.detail}</p>
+                {item.repo && (
+                  <p>
+                    Upstream:{" "}
+                    <a className="textLink" href={item.repo}>
+                      {item.repo}
+                    </a>
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="contentCard">
+          <h2>Code contributions</h2>
+          <p>
+            Specific techniques and snippets adopted from other projects, with
+            attribution to the original authors.
+          </p>
+          <div className="licenseList">
+            {codeContributions.map((item) => (
+              <div className="licenseItem" key={item.name}>
+                <h3>{item.name}</h3>
+                <p>{item.detail}</p>
+                <p>
+                  Reference:{" "}
                   <a className="textLink" href={item.repo}>
                     {item.repo}
                   </a>

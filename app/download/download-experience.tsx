@@ -124,7 +124,14 @@ export function DownloadExperience({
           limits some desktop features such as controlling other app windows.
         </p>
         <div className="downloadPathActions">
-          <a href={appStoreUrl}>
+          <a href={appStoreUrl} aria-label="Download on the App Store for iPhone and iPad">
+            <img
+              src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
+              alt="Download on the App Store (iPhone & iPad)"
+              style={{ height: 48 }}
+            />
+          </a>
+          <a href={appStoreUrl} aria-label="Download on the Mac App Store">
             <img
               src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/en-us?size=250x83"
               alt="Download on the Mac App Store"

@@ -18,7 +18,6 @@ function getInitialMode(): Mode {
 
 export function HomeExperience() {
   const [mode, setMode] = useState<Mode>(getInitialMode);
-  const [personalPath, setPersonalPath] = useState<"direct" | "appstore">("appstore");
   const [businessPath, setBusinessPath] = useState<"team" | "enterprise">("team");
   const [detailsVisible, setDetailsVisible] = useState(false);
   const detailsRef = useRef<HTMLElement | null>(null);
@@ -289,62 +288,48 @@ export function HomeExperience() {
         </div>
 
         {mode === "personal" ? (
-          <div className="toggleCardSection sectionChildReveal">
-            <DragToggle
-              labels={["Indoor Cat", "Outdoor Cat"]}
-              onChange={setPersonalPath}
-              options={["appstore", "direct"] as const}
-              size="compact"
-              value={personalPath}
-            />
-            <div className="toggleCardPanel">
-              {personalPath === "appstore" ? (
-                <article className="toggleCard" key="appstore">
-                  <p className="dualCardEyebrow">Indoor Cat</p>
-                  <h3>App Store for iPhone, iPad, and Mac.</h3>
-                  <p className="dualCardBody">
-                    Apple billing and the simplest install path. On Mac, sandboxing limits some desktop features — for the full macOS experience, we recommend{" "}
-                    <button
-                      className="inlineToggleLink"
-                      onClick={() => setPersonalPath("direct")}
-                      type="button"
-                    >
-                      Outdoor Cat
-                    </button>.
-                  </p>
-                  <ul className="dualCardList">
-                    <li>iPhone, iPad, and Mac</li>
-                    <li>Apple billing and restore flow</li>
-                    <li>Pro: £4/mo or £40/yr</li>
-                    <li>Developer Mode: £10 one-time</li>
-                    <li>Best for iPhone &amp; iPad</li>
-                  </ul>
-                  <div className="dualCardActions">
-                    <Link className="planButton" href="/download/app-store">App Store</Link>
-                    <Link className="secondaryButton" href="/pricing/app-store">Pricing</Link>
-                  </div>
-                </article>
-              ) : (
-                <article className="toggleCard" key="direct">
-                  <p className="dualCardEyebrow">Outdoor Cat</p>
-                  <h3>Direct download for Mac.</h3>
-                  <p className="dualCardBody">
-                    Web billing and the full macOS feature set, including desktop tools that are limited in the App Store build.
-                  </p>
-                  <ul className="dualCardList">
-                    <li>Mac-only direct build</li>
-                    <li>Full macOS desktop feature set</li>
-                    <li>Pro: £4/mo or £40/yr</li>
-                    <li>Developer Mode: £10 one-time</li>
-                    <li>Best for full Mac use</li>
-                  </ul>
-                  <div className="dualCardActions">
-                    <Link className="planButton" href="/download/direct">Download</Link>
-                    <Link className="secondaryButton" href="/pricing/direct">Pricing</Link>
-                  </div>
-                </article>
-              )}
-            </div>
+          <div className="dualCards sectionChildReveal">
+            {/* ─── Indoor Cat / App Store ─── */}
+            <article className="dualCard">
+              <p className="dualCardEyebrow">Indoor Cat</p>
+              <p className="dualCardDescriptor">Within the App Store</p>
+              <h3>App Store for iPhone, iPad &amp; Mac.</h3>
+              <p className="dualCardBody">
+                Apple billing and the simplest install path. On Mac, sandboxing limits some desktop features.
+              </p>
+              <ul className="dualCardList">
+                <li>iPhone, iPad &amp; Mac</li>
+                <li>Apple billing &amp; restore flow</li>
+                <li>On-device chat, transcription &amp; models</li>
+                <li>Automatic App Store updates</li>
+              </ul>
+              <div className="dualCardActions">
+                <Link className="planButton" href="/download/app-store">App Store</Link>
+                <Link className="secondaryButton" href="/pricing/app-store">Pricing</Link>
+              </div>
+            </article>
+
+            {/* ─── Outdoor Cat / direct download ─── */}
+            <article className="dualCard dualCardStrong">
+              <p className="dualCardEyebrow">Outdoor Cat</p>
+              <p className="dualCardDescriptor">External install for Mac</p>
+              <h3>Direct download for Mac.</h3>
+              <p className="dualCardBody">
+                Downloaded straight from the web, with no sandbox — the complete macOS feature set, including desktop tools the App Store build can&apos;t offer.
+              </p>
+              <ul className="dualCardList">
+                <li>Everything in Indoor Cat, plus:</li>
+                <li>Global menu-bar transcription</li>
+                <li>Window management across apps</li>
+                <li>System-wide hotkeys &amp; shortcuts</li>
+                <li>Keyboard cleaning mode</li>
+                <li>Web billing &amp; portable license keys</li>
+              </ul>
+              <div className="dualCardActions">
+                <Link className="planButton" href="/download/direct">Download</Link>
+                <Link className="secondaryButton" href="/pricing/direct">Pricing</Link>
+              </div>
+            </article>
           </div>
         ) : (
           <div className="toggleCardSection sectionChildReveal">

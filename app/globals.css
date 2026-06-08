@@ -771,6 +771,17 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   margin: 4px 0 0;
 }
 
+.dualCardDescriptor {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dualCardStrong .dualCardDescriptor {
+  color: var(--accent);
+}
+
 .dualCardPrice {
   margin: 0;
   color: var(--accent);

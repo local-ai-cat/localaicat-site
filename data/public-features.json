@@ -1,0 +1,457 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-07-08",
+  "features": [
+    {
+      "name": "Local LLM Chat",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Camera"
+      ]
+    },
+    {
+      "name": "Transcription (Whisper / SpeechAnalyzer)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Microphone",
+        "Speech Recognition"
+      ]
+    },
+    {
+      "name": "Global Transcription (menu bar)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Accessibility",
+        "Screen Recording",
+        "Microphone",
+        "Speech Recognition"
+      ]
+    },
+    {
+      "name": "Auto-paste transcription into active app",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Accessibility"
+      ]
+    },
+    {
+      "name": "Window management of other apps",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Accessibility"
+      ]
+    },
+    {
+      "name": "Window management (own windows)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Quit Apps (force-quit running apps)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Screen Awake",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Keyboard Backlight",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Hide Desktop Icons",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Eye Care reminder (20-20-20)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Monitor Control (external DDC)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Accessibility"
+      ]
+    },
+    {
+      "name": "Compute / Model Link (discovery, remote cat, P2P, VNC, SSH, Terminal3D)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Local Network",
+        "Automation"
+      ]
+    },
+    {
+      "name": "OpenClaw (gateway chat)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Local Network"
+      ]
+    },
+    {
+      "name": "Local API server",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "MLXServe sidecar",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "MLXServe embedded listener",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Energy & Impact",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Dangerously Skip (BLE jump rope)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Bluetooth"
+      ]
+    },
+    {
+      "name": "Workout: Exercise (camera rep counter)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Camera"
+      ]
+    },
+    {
+      "name": "Sentry Mode (away-guard lock)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Input Monitoring",
+        "Screen Recording"
+      ]
+    },
+    {
+      "name": "Model Link (P2P remote AI)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Local Network"
+      ]
+    },
+    {
+      "name": "Screen Recording (demo capture)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Screen Recording"
+      ]
+    },
+    {
+      "name": "Skip HealthKit workout logging",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [],
+      "permissions": [
+        "Health"
+      ]
+    },
+    {
+      "name": "Content Safety Filter (toggle)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Subscription / Payments",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Translate (Even G2 live translation)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Microphone"
+      ]
+    },
+    {
+      "name": "Even Realities / G2 (translation glasses)",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta"
+      ],
+      "permissions": [
+        "Microphone",
+        "Local Network",
+        "Bluetooth"
+      ]
+    },
+    {
+      "name": "LM Studio model interop",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "GGUF backend (llama.cpp sidecar)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "omlx sidecar (Python MLX oracle)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "No special permission"
+      ]
+    },
+    {
+      "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Camera",
+        "Screen Recording"
+      ]
+    }
+  ]
+}

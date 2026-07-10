@@ -1159,6 +1159,67 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   gap: 20px;
 }
 
+/* ─── Documentation ─── */
+
+.docsNav {
+  display: flex;
+  gap: 4px;
+  padding: 28px 0 0;
+  overflow-x: auto;
+}
+
+.docsNav a {
+  padding: 8px 12px;
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.docsNav a:hover {
+  color: var(--text);
+}
+
+.featureCoverageList {
+  border-top: 1px solid var(--line);
+}
+
+.featureCoverageRow {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+  gap: 32px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.featureCoverageRow h2 {
+  font-size: clamp(20px, 3vw, 26px);
+  line-height: 1.1;
+}
+
+.featureCoverageMeta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin: 0;
+}
+
+.featureCoverageMeta dt {
+  margin-bottom: 6px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.featureCoverageMeta dd {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .contentBack {
   display: inline-block;
   margin-bottom: 16px;
@@ -2284,6 +2345,25 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
     padding-left: 16px;
     padding-right: 16px;
     padding-bottom: 60px;
+  }
+
+  .docsNav {
+    margin-right: -16px;
+    padding-top: 20px;
+    padding-right: 16px;
+  }
+
+  .featureCoverageRow,
+  .featureCoverageMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .featureCoverageRow {
+    gap: 18px;
+  }
+
+  .featureCoverageMeta {
+    gap: 12px;
   }
 
   .siteFooter {

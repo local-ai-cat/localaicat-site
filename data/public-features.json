@@ -1,9 +1,11 @@
 {
-  "schemaVersion": 1,
-  "updated": "2026-07-08",
+  "schemaVersion": 2,
+  "updated": "2026-07-10",
   "features": [
     {
+      "id": "chat-local-llm",
       "name": "Local LLM Chat",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -15,10 +17,46 @@
       ],
       "permissions": [
         "Camera"
-      ]
+      ],
+      "description": "Text-generation request/session/service types, native-tool availability/default policy, native tool contract/toolbox, calculator, datetime, web search, URL fetch, weather tools, tool-calling coordinator, and gpt-oss harmony stream parsing are packaged; MLX runtime adapters, model download/selection UI, chat UI, and tool-run UI/persistence mapping remain in the app. Camera (iOS) used to capture images for multimodal attach; photo attach uses PhotosPicker (no TCC).",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "LocalAITextGeneration + LocalAICore + app UI",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "MLX runtime adapters, model download/selection UI, chat UI + tool-run UI/persistence still app-side; app imports packaged types directly, no backend registry seam yet",
+        "grade": "partial"
+      }
     },
     {
+      "id": "transcription",
       "name": "Transcription (Whisper / SpeechAnalyzer)",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -31,10 +69,46 @@
       "permissions": [
         "Microphone",
         "Speech Recognition"
-      ]
+      ],
+      "description": "Core request/result models, request source/mode/translation flag, scheduler, scheduling priority, runtime lane resolver/OpenAI-model exclusion policy, Apple engine selection/fallback policy, concurrency profile/configuration/status, device capability detection helper, job service, Whisper language picker/display/request-parameter presentation, Settings speech-language display/code groups, Settings transcription model-card presentation, Transcribe playback/recording duration formatting, and the Whisper model catalog (sizes, WhisperKit variant/tokenizer manifests, device-availability policy, stored-selection normalization, preference-driven selection ordering) are packaged in LocalAITranscription; the app runtime imports the packaged types directly while supplying app-owned feature-flag/availability inputs. TERMINAL: only the WhisperKit/Apple SpeechAnalyzer/SFSpeechRecognizer live adapters, recording UI, model-selection UI layout, localized model presentation (display names/descriptions), the filesystem-bound WhisperModelAssets, history, and global-transcription shell remain — irreducible app-shell.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "LocalAITranscription + app engine/UI adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "product logic + catalog packaged, but app imports packaged types directly and the WhisperKit/Apple live engine adapters + recording/model-selection UI are app-shell-terminal — no registry seam",
+        "grade": "strong"
+      }
     },
     {
+      "id": "global-transcription",
       "name": "Global Transcription (menu bar)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -48,10 +122,55 @@
         "Screen Recording",
         "Microphone",
         "Speech Recognition"
-      ]
+      ],
+      "description": "macOS only. Hotkey storage keys, modifier-key defaulting, legacy display-name migration, display-name normalization, App Store fixed-hotkey display policy, history sentinel parsing/labels, failure kind and short/external-message presentation, recording mode, runtime-engine resolution/labels/stable identifiers, target-application metadata formatting/project-name parsing, background-transcription menu control presentation, Transcribe-screen background status presentation, floating recording indicator presentation, floating panel state presentation, and model-loading indicator elapsed/message presentation are packaged. Core Apple engine selection/fallback policy now lives in LocalAITranscription and is consumed here through a compatibility alias. APPLE PERMISSION DIFFERENCE: Outdoor uses an NSEvent global monitor for a configurable modifier-only hotkey (default Right ⌘), gated on Accessibility (AXIsProcessTrusted); Indoor uses Carbon RegisterEventHotKey for a fixed ⌃⌥Space with no special permission. Input Monitoring is no longer used. Screen Recording is requested to read active-window titles (kCGWindowName via CGWindowListCopyWindowInfo) for routing transcriptions. AppKit hotkey registration, active-window capture, menu-bar shell/layout, loading panel, active-app routing, permissions, and service orchestration remain in app controllers/adapters.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Fixed hotkey ⌃⌥Space via Carbon RegisterEventHotKey — NOT configurable, no Accessibility. Screen Recording still requested for active-window title routing."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Configurable modifier-only hotkey (default Right ⌘) via NSEvent global monitor, gated on Accessibility (AXIsProcessTrusted)."
+        }
+      ],
+      "package": "FeatureGlobalTranscription + app controllers/adapters",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "presentation/policy packaged, but AppKit hotkey registration, active-window capture, menu-bar shell, permissions + service orchestration remain meaningful app-side logic with no registry seam",
+        "grade": "partial"
+      }
     },
     {
+      "id": "auto-paste",
       "name": "Auto-paste transcription into active app",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -62,10 +181,55 @@
       ],
       "permissions": [
         "Accessibility"
-      ]
+      ],
+      "description": "macOS. INDOOR DIFFERENCE: Indoor clipboard-only; Outdoor auto-pastes via Accessibility. FeatureAutoPaste owns completion policy, manual-paste preview, destination-capture delay, and copy/paste/prompt/wait/capture orchestration. The app shell only supplies platform side-effect adapters for clipboard writes, CGEvent paste simulation, notifications, HUD, and destination capture.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped (sandbox + no Accessibility); transcription paste falls back to clipboard-only."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Auto-pastes into the active app via Accessibility + CGEvent paste simulation."
+        }
+      ],
+      "package": "FeatureAutoPaste + app side-effect adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "all orchestration packaged with only thin platform side-effect adapters left, but wired directly rather than registered through a provider/registry like the reference module",
+        "grade": "strong"
+      }
     },
     {
+      "id": "window-mgmt-others",
       "name": "Window management of other apps",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -76,10 +240,55 @@
       ],
       "permissions": [
         "Accessibility"
-      ]
+      ],
+      "description": "macOS. Unsandboxed only. Hotkey mapping, frame geometry, best-effort frame clamping, other-app snap/action frame planning, drag-release pointer/frame edge/corner detection across physical and visible screen frames, own-window planning, multi-screen detection policy, manual-accessibility app policy, and settings availability/shortcut/subtitle presentation are packaged. Accessibility window lookup/movement, NSScreen snapshotting, event monitoring, permission deep-linking, and settings UI composition remain in the app so App Store builds keep Accessibility API references out of the app target path.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — App Store build keeps Accessibility API references out of the target path."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Snap/move OTHER apps' windows via Accessibility (AXIsProcessTrusted). Unsandboxed only."
+        }
+      ],
+      "package": "FeatureWindowManagement + app services",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "planning logic packaged, but AX window lookup/movement, NSScreen snapshotting, event monitoring + settings UI composition remain app-side; no registry seam",
+        "grade": "partial"
+      }
     },
     {
+      "id": "window-mgmt-self",
       "name": "Window management (own windows)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -90,10 +299,46 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS. FeatureWindowManagement owns hotkey mapping, frame geometry, own-window eligibility, target-window selection priority, resize planning, AppKit/AX coordinate conversion, same-relative-position display cycling, and settings shortcut/subtitle presentation. The app shell only snapshots NSWindow/NSScreen state, applies the planned frame, and composes the settings UI.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "FeatureWindowManagement + app NSWindow adapter",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "all planning logic packaged with only NSWindow/NSScreen snapshot + frame-apply adapters left, but composed directly rather than via a registry/provider seam",
+        "grade": "strong"
+      }
     },
     {
+      "id": "quit-apps",
       "name": "Quit Apps (force-quit running apps)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -104,10 +349,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS, Outdoor only (unsandboxed). FeatureQuitApps owns running-app classification, exclusion policy, app snapshotting, terminate/escalate policy, view model, window, and SwiftUI surface. The app shell only gates availability through FeatureFlags/Pro access and calls the package presenter.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — sandbox blocks terminating other processes."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Force-quit running apps; Outdoor-only and Pro-gated. No special TCC."
+        }
+      ],
+      "package": "FeatureQuitApps + app gate",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "entire surface (logic + view model + SwiftUI window) packaged; app shell is gate-and-call only, but invoked directly rather than registered through a provider/registry",
+        "grade": "strong"
+      }
     },
     {
+      "id": "screen-awake",
       "name": "Screen Awake",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -118,10 +408,46 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS menu bar. FeatureScreenAwake owns duration policy, session state, Pomodoro state, observable controller, IOKit power/clamshell orchestration, notification/event seams, menu-bar UI, status observer, and termination cleanup primitive. The app shell only supplies diagnostics logging/lid-state metadata and startup registration.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "FeatureScreenAwake + app diagnostics/startup adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "full controller + IOKit orchestration + menu-bar UI packaged; only diagnostics/startup adapters remain, but registered via direct startup wiring not a provider seam",
+        "grade": "strong"
+      }
     },
     {
+      "id": "keyboard-backlight",
       "name": "Keyboard Backlight",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -132,10 +458,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS menu bar, Outdoor/Beta only. FeatureKeyboardBacklight owns the CoreBrightness private-framework bridge, service state, ON/OFF restore policy, last-brightness persistence key, manual-vs-ambient auto state transitions, and SwiftUI menu row. The package is linked only by Direct/Outdoor and macOS Beta targets, never by App Store targets.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — CoreBrightness is a private framework, so the package is not linked by App Store targets."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Controls the built-in MacBook keyboard backlight through a runtime-loaded CoreBrightness bridge."
+        }
+      ],
+      "package": "FeatureKeyboardBacklight + app startup registration",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "service, pure control logic, persistence keys, and menu-bar UI are packaged; app shell only links/registers the feature on Outdoor/Beta",
+        "grade": "strong"
+      }
     },
     {
+      "id": "desktop-curtain",
       "name": "Hide Desktop Icons",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -146,10 +517,51 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS menu bar. Sandbox-safe overlay NSWindow at desktopIcon+1 (above icons, below app windows) covering the desktop icons (frost / wallpaper / Catty 3D / solid). The Catty 3D ambient scene is the cat-themed fallback shown when a custom wallpaper can't be read in the sandbox. Package FeatureDesktopCurtain owns the fill policy, generic cat-content hook, fallback image, and overlay controller; the app shell owns the Catty content provider, menu toggle, and DesktopCurtainService persistence.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Overlay covers the icons (sandbox-safe); it does not genuinely remove them. Genuine CreateDesktop hiding isn't possible in the App Store sandbox and is intentionally not used."
+        }
+      ],
+      "package": "FeatureDesktopCurtain + app menu/service adapter",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "FeatureDesktopCurtain owns the fill policy (unit-tested) + generic app-provided cat-themed content hook (behavioural-tested) + AppKit overlay controller incl. the covering window-level (behavioural-tested); app shell supplies the Catty 3D ambient view, menu-bar toggle, and persisted DesktopCurtainService.",
+        "grade": "strong"
+      }
     },
     {
+      "id": "eye-care",
       "name": "Eye Care reminder (20-20-20)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -160,10 +572,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS menu bar. FeatureEyeCare owns metrics storage, reminder controller/state machine, interval/look-away/Pomodoro/goodbye timer behavior, Cat Nap controller/state machine, lid/sleep reconciliation, Skip challenge handoff policy, screen-time tracking policy, settings content, settings metrics visibility, presentation copy, panel content, panel controllers, and Dangerously Skip menu/settings presentation content. The app shell supplies lifecycle observers, keyboard-locking side effects, Doug/panel notifications, optional asset preloading, Skip service injection/Bluetooth/session side effects, clipboard adapter, settings sheets/remaining feature gates, and startup registration.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Break-time keyboard-cleaning uses a frontmost NSPanel overlay (no Accessibility); degraded — keys that bypass a frontmost panel aren't blocked."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Break-time keyboard-cleaning intercepts all keys system-wide via a CGEvent .defaultTap gated on Accessibility."
+        }
+      ],
+      "package": "FeatureEyeCare + app lifecycle/side-effect adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "controllers/state machines/presentation packaged, but app shell still wires many side effects (keyboard-lock, notifications, Skip service injection, settings sheets/gates) directly rather than via a registry",
+        "grade": "strong"
+      }
     },
     {
+      "id": "monitor-control",
       "name": "Monitor Control (external DDC)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -174,10 +631,55 @@
       ],
       "permissions": [
         "Accessibility"
-      ]
+      ],
+      "description": "macOS. FeatureMonitorControl owns DDC display contracts/backend, display controller state/read/write orchestration, CoreAudio output, write coalescing, HUD/menu/settings SwiftUI primitives, startup participants, display-selection/status/settings presentation, selected-display persistence helper, focused-display geometry resolution, media-key activation policy, event tap/parser/action routing, display volume policy, and media-key permission presentation/lifecycle policy. The app keeps feature/defaults value reads, build-flavor injection, the concrete settings key, AppKit screen/mouse snapshots, notification observers, and PermissionManager/PermissionMonitor Accessibility side effects. DDC/CI brightness over I2C needs no permission; media-key routing (Outdoor only) uses a CGEvent .defaultTap gated on Accessibility (AXIsProcessTrusted).",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "DDC/CI brightness over I2C works (no permission). Media-key volume/brightness routing UNAVAILABLE — needs a CGEvent .defaultTap + Accessibility."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Full: DDC brightness + media-key volume/brightness routing via CGEvent .defaultTap gated on Accessibility."
+        }
+      ],
+      "package": "FeatureMonitorControl + app notification/defaults adapters",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "DDC/media-key logic packaged, but app keeps AppKit screen/mouse snapshots, notification observers + PermissionManager Accessibility side effects without a registry seam",
+        "grade": "partial"
+      }
     },
     {
+      "id": "compute",
       "name": "Compute / Model Link (discovery, remote cat, P2P, VNC, SSH, Terminal3D)",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -190,10 +692,55 @@
       "permissions": [
         "Local Network",
         "Automation"
-      ]
+      ],
+      "description": "Cross-platform. FeatureCompute owns per-device host-profile, saved-computer, recent-connection, Catty favorite-folder, manual-host, Remote Cat credential, SSH credential, and VNC credential stores, SSH handoff command policy, pure Tailscale status parsing/mapping, Tailscale CLI path/argument/environment policy, Tailscale section subtitle/state presentation, Tailscale serve DNS/funnel status policy, and tailnet service probe response classification/model-list decoding. Shared discovery contracts, Compute persistence models, and P2P Model Link peer/Bonjour/loopback contract are packaged in LocalAIContracts; VNC UI is packaged in RoyalVNCKitUI. Networking discovery/probing/cloud sync, Tailscale CLI process execution, tailnet HTTPS transport/TLS fingerprint capture, P2P advertise/browse/relay transport, sharing orchestration, SSH Terminal/pasteboard side effects, Terminal3D shell-spawn, and Compute UI remain app-owned. Terminal3D shell-spawn is Outdoor macOS only (→ iOS partial); remote-cat and iOS AWDL P2P model surfaces are contributed through the ChatBackend registry (ModelCatalogContributor), so the runtime catalog no longer injects them inline. TERMINAL: the remaining app-owned networking/transport/SSH/Terminal3D/VNC and Compute UI are irreducible app-shell. Apple Events (NSAppleScript) opens Terminal.app for SSH on Outdoor macOS.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "partial",
+          "macOS": "partial"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Partial — saved + iCloud-synced hosts and VNC/SSH-to-saved-host only. Outdoor-only and stripped here: Tailscale CLI live status/serve/funnel, Terminal3D shell-spawn, and SSH-into-Terminal.app (NSAppleScript). Local Network (Bonjour) permission."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Full: Tailscale CLI, P2P AWDL Model Link, VNC, SSH via Terminal.app (Apple Events), Terminal3D. Local Network + Apple Events."
+        }
+      ],
+      "package": "FeatureCompute + LocalAIContracts + RoyalVNCKitUI (VNC) + monolith networking",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "model surfaces contributed via the ChatBackend/ModelCatalogContributor registry, but networking/transport/SSH/Terminal3D/VNC + Compute UI remain a large app-owned (irreducible) shell",
+        "grade": "partial"
+      }
     },
     {
+      "id": "openclaw",
       "name": "OpenClaw (gateway chat)",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -203,10 +750,59 @@
       ],
       "permissions": [
         "Local Network"
-      ]
+      ],
+      "description": "REVIVED on Beta 2026-06-18 — out of purgatory. FeatureOpenClaw (gateway backend, probe, credential store, model contributor, workspace state, chat workspace view, pairing/pinned/history/home/compute UI primitives) + OpenClawKit are linked on the macOS Beta target ONLY; FEATURE_OPENCLAW (defined on the Beta target and in FeatureOpenClaw's Package.swift) activates the fenced gateway-chat surfaces. Physically absent from Outdoor + App Store binaries, same mechanism as BetaTelemetry. modular=yes: product logic and OpenClaw UI ownership now live in FeatureOpenClaw; the app shell retains only thin build-fence/navigation/storage adapters where the package is not linked in production targets. iOS pairing paths exist but it only ever activated on macOS (→ iOS partial).",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — physically absent from the binary (package not linked)."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Not shipped — physically absent from the binary (package not linked)."
+        },
+        {
+          "channel": "Beta",
+          "note": "Beta-only: gateway chat via FEATURE_OPENCLAW on the macOS Beta target. Local Network permission. Needs a reachable OpenClaw v4 gateway + token. iOS pairing paths exist but never activate (→ iOS partial)."
+        }
+      ],
+      "package": "FeatureOpenClaw + OpenClawKit + app adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "",
+        "grade": "gold"
+      }
     },
     {
+      "id": "local-api",
       "name": "Local API server",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -217,10 +813,163 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS. HTTP routing, public docs/OpenAPI/health/Ollama-liveness endpoint response policy, runtime route-forwarding policy, request/response transport parsing/serialization, multipart parsing, upload content-type extension policy, model list/status responses, transcription request parameter mapping, recording-session route classification, verbose transcription response model, settings defaults, port fallback, build-injected token requirement default, token persistence/redaction/generation/reset policy, network-exposure flag, idle-unload policy/label, menu-bar status/accessibility presentation, Settings server status-row presentation, start-failure/port-conflict presentation, request-log filtering/path sanitization/auth-state classification, agent-skill Markdown/auth/include-token generation/copy hint, OpenAPI JSON generation, and status/docs page HTML are packaged; the app server imports those package types directly. INDOOR DIFFERENCE: token required by default in Indoor. App still owns NWListener binding, notification delivery, settings UI composition, menu-bar side effects, app microphone recording execution, server stop, and startup wiring. Localhost only unless network exposure is explicitly enabled.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "API token REQUIRED by default (defaultRequiresToken: true). Localhost only unless network exposure is explicitly enabled."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "API token NOT required by default. Localhost only unless exposed."
+        }
+      ],
+      "package": "LocalAIHTTPServer",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "app still owns NWListener binding + settings UI + startup wiring and imports the package types directly, no registry seam",
+        "grade": "partial"
+      }
     },
     {
+      "id": "app-control",
+      "name": "App Control API",
+      "group": null,
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "No special permission"
+      ],
+      "description": "macOS alpha lane. Bearer-authenticated /v1/local/app routes control the real visible app. AppControlKit owns the wire descriptors, registry actor, SwiftUI page-root modifier, and injected-clock transaction state machine. The app shell owns its typed destination catalog, runtime navigation adapter, in-process accessibility fallback, readiness integration, and route provider. Settings root and Translate hub are the initial declarative registry surfaces; all other catalogued surfaces honestly report AX or unavailable coverage.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "partial"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "Alpha",
+          "note": "Read-only discovery/state plus alpha-gated navigation and actions. Declarative coverage starts with Settings and Translate; remaining surfaces use self-AX fallback."
+        }
+      ],
+      "package": "AppControlKit + app navigation/AX/HTTP adapters",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "descriptors, registry, and transactions are packaged; destination catalog, self-AX walking, navigation, and HTTP composition remain app-owned",
+        "grade": "partial"
+      }
+    },
+    {
+      "id": "routine-kit",
+      "name": "Routines",
+      "group": "utilities",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Calendar",
+        "Alarms"
+      ],
+      "description": "Alpha P4. RoutineKit owns revisioned routines, session lifecycle, injected-clock scheduling, DST and missed-session recovery, atomic persistence, idempotent commands/provider updates, screen-time thresholds, and reconnectable events. The app composes existing macOS providers, projects EventKit and iOS 26 AlarmKit records as recoverable subordinate state, and exposes linked iOS views through UUID-deduplicated commands based on monotonic App Group snapshot revisions. Alarm actions only open the session UI; they do not claim exercise verification. One engine remains authoritative through the menu bar, Settings, Utilities, Home, linked views, and token-authenticated Local API.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "Alpha",
+          "note": "P4 links revisioned snapshots and commands through the existing App Group and projects eligible iOS 26 sessions into AlarmKit. Alarm actions open the session; exercise verification remains P5."
+        }
+      ],
+      "package": "RoutineKit + LocalAIHTTPServer",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "engine mutations, providers, recoverable calendar/alarm projections, screen-time thresholds, and the revisioned App Group command bridge are isolated behind tested package contracts",
+        "grade": "strong"
+      }
+    },
+    {
+      "id": "mlxserve-sidecar",
       "name": "MLXServe sidecar",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -231,10 +980,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS Outdoor/Beta only. Adds FEATURE_MLXSERVE_SIDECAR, bundles mlxserve-http plus mlx.metallib into Contents/Resources/mlxserve when MLXSERVE_BINARY_DIR is supplied, and supervises that real engine as a child process on a second OpenAI-compatible listener beside the legacy Local API. The sidecar is now kept for its operational wins (kill-to-reclaim memory, crash isolation) rather than out of necessity: as of 2026-07-06 the app and mlxserve pin the SAME mlx-swift-lm fork SHA, so the engine can be linked in-process via the MLXServeNative library (this is how the iOS embed runs the real engine). If artifacts are absent, the app still builds and the opt-in sidecar reports binary not bundled at runtime. The sidecar points at the same LLM model store and app WhisperKit models root; legacy :11434 is untouched. The A/B phase deliberately permits double-loading because the sidecar process and app runtime pool are separate until serving unification.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — App Store and iOS targets do not resolve the local-path mlxserve dependency."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Experimental second listener on port 11435. Default off; runs the real bundled mlxserve-http engine out-of-process."
+        }
+      ],
+      "package": "bundled mlxserve-http subprocess + app controller",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "real mlxserve-http engine is supervised out-of-process; the app still owns bundle resolution, settings, lifecycle, and health/status presentation",
+        "grade": "partial"
+      }
     },
     {
+      "id": "mlxserve-embed",
       "name": "MLXServe embedded listener",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -246,10 +1040,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "Cross-platform default-off A/B infrastructure. Adds FEATURE_MLXSERVE_EMBED and links only the MLXServeHTTP product from local-ai-cat/mlxserve. The adapter implements mlxserve's OpenAIChatBackend over the app's existing GenerationQueue/TextGenerationRuntime lineage, preserving the single resident model runtime invariant. macOS keeps the out-of-process sidecar as the default A/B path; iOS can opt into an in-process loopback listener on port 11435 for device validation.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "partial",
+          "macOS": "partial"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Compiled as default-off A/B infrastructure; no review-facing surface and no listener unless explicitly enabled."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Compiled as default-off A/B infrastructure; alpha-lane settings can enable the in-process listener on 127.0.0.1:11435."
+        }
+      ],
+      "package": "MLXServeHTTP + app shared-runtime adapter",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "HTTP listener is reused from mlxserve, but generation is delegated to LocalAIAppRuntime.shared.serving so no second EnginePool or model copy is created",
+        "grade": "partial"
+      }
     },
     {
+      "id": "energy-impact",
       "name": "Energy & Impact",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -261,10 +1100,46 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "Estimator, ledger, fleet aggregation, citations, unit models, display formatting, ledger file persistence, privacy-preserving device identity, iCloud KVS sync, backfill computation, recorder engine, value-typed Energy UI content, methodology view, and mock/offscreen presentation are packaged. The app shell retains startup wiring, memory-history backfill adapter, static recording hooks, Settings navigation, and live recorder wrapper. iPhone + Mac power measurement.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "LocalAIEnergy + app adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "estimator/ledger/UI fully packaged with only thin adapters left, but startup + live recorder wrapper are wired directly rather than registered through a provider/registry",
+        "grade": "strong"
+      }
     },
     {
+      "id": "dangerously-skip",
       "name": "Dangerously Skip (BLE jump rope)",
+      "group": "utilities",
       "platforms": [
         "iOS",
         "macOS"
@@ -276,10 +1151,55 @@
       ],
       "permissions": [
         "Bluetooth"
-      ]
+      ],
+      "description": "New in 1.3.x. Renpho/R-Q008 rope. SkipKit owns codec, challenge state, completion stats, transport seam, CoreBluetooth transport, and service orchestration; FeatureDangerouslySkip owns the live service facade, registry, overlay controller, menu/settings adapters, the macOS Utilities Skip screen, and the iOS standalone session screen; FeatureEyeCare owns shared macOS menu/settings presentation content. The app shell keeps composition-root registration, feature/defaults value injection, panel routing, and settings/menu placement. Surfaced through the Utilities hub on macOS and iOS.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Included in Indoor: the macOS screen block is a permission-free overlay (no Accessibility API), and iOS standalone sessions can only ship through the App Store lane."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Surfaced through the Outdoor macOS Utilities hub."
+        }
+      ],
+      "package": "SkipKit + FeatureDangerouslySkip + FeatureEyeCare + app adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "codec/transport/orchestration in SkipKit, live feature facade/registry plus service adapters in FeatureDangerouslySkip, and presentation primitives in FeatureEyeCare",
+        "grade": "strong"
+      }
     },
     {
+      "id": "workout-exercise",
       "name": "Workout: Exercise (camera rep counter)",
+      "group": "utilities",
       "platforms": [
         "macOS"
       ],
@@ -288,10 +1208,55 @@
       ],
       "permissions": [
         "Camera"
-      ]
+      ],
+      "description": "The workout-gate concept, native: an ExerciseObserver emits phase observations, ExerciseKit's RepCounter/ExerciseChallenge count reps with hysteresis + anti-cheat (minimum rep duration, confidence gates, liveness). Current slice ships both a deterministic demo observer and a live AVCapture/Vision body-pose observer through ExerciseCameraRunner/VisionPoseExerciseObserver, so camera permission is required. Camera→VLM observer (CameraFrameSource + VLMDispatchKit) remains a later enhancement.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not surfaced in Indoor — the Utilities hub stays hidden in App Store builds."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Surfaced through the Outdoor macOS Utilities hub with live camera and demo observers."
+        }
+      ],
+      "package": "ExerciseKit + ChallengeKit + app Utilities screen",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "rep counting/anti-cheat/challenge state fully packaged in ExerciseKit; the app owns only the Utilities screen and (later) the camera→VLM observer adapter",
+        "grade": "strong"
+      }
     },
     {
+      "id": "sentry-mode",
       "name": "Sentry Mode (away-guard lock)",
+      "group": "utilities",
       "platforms": [
         "macOS"
       ],
@@ -301,10 +1266,55 @@
       "permissions": [
         "Input Monitoring",
         "Screen Recording"
-      ]
+      ],
+      "description": "Machine-locked away-guard: arm it, walk away; key/mouse activity raises the wallpaper curtain + a key-swallowing lock panel, sustained activity starts a screen recording and a spoken cat taunt, the passphrase disarms. SentryKit is the pure clock-injected brain emitting intents; mouse can't be blocked on macOS by design — the curtain + keyboard-swallowing panel is the effective lock.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not surfaced in Indoor — the Utilities hub stays hidden in App Store builds; keylog-adjacent surface parked pending a 2.4.5 review read."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Surfaced through the Outdoor macOS Utilities hub. Input Monitoring (listen-only tap) + Screen Recording TCC prompts on first arm."
+        }
+      ],
+      "package": "SentryKit + app adapters (key monitor, lock panel, curtain, recorder)",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "the escalation ladder/state machine is fully packaged in SentryKit; the app owns the impure edges (CGEvent listen-only tap, blocking panel, curtain, ScreenCaptureKit recorder, speech quirk)",
+        "grade": "strong"
+      }
     },
     {
+      "id": "model-link",
       "name": "Model Link (P2P remote AI)",
+      "group": "utilities",
       "platforms": [
         "iOS",
         "macOS"
@@ -314,10 +1324,55 @@
       ],
       "permissions": [
         "Local Network"
-      ]
+      ],
+      "description": "Reach a nearby Mac's local AI without Wi-Fi (peer-to-peer / Tailnet). FeatureModelLink owns RemoteCatBackend, P2PModelLinkService, ModelLinkShareService, TailnetServiceProber, and the ChatBackendRegistry model/generator registration. The app provides DiagnosticLogger, Local API settings/token, Tailscale CLI execution, cloud-computer snapshots, and Settings/Utilities UI adapters. Ships through the Outdoor/Beta Utilities hub; Indoor keeps the hub hidden.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not surfaced in Indoor — the Utilities hub stays hidden in App Store builds."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Surfaced through the Outdoor macOS Utilities hub and Local API settings."
+        }
+      ],
+      "package": "FeatureModelLink + FeatureCompute stores + app UI/settings adapters",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "remote backend, P2P transport, sharing orchestration, tailnet probing, and chat-backend registration are packaged; app shell still owns Settings/Utilities UI, Tailscale CLI process adapter, and KVS sync",
+        "grade": "partial"
+      }
     },
     {
+      "id": "screen-recording",
       "name": "Screen Recording (demo capture)",
+      "group": "utilities",
       "platforms": [
         "macOS"
       ],
@@ -326,10 +1381,55 @@
       ],
       "permissions": [
         "Screen Recording"
-      ]
+      ],
+      "description": "macOS, unsandboxed (Outdoor) only — records demos with cursor + input metadata. Surfaced as Recording Studio in the Outdoor/Beta Utilities hub; Indoor does not link the recording studio UI and keeps the hub hidden.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — App Store builds do not link the recording studio UI."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Surfaced as Recording Studio through the Outdoor macOS Utilities hub."
+        }
+      ],
+      "package": "FeatureScreenRecordingCore/UI/EditorCore/EditorUI + app adapters",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "capture/editor logic packaged; app shell wires the utility surface directly rather than via a registry seam",
+        "grade": "strong"
+      }
     },
     {
+      "id": "skip-healthkit-logging",
       "name": "Skip HealthKit workout logging",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -337,10 +1437,46 @@
       "tiers": [],
       "permissions": [
         "Health"
-      ]
+      ],
+      "description": "Code-only and default OFF via FeatureFlags.enableSkipHealthKitLogging. Manual follow-up required before enabling: HealthKit App ID capability/provisioning for Indoor and Outdoor, com.apple.developer.healthkit entitlement, and NSHealthUpdateUsageDescription.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [],
+      "package": "HealthKitLogging + app seam",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "logging logic lives behind a package seam; app side is a thin seam but wired directly, and entitlement/provisioning follow-up still gates shipping — no registry seam",
+        "grade": "strong"
+      }
     },
     {
+      "id": "content-safety-filter",
       "name": "Content Safety Filter (toggle)",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -352,10 +1488,46 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "FeatureContentSafety owns filter prompt composition, category verdicts, full-text checks, streaming scanner state, effective enablement policy, and hosted chat enforcement calls. The app shell only supplies persisted setting, subscription, and age-verification inputs plus Settings UI. Disabling is Pro + age-gated (Apple DeclaredAgeRange API, OS 26+).",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "FeatureContentSafety + app settings inputs",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "all filter logic + enforcement packaged; app supplies only persisted setting/subscription/age inputs + Settings UI, but wired directly rather than via a provider/registry seam",
+        "grade": "strong"
+      }
     },
     {
+      "id": "subscription",
       "name": "Subscription / Payments",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -367,10 +1539,59 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "Indoor = StoreKit 2; Outdoor = Polar. Beta = Pro unlocked free (data-for-Pro exchange). Subscription status, product IDs, subscription errors, external-license validation errors, external-license HTTP status mapping, state/source resolution, access/direct-billing policy, settings/account/product-row/developer-mode presentation policy, external-license card presentation, debug dev Pro trial date policy, direct-billing plan metadata, Polar commerce configuration, activation-link URL/query parsing, activation payload/error contracts, activation-token response parsing, direct-billing date parsing, entitlement provider/grace policy, external-license status banners, and mirrored entitlement value semantics are packaged; StoreKit, Polar validation/network adapters, iCloud KVS storage/sync adapters, settings UI layout, debug trial storage/start/reset side effects, activation side effects, and purchase/restore flows remain in the app.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Payments via StoreKit 2."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Payments via Polar; external-license activation synced via iCloud."
+        },
+        {
+          "channel": "Beta",
+          "note": "Pro unlocked free while Sentry diagnostics stay ON (isBetaProPerkActive, #if BETA) — a data-for-Pro exchange; turning off beta-Sentry drops the perk."
+        }
+      ],
+      "package": "FeatureSubscription + app payment adapters",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "StoreKit/Polar adapters, iCloud KVS sync, settings UI + purchase/restore flows still app-side; no registry seam over the billing backends",
+        "grade": "partial"
+      }
     },
     {
+      "id": "translate",
       "name": "Translate (Even G2 live translation)",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -382,10 +1603,46 @@
       ],
       "permissions": [
         "Microphone"
-      ]
+      ],
+      "description": "Live translate: on-device Apple Translation + FluidAudio diarization render a contextual sentence and a word-by-word gloss as speech streams in, with an Even G2 glasses preview and an experimental two-way conversation mode. Ships on iOS + macOS (Indoor, Outdoor, Beta) via FEATURE_EVEN_G2 — the old 'Coming soon' FeatureTranslate placeholder package was deleted.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "yes",
+          "macOS": "yes"
+        }
+      ],
+      "caveats": [],
+      "package": "app (Features/Translate) + FeatureEvenG2 + LocalSpeechKit",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "live-translate UI + view model + conversation/diarization services live in the app shell (Features/Translate); FeatureEvenG2 + LocalSpeechKit own the glasses/diarization engines, but the app UI isn't packaged or registry-wired",
+        "grade": "partial"
+      }
     },
     {
+      "id": "even-realities",
       "name": "Even Realities / G2 (translation glasses)",
+      "group": null,
       "platforms": [
         "iOS",
         "macOS"
@@ -398,10 +1655,51 @@
         "Microphone",
         "Local Network",
         "Bluetooth"
-      ]
+      ],
+      "description": "Track 3 started in-tree: FeatureEvenG2 owns the package screen, SpeechSink, Even G2 preview, and Apple Translation provider seams; WearableGlassesKit owns the generic Even G2 driver, transcript stabilizer, and captions content provider; LocalSpeechKit is vendored for FluidAudio streaming ASR and exposes a SpeechPipeline TranscriptionBackend; LocalAIHTTPServer owns translation/session contracts, session-state SSE routes, and the companion translation web page (GET /even/translation). App-shell wiring now links FeatureEvenG2/LocalSpeechKit on the beta target, registers FluidAudio, registers the shared Even screen sink and Apple Translation providers, routes the Translate slot to the Even screen under FEATURE_EVEN_G2, and carries generated-plist support for the evenTranslation background-task wildcard. Companion web page is now ported + tested. Even's interactive TranslateView (+5 conversation views, FluidAudio/two-way capture, EvenG2BackgroundSessionManager) is now ported into the app and is the Translate-slot surface under FEATURE_EVEN_G2, which is defined on the macOS Beta target AND all iOS configs on the beta branch — so the feature runs live in every beta-branch build, with public App Store inclusion deferred to promotion. Simulator UI tests (loads/survives, session controls, conversation-setup screenshot) pass on iPhone 16. T6c: iOS now hosts the Even HTTP surface itself via EvenGlassesListener (Core/LocalAPI) — the same packaged /v1/even/translation/sessions family + companion page the Mac serves, no auth (Even SDK webview can't send one; surface restricted to the Even family), CORS * + OPTIONS preflight on every route, loopback-first with an exposeOnNetwork flag; lifecycle rides the Translate surface, DEBUG -even_listener_autostart for the sim e2e (scripts/even-ios-listener-e2e.sh). Remaining before live proof: on-device validation (real mic + Apple Translation + MLX) + real-glasses poll of the phone listener. Target = beta-led; two-way Conversation remains out of scope/debug-gated.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "Beta",
+          "note": "Beta-branch live via FEATURE_EVEN_G2 on the macOS Beta target AND all iOS configs (the Translate slot routes to even's interactive TranslateView; placeholder only in non-Even builds). Mic + Local Network + Bluetooth. Mic/session orchestration (LiveTranslateViewModel) + Live Activity are ported; simulator UI tests pass (loads/survives + session controls + screenshot). Public App Store inclusion is a deliberate promotion-time decision, not a branch gate. Remaining: on-device validation."
+        }
+      ],
+      "package": "FeatureEvenG2 + WearableGlassesKit + LocalSpeechKit + LocalAIHTTPServer contracts",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "split across packages but app shell still owns mic/session orchestration, Live Activity plumbing + sink/provider registration; #if FEATURE_EVEN_G2 fences in shared code, WIP",
+        "grade": "partial"
+      }
     },
     {
+      "id": "lmstudio-interop",
       "name": "LM Studio model interop",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -412,10 +1710,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS / Outdoor + Beta only. LMStudioModelSource (walk ~/.lmstudio/models/<org>/<model>, validate against the app completeness rule, reject partial/.part/sharded-without-index, route GGUF-only dirs to the GGUF backend via format=.gguf, infer capabilities from config.json) is packaged in LocalAICore and unit-tested with fixtures + the real on-disk library. The LocalAIExternalModelServing provider protocol + GET /v1/local/models/external, POST /external/import (idempotent symlink + .userAdded catalog contribution), POST /refresh, and the GET /v1/models merge live in LocalAIHTTPServer (route-tested). App-side: LocalAIExternalModelService does the symlink link-in (~/Library/Caches/models/<org>/<model> → the LM Studio dir; never clobbers a real dir) so the existing flat-path load/status code serves it with zero duplication, and HubSnapshotDownloader gained a local-first short-circuit so a complete local/imported model loads offline without a HubApi network revision-check. Deferred: surfacing imported models in the model-manager/picker UI with a provenance badge.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — the sandboxed App Store build can't read ~/.lmstudio or symlink into the model cache; #if !APPSTORE_BUILD && os(macOS) strips the source + routes (they 503)."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Discovers ~/.lmstudio/models MLX models, imports a chosen one via symlink into the model cache (no 15-32 GB re-download), and serves it through /v1/local/models/external, /external/import, /refresh, and the /v1/models merge."
+        }
+      ],
+      "package": "LocalAICore (discovery) + LocalAIHTTPServer (provider/routes) + app symlink adapter",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "discovery (LMStudioModelSource) + the LocalAIExternalModelServing protocol/types/routes are packaged; the symlink link-in adapter + catalog merge + HubApi local-first short-circuit are app-side; UI picker provenance badge deferred",
+        "grade": "partial"
+      }
     },
     {
+      "id": "gguf-backend",
       "name": "GGUF backend (llama.cpp sidecar)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -426,10 +1769,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS / Outdoor + Beta only. Sidecar-first (see docs/planning/gguf-backend-spike-notes.md): FeatureGGUF's LlamaServerSidecar actor locates a llama-server binary, spawns it on a free loopback port for the selected .gguf model, health-checks /health, detects crashes and restarts (bounded), and terminates gracefully. GGUFChatBackend proxies /v1/chat/completions SSE into LocalAITextGenerationEvents behind the SAME LocalAITextGenerating seam RemoteCatBackend uses, registered through ChatBackendRegistry with a `gguf:`-prefixed model contributor. GGUF-only LM Studio dirs are no longer rejected by ExternalModelSource — they carry format=.gguf and are served here instead of the MLX loader. Physically absent from App Store + iOS (package unlinked, FEATURE_GGUF undefined). Deferred: bundling llama-server (size + signing/notarization) and GGUF model-download UX.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — the sandboxed App Store build can't spawn a child process; FeatureGGUF is unlinked (FEATURE_GGUF undefined) so it is physically absent from the binary."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Discovers .gguf files in the model cache + LM Studio library and serves a selected one via a locally-spawned llama-server (OpenAI-compatible loopback)."
+        }
+      ],
+      "package": "FeatureGGUF + app composition-root wiring",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "sidecar lifecycle + SSE adaptation + gguf discovery + ChatBackendRegistry registration are packaged; the app supplies only binary/model-dir config at the composition root behind FEATURE_GGUF",
+        "grade": "strong"
+      }
     },
     {
+      "id": "omlx-sidecar",
       "name": "omlx sidecar (Python MLX oracle)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -438,10 +1826,55 @@
       ],
       "permissions": [
         "No special permission"
-      ]
+      ],
+      "description": "macOS / Outdoor + Beta only. Bridge track from docs/planning/omlx-sidecar-plan.md: SidecarProcess spawns/health-polls/tears down the omlx server, SidecarBackend adapts its /v1/chat/completions SSE (incl. reasoning_content + streamed tool_calls) into LocalAITextGenerationEvents, SidecarRouting sends big/coding downloaded MLX models to the sidecar (H1: unloads the in-process runtime first). Engine policy via localAI.engineSelectionMode (auto/forceNative/forceSidecar) in Advanced Settings — lets us A/B the native runtime vs omlx through the same app surfaces. Deferred: S4 runtime bundling (currently needs a dev-machine omlx venv).",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — sandboxed builds can't spawn a child process; FEATURE_OMLX_SIDECAR undefined so the code is physically absent."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Dev/compare surface: routes big/coding MLX models through a managed omlx subprocess behind the LocalAITextGenerating seam. Default OFF (localAI.engineSelectionMode=auto); requires a local omlx install until S4 bundling."
+        }
+      ],
+      "package": "app-side Core/LocalAI/Sidecar (SidecarProcess/Backend/Routing)",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "process lifecycle + SSE backend + routing policy are app-side behind one flag; packaging (S4) and MLXServe-native parity comparison are the open tracks",
+        "grade": "partial"
+      }
     },
     {
+      "id": "snap-capture",
       "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+      "group": null,
       "platforms": [
         "macOS"
       ],
@@ -451,7 +1884,50 @@
       "permissions": [
         "Camera",
         "Screen Recording"
-      ]
+      ],
+      "description": "macOS / Outdoor + Beta only. docs/planning/GOAL-device-snap-capture.md. SnapCaptureKit (pure, swift-tested): multi-source SnapSessionWriter/README/clipboard-path + SnapSessionController + SnapCaptureSource seam. SnapDeviceCaptureKit (macOS): CoreMediaIO DAL opt-in (kCMIOHardwarePropertyAllowScreenCaptureDevices) + wasConnectedNotification + one-frame grab for the iPhone SCREEN (NOT camera; excludes .continuityCamera). One additive GlobalTranscriptionService hook posts t0 + finalize (text/duration/timed words) so shots share the audio clock. App-side SnapCaptureCoordinator bridges the hook to the controller; SnapWindowCaptureSource (SCScreenshotManager) + SnapDeviceCaptureSource wrap the seam. Runnable de-risking spike via the DEBUG -snap_device_spike launch flag. PENDING: on-device spike verification (screen-not-camera), then S1 preview windows + S3 ⌘⌥ overlay/picker/Utilities home (gated on the spike). Camera prompt on iPhone activation; Screen Recording on window/display capture.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — capture/AX gated #if os(macOS) && !APPSTORE_BUILD; physically inert in the sandboxed build."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "WIP: ⌘⌥ overlay opens iPhone-SCREEN / window / display previews; Screenshot during a transcription writes timestamped PNGs correlated to the audio clock; on stop a session folder path lands on the clipboard. Camera (iPhone DAL) + Screen Recording (windows/displays)."
+        }
+      ],
+      "package": "SnapCaptureKit + SnapDeviceCaptureKit + app Utilities UI",
+      "modular": "partial",
+      "goldStandard": {
+        "gap": "pure session model/writer/controller + capture-source seam are packaged (SnapCaptureKit, swift-tested) and the GTS clock hook is additive; concrete AVFoundation/ScreenCaptureKit sources, the preview windows, and the ⌘⌥ overlay/picker remain app-side and pending on-device verification of the DAL spike",
+        "grade": "partial"
+      }
     }
   ]
 }

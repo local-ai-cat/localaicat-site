@@ -7,22 +7,26 @@ const sourcePath = path.resolve(root, "../Local-AI-Chat/docs/features.json");
 const outputPath = path.resolve(root, "data/public-features.json");
 
 const allowedTopLevelKeys = new Set([
-  "$comment", "channels", "features", "lanes", "permissionCatalog",
-  "platformAxis", "schemaVersion", "updated"
+  "$comment", "apiAxis", "capabilities", "channels", "features", "lanes",
+  "permissionCatalog", "platformAxis", "schemaVersion", "updated"
 ]);
 const allowedFeatureKeys = new Set([
-  "builds", "caveats", "goldStandard", "group", "id", "internal", "lane",
-  "modular", "name", "notes", "package", "permissions", "platforms",
+  "api", "builds", "caveats", "goldStandard", "group", "id", "internal",
+  "lane", "modular", "name", "notes", "package", "permissions", "platforms",
   "stagedForPromotion", "status", "target"
 ]);
 const buildChannels = ["alpha", "beta", "main", "outdoor"];
 const platforms = ["iOS", "macOS"];
-const availabilityValues = new Set(["yes", "no", "partial"]);
+const availabilityValues = new Set(["yes", "no", "partial", "planned"]);
 const laneValues = new Set(["stable", "beta", "alpha", "locked", "purgatory"]);
+const modularValues = new Set(["yes", "partial", "no"]);
+const gradeValues = new Set(["gold", "strong", "partial", "weak"]);
 const permissionLabels = {
   accessibility: "Accessibility",
+  alarmKit: "Alarms",
   appleEvents: "Automation",
   bluetooth: "Bluetooth",
+  calendar: "Calendar",
   camera: "Camera",
   healthKit: "Health",
   inputMonitoring: "Input Monitoring",
@@ -31,6 +35,12 @@ const permissionLabels = {
   none: "No special permission",
   screenRecording: "Screen Recording",
   speechRecognition: "Speech Recognition"
+};
+const channelLabels = {
+  alpha: "Alpha",
+  beta: "Beta",
+  outdoor: "Direct Download",
+  main: "App Store"
 };
 
 function fail(message) {
@@ -63,7 +73,7 @@ function validateAvailabilityGrid(grid, location) {
 function validateManifest(manifest) {
   if (!isObject(manifest)) fail("root must be an object");
   assertKnownKeys(manifest, allowedTopLevelKeys, "root");
-  if (manifest.schemaVersion !== 4) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
+  if (manifest.schemaVersion !== 5) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
   if (typeof manifest.updated !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.updated)) {
     fail("updated must be an ISO date");
   }
@@ -73,9 +83,29 @@ function validateManifest(manifest) {
     const location = `features[${index}]`;
     if (!isObject(feature)) fail(`${location} must be an object`);
     assertKnownKeys(feature, allowedFeatureKeys, location);
+    if (typeof feature.id !== "string" || feature.id.trim() === "") fail(`${location}.id must be a non-empty string`);
     if (typeof feature.name !== "string" || feature.name.trim() === "") fail(`${location}.name must be a non-empty string`);
     if (typeof feature.internal !== "boolean") fail(`${location}.internal must be a boolean`);
     if (!laneValues.has(feature.lane)) fail(`${location}.lane has unknown value ${JSON.stringify(feature.lane)}`);
+    if (!modularValues.has(feature.modular)) fail(`${location}.modular has unknown value ${JSON.stringify(feature.modular)}`);
+    if (feature.notes !== undefined && typeof feature.notes !== "string") fail(`${location}.notes must be a string`);
+    if (feature.package !== undefined && typeof feature.package !== "string") fail(`${location}.package must be a string`);
+    if (feature.goldStandard !== undefined) {
+      if (!isObject(feature.goldStandard)) fail(`${location}.goldStandard must be an object`);
+      if (!gradeValues.has(feature.goldStandard.grade)) {
+        fail(`${location}.goldStandard.grade has unknown value ${JSON.stringify(feature.goldStandard.grade)}`);
+      }
+      if (typeof feature.goldStandard.gap !== "string") fail(`${location}.goldStandard.gap must be a string`);
+    }
+    if (feature.caveats !== undefined) {
+      if (!Array.isArray(feature.caveats)) fail(`${location}.caveats must be an array`);
+      feature.caveats.forEach((caveat, caveatIndex) => {
+        const caveatLocation = `${location}.caveats[${caveatIndex}]`;
+        if (!isObject(caveat)) fail(`${caveatLocation} must be an object`);
+        if (!(caveat.scope in channelLabels)) fail(`${caveatLocation}.scope has unknown value ${JSON.stringify(caveat.scope)}`);
+        if (typeof caveat.note !== "string" || caveat.note.trim() === "") fail(`${caveatLocation}.note must be a non-empty string`);
+      });
+    }
     if (!Array.isArray(feature.permissions) || feature.permissions.some((value) => typeof value !== "string")) {
       fail(`${location}.permissions must be a string array`);
     }
@@ -106,11 +136,29 @@ function projectFeature(feature) {
   if (hasAvailability(feature, ["beta"])) tiers.push("Beta");
   if (hasAvailability(feature, ["main", "outdoor"])) tiers.push("Stable");
 
+  const channels = ["alpha", "beta", "outdoor", "main"].map((key) => ({
+    key,
+    label: channelLabels[key],
+    iOS: feature.builds[key].iOS,
+    macOS: feature.builds[key].macOS
+  }));
+
   return {
+    id: feature.id,
     name: feature.name,
+    group: feature.group ?? null,
     platforms: availablePlatforms(feature.platforms),
     tiers,
-    permissions: feature.permissions.map((permission) => permissionLabels[permission])
+    permissions: feature.permissions.map((permission) => permissionLabels[permission]),
+    description: feature.notes ?? null,
+    channels,
+    caveats: (feature.caveats ?? []).map((caveat) => ({
+      channel: channelLabels[caveat.scope],
+      note: caveat.note
+    })),
+    package: feature.package ?? null,
+    modular: feature.modular,
+    goldStandard: feature.goldStandard ?? null
   };
 }
 
@@ -134,7 +182,7 @@ async function main() {
   const features = manifest.features
     .filter((feature) => !feature.internal && feature.lane !== "locked" && feature.lane !== "purgatory")
     .map(projectFeature);
-  const output = { schemaVersion: 1, updated: manifest.updated, features };
+  const output = { schemaVersion: 2, updated: manifest.updated, features };
 
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`);

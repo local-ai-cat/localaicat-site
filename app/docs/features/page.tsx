@@ -1,29 +1,25 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import featureData from "../../../data/public-features.json";
 import { ContentPage } from "../../_components/content-page";
+import { FeatureList, type PublicFeature } from "./feature-list";
 
 export const metadata: Metadata = { title: "Feature Coverage" };
 
 export default function FeatureCoveragePage() {
+  const features = featureData.features as PublicFeature[];
   return (
     <ContentPage
       kicker="Documentation"
       title="Feature Coverage"
-      intro="Platform, release-tier, and permission coverage for public Local AI Cat features. Availability may vary within a platform."
+      intro="Every public Local AI Cat feature, with its platform, release-channel, and permission coverage. Expand a feature for its full availability grid and architecture notes."
       meta={`Snapshot updated ${featureData.updated}`}
     >
-      <div className="featureCoverageList">
-        {featureData.features.map((feature) => (
-          <article className="featureCoverageRow" key={feature.name}>
-            <h2>{feature.name}</h2>
-            <dl className="featureCoverageMeta">
-              <div><dt>Platforms</dt><dd>{feature.platforms.join(", ") || "Not available"}</dd></div>
-              <div><dt>Tiers</dt><dd>{feature.tiers.join(", ") || "Not released"}</dd></div>
-              <div><dt>Permissions</dt><dd>{feature.permissions.join(", ")}</dd></div>
-            </dl>
-          </article>
-        ))}
-      </div>
+      <p className="fcCrossLink">
+        Looking for how far each feature has been extracted into its own module? See the{" "}
+        <Link className="textLink" href="/docs/modularity">modular refactoring status</Link>.
+      </p>
+      <FeatureList features={features} />
     </ContentPage>
   );
 }

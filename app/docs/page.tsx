@@ -26,6 +26,7 @@ export default function DocsPage() {
         <h2>Explore the docs</h2>
         <p>
           Start with the <Link className="textLink" href="/docs/features">feature coverage</Link>,
+          follow the <Link className="textLink" href="/docs/modularity">modular refactoring status</Link>,
           or browse the upcoming <Link className="textLink" href="/docs/api">API reference</Link> and{" "}
           <Link className="textLink" href="/docs/testing">testing evidence</Link>.
         </p>

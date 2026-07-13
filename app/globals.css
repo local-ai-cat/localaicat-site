@@ -1180,32 +1180,150 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   color: var(--text);
 }
 
-.featureCoverageList {
+/* ─── Feature coverage (expandable list) ─── */
+
+.fcCrossLink {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.fcControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.fcSearch {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.fcSearch::placeholder {
+  color: var(--text-faint);
+}
+
+.fcSearch:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.fcCount {
+  color: var(--text-faint);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.fcToggleAll {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fcToggleAll:hover {
+  color: var(--text);
+  border-color: var(--text-faint);
+}
+
+.fcList {
   border-top: 1px solid var(--line);
 }
 
-.featureCoverageRow {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
-  gap: 32px;
-  padding: 24px 0;
+.fcItem {
   border-bottom: 1px solid var(--line);
 }
 
-.featureCoverageRow h2 {
-  font-size: clamp(20px, 3vw, 26px);
-  line-height: 1.1;
+.fcHead {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.featureCoverageMeta {
+.fcHead:hover .fcName {
+  color: var(--accent);
+}
+
+.fcName {
+  flex: 1;
+  font-size: clamp(18px, 2.6vw, 24px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.fcChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fcChip {
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fcChipTier {
+  color: var(--text-dim);
+}
+
+.fcChipGroup {
+  color: var(--accent);
+  border-color: rgba(232, 213, 176, 0.3);
+}
+
+.fcCaret {
+  color: var(--text-faint);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.fcBody {
+  padding: 0 0 24px;
+}
+
+.fcDescription {
+  margin: 0 0 20px;
+  max-width: 72ch;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.fcDetailGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  margin: 0;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.4fr);
+  gap: 28px;
 }
 
-.featureCoverageMeta dt {
-  margin-bottom: 6px;
+.fcDetailLabel {
+  margin: 0 0 8px;
   color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -1213,11 +1331,276 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   font-weight: 700;
 }
 
-.featureCoverageMeta dd {
+.fcDetailLabel + .fcDetailLabel,
+.fcDetailText + .fcDetailLabel,
+.fcCaveats + .fcDetailLabel,
+.fcPackage + .fcDetailLabel {
+  margin-top: 18px;
+}
+
+.fcDetailText {
   margin: 0;
   color: var(--text-dim);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.fcCaveats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.fcCaveats li + li {
+  margin-top: 6px;
+}
+
+.fcCaveats strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.fcPackage {
+  margin: 8px 0 0;
+  color: var(--text-faint);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fcChannelTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.fcChannelTable th,
+.fcChannelTable td {
+  padding: 6px 12px 6px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.fcChannelTable thead th {
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.fcChannelTable tbody th {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.fcChannelTable td {
+  color: var(--text-dim);
+}
+
+.fcChannelTable td[data-avail="yes"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.fcChannelTable td[data-avail="no"] {
+  color: var(--text-faint);
+}
+
+.fcEmpty {
+  padding: 24px 0;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+
+/* ─── Modular refactoring status ─── */
+
+.modStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.modStat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.modStatValue {
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.modStatLabel {
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.modBarFigure {
+  margin: 0;
+}
+
+.modBarLabel {
+  margin-bottom: 10px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.modBar {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+}
+
+.modSeg {
+  display: block;
+  flex-basis: 0;
+  border-radius: 4px;
+  min-width: 6px;
+}
+
+.modLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.modLegend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modLegend strong {
+  color: var(--text);
+}
+
+.modSwatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.modSegYes,
+.gradeSeg_gold {
+  background: #e8d5b0;
+}
+
+.gradeSeg_strong {
+  background: #c0a97e;
+}
+
+.modSegPartial,
+.gradeSeg_partial {
+  background: #96805a;
+}
+
+.modSegNo,
+.gradeSeg_weak {
+  background: #6b5a3e;
+}
+
+.modGradeGlossary {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 0;
+}
+
+.modGradeGlossary dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.modGradeGlossary dd {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.modGradeGroup {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.modGradeHeading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  font-size: clamp(20px, 3vw, 26px);
+}
+
+.modGradeCount {
+  color: var(--text-faint);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modFeatureList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 28px;
+}
+
+.modFeature h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.modGap {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.modGap strong {
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .fcDetailGrid,
+  .modFeatureList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fcControls {
+    flex-wrap: wrap;
+  }
+
+  .modStats {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .contentBack {

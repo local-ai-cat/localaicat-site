@@ -1659,6 +1659,12 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   font-size: 11px;
 }
 
+.moduleDetailNeverDriven {
+  min-height: 28px;
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
 .moduleStatusGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -32,8 +32,14 @@ export async function generateMetadata({ params }: ModulePageProps): Promise<Met
   };
 }
 
-function StatusChip({ children, kind }: { children: React.ReactNode; kind: string }) {
-  return <span className="moduleChip moduleDetailChip" data-kind={kind}>{children}</span>;
+const provisionalTooltip = "Provisional signal from test-file presence — NOT the testing grade. Real grade lands with the ledger grade script.";
+
+function provisionalLabel(status: ModulePage["behavioral"]["status"]): string {
+  return status === "behavioral" ? "+behavioral" : status;
+}
+
+function StatusChip({ children, kind, title }: { children: React.ReactNode; kind: string; title?: string }) {
+  return <span className="moduleChip moduleDetailChip" data-kind={kind} title={title}>{children}</span>;
 }
 
 function availabilityPlatforms(module: ModulePage, key: ModulePage["channels"][number]["key"]) {
@@ -63,9 +69,13 @@ function StatusSection({ module }: { module: ModulePage }) {
       <div className="moduleStatusSummary">
         <StatusChip kind="status">Lane: {displayLabel(module.lane)}</StatusChip>
         <StatusChip kind="status">Status: {displayLabel(module.status)}</StatusChip>
-        <StatusChip kind="testing">
-          Testing: {displayLabel(module.testing.tier)} (~{module.testing.cases} cases)
+        <StatusChip
+          kind="testing"
+          title={`${provisionalTooltip} Approximately ${module.testing.cases} test cases detected${module.behavioral.hasSnapshot ? "; snapshot evidence present" : ""}.`}
+        >
+          Testing: prov. {provisionalLabel(module.behavioral.status)}
         </StatusChip>
+        {module.behavioral.neverDriven ? <span className="moduleNeverDrivenBadge moduleDetailNeverDriven">⚠ never-driven</span> : null}
         {module.accessTier === "pro" ? <StatusChip kind="access">Pro</StatusChip> : null}
       </div>
 

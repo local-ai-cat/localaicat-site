@@ -1,11 +1,14 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "updated": "2026-07-16",
   "features": [
     {
       "id": "chat-local-llm",
       "name": "Local LLM Chat",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -57,6 +60,9 @@
       "id": "transcription",
       "name": "Transcription (Whisper / SpeechAnalyzer)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -106,9 +112,74 @@
       }
     },
     {
+      "id": "wav2vec2-transcription",
+      "name": "Wav2Vec2 XLSR-53 Multilingual Transcription",
+      "group": null,
+      "lane": "purgatory",
+      "status": "beta",
+      "accessTier": "free",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [],
+      "permissions": [
+        "Microphone"
+      ],
+      "description": "PARKED to purgatory 2026-07-08 — likely deletion candidate. Ships nowhere and FEATURE_WAV2VEC2 remains defined on no shipping target. The macOS-only FeatureWav2Vec2 package makes the architecture seam complete, but does not change the distribution wall: scripts/build-wav2vec2-runtime.sh still compiles the py-ai-dev/wav2vec2.cpp CLI plus a Python conversion environment, no pre-converted GGUFs are published, and a self-compiled unsigned subprocess cannot ship in notarized/App-Store builds. File-transcription-only, ~3× RTF. Revive only with an in-process static C target (no subprocess/signing) or an otherwise sanctioned compile/sign/distribution path.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — App Store (sandboxed) build excludes the subprocess runtime."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "File-transcription lane only. Requires the optional wav2vec2-cli runtime installed via scripts/build-wav2vec2-runtime.sh; engine reports unavailable-with-reason until then."
+        },
+        {
+          "channel": "Beta",
+          "note": "File-transcription lane only (RTF ~3×, slower than real time — never wired to live mic). 16-language xlsr-53 family, per-language GGUF converted via python3. macOS only (Process/subprocess); iOS excluded."
+        }
+      ],
+      "package": "LocalAITranscription + FeatureWav2Vec2",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "LocalAITranscription owns pure selection/catalog/parser/runtime contracts; macOS-only FeatureWav2Vec2 owns AVFoundation resampling, subprocess lifecycle, availability, and optional-engine registration. The app shell consumes only the feature-agnostic transcription-engine registry.",
+        "grade": "strong"
+      }
+    },
+    {
       "id": "global-transcription",
       "name": "Global Transcription (menu bar)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -171,6 +242,9 @@
       "id": "auto-paste",
       "name": "Auto-paste transcription into active app",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -230,6 +304,9 @@
       "id": "window-mgmt-others",
       "name": "Window management of other apps",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -289,6 +366,9 @@
       "id": "window-mgmt-self",
       "name": "Window management (own windows)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -339,6 +419,9 @@
       "id": "quit-apps",
       "name": "Quit Apps (force-quit running apps)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "pro",
       "platforms": [
         "macOS"
       ],
@@ -398,6 +481,9 @@
       "id": "screen-awake",
       "name": "Screen Awake",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -448,6 +534,9 @@
       "id": "keyboard-backlight",
       "name": "Keyboard Backlight",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -507,6 +596,9 @@
       "id": "desktop-curtain",
       "name": "Hide Desktop Icons / Desktop Curtain",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -562,6 +654,9 @@
       "id": "eye-care",
       "name": "Eye Care reminder (20-20-20)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -621,6 +716,9 @@
       "id": "monitor-control",
       "name": "Monitor Control (external DDC)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -680,6 +778,9 @@
       "id": "compute",
       "name": "Compute / Model Link (discovery, remote cat, P2P, VNC + audio, SSH, Terminal3D)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -743,6 +844,9 @@
       "id": "openclaw",
       "name": "OpenClaw (gateway chat)",
       "group": null,
+      "lane": "alpha",
+      "status": "beta",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -805,6 +909,9 @@
       "id": "local-api",
       "name": "Local API server",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -864,6 +971,9 @@
       "id": "app-control",
       "name": "App Control API",
       "group": null,
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -917,6 +1027,9 @@
       "id": "routine-kit",
       "name": "Routines",
       "group": "utilities",
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -976,6 +1089,9 @@
       "id": "mlxserve-sidecar",
       "name": "MLXServe sidecar",
       "group": null,
+      "lane": "stable",
+      "status": "beta",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1035,6 +1151,9 @@
       "id": "mlxserve-embed",
       "name": "MLXServe embedded listener",
       "group": null,
+      "lane": "stable",
+      "status": "beta",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1095,6 +1214,9 @@
       "id": "energy-impact",
       "name": "Energy & Impact",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1146,6 +1268,9 @@
       "id": "dangerously-skip",
       "name": "Dangerously Skip (BLE jump rope)",
       "group": "utilities",
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1206,6 +1331,9 @@
       "id": "workout-exercise",
       "name": "Workout: Exercise (camera rep counter)",
       "group": "utilities",
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1263,6 +1391,9 @@
       "id": "sentry-mode",
       "name": "Sentry Mode (away-guard lock)",
       "group": "utilities",
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1321,6 +1452,9 @@
       "id": "model-link",
       "name": "Model Link (P2P remote AI)",
       "group": "settings",
+      "lane": "alpha",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1379,6 +1513,9 @@
       "id": "quick-capture",
       "name": "Quick Capture (capture-chord palette)",
       "group": "utilities",
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1438,6 +1575,9 @@
       "id": "skip-healthkit-logging",
       "name": "Skip HealthKit workout logging",
       "group": null,
+      "lane": "beta",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1485,6 +1625,9 @@
       "id": "content-safety-filter",
       "name": "Content Safety Filter (toggle)",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1536,6 +1679,9 @@
       "id": "subscription",
       "name": "Subscription / Payments",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1597,9 +1743,82 @@
       }
     },
     {
+      "id": "beta-telemetry",
+      "name": "Beta Telemetry (Sentry) — GOLD STANDARD MODULE",
+      "group": null,
+      "lane": "locked",
+      "status": "beta",
+      "accessTier": "free",
+      "platforms": [
+        "iOS",
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta"
+      ],
+      "permissions": [
+        "No special permission"
+      ],
+      "description": "Reference module for the modular architecture. Facade always present; the Sentry impl is linked/injected by the macOS Beta target — which BOTH the beta channel AND the alpha overlay (Beta scheme + ALPHA) build on, so telemetry runs on alpha AND beta (not beta-only). Alpha is mandatory (opt-out ignored); beta is opt-out via betaDisableSentry. Stable Outdoor + App Store link no Sentry backend at all. Release flows bake SENTRY_DSN (into Info.plist); unseeded local builds no-op. Events are tagged with environment=alpha/beta + release=<version>+<build>.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Facade present, no Sentry backend linked — no telemetry."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Facade present, no Sentry backend linked — no telemetry."
+        },
+        {
+          "channel": "Alpha",
+          "note": "ALWAYS ON: the Sentry impl (linked via the Beta target the alpha overlay builds on) is mandatory in alpha — the opt-out is ignored, and that unconditional diagnostics consent is what makes the free-Pro perk unconditional too."
+        },
+        {
+          "channel": "Beta",
+          "note": "On by default, OPT-OUT via betaDisableSentry (that consent is the free-Pro trigger). Same Sentry impl as alpha, injected by the macOS Beta target; SENTRY_DSN baked by the release flow (unseeded local builds no-op)."
+        }
+      ],
+      "package": "Packages/Telemetry (facade) + Packages/BetaTelemetry (Sentry impl)",
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "",
+        "grade": "gold"
+      }
+    },
+    {
       "id": "translate",
       "name": "Translate",
       "group": null,
+      "lane": "stable",
+      "status": "live",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1651,6 +1870,9 @@
       "id": "even-realities",
       "name": "Even Realities / G2 display driver",
       "group": null,
+      "lane": "stable",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "iOS",
         "macOS"
@@ -1704,6 +1926,9 @@
       "id": "lmstudio-interop",
       "name": "LM Studio model interop",
       "group": null,
+      "lane": "stable",
+      "status": "beta",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1763,6 +1988,9 @@
       "id": "gguf-backend",
       "name": "GGUF backend (llama.cpp sidecar)",
       "group": null,
+      "lane": "stable",
+      "status": "beta",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1822,6 +2050,9 @@
       "id": "omlx-sidecar",
       "name": "omlx sidecar (Python MLX oracle)",
       "group": null,
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],
@@ -1879,6 +2110,9 @@
       "id": "snap-capture",
       "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
       "group": null,
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
       "platforms": [
         "macOS"
       ],

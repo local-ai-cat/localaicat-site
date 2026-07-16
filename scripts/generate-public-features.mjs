@@ -19,6 +19,8 @@ const buildChannels = ["alpha", "beta", "main", "outdoor"];
 const platforms = ["iOS", "macOS"];
 const availabilityValues = new Set(["yes", "no", "partial", "planned"]);
 const laneValues = new Set(["stable", "beta", "alpha", "locked", "purgatory"]);
+const statusValues = new Set(["live", "beta", "wip"]);
+const accessTierValues = new Set(["free", "pro"]);
 const modularValues = new Set(["yes", "partial", "no"]);
 const gradeValues = new Set(["gold", "strong", "partial", "weak"]);
 const permissionLabels = {
@@ -87,9 +89,15 @@ function validateManifest(manifest) {
     if (typeof feature.name !== "string" || feature.name.trim() === "") fail(`${location}.name must be a non-empty string`);
     if (typeof feature.internal !== "boolean") fail(`${location}.internal must be a boolean`);
     if (!laneValues.has(feature.lane)) fail(`${location}.lane has unknown value ${JSON.stringify(feature.lane)}`);
+    if (!statusValues.has(feature.status)) fail(`${location}.status has unknown value ${JSON.stringify(feature.status)}`);
     if (!modularValues.has(feature.modular)) fail(`${location}.modular has unknown value ${JSON.stringify(feature.modular)}`);
     if (feature.notes !== undefined && typeof feature.notes !== "string") fail(`${location}.notes must be a string`);
     if (feature.package !== undefined && typeof feature.package !== "string") fail(`${location}.package must be a string`);
+    if (!isObject(feature.requirements)) fail(`${location}.requirements must be an object`);
+    assertKnownKeys(feature.requirements, new Set(["minTier"]), `${location}.requirements`);
+    if (!accessTierValues.has(feature.requirements.minTier)) {
+      fail(`${location}.requirements.minTier has unknown value ${JSON.stringify(feature.requirements.minTier)}`);
+    }
     if (feature.goldStandard !== undefined) {
       if (!isObject(feature.goldStandard)) fail(`${location}.goldStandard must be an object`);
       if (!gradeValues.has(feature.goldStandard.grade)) {
@@ -147,6 +155,9 @@ function projectFeature(feature) {
     id: feature.id,
     name: feature.name,
     group: feature.group ?? null,
+    lane: feature.lane,
+    status: feature.status,
+    accessTier: feature.requirements.minTier,
     platforms: availablePlatforms(feature.platforms),
     tiers,
     permissions: feature.permissions.map((permission) => permissionLabels[permission]),
@@ -180,9 +191,9 @@ async function main() {
   validateManifest(manifest);
 
   const features = manifest.features
-    .filter((feature) => !feature.internal && feature.lane !== "locked" && feature.lane !== "purgatory")
+    .filter((feature) => !feature.internal)
     .map(projectFeature);
-  const output = { schemaVersion: 2, updated: manifest.updated, features };
+  const output = { schemaVersion: 3, updated: manifest.updated, features };
 
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`);

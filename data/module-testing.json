@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-07-16",
+  "modules": [
+    {
+      "id": "chat-local-llm",
+      "packages": [
+        "LocalAICore",
+        "LocalAITextGeneration"
+      ],
+      "cases": 64,
+      "tier": "heavy"
+    },
+    {
+      "id": "transcription",
+      "packages": [
+        "LocalAITranscription"
+      ],
+      "cases": 56,
+      "tier": "heavy"
+    },
+    {
+      "id": "wav2vec2-transcription",
+      "packages": [
+        "FeatureWav2Vec2",
+        "LocalAITranscription"
+      ],
+      "cases": 61,
+      "tier": "heavy"
+    },
+    {
+      "id": "global-transcription",
+      "packages": [
+        "FeatureGlobalTranscription"
+      ],
+      "cases": 94,
+      "tier": "heavy"
+    },
+    {
+      "id": "auto-paste",
+      "packages": [
+        "FeatureAutoPaste"
+      ],
+      "cases": 7,
+      "tier": "thin"
+    },
+    {
+      "id": "window-mgmt-others",
+      "packages": [
+        "FeatureWindowManagement"
+      ],
+      "cases": 45,
+      "tier": "heavy"
+    },
+    {
+      "id": "window-mgmt-self",
+      "packages": [
+        "FeatureWindowManagement"
+      ],
+      "cases": 45,
+      "tier": "heavy"
+    },
+    {
+      "id": "quit-apps",
+      "packages": [
+        "FeatureQuitApps"
+      ],
+      "cases": 8,
+      "tier": "thin"
+    },
+    {
+      "id": "screen-awake",
+      "packages": [
+        "FeatureScreenAwake"
+      ],
+      "cases": 38,
+      "tier": "heavy"
+    },
+    {
+      "id": "keyboard-backlight",
+      "packages": [
+        "FeatureKeyboardBacklight"
+      ],
+      "cases": 5,
+      "tier": "thin"
+    },
+    {
+      "id": "desktop-curtain",
+      "packages": [
+        "FeatureDesktopCurtain"
+      ],
+      "cases": 26,
+      "tier": "covered"
+    },
+    {
+      "id": "eye-care",
+      "packages": [
+        "FeatureEyeCare"
+      ],
+      "cases": 31,
+      "tier": "heavy"
+    },
+    {
+      "id": "monitor-control",
+      "packages": [
+        "FeatureMonitorControl"
+      ],
+      "cases": 36,
+      "tier": "heavy"
+    },
+    {
+      "id": "compute",
+      "packages": [
+        "FeatureCompute",
+        "LocalAIContracts"
+      ],
+      "cases": 49,
+      "tier": "heavy"
+    },
+    {
+      "id": "openclaw",
+      "packages": [
+        "FeatureOpenClaw"
+      ],
+      "cases": 6,
+      "tier": "thin"
+    },
+    {
+      "id": "local-api",
+      "packages": [
+        "LocalAIHTTPServer"
+      ],
+      "cases": 202,
+      "tier": "heavy"
+    },
+    {
+      "id": "app-control",
+      "packages": [
+        "AppControlKit"
+      ],
+      "cases": 25,
+      "tier": "covered"
+    },
+    {
+      "id": "routine-kit",
+      "packages": [
+        "LocalAIHTTPServer",
+        "RoutineKit"
+      ],
+      "cases": 270,
+      "tier": "heavy"
+    },
+    {
+      "id": "mlxserve-sidecar",
+      "packages": [
+        "FeatureMLXServeSidecar"
+      ],
+      "cases": 9,
+      "tier": "thin"
+    },
+    {
+      "id": "mlxserve-embed",
+      "packages": [],
+      "cases": 0,
+      "tier": "none"
+    },
+    {
+      "id": "energy-impact",
+      "packages": [
+        "LocalAIEnergy"
+      ],
+      "cases": 27,
+      "tier": "covered"
+    },
+    {
+      "id": "dangerously-skip",
+      "packages": [
+        "FeatureDangerouslySkip",
+        "FeatureEyeCare",
+        "SkipKit"
+      ],
+      "cases": 69,
+      "tier": "heavy"
+    },
+    {
+      "id": "workout-exercise",
+      "packages": [
+        "ChallengeKit",
+        "ExerciseKit"
+      ],
+      "cases": 53,
+      "tier": "heavy"
+    },
+    {
+      "id": "sentry-mode",
+      "packages": [
+        "SentryKit"
+      ],
+      "cases": 23,
+      "tier": "covered"
+    },
+    {
+      "id": "model-link",
+      "packages": [
+        "FeatureModelLink"
+      ],
+      "cases": 7,
+      "tier": "thin"
+    },
+    {
+      "id": "quick-capture",
+      "packages": [
+        "FeatureQuickCapture",
+        "SnapCaptureKit"
+      ],
+      "cases": 51,
+      "tier": "heavy"
+    },
+    {
+      "id": "skip-healthkit-logging",
+      "packages": [
+        "HealthKitLogging"
+      ],
+      "cases": 2,
+      "tier": "thin"
+    },
+    {
+      "id": "content-safety-filter",
+      "packages": [
+        "FeatureContentSafety"
+      ],
+      "cases": 14,
+      "tier": "covered"
+    },
+    {
+      "id": "subscription",
+      "packages": [
+        "FeatureSubscription"
+      ],
+      "cases": 45,
+      "tier": "heavy"
+    },
+    {
+      "id": "beta-telemetry",
+      "packages": [
+        "BetaTelemetry",
+        "Telemetry"
+      ],
+      "cases": 9,
+      "tier": "thin"
+    },
+    {
+      "id": "translate",
+      "packages": [
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalSpeechKit"
+      ],
+      "cases": 59,
+      "tier": "heavy"
+    },
+    {
+      "id": "even-realities",
+      "packages": [
+        "FeatureEvenRealities",
+        "WearableGlassesKit"
+      ],
+      "cases": 30,
+      "tier": "heavy"
+    },
+    {
+      "id": "lmstudio-interop",
+      "packages": [
+        "LocalAICore",
+        "LocalAIHTTPServer"
+      ],
+      "cases": 238,
+      "tier": "heavy"
+    },
+    {
+      "id": "gguf-backend",
+      "packages": [
+        "FeatureGGUF"
+      ],
+      "cases": 22,
+      "tier": "covered"
+    },
+    {
+      "id": "omlx-sidecar",
+      "packages": [
+        "FeatureOMLXSidecar"
+      ],
+      "cases": 2,
+      "tier": "thin"
+    },
+    {
+      "id": "snap-capture",
+      "packages": [
+        "SnapCaptureKit",
+        "SnapDeviceCaptureKit"
+      ],
+      "cases": 26,
+      "tier": "covered"
+    }
+  ]
+}

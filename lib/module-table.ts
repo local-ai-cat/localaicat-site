@@ -1,5 +1,5 @@
-export type FilterKey = "channels" | "platforms" | "distributions" | "statuses" | "testingTiers";
-export type SortKey = "name" | "status" | "modular" | "testingTier";
+export type FilterKey = "channels" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
+export type SortKey = "name" | "status" | "modular" | "testingStatus";
 export type SortDirection = "asc" | "desc";
 
 export type ModuleTableRow = {
@@ -11,8 +11,10 @@ export type ModuleTableRow = {
   distributions: string[];
   status: string;
   modular: "yes" | "partial" | "no";
-  testingTier: "none" | "thin" | "covered" | "heavy";
+  testingStatus: "untested" | "unit-only" | "behavioral";
   testingCases: number;
+  hasSnapshot: boolean;
+  neverDriven: boolean;
 };
 
 export type ModuleFilters = Record<FilterKey, Set<string>>;
@@ -24,7 +26,8 @@ export function emptyModuleFilters(): ModuleFilters {
     platforms: new Set(),
     distributions: new Set(),
     statuses: new Set(),
-    testingTiers: new Set()
+    testingStatuses: new Set(),
+    neverDriven: new Set()
   };
 }
 
@@ -38,13 +41,14 @@ export function filterModuleRows(rows: ModuleTableRow[], filters: ModuleFilters)
     matchesFacet(filters.platforms, row.platforms) &&
     matchesFacet(filters.distributions, row.distributions) &&
     matchesFacet(filters.statuses, [row.status]) &&
-    matchesFacet(filters.testingTiers, [row.testingTier])
+    matchesFacet(filters.testingStatuses, [row.testingStatus]) &&
+    matchesFacet(filters.neverDriven, [row.neverDriven ? "yes" : "no"])
   );
 }
 
 const statusOrder = ["live", "beta", "wip", "locked", "purgatory"];
 const modularOrder = ["yes", "partial", "no"];
-const testingOrder = ["none", "thin", "covered", "heavy"];
+const testingOrder = ["untested", "unit-only", "behavioral"];
 
 function orderedValue(value: string, order: string[]): number {
   const index = order.indexOf(value);
@@ -55,7 +59,7 @@ function compareRows(left: ModuleTableRow, right: ModuleTableRow, key: SortKey):
   if (key === "name") return left.name.localeCompare(right.name);
   if (key === "status") return orderedValue(left.status, statusOrder) - orderedValue(right.status, statusOrder);
   if (key === "modular") return orderedValue(left.modular, modularOrder) - orderedValue(right.modular, modularOrder);
-  return orderedValue(left.testingTier, testingOrder) - orderedValue(right.testingTier, testingOrder);
+  return orderedValue(left.testingStatus, testingOrder) - orderedValue(right.testingStatus, testingOrder);
 }
 
 export function sortModuleRows(rows: ModuleTableRow[], sort: ModuleSort): ModuleTableRow[] {

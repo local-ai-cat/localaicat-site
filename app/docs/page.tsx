@@ -29,8 +29,10 @@ export default function ModulesPage() {
       distributions: routes.length > 0 ? routes : ["none"],
       status: moduleState(module),
       modular: module.modular,
-      testingTier: module.testing.tier,
-      testingCases: module.testing.cases
+      testingStatus: module.behavioral.status,
+      testingCases: module.testing.cases,
+      hasSnapshot: module.behavioral.hasSnapshot,
+      neverDriven: module.behavioral.neverDriven
     };
   });
 

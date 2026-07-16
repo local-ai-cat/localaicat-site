@@ -57,24 +57,36 @@ const filterGroups: FilterGroup[] = [
     ]
   },
   {
-    key: "testingTiers",
-    label: "Testing",
+    key: "testingStatuses",
+    label: "Provisional testing",
     options: [
-      { value: "heavy", label: "Heavy" },
-      { value: "covered", label: "Covered" },
-      { value: "thin", label: "Thin" },
-      { value: "none", label: "None" }
+      { value: "behavioral", label: "+Behavioral" },
+      { value: "unit-only", label: "Unit only" },
+      { value: "untested", label: "Untested" }
+    ]
+  },
+  {
+    key: "neverDriven",
+    label: "Drive gap",
+    options: [
+      { value: "yes", label: "⚠ Never driven" }
     ]
   }
 ];
+
+const provisionalTooltip = "Provisional signal from test-file presence — NOT the testing grade. Real grade lands with the ledger grade script.";
 
 function labelFor(value: string): string {
   if (value === "wip") return "Work in progress";
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
 
-function TableChip({ children, kind }: { children: React.ReactNode; kind: string }) {
-  return <span className="moduleChip moduleTableChip" data-kind={kind}>{children}</span>;
+function provisionalLabel(value: ModuleTableRow["testingStatus"]): string {
+  return value === "behavioral" ? "prov. +behavioral" : `prov. ${value}`;
+}
+
+function TableChip({ children, kind, title }: { children: React.ReactNode; kind: string; title?: string }) {
+  return <span className="moduleChip moduleTableChip" data-kind={kind} title={title}>{children}</span>;
 }
 
 function SortHeader({
@@ -132,7 +144,8 @@ function FilterControls({
         {filterGroups.map((group) => {
           const availableOptions = group.options.filter((option) => rows.some((row) => {
             if (group.key === "statuses") return row.status === option.value;
-            if (group.key === "testingTiers") return row.testingTier === option.value;
+            if (group.key === "testingStatuses") return row.testingStatus === option.value;
+            if (group.key === "neverDriven") return row.neverDriven && option.value === "yes";
             return row[group.key].includes(option.value);
           }));
 
@@ -225,7 +238,7 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
               <th scope="col">Indoor / Outdoor</th>
               <SortHeader activeSort={sort} column="status" label="Status" onSort={changeSort} />
               <SortHeader activeSort={sort} column="modular" label="Modular" onSort={changeSort} />
-              <SortHeader activeSort={sort} column="testingTier" label="Testing tier" onSort={changeSort} />
+              <SortHeader activeSort={sort} column="testingStatus" label="Provisional testing" onSort={changeSort} />
             </tr>
           </thead>
           <tbody>
@@ -270,8 +283,13 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
                 <td><TableChip kind="modular">{labelFor(row.modular)}</TableChip></td>
                 <td>
                   <div className="moduleTestingCell">
-                    <TableChip kind="testing">{labelFor(row.testingTier)}</TableChip>
-                    <span title={`Approximately ${row.testingCases} test cases`}>~{row.testingCases}</span>
+                    <TableChip
+                      kind="testing"
+                      title={`${provisionalTooltip} Approximately ${row.testingCases} test cases detected${row.hasSnapshot ? "; snapshot evidence present" : ""}.`}
+                    >
+                      {provisionalLabel(row.testingStatus)}
+                    </TableChip>
+                    {row.neverDriven ? <span className="moduleNeverDrivenBadge">⚠ never-driven</span> : null}
                   </div>
                 </td>
               </tr>

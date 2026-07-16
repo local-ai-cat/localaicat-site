@@ -17,8 +17,10 @@ const rows: ModuleTableRow[] = [
     distributions: ["outdoor"],
     status: "live",
     modular: "yes",
-    testingTier: "heavy",
-    testingCases: 40
+    testingStatus: "behavioral",
+    testingCases: 40,
+    hasSnapshot: true,
+    neverDriven: false
   },
   {
     id: "parked",
@@ -29,8 +31,10 @@ const rows: ModuleTableRow[] = [
     distributions: ["none"],
     status: "purgatory",
     modular: "partial",
-    testingTier: "thin",
-    testingCases: 4
+    testingStatus: "untested",
+    testingCases: 0,
+    hasSnapshot: false,
+    neverDriven: true
   },
   {
     id: "beta",
@@ -41,8 +45,10 @@ const rows: ModuleTableRow[] = [
     distributions: ["indoor"],
     status: "beta",
     modular: "no",
-    testingTier: "covered",
-    testingCases: 18
+    testingStatus: "unit-only",
+    testingCases: 18,
+    hasSnapshot: false,
+    neverDriven: true
   }
 ];
 
@@ -58,13 +64,21 @@ test("empty filters keep every row", () => {
   assert.deepEqual(filterModuleRows(rows, emptyModuleFilters()), rows);
 });
 
-test("sorts semantic status and testing tiers in either direction", () => {
+test("filters provisional status and never-driven modules", () => {
+  const filters = emptyModuleFilters();
+  filters.testingStatuses = new Set(["unit-only", "behavioral"]);
+  filters.neverDriven = new Set(["yes"]);
+
+  assert.deepEqual(filterModuleRows(rows, filters).map((row) => row.id), ["beta"]);
+});
+
+test("sorts semantic status and provisional testing status in either direction", () => {
   assert.deepEqual(
     sortModuleRows(rows, { key: "status", direction: "asc" }).map((row) => row.id),
     ["stable", "beta", "parked"]
   );
   assert.deepEqual(
-    sortModuleRows(rows, { key: "testingTier", direction: "desc" }).map((row) => row.id),
+    sortModuleRows(rows, { key: "testingStatus", direction: "desc" }).map((row) => row.id),
     ["stable", "beta", "parked"]
   );
 });

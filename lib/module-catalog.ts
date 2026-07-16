@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import behavioralData from "../data/module-behavioral.json";
 import featureData from "../data/public-features.json";
 import testingData from "../data/module-testing.json";
 
@@ -7,6 +8,7 @@ export type Availability = "yes" | "no" | "partial" | "planned";
 export type ModuleLane = "stable" | "beta" | "alpha" | "locked" | "purgatory";
 export type ModuleStatus = "live" | "beta" | "wip";
 export type TestingTier = "none" | "thin" | "covered" | "heavy";
+export type BehavioralStatus = "untested" | "unit-only" | "behavioral";
 
 export type PublicModule = {
   id: string;
@@ -41,6 +43,13 @@ export type ModuleTesting = {
   tier: TestingTier;
 };
 
+export type ModuleBehavioral = {
+  id: string;
+  status: BehavioralStatus;
+  hasSnapshot: boolean;
+  neverDriven: boolean;
+};
+
 export type ModuleBacklogItem = {
   title: string;
   description?: string;
@@ -60,12 +69,15 @@ export type ModuleOverlay = {
 };
 
 export type ModulePage = PublicModule & {
+  behavioral: ModuleBehavioral;
   testing: ModuleTesting;
   overlay: ModuleOverlay;
 };
 
 const modules = featureData.features as PublicModule[];
+const behavioralRows = behavioralData.modules as ModuleBehavioral[];
 const testingRows = testingData.modules as ModuleTesting[];
+const behavioralById = new Map(behavioralRows.map((row) => [row.id, row]));
 const testingById = new Map(testingRows.map((row) => [row.id, row]));
 const overlayRoot = path.join(process.cwd(), "data/module-pages");
 
@@ -137,9 +149,16 @@ function testingFor(id: string): ModuleTesting {
   return testing;
 }
 
+function behavioralFor(id: string): ModuleBehavioral {
+  const behavioral = behavioralById.get(id);
+  if (!behavioral) throw new Error(`Missing generated behavioral data for module ${JSON.stringify(id)}`);
+  return behavioral;
+}
+
 export function getModules(): ModulePage[] {
   return modules.map((module) => ({
     ...module,
+    behavioral: behavioralFor(module.id),
     testing: testingFor(module.id),
     overlay: readOverlay(module.id)
   }));
@@ -148,7 +167,7 @@ export function getModules(): ModulePage[] {
 export function getModule(id: string): ModulePage | undefined {
   const module = modules.find((candidate) => candidate.id === id);
   if (!module) return undefined;
-  return { ...module, testing: testingFor(id), overlay: readOverlay(id) };
+  return { ...module, behavioral: behavioralFor(id), testing: testingFor(id), overlay: readOverlay(id) };
 }
 
 function channelShips(module: PublicModule, key: PublicModule["channels"][number]["key"]) {

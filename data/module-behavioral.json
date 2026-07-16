@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-07-16",
+  "modules": [
+    {
+      "id": "chat-local-llm",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "transcription",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "wav2vec2-transcription",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "global-transcription",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "auto-paste",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "window-mgmt-others",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "window-mgmt-self",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "quit-apps",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "screen-awake",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "keyboard-backlight",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "desktop-curtain",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "eye-care",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "monitor-control",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "compute",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "openclaw",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "local-api",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "app-control",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "routine-kit",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "mlxserve-sidecar",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "mlxserve-embed",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "energy-impact",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "dangerously-skip",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "workout-exercise",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "sentry-mode",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "model-link",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "quick-capture",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "skip-healthkit-logging",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "content-safety-filter",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "subscription",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "beta-telemetry",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "translate",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "even-realities",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "lmstudio-interop",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "gguf-backend",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "omlx-sidecar",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
+    },
+    {
+      "id": "snap-capture",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": false
+    }
+  ]
+}

@@ -7,13 +7,13 @@ const sourcePath = path.resolve(root, "../Local-AI-Chat/docs/features.json");
 const outputPath = path.resolve(root, "data/public-features.json");
 
 const allowedTopLevelKeys = new Set([
-  "$comment", "apiAxis", "capabilities", "channels", "features", "lanes",
+  "$comment", "accessTiers", "apiAxis", "capabilities", "channels", "features", "lanes",
   "permissionCatalog", "platformAxis", "schemaVersion", "updated"
 ]);
 const allowedFeatureKeys = new Set([
   "api", "builds", "caveats", "goldStandard", "group", "id", "internal",
   "lane", "modular", "name", "notes", "package", "permissions", "platforms",
-  "stagedForPromotion", "status", "target"
+  "requirements", "stagedForPromotion", "status", "target", "uiPlacements"
 ]);
 const buildChannels = ["alpha", "beta", "main", "outdoor"];
 const platforms = ["iOS", "macOS"];

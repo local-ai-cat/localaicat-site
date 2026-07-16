@@ -16,6 +16,7 @@ const navLinks =
   [
     { href: "/pricing", label: "Pricing" },
     { href: "/manage", label: "Manage" },
+    { href: "/docs", label: "Modules" },
     { href: "/support", label: "Support" },
     { href: "/download", label: "Download", cta: true }
   ] as const;
@@ -96,6 +97,7 @@ export function SiteShell({
           <nav aria-label="Footer" className="footerLinks">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
+            <Link href="/docs">Modules</Link>
             <Link href="/support">Support</Link>
           </nav>
         </div>

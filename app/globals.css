@@ -1159,447 +1159,462 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   gap: 20px;
 }
 
-/* ─── Documentation ─── */
+/* ─── Modules ─── */
 
-.docsNav {
+.moduleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.moduleCard {
+  --module-state: var(--accent);
+  position: relative;
   display: flex;
-  gap: 4px;
-  padding: 28px 0 0;
-  overflow-x: auto;
+  flex-direction: column;
+  min-height: 256px;
+  padding: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 62%),
+    var(--surface);
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
 }
 
-.docsNav a {
-  padding: 8px 12px;
-  color: var(--text-faint);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
+.moduleCard::before {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  left: 24px;
+  height: 2px;
+  content: "";
+  background: var(--module-state);
+  opacity: 0.62;
+  transform: scaleX(0.22);
+  transform-origin: left;
+  transition: transform 220ms ease;
 }
 
-.docsNav a:hover {
-  color: var(--text);
+.moduleCard[data-state="live"],
+.moduleStatus[data-state="live"] {
+  --module-state: #9dc9a5;
 }
 
-/* ─── Feature coverage (expandable list) ─── */
+.moduleCard[data-state="beta"],
+.moduleStatus[data-state="beta"] {
+  --module-state: #adc5e2;
+}
 
-.fcCrossLink {
+.moduleCard[data-state="wip"],
+.moduleStatus[data-state="wip"] {
+  --module-state: #d8bd88;
+}
+
+.moduleCard[data-state="locked"],
+.moduleStatus[data-state="locked"] {
+  --module-state: #c4a7db;
+}
+
+.moduleCard[data-state="purgatory"],
+.moduleStatus[data-state="purgatory"] {
+  --module-state: #d08f86;
+}
+
+.moduleCard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.moduleCardCopy h2 {
+  display: -webkit-box;
   margin: 0;
+  overflow: hidden;
+  font-size: clamp(23px, 2.4vw, 30px);
+  line-height: 1.02;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.moduleCardCopy p {
+  display: -webkit-box;
+  margin: 14px 0 0;
+  overflow: hidden;
   color: var(--text-dim);
-  font-size: 14px;
-}
-
-.fcControls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding-bottom: 16px;
-}
-
-.fcSearch {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  font-size: 14px;
-}
-
-.fcSearch::placeholder {
-  color: var(--text-faint);
-}
-
-.fcSearch:focus-visible {
-  outline: none;
-  border-color: var(--accent);
-}
-
-.fcCount {
-  color: var(--text-faint);
   font-size: 13px;
-  white-space: nowrap;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.fcToggleAll {
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-dim);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.fcToggleAll:hover {
-  color: var(--text);
-  border-color: var(--text-faint);
-}
-
-.fcList {
-  border-top: 1px solid var(--line);
-}
-
-.fcItem {
-  border-bottom: 1px solid var(--line);
-}
-
-.fcHead {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  width: 100%;
-  padding: 20px 0;
-  border: 0;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.fcHead:hover .fcName {
-  color: var(--accent);
-}
-
-.fcName {
-  flex: 1;
-  font-size: clamp(18px, 2.6vw, 24px);
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.fcChips {
+.moduleChips,
+.moduleStatusSummary {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.fcChip {
+.moduleChips {
+  align-content: flex-end;
+  margin-top: auto;
+  padding-top: 24px;
+  padding-right: 28px;
+}
+
+.moduleChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   padding: 3px 8px;
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--text-faint);
-  font-size: 11px;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.018);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  line-height: 1;
   white-space: nowrap;
 }
 
-.fcChipTier {
-  color: var(--text-dim);
+.moduleChip[data-kind="channel"] {
+  color: #dac7a4;
+  border-color: rgba(218, 199, 164, 0.2);
 }
 
-.fcChipGroup {
+.moduleChip[data-kind="platform"] {
+  color: #aac3df;
+  border-color: rgba(170, 195, 223, 0.2);
+}
+
+.moduleChip[data-kind="distribution"] {
+  color: #a8cfb0;
+  border-color: rgba(168, 207, 176, 0.2);
+}
+
+.moduleChip[data-kind="testing"] {
+  color: #c4aed7;
+  border-color: rgba(196, 174, 215, 0.2);
+}
+
+.moduleChip[data-kind="access"] {
   color: var(--accent);
-  border-color: rgba(232, 213, 176, 0.3);
+  border-color: rgba(232, 213, 176, 0.32);
 }
 
-.fcCaret {
+.moduleChip[data-kind="status"] {
+  color: var(--module-state);
+  border-color: color-mix(in srgb, var(--module-state) 28%, transparent);
+}
+
+.moduleCardArrow {
+  position: absolute;
+  right: 24px;
+  bottom: 25px;
   color: var(--text-faint);
-  font-size: 18px;
+  font-size: 16px;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+@media (hover: hover) {
+  .moduleCard:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 62%),
+      var(--surface);
+    transform: translateY(-2px);
+  }
+
+  .moduleCard:hover::before {
+    transform: scaleX(1);
+  }
+
+  .moduleCard:hover .moduleCardArrow {
+    color: var(--text);
+    transform: translate(2px, -2px);
+  }
+}
+
+.moduleDetail {
+  --module-label-width: 180px;
+  padding-top: 32px;
+}
+
+.moduleDetail .contentPage {
+  padding-top: 12px;
+}
+
+.moduleSection {
+  padding: 34px 0 10px;
+  border-top: 1px solid var(--line);
+}
+
+.moduleSectionHeading {
+  display: grid;
+  grid-template-columns: var(--module-label-width) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 24px;
+}
+
+.moduleSectionHeading p {
+  margin: 0;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.moduleSectionHeading h2 {
+  font-size: clamp(28px, 4vw, 42px);
   line-height: 1;
 }
 
-.fcBody {
-  padding: 0 0 24px;
+.moduleStatusSummary,
+.moduleStatusGrid,
+.moduleShippingList,
+.moduleLongCopy,
+.moduleMedia,
+.moduleEntryList,
+.moduleEmptyState,
+.moduleHistory {
+  margin-left: calc(var(--module-label-width) + 24px);
 }
 
-.fcDescription {
-  margin: 0 0 20px;
-  max-width: 72ch;
-  color: var(--text-dim);
-  font-size: 14px;
-  line-height: 1.6;
+.moduleStatusSummary {
+  margin-top: 24px;
 }
 
-.fcDetailGrid {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.4fr);
-  gap: 28px;
+.moduleDetailChip {
+  min-height: 28px;
+  padding: 5px 10px;
+  font-size: 11px;
 }
 
-.fcDetailLabel {
-  margin: 0 0 8px;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.fcDetailLabel + .fcDetailLabel,
-.fcDetailText + .fcDetailLabel,
-.fcCaveats + .fcDetailLabel,
-.fcPackage + .fcDetailLabel {
-  margin-top: 18px;
-}
-
-.fcDetailText {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.fcCaveats {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--text-dim);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.fcCaveats li + li {
-  margin-top: 6px;
-}
-
-.fcCaveats strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.fcPackage {
-  margin: 8px 0 0;
-  color: var(--text-faint);
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.fcChannelTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.fcChannelTable th,
-.fcChannelTable td {
-  padding: 6px 12px 6px 0;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-}
-
-.fcChannelTable thead th {
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.fcChannelTable tbody th {
-  color: var(--text-dim);
-  font-weight: 600;
-}
-
-.fcChannelTable td {
-  color: var(--text-dim);
-}
-
-.fcChannelTable td[data-avail="yes"] {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.fcChannelTable td[data-avail="no"] {
-  color: var(--text-faint);
-}
-
-.fcEmpty {
-  padding: 24px 0;
-  color: var(--text-faint);
-  font-size: 14px;
-}
-
-/* ─── Modular refactoring status ─── */
-
-.modStats {
+.moduleStatusGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 24px;
+  margin-top: 28px;
+  margin-bottom: 0;
 }
 
-.modStat {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 20px 0;
+.moduleStatusGrid div {
+  padding-top: 12px;
   border-top: 1px solid var(--line);
 }
 
-.modStatValue {
-  font-size: clamp(36px, 5vw, 52px);
-  font-weight: 700;
-  line-height: 1;
-}
-
-.modStatLabel {
+.moduleStatusGrid dt {
   color: var(--text-faint);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 11px;
+  letter-spacing: 0.11em;
+  font-size: 9px;
   font-weight: 700;
 }
 
-.modBarFigure {
-  margin: 0;
-}
-
-.modBarLabel {
-  margin-bottom: 10px;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.modBar {
-  display: flex;
-  gap: 2px;
-  height: 14px;
-}
-
-.modSeg {
-  display: block;
-  flex-basis: 0;
-  border-radius: 4px;
-  min-width: 6px;
-}
-
-.modLegend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-  color: var(--text-dim);
-  font-size: 13px;
-}
-
-.modLegend li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.modLegend strong {
-  color: var(--text);
-}
-
-.modSwatch {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-.modSegYes,
-.gradeSeg_gold {
-  background: #e8d5b0;
-}
-
-.gradeSeg_strong {
-  background: #c0a97e;
-}
-
-.modSegPartial,
-.gradeSeg_partial {
-  background: #96805a;
-}
-
-.modSegNo,
-.gradeSeg_weak {
-  background: #6b5a3e;
-}
-
-.modGradeGlossary {
-  display: grid;
-  gap: 14px;
-  margin: 16px 0 0;
-}
-
-.modGradeGlossary dt {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.modGradeGlossary dd {
-  margin: 0;
+.moduleStatusGrid dd {
+  margin: 7px 0 0;
   color: var(--text-dim);
   font-size: 13px;
   line-height: 1.5;
 }
 
-.modGradeGroup {
-  border-top: 1px solid var(--line);
-  padding-top: 20px;
+.moduleShippingList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+  margin-top: 28px;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.modGradeHeading {
+.moduleShippingList li {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 16px;
-  font-size: clamp(20px, 3vw, 26px);
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: 12px;
 }
 
-.modGradeCount {
-  color: var(--text-faint);
-  font-size: 15px;
+.moduleShippingList strong {
+  color: var(--text);
   font-weight: 600;
 }
 
-.modFeatureList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px 28px;
-}
-
-.modFeature h3 {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.2;
-}
-
-.modGap {
-  margin: 8px 0 0;
+.moduleLongCopy {
+  max-width: 76ch;
+  margin-top: 24px;
+  margin-bottom: 0;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.moduleMedia {
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+
+.moduleMediaFrame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(232, 213, 176, 0.08), transparent 34%),
+    #090909;
+}
+
+.moduleMediaFrame video,
+.moduleMediaFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.moduleMediaEmpty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.moduleMediaPlay {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 4px;
+  border: 1px solid rgba(232, 213, 176, 0.25);
+  border-radius: 50%;
+  place-items: center;
+  color: var(--accent);
+  font-size: 14px;
+  text-indent: 2px;
+}
+
+.moduleMediaEmpty strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.moduleMediaEmpty span:last-child,
+.moduleMedia figcaption {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.moduleMedia figcaption {
+  margin-top: 10px;
   line-height: 1.5;
 }
 
-.modGap strong {
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 10px;
-  font-weight: 700;
+.moduleEntryList,
+.moduleHistory {
+  margin-top: 24px;
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
 }
 
-@media (max-width: 720px) {
-  .fcDetailGrid,
-  .modFeatureList {
+.moduleEntryList li {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.moduleEntryList strong,
+.moduleHistory strong {
+  font-size: 14px;
+}
+
+.moduleEntryList p,
+.moduleHistory p {
+  margin: 7px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.moduleHistory li {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 24px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.moduleHistory time {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.moduleEmptyState {
+  margin-top: 24px;
+  margin-bottom: 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  color: var(--text-faint);
+  font-size: 13px;
+}
+
+@media (max-width: 980px) {
+  .moduleGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .moduleStatusGrid,
+  .moduleShippingList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .moduleGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .fcControls {
-    flex-wrap: wrap;
+  .moduleCard {
+    min-height: 230px;
   }
 
-  .modStats {
+  .moduleDetail {
+    --module-label-width: 0px;
+  }
+
+  .moduleSectionHeading {
     grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .moduleStatusSummary,
+  .moduleStatusGrid,
+  .moduleShippingList,
+  .moduleLongCopy,
+  .moduleMedia,
+  .moduleEntryList,
+  .moduleEmptyState,
+  .moduleHistory {
+    margin-left: 0;
+  }
+
+  .moduleHistory li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
   }
 }
 

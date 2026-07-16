@@ -8,7 +8,7 @@ const outputPath = path.resolve(root, "data/public-features.json");
 
 const allowedTopLevelKeys = new Set([
   "$comment", "accessTiers", "apiAxis", "capabilities", "channels", "features", "lanes",
-  "permissionCatalog", "platformAxis", "schemaVersion", "updated"
+  "permissionCatalog", "platformAxis", "schemaVersion", "uiPlacementKinds", "updated"
 ]);
 const allowedFeatureKeys = new Set([
   "api", "builds", "caveats", "goldStandard", "group", "id", "internal",
@@ -73,7 +73,7 @@ function validateAvailabilityGrid(grid, location) {
 function validateManifest(manifest) {
   if (!isObject(manifest)) fail("root must be an object");
   assertKnownKeys(manifest, allowedTopLevelKeys, "root");
-  if (manifest.schemaVersion !== 5) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
+  if (manifest.schemaVersion !== 5 && manifest.schemaVersion !== 6) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
   if (typeof manifest.updated !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.updated)) {
     fail("updated must be an ISO date");
   }

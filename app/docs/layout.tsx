@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
-  return <SiteShell>{children}</SiteShell>;
+  return <SiteShell wide>{children}</SiteShell>;
 }

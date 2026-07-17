@@ -10,6 +10,8 @@ type SiteShellProps = {
   navMode?: "default" | "legal";
   /** Force brand icon/tagline to a specific mode on deterministic pages */
   siteMode?: "personal" | "business";
+  /** Widen the content frame for dense data views (e.g. the modules grid) */
+  wide?: boolean;
 };
 
 const navLinks =
@@ -32,7 +34,8 @@ const legalLinks =
 export function SiteShell({
   children,
   navMode = "default",
-  siteMode
+  siteMode,
+  wide = false
 }: SiteShellProps) {
   const links = navMode === "legal" ? legalLinks : navLinks;
 
@@ -83,7 +86,7 @@ export function SiteShell({
         </div>
       </ScrollHeader>
 
-      <div className="pageFrame">
+      <div className={wide ? "pageFrame pageFrameWide" : "pageFrame"}>
         <main>{children}</main>
       </div>
 

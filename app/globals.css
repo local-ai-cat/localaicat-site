@@ -313,6 +313,11 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   padding: 0 24px 100px;
 }
 
+/* Wide frame for dense data views (modules grid) so the full table is visible. */
+.pageFrameWide {
+  width: min(2400px, 95vw);
+}
+
 #main {
   outline: none;
 }

@@ -33,13 +33,18 @@ const maxApiPaths = 10;
 
 const allowedTopLevelKeys = new Set([
   "$comment", "accessTiers", "apiAxis", "capabilities", "channels", "features", "lanes",
-  "permissionCatalog", "platformAxis", "schemaVersion", "uiPlacementKinds", "updated"
+  "modules", "permissionCatalog", "platformAxis", "schemaVersion", "uiPlacementKinds", "updated"
 ]);
 const allowedFeatureKeys = new Set([
   "api", "builds", "caveats", "goldStandard", "group", "id", "internal",
-  "lane", "modular", "name", "notes", "package", "permissions", "platforms",
-  "requirements", "stagedForPromotion", "status", "target", "uiPlacements"
+  "lane", "modular", "name", "notes", "ownedPackages", "package", "permissions", "platforms",
+  "requirements", "stagedForPromotion", "status", "target", "uiPlacements", "usesPackages"
 ]);
+// Infrastructure modules (engines / platform / harness / vendored) are projected
+// verbatim EXCEPT `notes`, which carries internal nuance (deletion-candidate remarks,
+// migration TODOs) that is not for the public site.
+const allowedModuleKeys = new Set(["description", "id", "kind", "name", "notes", "packages"]);
+const moduleKindValues = new Set(["feature", "engine", "platform", "harness", "vendored"]);
 const buildChannels = ["alpha", "beta", "main", "outdoor"];
 const platforms = ["iOS", "macOS"];
 const availabilityValues = new Set(["yes", "no", "partial", "planned"]);
@@ -97,13 +102,35 @@ function validateAvailabilityGrid(grid, location) {
   }
 }
 
+function validateStringArray(value, location) {
+  if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string" || entry.trim() === "")) {
+    fail(`${location} must be an array of non-empty strings`);
+  }
+}
+
+function validateModules(modules) {
+  if (!Array.isArray(modules)) fail("modules must be an array");
+  modules.forEach((module, index) => {
+    const location = `modules[${index}]`;
+    if (!isObject(module)) fail(`${location} must be an object`);
+    assertKnownKeys(module, allowedModuleKeys, location);
+    if (typeof module.id !== "string" || module.id.trim() === "") fail(`${location}.id must be a non-empty string`);
+    if (typeof module.name !== "string" || module.name.trim() === "") fail(`${location}.name must be a non-empty string`);
+    if (!moduleKindValues.has(module.kind)) fail(`${location}.kind has unknown value ${JSON.stringify(module.kind)}`);
+    if (typeof module.description !== "string" || module.description.trim() === "") fail(`${location}.description must be a non-empty string`);
+    validateStringArray(module.packages, `${location}.packages`);
+    if (module.notes !== undefined && typeof module.notes !== "string") fail(`${location}.notes must be a string`);
+  });
+}
+
 function validateManifest(manifest) {
   if (!isObject(manifest)) fail("root must be an object");
   assertKnownKeys(manifest, allowedTopLevelKeys, "root");
-  if (manifest.schemaVersion !== 5 && manifest.schemaVersion !== 6) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
+  if (![5, 6, 7].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
   if (typeof manifest.updated !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.updated)) {
     fail("updated must be an ISO date");
   }
+  if (manifest.modules !== undefined) validateModules(manifest.modules);
   if (!Array.isArray(manifest.features)) fail("features must be an array");
 
   manifest.features.forEach((feature, index) => {
@@ -118,6 +145,8 @@ function validateManifest(manifest) {
     if (!modularValues.has(feature.modular)) fail(`${location}.modular has unknown value ${JSON.stringify(feature.modular)}`);
     if (feature.notes !== undefined && typeof feature.notes !== "string") fail(`${location}.notes must be a string`);
     if (feature.package !== undefined && typeof feature.package !== "string") fail(`${location}.package must be a string`);
+    if (feature.ownedPackages !== undefined) validateStringArray(feature.ownedPackages, `${location}.ownedPackages`);
+    if (feature.usesPackages !== undefined) validateStringArray(feature.usesPackages, `${location}.usesPackages`);
     if (!isObject(feature.requirements)) fail(`${location}.requirements must be an object`);
     assertKnownKeys(feature.requirements, new Set(["minTier"]), `${location}.requirements`);
     if (!accessTierValues.has(feature.requirements.minTier)) {
@@ -211,10 +240,22 @@ function projectFeature(feature, openApiPaths) {
       note: caveat.note
     })),
     package: feature.package ?? null,
+    ownedPackages: [...(feature.ownedPackages ?? [])].sort(),
+    usesPackages: [...(feature.usesPackages ?? [])].sort(),
     modular: feature.modular,
     goldStandard: feature.goldStandard ?? null,
     api: feature.api ?? null,
     apiPaths: matchedApiPaths(feature, openApiPaths)
+  };
+}
+
+function projectModule(module) {
+  return {
+    id: module.id,
+    name: module.name,
+    kind: module.kind,
+    description: module.description,
+    packages: [...module.packages].sort()
   };
 }
 
@@ -254,11 +295,14 @@ async function main() {
   const features = manifest.features
     .filter((feature) => !feature.internal)
     .map((feature) => projectFeature(feature, openApiPaths));
-  const output = { schemaVersion: 3, updated: manifest.updated, features };
+  const modules = (manifest.modules ?? [])
+    .map((module) => projectModule(module))
+    .sort((left, right) => left.id.localeCompare(right.id));
+  const output = { schemaVersion: 4, updated: manifest.updated, features, modules };
 
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`);
-  console.log(`Wrote ${features.length} public features to ${path.relative(root, outputPath)}.`);
+  console.log(`Wrote ${features.length} public features and ${modules.length} infrastructure modules to ${path.relative(root, outputPath)}.`);
 }
 
 await main();

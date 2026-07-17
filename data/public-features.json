@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 3,
-  "updated": "2026-07-16",
+  "schemaVersion": 4,
+  "updated": "2026-07-17",
   "features": [
     {
       "id": "chat-local-llm",
@@ -50,6 +50,12 @@
       ],
       "caveats": [],
       "package": "LocalAITextGeneration + LocalAICore + app UI",
+      "ownedPackages": [
+        "LocalAITextGeneration"
+      ],
+      "usesPackages": [
+        "LocalAICore"
+      ],
       "modular": "partial",
       "goldStandard": {
         "gap": "MLX runtime adapters, model download/selection UI, chat UI + tool-run UI/persistence still app-side; app imports packaged types directly, no backend registry seam yet",
@@ -136,6 +142,12 @@
       ],
       "caveats": [],
       "package": "LocalAITranscription + app engine/UI adapters",
+      "ownedPackages": [
+        "LocalAITranscription"
+      ],
+      "usesPackages": [
+        "LocalSpeechKit"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "product logic + catalog packaged, but app imports packaged types directly and the WhisperKit/Apple live engine adapters + recording/model-selection UI are app-shell-terminal — no registry seam",
@@ -224,6 +236,12 @@
         }
       ],
       "package": "LocalAITranscription + FeatureWav2Vec2",
+      "ownedPackages": [
+        "FeatureWav2Vec2"
+      ],
+      "usesPackages": [
+        "LocalAITranscription"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "LocalAITranscription owns pure selection/catalog/parser/runtime contracts; macOS-only FeatureWav2Vec2 owns AVFoundation resampling, subprocess lifecycle, availability, and optional-engine registration. The app shell consumes only the feature-agnostic transcription-engine registry.",
@@ -302,6 +320,12 @@
         }
       ],
       "package": "FeatureGlobalTranscription + thin app runtime/panel/side-effect adapters",
+      "ownedPackages": [
+        "FeatureGlobalTranscription"
+      ],
+      "usesPackages": [
+        "FeatureAutoPaste"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "service/session state, panel controller/views, detailed menu controls, launch lifecycle, and paste orchestration are packaged; app adapters terminate at Whisper/audio/history, NSPanel, clipboard/CGEvent, notifications, and TCC/window capture",
@@ -379,6 +403,10 @@
         }
       ],
       "package": "FeatureAutoPaste + app side-effect adapters",
+      "ownedPackages": [
+        "FeatureAutoPaste"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "all orchestration packaged with only thin platform side-effect adapters left, but wired directly rather than registered through a provider/registry like the reference module",
@@ -454,6 +482,10 @@
         }
       ],
       "package": "FeatureWindowManagement + app AX/AppKit adapters",
+      "ownedPackages": [
+        "FeatureWindowManagement"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "planning and provider contracts are packaged; AX movement and NSScreen capture remain injected terminal app adapters behind the shared settings contribution",
@@ -520,6 +552,10 @@
       ],
       "caveats": [],
       "package": "FeatureWindowManagement + app NSWindow adapter",
+      "ownedPackages": [],
+      "usesPackages": [
+        "FeatureWindowManagement"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "all planning logic packaged with only NSWindow/NSScreen snapshot + frame-apply adapters left, but composed directly rather than via a registry/provider seam",
@@ -608,6 +644,10 @@
         }
       ],
       "package": "FeatureQuitApps + app gate",
+      "ownedPackages": [
+        "FeatureQuitApps"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "entire surface (logic + view model + SwiftUI window) packaged; app shell is gate-and-call only, but invoked directly rather than registered through a provider/registry",
@@ -687,6 +727,10 @@
       ],
       "caveats": [],
       "package": "FeatureScreenAwake + app diagnostics/startup adapters",
+      "ownedPackages": [
+        "FeatureScreenAwake"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "full controller + IOKit orchestration + menu-bar UI packaged; only diagnostics/startup adapters remain, but registered via direct startup wiring not a provider seam",
@@ -775,6 +819,10 @@
         }
       ],
       "package": "FeatureKeyboardBacklight + app startup registration",
+      "ownedPackages": [
+        "FeatureKeyboardBacklight"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "service, pure control logic, persistence keys, and menu-bar UI are packaged; app shell only links/registers the feature on Outdoor/Beta",
@@ -859,6 +907,10 @@
         }
       ],
       "package": "FeatureDesktopCurtain + app menu/service adapter",
+      "ownedPackages": [
+        "FeatureDesktopCurtain"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "FeatureDesktopCurtain owns the fill policy (unit-tested) + generic app-provided cat-themed content hook (behavioural-tested) + AppKit overlay controller incl. the covering window-level (behavioural-tested); app shell supplies the Catty 3D ambient view, menu-bar toggle, and persisted DesktopCurtainService.",
@@ -947,6 +999,10 @@
         }
       ],
       "package": "FeatureEyeCare + app lifecycle/side-effect adapters",
+      "ownedPackages": [
+        "FeatureEyeCare"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "controllers/state machines/presentation packaged, but app shell still wires many side effects (keyboard-lock, notifications, Skip service injection, settings sheets/gates) directly rather than via a registry",
@@ -1035,6 +1091,12 @@
         }
       ],
       "package": "FeatureMonitorControl + app platform adapters",
+      "ownedPackages": [
+        "FeatureMonitorControl"
+      ],
+      "usesPackages": [
+        "MonitorControlDDC"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "DDC/media-key behavior and UI are packaged; AppKit display snapshots and Accessibility prompting are injected terminal adapters behind package protocols",
@@ -1114,6 +1176,12 @@
         }
       ],
       "package": "FeatureCompute + LocalAIContracts + RoyalVNCKitUI (VNC) + monolith networking",
+      "ownedPackages": [
+        "FeatureCompute"
+      ],
+      "usesPackages": [
+        "LocalAIContracts"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "model surfaces contributed via the ChatBackend/ModelCatalogContributor registry, but networking/transport/SSH/Terminal3D/VNC + Compute UI remain a large app-owned (irreducible) shell",
@@ -1203,6 +1271,13 @@
         }
       ],
       "package": "FeatureOpenClaw + OpenClawKit + app adapters",
+      "ownedPackages": [
+        "FeatureOpenClaw"
+      ],
+      "usesPackages": [
+        "GatewayFeatureSupport",
+        "OpenClawKit"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "",
@@ -1283,6 +1358,12 @@
         }
       ],
       "package": "LocalAIHTTPServer + app Network adapter",
+      "ownedPackages": [
+        "LocalAIHTTPServer"
+      ],
+      "usesPackages": [
+        "LocalAIServing"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "HTTP behavior and listener lifecycle contract are packaged; NWListener binding remains an injected terminal app adapter behind shared launch and settings contribution seams",
@@ -1365,6 +1446,10 @@
         }
       ],
       "package": "AppControlKit + injected app navigation/AX/capture adapters",
+      "ownedPackages": [
+        "AppControlKit"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "AppControlKit owns the navigation, AX-walking, and capture contracts plus descriptors, registry, and transactions; platform composition is injected through app conformers",
@@ -1454,6 +1539,12 @@
         }
       ],
       "package": "RoutineKit + LocalAIHTTPServer",
+      "ownedPackages": [
+        "RoutineKit"
+      ],
+      "usesPackages": [
+        "LocalAIHTTPServer"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "engine mutations, providers, recoverable calendar/alarm projections, screen-time thresholds, the pure planned-day planner, and the revisioned App Group command bridge are isolated behind tested package contracts",
@@ -1543,6 +1634,10 @@
         }
       ],
       "package": "FeatureMLXServeSidecar + app bundle/log adapters",
+      "ownedPackages": [
+        "FeatureMLXServeSidecar"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "controller, process supervision, health/model discovery, settings policy, and lifecycle participant are packaged; the app injects only Bundle resolution and log forwarding",
@@ -1632,6 +1727,8 @@
         }
       ],
       "package": "MLXServeHTTP + app shared-runtime adapter",
+      "ownedPackages": [],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "terminal app backend adapter remains; listener lifecycle is registered through LaunchParticipant with the shared serving handle injected",
@@ -1712,6 +1809,10 @@
       ],
       "caveats": [],
       "package": "LocalAIEnergy + app adapters",
+      "ownedPackages": [
+        "LocalAIEnergy"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "estimator/ledger/UI fully packaged with only thin adapters left, but startup + live recorder wrapper are wired directly rather than registered through a provider/registry",
@@ -1788,6 +1889,13 @@
         }
       ],
       "package": "SkipKit + FeatureDangerouslySkip + FeatureEyeCare + app adapters",
+      "ownedPackages": [
+        "FeatureDangerouslySkip",
+        "SkipKit"
+      ],
+      "usesPackages": [
+        "FeatureEyeCare"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "codec/transport/orchestration in SkipKit, live feature facade/registry plus service adapters in FeatureDangerouslySkip, and presentation primitives in FeatureEyeCare",
@@ -1874,6 +1982,11 @@
         }
       ],
       "package": "ExerciseKit + ChallengeKit + app Utilities screen",
+      "ownedPackages": [
+        "ChallengeKit",
+        "ExerciseKit"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "rep counting/anti-cheat/challenge state fully packaged in ExerciseKit; the app owns only the Utilities screen and (later) the camera→VLM observer adapter",
@@ -1948,6 +2061,10 @@
         }
       ],
       "package": "SentryKit + app adapters (key monitor, lock panel, curtain, recorder)",
+      "ownedPackages": [
+        "SentryKit"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "the escalation ladder/state machine is fully packaged in SentryKit; the app owns the impure edges (CGEvent listen-only tap, blocking panel, curtain, ScreenCaptureKit recorder, speech quirk)",
@@ -2022,6 +2139,10 @@
         }
       ],
       "package": "FeatureModelLink + app Tailscale/KVS adapters",
+      "ownedPackages": [
+        "FeatureModelLink"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "remote backend, P2P transport, sharing orchestration, tailnet probing, provider contracts, and chat-backend registration are packaged; CLI and KVS side effects remain terminal app adapters",
@@ -2110,6 +2231,12 @@
         }
       ],
       "package": "FeatureQuickCapture + SnapCaptureKit + app platform adapters",
+      "ownedPackages": [
+        "FeatureQuickCapture"
+      ],
+      "usesPackages": [
+        "SnapCaptureKit"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "FeatureQuickCapture owns palette/runtime orchestration, chord policy, UI contribution, and lifecycle; app shell retains injected hotkey, SnapCaptureKit/Workbench capture, AVFoundation camera, and Desktop Curtain adapters",
@@ -2173,6 +2300,10 @@
       ],
       "caveats": [],
       "package": "HealthKitLogging + app seam",
+      "ownedPackages": [
+        "HealthKitLogging"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "logging logic lives behind a package seam; app side is a thin seam but wired directly, and entitlement/provisioning follow-up still gates shipping — no registry seam",
@@ -2240,6 +2371,10 @@
       ],
       "caveats": [],
       "package": "FeatureContentSafety + app settings inputs",
+      "ownedPackages": [
+        "FeatureContentSafety"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "all filter logic + enforcement packaged; app supplies only persisted setting/subscription/age inputs + Settings UI, but wired directly rather than via a provider/registry seam",
@@ -2320,6 +2455,10 @@
         }
       ],
       "package": "FeatureSubscription + flavor-specific billing providers + app adapters",
+      "ownedPackages": [
+        "FeatureSubscription"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "billing lifecycle and account UI are package-owned by build flavor; the app supplies only persistence, feature-flag, and effective-access adapters",
@@ -2404,6 +2543,12 @@
         }
       ],
       "package": "Packages/Telemetry (facade) + Packages/BetaTelemetry (Sentry impl)",
+      "ownedPackages": [
+        "BetaTelemetry"
+      ],
+      "usesPackages": [
+        "Telemetry"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "",
@@ -2472,6 +2617,15 @@
       ],
       "caveats": [],
       "package": "FeatureTranslate + FeatureTranslateDomain + LocalSpeechKit",
+      "ownedPackages": [
+        "FeatureTranslate",
+        "FeatureTranslateDomain"
+      ],
+      "usesPackages": [
+        "AudioSession",
+        "LocalSpeechKit",
+        "SpeechPipeline"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "FeatureTranslate owns its UI, view model, conversation/diarization services, and feature-neutral TranslateDisplayAdapter registry; it has no dependency on the Even Realities driver",
@@ -2555,6 +2709,15 @@
       ],
       "caveats": [],
       "package": "FeatureEvenRealities + EvenRealitiesTranslate + WearableGlassesKit",
+      "ownedPackages": [
+        "FeatureEvenG2",
+        "FeatureEvenRealities",
+        "WearableGlassesKit"
+      ],
+      "usesPackages": [
+        "FeatureTranslate",
+        "SpeechPipeline"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "FeatureEvenRealities owns the generic GlassesDisplaySink, G2 driver, listener, Live Activity, companion surface, and LaunchParticipant lifecycle; feature adapters are separate products",
@@ -2644,6 +2807,11 @@
         }
       ],
       "package": "LocalAICore (discovery) + LocalAIHTTPServer (provider/routes) + app symlink adapter",
+      "ownedPackages": [],
+      "usesPackages": [
+        "LocalAICore",
+        "LocalAIHTTPServer"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "terminal symlink and HubApi adapters remain app-owned; LocalAIExternalModelServing is registered through the packaged provider registry",
@@ -2732,6 +2900,10 @@
         }
       ],
       "package": "FeatureGGUF + app composition-root wiring",
+      "ownedPackages": [
+        "FeatureGGUF"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "sidecar lifecycle + SSE adaptation + gguf discovery + ChatBackendRegistry registration are packaged; the app supplies only binary/model-dir config at the composition root behind FEATURE_GGUF",
@@ -2818,6 +2990,10 @@
         }
       ],
       "package": "FeatureOMLXSidecar + app composition-root wiring",
+      "ownedPackages": [
+        "FeatureOMLXSidecar"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "FeatureOMLXSidecar owns process lifecycle, SSE adaptation, routing policy, ChatBackendRegistry registration, and termination; the app injects only native-runtime unload and logging hooks",
@@ -2905,6 +3081,11 @@
         }
       ],
       "package": "SnapCaptureKit (pure + SnapCapturePlatform) + SnapDeviceCaptureKit",
+      "ownedPackages": [
+        "SnapCaptureKit",
+        "SnapDeviceCaptureKit"
+      ],
+      "usesPackages": [],
       "modular": "yes",
       "goldStandard": {
         "gap": "SnapCaptureKit owns the session model, transcription event contract, capture-source seam, concrete ScreenCaptureKit/AVFoundation adapters, coordinator, preview UI, and lazy lifecycle participant; the app retains only composition and the existing Quick Capture host",
@@ -2923,6 +3104,238 @@
         "parity": "none"
       },
       "apiPaths": []
+    },
+    {
+      "id": "studio-recording",
+      "name": "Studio recording & streaming",
+      "group": null,
+      "lane": "alpha",
+      "status": "wip",
+      "accessTier": "free",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha"
+      ],
+      "permissions": [
+        "Screen Recording",
+        "Microphone",
+        "Camera"
+      ],
+      "description": "macOS / Alpha only. The /v1/local/studio/* recording & streaming suite: StudioModeKit owns word-timed recording bundles and session lifecycle, StudioSceneKit the scene compositor, SubtitleKit + TranscriptSyncKit the subtitle rendering and transcript-to-audio-clock sync, DevLoopUI + DevLoopStreamKit the dev-loop streaming surface, and StudioAgentBridge the headless agent control bridge. It consumes the shared capture engine (FrameSourceKit/FramePipelineKit) and VLMDispatchKit rather than owning frame sources. Drives real displays/windows/devices headlessly over the token-gated Local API studio routes; no human-at-the-machine capture required. PENDING: on-device verification of the full record→composite→stream pipeline under real TCC grants.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "partial"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "Not shipped — the recording/streaming suite is alpha-lane only and absent from App Store builds."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Not shipped by the standard Outdoor target — alpha overlay only."
+        },
+        {
+          "channel": "Alpha",
+          "note": "Alpha overlay only. The /v1/local/studio/* routes drive real capture headlessly (word-timed recording bundles, scene compositing, subtitles, transcript sync, dev-loop streaming, agent bridge)."
+        }
+      ],
+      "package": "StudioModeKit + StudioSceneKit + StudioAgentBridge + DevLoop* + Subtitle/TranscriptSync + app composition",
+      "ownedPackages": [
+        "DevLoopStreamKit",
+        "DevLoopUI",
+        "StudioAgentBridge",
+        "StudioModeKit",
+        "StudioSceneKit",
+        "SubtitleKit",
+        "TranscriptSyncKit"
+      ],
+      "usesPackages": [
+        "FramePipelineKit",
+        "FrameSourceKit",
+        "VLMDispatchKit"
+      ],
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "StudioModeKit/StudioSceneKit/StudioAgentBridge/DevLoop*/Subtitle/TranscriptSync own the recording, compositing, subtitle, and streaming engines; the app supplies only composition-root wiring and the shared capture engine (FrameSourceKit/FramePipelineKit) it consumes",
+        "grade": "strong"
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "present",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "partial"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "capture-engine",
+      "name": "Capture engine",
+      "kind": "engine",
+      "description": "Screen / window / device frame sources plus the frame-processing pipeline.",
+      "packages": [
+        "FeatureScreenRecording",
+        "FramePipelineKit",
+        "FrameSourceKit"
+      ]
+    },
+    {
+      "id": "core",
+      "name": "Core platform",
+      "kind": "platform",
+      "description": "Foundational shared types and contracts every feature builds on.",
+      "packages": [
+        "LocalAIContracts",
+        "LocalAICore"
+      ]
+    },
+    {
+      "id": "gateway-support",
+      "name": "Gateway support",
+      "kind": "platform",
+      "description": "Shared gateway feature-support scaffolding for OpenClaw / remote gateway chat.",
+      "packages": [
+        "GatewayFeatureSupport",
+        "OpenClawFeatureSupport"
+      ]
+    },
+    {
+      "id": "manifest",
+      "name": "Feature manifest",
+      "kind": "platform",
+      "description": "This code-first feature catalog and its emitters — the manifest itself.",
+      "packages": [
+        "FeatureManifest"
+      ]
+    },
+    {
+      "id": "migration-harness",
+      "name": "Migration & scenario harnesses",
+      "kind": "harness",
+      "description": "Migration-gate and scenario test scaffolding for package/refactor validation.",
+      "packages": [
+        "MigrationGateHarness",
+        "ScenarioHarness"
+      ]
+    },
+    {
+      "id": "monitor-ddc",
+      "name": "MonitorControl DDC",
+      "kind": "vendored",
+      "description": "Vendored DDC/CI display-control library (public local-ai-cat org repo).",
+      "packages": [
+        "MonitorControlDDC"
+      ]
+    },
+    {
+      "id": "openclaw-kit",
+      "name": "OpenClawKit",
+      "kind": "vendored",
+      "description": "Vendored OpenClaw client kit (public local-ai-cat org repo).",
+      "packages": [
+        "OpenClawKit"
+      ]
+    },
+    {
+      "id": "serving-engine",
+      "name": "Serving engine",
+      "kind": "engine",
+      "description": "Model-serving core behind the Local API HTTP server.",
+      "packages": [
+        "LocalAIServing"
+      ]
+    },
+    {
+      "id": "speech-engine",
+      "name": "Speech engine",
+      "kind": "engine",
+      "description": "Shared microphone / VAD / speech pipeline used by translate, transcription, and even-realities.",
+      "packages": [
+        "AudioSession",
+        "LocalSpeechKit",
+        "SpeechPipeline"
+      ]
+    },
+    {
+      "id": "telemetry",
+      "name": "Telemetry facade",
+      "kind": "platform",
+      "description": "Always-linked telemetry facade; the Sentry impl (BetaTelemetry) injects behind it.",
+      "packages": [
+        "Telemetry"
+      ]
+    },
+    {
+      "id": "translation-engine",
+      "name": "Translation engine",
+      "kind": "engine",
+      "description": "On-device translation core consumed by the Translate feature.",
+      "packages": [
+        "LocalAITranslation"
+      ]
+    },
+    {
+      "id": "tts-engine",
+      "name": "Text-to-speech engine",
+      "kind": "engine",
+      "description": "On-device text-to-speech engine.",
+      "packages": [
+        "LocalAITTS"
+      ]
+    },
+    {
+      "id": "vlm-dispatch",
+      "name": "VLM dispatch",
+      "kind": "engine",
+      "description": "Vision-language-model dispatch transport shared by camera/observer features.",
+      "packages": [
+        "VLMDispatchKit"
+      ]
     }
   ]
 }

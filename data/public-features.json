@@ -54,7 +54,9 @@
         "LocalAITextGeneration"
       ],
       "usesPackages": [
-        "LocalAICore"
+        "LocalAICore",
+        "LocalAITTS",
+        "Telemetry"
       ],
       "modular": "partial",
       "goldStandard": {
@@ -2704,6 +2706,7 @@
       ],
       "usesPackages": [
         "AudioSession",
+        "LocalAITranslation",
         "LocalSpeechKit",
         "SpeechPipeline"
       ],
@@ -3321,8 +3324,7 @@
       "kind": "platform",
       "description": "Shared gateway feature-support scaffolding for OpenClaw / remote gateway chat.",
       "packages": [
-        "GatewayFeatureSupport",
-        "OpenClawFeatureSupport"
+        "GatewayFeatureSupport"
       ]
     },
     {
@@ -3404,7 +3406,7 @@
       "id": "tts-engine",
       "name": "Text-to-speech engine",
       "kind": "engine",
-      "description": "On-device text-to-speech engine.",
+      "description": "On-device text-to-speech engine consumed by the chat runtime for voice output.",
       "packages": [
         "LocalAITTS"
       ]

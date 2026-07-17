@@ -568,13 +568,6 @@
       "linkedInProject": false
     },
     {
-      "name": "OpenClawFeatureSupport",
-      "deps": [],
-      "reverseDeps": [],
-      "appStoreGates": [],
-      "linkedInProject": false
-    },
-    {
       "name": "OpenClawKit",
       "deps": [],
       "reverseDeps": [],

@@ -1312,7 +1312,7 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 
 .moduleTable {
   width: 100%;
-  min-width: 1260px;
+  min-width: 1480px;
   border-spacing: 0;
   border-collapse: separate;
   table-layout: fixed;
@@ -1343,14 +1343,17 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   font-weight: 700;
 }
 
-.moduleTable th:nth-child(1) { width: 205px; }
-.moduleTable th:nth-child(2) { width: 320px; }
-.moduleTable th:nth-child(3) { width: 145px; }
-.moduleTable th:nth-child(4) { width: 125px; }
-.moduleTable th:nth-child(5) { width: 160px; }
-.moduleTable th:nth-child(6) { width: 140px; }
-.moduleTable th:nth-child(7) { width: 105px; }
-.moduleTable th:nth-child(8) { width: 140px; }
+.moduleTable th:nth-child(1) { width: 200px; }
+.moduleTable th:nth-child(2) { width: 280px; }
+.moduleTable th:nth-child(3) { width: 130px; }
+.moduleTable th:nth-child(4) { width: 140px; }
+.moduleTable th:nth-child(5) { width: 115px; }
+.moduleTable th:nth-child(6) { width: 155px; }
+.moduleTable th:nth-child(7) { width: 110px; }
+.moduleTable th:nth-child(8) { width: 95px; }
+.moduleTable th:nth-child(9) { width: 140px; }
+.moduleTable th:nth-child(10) { width: 110px; }
+.moduleTable th:nth-child(11) { width: 95px; }
 
 .moduleSortButton {
   display: flex;
@@ -1463,6 +1466,153 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   padding: 36px 18px !important;
   color: var(--text-faint);
   text-align: center !important;
+}
+
+.moduleTableRow[data-clickable="false"] {
+  cursor: default;
+}
+
+.moduleTableNameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.moduleTableNameStatic {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.moduleNa {
+  color: var(--text-faint);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+
+.moduleKindBadge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-faint);
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.moduleKindBadge[data-kind="feature"] {
+  color: color-mix(in srgb, #7fae8b 62%, var(--text));
+  border-color: color-mix(in srgb, #7fae8b 26%, transparent);
+}
+
+.moduleKindBadge[data-kind="engine"] {
+  color: color-mix(in srgb, #d19a5b 62%, var(--text));
+  border-color: color-mix(in srgb, #d19a5b 26%, transparent);
+}
+
+.moduleKindBadge[data-kind="platform"] {
+  color: color-mix(in srgb, #6f9bd0 62%, var(--text));
+  border-color: color-mix(in srgb, #6f9bd0 26%, transparent);
+}
+
+.moduleKindBadge[data-kind="harness"] {
+  color: color-mix(in srgb, #9d84c2 62%, var(--text));
+  border-color: color-mix(in srgb, #9d84c2 26%, transparent);
+}
+
+.moduleKindBadge[data-kind="vendored"] {
+  color: color-mix(in srgb, #b58686 62%, var(--text));
+  border-color: color-mix(in srgb, #b58686 26%, transparent);
+}
+
+.modulePackagesCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.modulePackagesToggle {
+  min-height: 21px;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 2%, transparent);
+  color: var(--text-dim);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+.modulePackagesToggle:hover,
+.modulePackagesToggle[aria-expanded="true"] {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.modulePackagesUses {
+  color: var(--text-faint);
+  font-weight: 600;
+}
+
+.modulePackagesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modulePackagesListLabel {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.modulePackagesList ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modulePackagesList code {
+  font-size: 10px;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+.moduleBuildsLink {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.moduleBuildsLink a {
+  color: var(--accent);
+  font-weight: 700;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.moduleBuildsLink a:hover {
+  border-bottom-color: var(--accent);
 }
 
 .visuallyHidden {

@@ -1,10 +1,13 @@
-export type FilterKey = "channels" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
+export type RowKind = "feature" | "engine" | "platform" | "harness" | "vendored";
+export type FilterKey = "kinds" | "channels" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
 export type SortKey = "name" | "status" | "modular" | "testingStatus" | "logging" | "apiParity";
 export type SortDirection = "asc" | "desc";
 
 export type ModuleTableRow = {
   id: string;
   name: string;
+  kind: RowKind;
+  clickable: boolean;
   description: string;
   channels: string[];
   platforms: string[];
@@ -18,13 +21,20 @@ export type ModuleTableRow = {
   logging: string;
   loggingSignal: string;
   apiParity: "full" | "partial" | "none" | "notApplicable";
+  ownedPackages: string[];
+  usesPackages: string[];
 };
 
 export type ModuleFilters = Record<FilterKey, Set<string>>;
 export type ModuleSort = { key: SortKey; direction: SortDirection };
 
+export function isFeatureRow(row: ModuleTableRow): boolean {
+  return row.kind === "feature";
+}
+
 export function emptyModuleFilters(): ModuleFilters {
   return {
+    kinds: new Set(),
     channels: new Set(),
     platforms: new Set(),
     distributions: new Set(),
@@ -38,14 +48,23 @@ function matchesFacet(selected: Set<string>, values: string[]): boolean {
   return selected.size === 0 || values.some((value) => selected.has(value));
 }
 
+// Feature-only facets (status, provisional testing, drive gap) do not apply to
+// infrastructure rows. Selecting one of these filters therefore narrows to
+// feature rows only — infrastructure rows never match a feature-only facet.
+function matchesFeatureFacet(selected: Set<string>, row: ModuleTableRow, value: string): boolean {
+  if (selected.size === 0) return true;
+  return isFeatureRow(row) && selected.has(value);
+}
+
 export function filterModuleRows(rows: ModuleTableRow[], filters: ModuleFilters): ModuleTableRow[] {
   return rows.filter((row) =>
+    matchesFacet(filters.kinds, [row.kind]) &&
     matchesFacet(filters.channels, row.channels) &&
     matchesFacet(filters.platforms, row.platforms) &&
     matchesFacet(filters.distributions, row.distributions) &&
-    matchesFacet(filters.statuses, [row.status]) &&
-    matchesFacet(filters.testingStatuses, [row.testingStatus]) &&
-    matchesFacet(filters.neverDriven, [row.neverDriven ? "yes" : "no"])
+    matchesFeatureFacet(filters.statuses, row, row.status) &&
+    matchesFeatureFacet(filters.testingStatuses, row, row.testingStatus) &&
+    matchesFeatureFacet(filters.neverDriven, row, row.neverDriven ? "yes" : "no")
   );
 }
 
@@ -72,6 +91,10 @@ function compareRows(left: ModuleTableRow, right: ModuleTableRow, key: SortKey):
 export function sortModuleRows(rows: ModuleTableRow[], sort: ModuleSort): ModuleTableRow[] {
   const direction = sort.direction === "asc" ? 1 : -1;
   return [...rows].sort((left, right) => {
+    // Feature rows always group ahead of infrastructure rows; the chosen sort key
+    // orders within each group so sorting stays useful without interleaving.
+    const grouping = Number(!isFeatureRow(left)) - Number(!isFeatureRow(right));
+    if (grouping !== 0) return grouping;
     const result = compareRows(left, right, sort.key);
     if (result !== 0) return result * direction;
     return left.name.localeCompare(right.name);

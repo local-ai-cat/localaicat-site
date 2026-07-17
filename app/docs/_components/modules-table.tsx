@@ -19,6 +19,17 @@ type FilterGroup = { key: FilterKey; label: string; options: FilterOption[] };
 
 const filterGroups: FilterGroup[] = [
   {
+    key: "kinds",
+    label: "Kind",
+    options: [
+      { value: "feature", label: "Feature" },
+      { value: "engine", label: "Engine" },
+      { value: "platform", label: "Platform" },
+      { value: "harness", label: "Harness" },
+      { value: "vendored", label: "Vendored" }
+    ]
+  },
+  {
     key: "channels",
     label: "Channel",
     options: [
@@ -84,9 +95,82 @@ const apiParityLabels: Record<ModuleTableRow["apiParity"], string> = {
   notApplicable: "n·a"
 };
 
+const kindLabels: Record<ModuleTableRow["kind"], string> = {
+  feature: "Feature",
+  engine: "Engine",
+  platform: "Platform",
+  harness: "Harness",
+  vendored: "Vendored"
+};
+
 function labelFor(value: string): string {
   if (value === "wip") return "Work in progress";
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+}
+
+function isFeatureRow(row: ModuleTableRow): boolean {
+  return row.kind === "feature";
+}
+
+function NotApplicable() {
+  return <span className="moduleNa" title="Not applicable to infrastructure modules">n/a</span>;
+}
+
+function KindBadge({ kind }: { kind: ModuleTableRow["kind"] }) {
+  return <span className="moduleKindBadge" data-kind={kind}>{kindLabels[kind]}</span>;
+}
+
+function PackagesCell({
+  expanded,
+  onToggle,
+  row
+}: {
+  expanded: boolean;
+  onToggle: () => void;
+  row: ModuleTableRow;
+}) {
+  const owned = row.ownedPackages;
+  const uses = row.usesPackages;
+  if (owned.length === 0 && uses.length === 0) {
+    return <span className="moduleNa" title="No packages mapped to this module yet">—</span>;
+  }
+
+  const ownedLabel = isFeatureRow(row) ? "Owns" : "Packages";
+  const title = [
+    owned.length > 0 ? `${ownedLabel}: ${owned.join(", ")}` : null,
+    uses.length > 0 ? `Uses: ${uses.join(", ")}` : null
+  ].filter(Boolean).join(" · ");
+
+  return (
+    <div className="modulePackagesCell">
+      <button
+        aria-expanded={expanded}
+        className="modulePackagesToggle"
+        onClick={onToggle}
+        title={title}
+        type="button"
+      >
+        {owned.length} pkg{owned.length === 1 ? "" : "s"}
+        {uses.length > 0 ? <span className="modulePackagesUses"> · {uses.length} used</span> : null}
+      </button>
+      {expanded ? (
+        <div className="modulePackagesList">
+          {owned.length > 0 ? (
+            <div>
+              <span className="modulePackagesListLabel">{ownedLabel}</span>
+              <ul>{owned.map((name) => <li key={name}><code>{name}</code></li>)}</ul>
+            </div>
+          ) : null}
+          {uses.length > 0 ? (
+            <div>
+              <span className="modulePackagesListLabel">Uses</span>
+              <ul>{uses.map((name) => <li key={name}><code>{name}</code></li>)}</ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function provisionalLabel(value: ModuleTableRow["testingStatus"]): string {
@@ -151,9 +235,11 @@ function FilterControls({
       <div className="moduleFilterGroups">
         {filterGroups.map((group) => {
           const availableOptions = group.options.filter((option) => rows.some((row) => {
-            if (group.key === "statuses") return row.status === option.value;
-            if (group.key === "testingStatuses") return row.testingStatus === option.value;
-            if (group.key === "neverDriven") return row.neverDriven && option.value === "yes";
+            if (group.key === "kinds") return row.kind === option.value;
+            // Feature-only facets never surface options from infrastructure rows.
+            if (group.key === "statuses") return isFeatureRow(row) && row.status === option.value;
+            if (group.key === "testingStatuses") return isFeatureRow(row) && row.testingStatus === option.value;
+            if (group.key === "neverDriven") return isFeatureRow(row) && row.neverDriven && option.value === "yes";
             return row[group.key].includes(option.value);
           }));
 
@@ -188,11 +274,21 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
   const router = useRouter();
   const [filters, setFilters] = useState<ModuleFilters>(emptyModuleFilters);
   const [sort, setSort] = useState<ModuleSort>({ key: "name", direction: "asc" });
+  const [expandedPackages, setExpandedPackages] = useState<Set<string>>(() => new Set());
 
   const visibleRows = useMemo(
     () => sortModuleRows(filterModuleRows(rows, filters), sort),
     [filters, rows, sort]
   );
+
+  function togglePackages(id: string) {
+    setExpandedPackages((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function toggleFilter(key: FilterKey, value: string) {
     setFilters((current) => {
@@ -210,15 +306,17 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
     }));
   }
 
-  function openRow(id: string, event: MouseEvent<HTMLTableRowElement>) {
+  function openRow(row: ModuleTableRow, event: MouseEvent<HTMLTableRowElement>) {
+    if (!row.clickable) return;
     if ((event.target as HTMLElement).closest("a, button")) return;
-    router.push(`/docs/modules/${id}`);
+    router.push(`/docs/modules/${row.id}`);
   }
 
-  function openRowWithKeyboard(id: string, event: KeyboardEvent<HTMLTableRowElement>) {
+  function openRowWithKeyboard(row: ModuleTableRow, event: KeyboardEvent<HTMLTableRowElement>) {
+    if (!row.clickable) return;
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
-    router.push(`/docs/modules/${id}`);
+    router.push(`/docs/modules/${row.id}`);
   }
 
   return (
@@ -241,6 +339,7 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
             <tr>
               <SortHeader activeSort={sort} column="name" label="Name" onSort={changeSort} />
               <th scope="col">Description</th>
+              <th scope="col">Packages</th>
               <th scope="col">Channel</th>
               <th scope="col">Platforms</th>
               <th scope="col">Indoor / Outdoor</th>
@@ -252,74 +351,102 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
             </tr>
           </thead>
           <tbody>
-            {visibleRows.map((row) => (
+            {visibleRows.map((row) => {
+              const feature = isFeatureRow(row);
+              return (
               <tr
-                aria-label={`Open ${row.name}`}
+                aria-label={row.clickable ? `Open ${row.name}` : undefined}
                 className="moduleTableRow"
-                data-state={row.status}
+                data-clickable={row.clickable}
+                data-state={feature ? row.status : "na"}
                 key={row.id}
-                onClick={(event) => openRow(row.id, event)}
-                onKeyDown={(event) => openRowWithKeyboard(row.id, event)}
-                tabIndex={0}
+                onClick={(event) => openRow(row, event)}
+                onKeyDown={(event) => openRowWithKeyboard(row, event)}
+                tabIndex={row.clickable ? 0 : -1}
               >
                 <td className="moduleTableNameCell">
-                  <Link href={`/docs/modules/${row.id}`}>
-                    {row.name}<span aria-hidden="true">↗</span>
-                  </Link>
+                  {row.clickable ? (
+                    <Link href={`/docs/modules/${row.id}`}>
+                      {row.name}<span aria-hidden="true">↗</span>
+                    </Link>
+                  ) : (
+                    <span className="moduleTableNameStatic">{row.name}</span>
+                  )}
+                  <KindBadge kind={row.kind} />
                 </td>
                 <td><p className="moduleTableDescription">{row.description}</p></td>
                 <td>
-                  <div className="moduleTableChips">
-                    {row.channels.map((channel) => (
-                      <TableChip kind="channel" key={channel}>{channel === "none" ? "No channel" : labelFor(channel)}</TableChip>
-                    ))}
-                  </div>
+                  <PackagesCell
+                    expanded={expandedPackages.has(row.id)}
+                    onToggle={() => togglePackages(row.id)}
+                    row={row}
+                  />
                 </td>
                 <td>
-                  <div className="moduleTableChips">
-                    {row.platforms.map((platform) => <TableChip kind="platform" key={platform}>{platform}</TableChip>)}
-                  </div>
+                  {feature ? (
+                    <div className="moduleTableChips">
+                      {row.channels.map((channel) => (
+                        <TableChip kind="channel" key={channel}>{channel === "none" ? "No channel" : labelFor(channel)}</TableChip>
+                      ))}
+                    </div>
+                  ) : <NotApplicable />}
                 </td>
                 <td>
-                  <div className="moduleTableChips">
-                    {row.distributions.map((distribution) => (
-                      <TableChip kind="distribution" key={distribution}>
-                        {distribution === "none" ? "Not distributed" : labelFor(distribution)}
+                  {feature ? (
+                    <div className="moduleTableChips">
+                      {row.platforms.map((platform) => <TableChip kind="platform" key={platform}>{platform}</TableChip>)}
+                    </div>
+                  ) : <NotApplicable />}
+                </td>
+                <td>
+                  {feature ? (
+                    <div className="moduleTableChips">
+                      {row.distributions.map((distribution) => (
+                        <TableChip kind="distribution" key={distribution}>
+                          {distribution === "none" ? "Not distributed" : labelFor(distribution)}
+                        </TableChip>
+                      ))}
+                    </div>
+                  ) : <NotApplicable />}
+                </td>
+                <td>{feature ? <TableChip kind="status">{labelFor(row.status)}</TableChip> : <NotApplicable />}</td>
+                <td>{feature ? <TableChip kind="modular">{labelFor(row.modular)}</TableChip> : <NotApplicable />}</td>
+                <td>
+                  {feature ? (
+                    <div className="moduleTestingCell">
+                      <TableChip
+                        kind="testing"
+                        title={`${provisionalTooltip} Approximately ${row.testingCases} test cases detected${row.hasSnapshot ? "; snapshot evidence present" : ""}.`}
+                      >
+                        {provisionalLabel(row.testingStatus)}
                       </TableChip>
-                    ))}
-                  </div>
+                      {row.neverDriven ? <span className="moduleNeverDrivenBadge">⚠ never-driven</span> : null}
+                    </div>
+                  ) : <NotApplicable />}
                 </td>
-                <td><TableChip kind="status">{labelFor(row.status)}</TableChip></td>
-                <td><TableChip kind="modular">{labelFor(row.modular)}</TableChip></td>
                 <td>
-                  <div className="moduleTestingCell">
-                    <TableChip
-                      kind="testing"
-                      title={`${provisionalTooltip} Approximately ${row.testingCases} test cases detected${row.hasSnapshot ? "; snapshot evidence present" : ""}.`}
-                    >
-                      {provisionalLabel(row.testingStatus)}
+                  {feature ? (
+                    <TableChip kind="logging" title={`${loggingTooltip} Signal: ${row.loggingSignal}.`}>
+                      {row.logging}
+                      <span className="moduleChipProvisional" aria-hidden="true"> · prov.</span>
                     </TableChip>
-                    {row.neverDriven ? <span className="moduleNeverDrivenBadge">⚠ never-driven</span> : null}
-                  </div>
+                  ) : <NotApplicable />}
                 </td>
                 <td>
-                  <TableChip kind="logging" title={`${loggingTooltip} Signal: ${row.loggingSignal}.`}>
-                    {row.logging}
-                    <span className="moduleChipProvisional" aria-hidden="true"> · prov.</span>
-                  </TableChip>
-                </td>
-                <td>
-                  <Link className="moduleApiLink" href={`/docs/modules/${row.id}#headless-api`}>
-                    <TableChip kind="api" title={`Headless Local API parity: ${apiParityLabels[row.apiParity]}. Opens the API section for ${row.name}.`}>
-                      {apiParityLabels[row.apiParity]}
-                    </TableChip>
-                  </Link>
+                  {feature ? (
+                    <Link className="moduleApiLink" href={`/docs/modules/${row.id}#headless-api`}>
+                      <TableChip kind="api" title={`Headless Local API parity: ${apiParityLabels[row.apiParity]}. Opens the API section for ${row.name}.`}>
+                        {apiParityLabels[row.apiParity]}
+                      </TableChip>
+                    </Link>
+                  ) : <NotApplicable />}
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {visibleRows.length === 0 ? (
               <tr>
-                <td className="moduleTableEmpty" colSpan={10}>No modules match these filters. Clear a filter to widen the view.</td>
+                <td className="moduleTableEmpty" colSpan={11}>No modules match these filters. Clear a filter to widen the view.</td>
               </tr>
             ) : null}
           </tbody>

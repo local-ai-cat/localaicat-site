@@ -44,6 +44,8 @@ export type PublicModule = {
   }>;
   caveats: Array<{ channel: string; note: string }>;
   package: string | null;
+  ownedPackages: string[];
+  usesPackages: string[];
   modular: "yes" | "partial" | "no";
   goldStandard: {
     grade: "gold" | "strong" | "partial" | "weak";
@@ -92,7 +94,22 @@ export type ModulePage = PublicModule & {
   overlay: ModuleOverlay;
 };
 
+export type ModuleKind = "feature" | "engine" | "platform" | "harness" | "vendored";
+
+// Infrastructure modules (engines, platform, harness, vendored) claim the
+// Packages/ directories that no user-facing feature owns. They render as rows in
+// the modules table but do not carry the feature columns (channels, permissions,
+// testing, Pro tier), and they do not have per-module pages yet.
+export type InfrastructureModule = {
+  id: string;
+  name: string;
+  kind: Exclude<ModuleKind, "feature">;
+  description: string;
+  packages: string[];
+};
+
 const modules = featureData.features as PublicModule[];
+const infrastructureModules = (featureData.modules ?? []) as InfrastructureModule[];
 const behavioralRows = behavioralData.modules as ModuleBehavioral[];
 const testingRows = testingData.modules as ModuleTesting[];
 const behavioralById = new Map(behavioralRows.map((row) => [row.id, row]));
@@ -180,6 +197,10 @@ export function getModules(): ModulePage[] {
     testing: testingFor(module.id),
     overlay: readOverlay(module.id)
   }));
+}
+
+export function getInfrastructureModules(): InfrastructureModule[] {
+  return infrastructureModules;
 }
 
 export function getModule(id: string): ModulePage | undefined {

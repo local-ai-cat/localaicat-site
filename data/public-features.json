@@ -1984,8 +1984,12 @@
         }
       ],
       "package": "FeatureLyrics (self-contained: playback + LRCLIB lyrics + Apple/FoundationModels translation) + FeatureTranslateDomain (shared value types)",
-      "ownedPackages": [],
-      "usesPackages": [],
+      "ownedPackages": [
+        "FeatureLyrics"
+      ],
+      "usesPackages": [
+        "FeatureTranslateDomain"
+      ],
       "modular": "yes",
       "goldStandard": {
         "gap": "playback/lyrics/translation/UI all packaged in FeatureLyrics; the app shell only wires the Translate-hub card. The private Apple syllable-lyrics source (MusanovaKit) is a documented follow-up, not yet integrated.",

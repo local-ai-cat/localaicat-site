@@ -90,23 +90,22 @@ what gets compiled into which flavor, and WHY — and a visual on this site that
   edges. CI diffs derived against the catalog's declared grid; mismatch fails. Coverage test:
   orphan package or double-claimed package fails FeatureManifest tests.
 
-### Site rendering
-1. **Modules table (existing page) gains:** a Kind filter chip row (feature/engine/platform/
-   harness/vendored — all 67 packages reachable from this one page), a Packages column
-   (owned count, expandable), and rows for the new non-feature modules.
-2. **NEW page: /docs/builds — "Build Anatomy".** The centerpiece visual:
-   - Segmented control: [Indoor] [Outdoor] [Beta] [Alpha]. Selecting a flavor re-renders the
-     module map: packages grouped by module in kind bands (features / engines / platform).
-     States per package: ● linked · ◐ variant-swapped (chip says what+why) · ✂ stripped
-     (ghosted, reason generated: "depends on capture-engine, which Indoor strips").
-   - **Dependency lens:** click any package → upstream deps + downstream dependents highlight,
-     everything else dims. Hover a stripped package → "stripping this also strips: …"
-     (cut propagation made visible). NO always-on 67-node edge hairball — edges render only
-     on selection.
-   - Summary strip: "62/67 packages · 3 variant-swapped · 5 stripped" per flavor.
-   - Gate glyph on packages containing `#if APPSTORE_BUILD` internally; click → file:line list.
-3. **Per-module pages gain a Packages section:** owned packages, uses-edges, per-flavor state
-   chips, variance explanations.
+### Site rendering — CORRECTION (Phil, 2026-07-17): NO new layout page. Grid only.
+Phil rejected the separate "Build Anatomy" page (kind-banded module map + flavor slicer): the
+grid view with filters is simpler and nicer. Everything integrates into the EXISTING modules
+grid/table:
+1. **Kind filter** chip row (Feature / Engine / Platform / Harness / Vendored). The 13
+   infrastructure modules become normal rows (kind badge; n/a for columns that don't apply).
+   All 67 packages reachable from the one page.
+2. **Packages column**: owned-package count chip, expandable in place to list package names.
+   Packages with internal `#if APPSTORE_BUILD` gates get a small gate marker in that expansion
+   (hover/click → file:line list).
+3. **Build filter** chips (Indoor / Outdoor / Beta / Alpha): selecting one filters rows to
+   modules included in that flavor and shows a per-row inclusion state (● linked ·
+   ◐ partial/variant · ✂ stripped, with the generated reason on hover). This carries the whole
+   "what's in this build" story inside the grid — no separate visual.
+4. Per-module pages gain the Packages section (owned, uses, per-flavor chips, gate list,
+   dependents from the derived graph) — detail lives there, not in a new overview layout.
 
 ### Data
 - App repo: extend gen-feature-manifest to also emit `docs/module-graph.json` (modules+kinds+

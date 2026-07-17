@@ -9,7 +9,7 @@ const publicFeaturesPath = path.join(root, "data/public-features.json");
 const overlayDirectory = path.join(root, "data/module-pages");
 const outputPath = path.join(root, "data/module-behavioral.json");
 
-const ignoredDirectories = new Set([".build", ".git", "DerivedData", "node_modules"]);
+const ignoredDirectories = new Set([".build", ".claude", ".git", "DerivedData", "node_modules"]);
 
 function fail(message) {
   throw new Error(`Could not generate module behavioral data: ${message}`);

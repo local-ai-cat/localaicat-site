@@ -11,6 +11,7 @@ const outputPath = path.join(root, "data/module-testing.json");
 
 const ignoredDirectories = new Set([
   ".build",
+  ".claude",
   ".git",
   "DerivedData",
   "node_modules"

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-07-16",
+  "updated": "2026-07-17",
   "modules": [
     {
       "id": "chat-local-llm",
@@ -217,6 +217,12 @@
       "status": "unit-only",
       "hasSnapshot": false,
       "neverDriven": false
+    },
+    {
+      "id": "studio-recording",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-07-16",
+  "updated": "2026-07-17",
   "modules": [
     {
       "id": "chat-local-llm",
@@ -479,6 +479,21 @@
       "logging": {
         "grade": "L0",
         "signal": "structured=0 print=9 sentry=0",
+        "provisional": true
+      }
+    },
+    {
+      "id": "studio-recording",
+      "packages": [
+        "StudioAgentBridge",
+        "StudioModeKit",
+        "StudioSceneKit"
+      ],
+      "cases": 41,
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     }

@@ -18,6 +18,7 @@ const outputPath = path.join(root, "data/module-graph.json");
 
 const ignoredDirectories = new Set([
   ".build",
+  ".claude",
   ".git",
   ".swiftpm",
   "DerivedData",

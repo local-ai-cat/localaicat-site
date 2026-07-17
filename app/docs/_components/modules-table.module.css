@@ -1,0 +1,74 @@
+/* Styles for the build-lens additions to the modules table. Everything else uses
+   the shared global classes in app/globals.css so the table look stays identical. */
+
+.stateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.stateGlyph {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.linked {
+  color: color-mix(in srgb, #5aa76b 62%, var(--text));
+  border-color: color-mix(in srgb, #5aa76b 34%, var(--line));
+  background: color-mix(in srgb, #5aa76b 12%, transparent);
+}
+
+.partial {
+  color: color-mix(in srgb, #c79646 66%, var(--text));
+  border-color: color-mix(in srgb, #c79646 34%, var(--line));
+  background: color-mix(in srgb, #c79646 12%, transparent);
+}
+
+.stripped {
+  color: color-mix(in srgb, #b65348 60%, var(--text));
+  border-color: color-mix(in srgb, #b65348 30%, var(--line));
+  background: color-mix(in srgb, #b65348 10%, transparent);
+}
+
+/* Stripped rows sink to the bottom and read as "not in this build" without hiding. */
+.strippedRow td {
+  opacity: 0.5;
+}
+
+.strippedRow:hover td {
+  opacity: 0.72;
+}
+
+/* App Store gate marker shown next to a package name in the expansion. */
+.gateMarker {
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: help;
+  color: color-mix(in srgb, #c79646 70%, var(--text));
+  border: 1px solid color-mix(in srgb, #c79646 34%, var(--line));
+  background: color-mix(in srgb, #c79646 12%, transparent);
+}
+
+.lensSummary {
+  display: inline-flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: 8px;
+}
+
+.lensSummaryItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -11,8 +11,11 @@ import {
   type ModuleFilters,
   type ModuleSort,
   type ModuleTableRow,
+  type RowFlavorState,
   type SortKey
 } from "../../../lib/module-table";
+import { flavorLabels, flavorOrder, stateGlyphs, stateLabels, type Flavor } from "../../../lib/build-anatomy";
+import styles from "./modules-table.module.css";
 
 type FilterOption = { value: string; label: string };
 type FilterGroup = { key: FilterKey; label: string; options: FilterOption[] };
@@ -85,6 +88,13 @@ const filterGroups: FilterGroup[] = [
   }
 ];
 
+const buildLensBlurbs: Record<Flavor, string> = {
+  indoor: "App Store · sandboxed",
+  outdoor: "Direct download · unsandboxed",
+  beta: "Sparkle beta channel",
+  alpha: "Daily agent / dev channel"
+};
+
 const provisionalTooltip = "Provisional signal from test-file presence — NOT the testing grade. Real grade lands with the ledger grade script.";
 const loggingTooltip = "Provisional logging/observability grade from a source scan — NOT an audited grade. L0 bare prints · L1 structured logging · L2 Sentry/telemetry.";
 
@@ -118,6 +128,49 @@ function NotApplicable() {
 
 function KindBadge({ kind }: { kind: ModuleTableRow["kind"] }) {
   return <span className="moduleKindBadge" data-kind={kind}>{kindLabels[kind]}</span>;
+}
+
+function InclusionBadge({ flavor, state }: { flavor: Flavor; state: RowFlavorState }) {
+  return (
+    <span
+      className={`${styles.stateBadge} ${styles[state.state]}`}
+      title={state.reason ?? `${stateLabels[state.state]} in ${flavorLabels[flavor]}`}
+    >
+      <span aria-hidden="true" className={styles.stateGlyph}>{stateGlyphs[state.state]}</span>
+      {stateLabels[state.state]}
+    </span>
+  );
+}
+
+function GateMarker({ gates }: { gates: Array<{ file: string; line: number }> }) {
+  const title = `Internal #if APPSTORE_BUILD gate${gates.length === 1 ? "" : "s"}:\n${gates.map((gate) => `${gate.file}:${gate.line}`).join("\n")}`;
+  return (
+    <span className={styles.gateMarker} title={title}>
+      ⚑ {gates.length} gate{gates.length === 1 ? "" : "s"}
+    </span>
+  );
+}
+
+function PackageItems({
+  gatesByPackage,
+  names
+}: {
+  gatesByPackage: ModuleTableRow["packageGates"];
+  names: string[];
+}) {
+  return (
+    <ul>
+      {names.map((name) => {
+        const gates = gatesByPackage[name];
+        return (
+          <li key={name}>
+            <code>{name}</code>
+            {gates && gates.length > 0 ? <GateMarker gates={gates} /> : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 function PackagesCell({
@@ -158,13 +211,13 @@ function PackagesCell({
           {owned.length > 0 ? (
             <div>
               <span className="modulePackagesListLabel">{ownedLabel}</span>
-              <ul>{owned.map((name) => <li key={name}><code>{name}</code></li>)}</ul>
+              <PackageItems gatesByPackage={row.packageGates} names={owned} />
             </div>
           ) : null}
           {uses.length > 0 ? (
             <div>
               <span className="modulePackagesListLabel">Uses</span>
-              <ul>{uses.map((name) => <li key={name}><code>{name}</code></li>)}</ul>
+              <PackageItems gatesByPackage={row.packageGates} names={uses} />
             </div>
           ) : null}
         </div>
@@ -208,13 +261,17 @@ function SortHeader({
 }
 
 function FilterControls({
+  buildLens,
   filters,
   onClear,
+  onSelectLens,
   onToggle,
   rows
 }: {
+  buildLens: Flavor | null;
   filters: ModuleFilters;
   onClear: () => void;
+  onSelectLens: (flavor: Flavor) => void;
   onToggle: (key: FilterKey, value: string) => void;
   rows: ModuleTableRow[];
 }) {
@@ -265,6 +322,26 @@ function FilterControls({
             </fieldset>
           );
         })}
+
+        {/* Build lens: single-select. Not a filter — it annotates rows with their
+            per-flavor inclusion state and sinks stripped rows to the bottom. */}
+        <fieldset>
+          <legend>Build</legend>
+          <div className="moduleFilterOptions">
+            {(flavorOrder as Flavor[]).map((flavor) => (
+              <button
+                aria-pressed={buildLens === flavor}
+                className="moduleFilterChip"
+                key={flavor}
+                onClick={() => onSelectLens(flavor)}
+                title={buildLensBlurbs[flavor]}
+                type="button"
+              >
+                {flavorLabels[flavor]}
+              </button>
+            ))}
+          </div>
+        </fieldset>
       </div>
     </section>
   );
@@ -274,12 +351,27 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
   const router = useRouter();
   const [filters, setFilters] = useState<ModuleFilters>(emptyModuleFilters);
   const [sort, setSort] = useState<ModuleSort>({ key: "name", direction: "asc" });
+  const [buildLens, setBuildLens] = useState<Flavor | null>(null);
   const [expandedPackages, setExpandedPackages] = useState<Set<string>>(() => new Set());
 
   const visibleRows = useMemo(
-    () => sortModuleRows(filterModuleRows(rows, filters), sort),
-    [filters, rows, sort]
+    () => sortModuleRows(filterModuleRows(rows, filters), sort, buildLens),
+    [buildLens, filters, rows, sort]
   );
+
+  const lensSummary = useMemo(() => {
+    if (!buildLens) return null;
+    let linked = 0;
+    let partial = 0;
+    let stripped = 0;
+    for (const row of visibleRows) {
+      const state = row.flavorStates[buildLens].state;
+      if (state === "linked") linked += 1;
+      else if (state === "partial") partial += 1;
+      else stripped += 1;
+    }
+    return { linked, partial, stripped };
+  }, [buildLens, visibleRows]);
 
   function togglePackages(id: string) {
     setExpandedPackages((current) => {
@@ -297,6 +389,10 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
       else next[key].add(value);
       return next;
     });
+  }
+
+  function selectLens(flavor: Flavor) {
+    setBuildLens((current) => (current === flavor ? null : flavor));
   }
 
   function changeSort(key: SortKey) {
@@ -322,14 +418,29 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
   return (
     <div className="moduleTableExperience">
       <FilterControls
+        buildLens={buildLens}
         filters={filters}
         onClear={() => setFilters(emptyModuleFilters())}
+        onSelectLens={selectLens}
         onToggle={toggleFilter}
         rows={rows}
       />
 
       <div className="moduleTableMeta" aria-live="polite">
         Showing <strong>{visibleRows.length}</strong> of {rows.length} modules
+        {lensSummary ? (
+          <span className={styles.lensSummary}>
+            <span className={styles.lensSummaryItem} title="Compiled into this build">
+              <span aria-hidden="true">{stateGlyphs.linked}</span> {lensSummary.linked} linked
+            </span>
+            <span className={styles.lensSummaryItem} title="Partially included in this build">
+              <span aria-hidden="true">{stateGlyphs.partial}</span> {lensSummary.partial} partial
+            </span>
+            <span className={styles.lensSummaryItem} title="Stripped from this build">
+              <span aria-hidden="true">{stateGlyphs.stripped}</span> {lensSummary.stripped} stripped
+            </span>
+          </span>
+        ) : null}
       </div>
 
       <div className="moduleTableScroll" tabIndex={0}>
@@ -353,10 +464,14 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
           <tbody>
             {visibleRows.map((row) => {
               const feature = isFeatureRow(row);
+              const lensState = buildLens ? row.flavorStates[buildLens] : null;
+              const rowClassName = lensState && lensState.state === "stripped"
+                ? `moduleTableRow ${styles.strippedRow}`
+                : "moduleTableRow";
               return (
               <tr
                 aria-label={row.clickable ? `Open ${row.name}` : undefined}
-                className="moduleTableRow"
+                className={rowClassName}
                 data-clickable={row.clickable}
                 data-state={feature ? row.status : "na"}
                 key={row.id}
@@ -373,6 +488,7 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
                     <span className="moduleTableNameStatic">{row.name}</span>
                   )}
                   <KindBadge kind={row.kind} />
+                  {buildLens && lensState ? <InclusionBadge flavor={buildLens} state={lensState} /> : null}
                 </td>
                 <td><p className="moduleTableDescription">{row.description}</p></td>
                 <td>

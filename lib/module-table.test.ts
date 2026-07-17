@@ -28,6 +28,13 @@ function featureRow(overrides: Partial<ModuleTableRow>): ModuleTableRow {
     apiParity: "notApplicable",
     ownedPackages: [],
     usesPackages: [],
+    packageGates: {},
+    flavorStates: {
+      indoor: { state: "linked", reason: null },
+      outdoor: { state: "linked", reason: null },
+      beta: { state: "linked", reason: null },
+      alpha: { state: "linked", reason: null }
+    },
     ...overrides
   };
 }
@@ -128,6 +135,46 @@ test("feature rows always group ahead of infrastructure rows", () => {
   assert.deepEqual(
     sortModuleRows(withInfra, { key: "name", direction: "asc" }).map((row) => row.id),
     ["beta", "parked", "stable", "speech-engine"]
+  );
+});
+
+test("build lens sinks stripped rows to the bottom without hiding them", () => {
+  const lensRows: ModuleTableRow[] = [
+    featureRow({ id: "in", name: "In build" }),
+    featureRow({
+      id: "out",
+      name: "Out of build",
+      flavorStates: {
+        indoor: { state: "stripped", reason: "Not shipped in Indoor" },
+        outdoor: { state: "linked", reason: null },
+        beta: { state: "linked", reason: null },
+        alpha: { state: "linked", reason: null }
+      }
+    })
+  ];
+  // No lens: alphabetical grouping keeps declaration/name order.
+  assert.deepEqual(
+    sortModuleRows(lensRows, { key: "name", direction: "asc" }).map((row) => row.id),
+    ["in", "out"]
+  );
+  // Indoor lens: the stripped row sinks last but stays present.
+  assert.deepEqual(
+    sortModuleRows(lensRows, { key: "name", direction: "asc" }, "indoor").map((row) => row.id),
+    ["in", "out"]
+  );
+  // Reverse the names so "out" would sort first without the lens; the lens still sinks it.
+  const flipped: ModuleTableRow[] = [
+    featureRow({ id: "aaa-out", name: "Aaa out", flavorStates: {
+      indoor: { state: "stripped", reason: "Not shipped in Indoor" },
+      outdoor: { state: "linked", reason: null },
+      beta: { state: "linked", reason: null },
+      alpha: { state: "linked", reason: null }
+    } }),
+    featureRow({ id: "zzz-in", name: "Zzz in" })
+  ];
+  assert.deepEqual(
+    sortModuleRows(flipped, { key: "name", direction: "asc" }, "indoor").map((row) => row.id),
+    ["zzz-in", "aaa-out"]
   );
 });
 

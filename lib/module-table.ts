@@ -1,7 +1,11 @@
+import type { Flavor, PackageState } from "./build-anatomy.ts";
+
 export type RowKind = "feature" | "engine" | "platform" | "harness" | "vendored";
 export type FilterKey = "kinds" | "channels" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
 export type SortKey = "name" | "status" | "modular" | "testingStatus" | "logging" | "apiParity";
 export type SortDirection = "asc" | "desc";
+
+export type RowFlavorState = { state: PackageState; reason: string | null };
 
 export type ModuleTableRow = {
   id: string;
@@ -23,6 +27,8 @@ export type ModuleTableRow = {
   apiParity: "full" | "partial" | "none" | "notApplicable";
   ownedPackages: string[];
   usesPackages: string[];
+  packageGates: Record<string, Array<{ file: string; line: number }>>;
+  flavorStates: Record<Flavor, RowFlavorState>;
 };
 
 export type ModuleFilters = Record<FilterKey, Set<string>>;
@@ -88,9 +94,23 @@ function compareRows(left: ModuleTableRow, right: ModuleTableRow, key: SortKey):
   return orderedValue(left.testingStatus, testingOrder) - orderedValue(right.testingStatus, testingOrder);
 }
 
-export function sortModuleRows(rows: ModuleTableRow[], sort: ModuleSort): ModuleTableRow[] {
+function isStrippedInLens(row: ModuleTableRow, buildLens: Flavor): boolean {
+  return row.flavorStates[buildLens].state === "stripped";
+}
+
+export function sortModuleRows(
+  rows: ModuleTableRow[],
+  sort: ModuleSort,
+  buildLens: Flavor | null = null
+): ModuleTableRow[] {
   const direction = sort.direction === "asc" ? 1 : -1;
   return [...rows].sort((left, right) => {
+    // With a build lens active, packages stripped from that flavor sink to the
+    // bottom (greyed) so the reader sees what is NOT in the build without hiding it.
+    if (buildLens) {
+      const stripGrouping = Number(isStrippedInLens(left, buildLens)) - Number(isStrippedInLens(right, buildLens));
+      if (stripGrouping !== 0) return stripGrouping;
+    }
     // Feature rows always group ahead of infrastructure rows; the chosen sort key
     // orders within each group so sorting stays useful without interleaving.
     const grouping = Number(!isFeatureRow(left)) - Number(!isFeatureRow(right));

@@ -61,3 +61,69 @@ the whole point. Requirements:
   rows), NOT decorative cards. Responsive: horizontal scroll container so the page body never scrolls
   sideways on mobile.
 The previous card-grid overview should be REPLACED. Per-module pages stay.
+
+## ADDENDUM (Phil, 2026-07-17) — Packages, kinds, and the Build Anatomy view
+
+Product vision driving this: **Ninite-style custom builds.** Eventually a customer (esp. enterprise)
+picks the features they want and gets a custom binary with only those — security/compliance story,
+smaller surface, custom auto-update lane. NOT building that now. What we build now is the
+prerequisite: a dependency/inclusion model that is always clear about what is Indoor vs Outdoor,
+what gets compiled into which flavor, and WHY — and a visual on this site that makes it legible.
+
+### Model (source of truth = FeatureCatalog.swift in the app repo)
+- **Everything is a module; every package in `Packages/` has exactly one owning module.** Modules
+  have a `kind`: `feature | engine | platform | harness | vendored`. Engines/platform ARE first-class
+  modules (rows, descriptions, channel grids, submodules) — they just don't render the user-facing
+  columns (permissions-as-consent, Pro tier, App Store status).
+- Features declare `ownedPackages: []` (lifecycle owned — dies with the feature) and `uses: []`
+  (shared engines — no single owner). The prose package field stays as `packageNotes`.
+- **Partial-inclusion rules** (already precedented in the catalog):
+  - Row split at the sandbox wall when the missing slice is a user-visible capability
+    (window-mgmt-self vs -others).
+  - Variant swap when only plumbing differs per channel (subscription: StoreKit↔Polar;
+    global-transcription: Carbon fixed hotkey ↔ NSEvent custom hotkey). New structured
+    `variances: [{channel, what, why}]` so `partial` cells explain themselves.
+  - In-package `#if APPSTORE_BUILD` gates are ALLOWED but must be visible: gate scan is generated
+    (grep), rendered as a per-package "internal gates" marker with file:line list.
+- **Derived vs declared:** a generator walks `Packages/*/Package.swift` + `project.yml` target
+  composition per flavor → derived inclusion grid (pkg × flavor ∈ in/out) + reverse "used by"
+  edges. CI diffs derived against the catalog's declared grid; mismatch fails. Coverage test:
+  orphan package or double-claimed package fails FeatureManifest tests.
+
+### Site rendering
+1. **Modules table (existing page) gains:** a Kind filter chip row (feature/engine/platform/
+   harness/vendored — all 67 packages reachable from this one page), a Packages column
+   (owned count, expandable), and rows for the new non-feature modules.
+2. **NEW page: /docs/builds — "Build Anatomy".** The centerpiece visual:
+   - Segmented control: [Indoor] [Outdoor] [Beta] [Alpha]. Selecting a flavor re-renders the
+     module map: packages grouped by module in kind bands (features / engines / platform).
+     States per package: ● linked · ◐ variant-swapped (chip says what+why) · ✂ stripped
+     (ghosted, reason generated: "depends on capture-engine, which Indoor strips").
+   - **Dependency lens:** click any package → upstream deps + downstream dependents highlight,
+     everything else dims. Hover a stripped package → "stripping this also strips: …"
+     (cut propagation made visible). NO always-on 67-node edge hairball — edges render only
+     on selection.
+   - Summary strip: "62/67 packages · 3 variant-swapped · 5 stripped" per flavor.
+   - Gate glyph on packages containing `#if APPSTORE_BUILD` internally; click → file:line list.
+3. **Per-module pages gain a Packages section:** owned packages, uses-edges, per-flavor state
+   chips, variance explanations.
+
+### Data
+- App repo: extend gen-feature-manifest to also emit `docs/module-graph.json` (modules+kinds+
+  ownership from the catalog; dep edges + per-flavor inclusion + gate scan derived from
+  Package.swift/project.yml). Site: `scripts/generate-public-graph.mjs` redacts/projects →
+  `data/module-graph.json`. Never hand-edit.
+- Until the catalog schema lands, NO site-side hand grouping map — the graph page waits for
+  real generated data rather than shipping a second source of truth.
+
+### Draft module chop (to migrate into FeatureCatalog.swift — sanity-check pending)
+- NEW feature modules: `studio-recording` (StudioModeKit, StudioSceneKit, StudioAgentBridge,
+  DevLoopUI, DevLoopStreamKit, SubtitleKit, TranscriptSyncKit — alpha lane), `tts` (LocalAITTS),
+  `screen-recording` (FeatureScreenRecording); `catbs-workbench` claims WorkbenchRouteKit.
+- Engines: `speech-engine` (SpeechPipeline, LocalSpeechKit, AudioSession), `capture-engine`
+  (FrameSourceKit, FramePipelineKit), `vlm-dispatch` (VLMDispatchKit), `serving-engine`
+  (LocalAIServing), `translation-engine` (LocalAITranslation).
+- Platform: `core` (LocalAICore, LocalAIContracts), `telemetry` (Telemetry), `manifest`
+  (FeatureManifest), `gateway-support` (GatewayFeatureSupport).
+- Harness: MigrationGateHarness, ScenarioHarness. Vendored: MonitorControlDDC, OpenClawKit.
+- DELETE: OpenClawFeatureSupport (zero references; superseded by GatewayFeatureSupport).

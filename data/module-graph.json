@@ -1,0 +1,752 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-07-17",
+  "packages": [
+    {
+      "name": "AppControlKit",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "AudioSession",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "BetaTelemetry",
+      "deps": [
+        "Telemetry"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "ChallengeKit",
+      "deps": [],
+      "reverseDeps": [
+        "SkipKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "DevLoopStreamKit",
+      "deps": [
+        "FramePipelineKit",
+        "FrameSourceKit",
+        "SubtitleKit",
+        "TranscriptSyncKit"
+      ],
+      "reverseDeps": [
+        "DevLoopUI",
+        "StudioAgentBridge",
+        "StudioSceneKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "DevLoopUI",
+      "deps": [
+        "DevLoopStreamKit",
+        "FramePipelineKit",
+        "StudioSceneKit"
+      ],
+      "reverseDeps": [
+        "StudioAgentBridge"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "ExerciseKit",
+      "deps": [],
+      "reverseDeps": [
+        "RoutineKit",
+        "VLMDispatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureAutoPaste",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureGlobalTranscription"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureCompute",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [
+        "FeatureModelLink"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureContentSafety",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureDangerouslySkip",
+      "deps": [
+        "FeatureEyeCare",
+        "HealthKitLogging",
+        "SkipKit"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureDesktopCurtain",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureEvenG2",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "FeatureEvenRealities",
+      "deps": [
+        "FeatureTranslate",
+        "LocalAIContracts",
+        "LocalAIHTTPServer",
+        "SpeechPipeline",
+        "WearableGlassesKit"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureEvenRealities/EvenRealitiesCompanionListener.swift",
+          "line": 17
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureEyeCare",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [
+        "FeatureDangerouslySkip"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureGGUF",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAITextGeneration"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureGlobalTranscription",
+      "deps": [
+        "FeatureAutoPaste",
+        "LocalAIContracts",
+        "LocalAITranscription"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureKeyboardBacklight",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureKeyboardBacklight/KeyboardBacklightMenuContent.swift",
+          "line": 153
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureManifest",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureMLXServeSidecar",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureModelLink",
+      "deps": [
+        "FeatureCompute",
+        "LocalAIContracts",
+        "LocalAITextGeneration"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureMonitorControl",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureMonitorControl/MonitorDDCBackend.swift",
+          "line": 53
+        },
+        {
+          "file": "Sources/FeatureMonitorControl/MonitorDDCBackend.swift",
+          "line": 117
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureOMLXSidecar",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAICore",
+        "LocalAITextGeneration"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureOpenClaw",
+      "deps": [
+        "GatewayFeatureSupport",
+        "LocalAIContracts",
+        "LocalAITextGeneration"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureOpenClaw/Core/OpenClawGatewayCatalog.swift",
+          "line": 23
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureQuickCapture",
+      "deps": [
+        "LocalAIContracts",
+        "SnapCaptureKit"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureQuitApps",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureScreenAwake",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureScreenRecording",
+      "deps": [
+        "FrameSourceKit"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureSubscription",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureTranslate",
+      "deps": [
+        "AppControlKit",
+        "AudioSession",
+        "FeatureTranslateDomain",
+        "LocalAIContracts",
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration",
+        "LocalSpeechKit",
+        "SpeechPipeline"
+      ],
+      "reverseDeps": [
+        "FeatureEvenRealities"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureTranslateDomain",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration"
+      ],
+      "reverseDeps": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWav2Vec2",
+      "deps": [
+        "LocalAITranscription"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWindowManagement",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FramePipelineKit",
+      "deps": [],
+      "reverseDeps": [
+        "DevLoopStreamKit",
+        "DevLoopUI",
+        "FrameSourceKit",
+        "StudioModeKit",
+        "VLMDispatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "FrameSourceKit",
+      "deps": [
+        "FramePipelineKit"
+      ],
+      "reverseDeps": [
+        "DevLoopStreamKit",
+        "FeatureScreenRecording",
+        "StudioAgentBridge",
+        "StudioModeKit",
+        "StudioSceneKit",
+        "VLMDispatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "GatewayFeatureSupport",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [
+        "FeatureOpenClaw"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "HealthKitLogging",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureDangerouslySkip"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIContracts",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureCompute",
+        "FeatureEvenRealities",
+        "FeatureEyeCare",
+        "FeatureGGUF",
+        "FeatureGlobalTranscription",
+        "FeatureMLXServeSidecar",
+        "FeatureModelLink",
+        "FeatureOMLXSidecar",
+        "FeatureOpenClaw",
+        "FeatureQuickCapture",
+        "FeatureScreenAwake",
+        "FeatureSubscription",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "GatewayFeatureSupport",
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration",
+        "SnapCaptureKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAICore",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureOMLXSidecar",
+        "LocalAIHTTPServer",
+        "LocalAIServing",
+        "LocalAITextGeneration"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIEnergy",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIHTTPServer",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAICore",
+        "LocalAIServing",
+        "LocalAITextGeneration",
+        "LocalAITranscription",
+        "RoutineKit"
+      ],
+      "reverseDeps": [
+        "FeatureEvenRealities",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAITranslation",
+        "LocalAITTS",
+        "StudioAgentBridge",
+        "WorkbenchRouteKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIServing",
+      "deps": [
+        "LocalAICore",
+        "LocalAITextGeneration"
+      ],
+      "reverseDeps": [
+        "LocalAIHTTPServer"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITextGeneration",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAICore"
+      ],
+      "reverseDeps": [
+        "FeatureGGUF",
+        "FeatureModelLink",
+        "FeatureOMLXSidecar",
+        "FeatureOpenClaw",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAIHTTPServer",
+        "LocalAIServing",
+        "LocalAITranslation"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITranscription",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureGlobalTranscription",
+        "FeatureWav2Vec2",
+        "LocalAIHTTPServer"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITranslation",
+      "deps": [
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration",
+        "SpeechPipeline",
+        "Telemetry"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITTS",
+      "deps": [
+        "LocalAIHTTPServer"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalSpeechKit",
+      "deps": [
+        "SpeechPipeline"
+      ],
+      "reverseDeps": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MigrationGateHarness",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MonitorControlDDC",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "OpenClawFeatureSupport",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "OpenClawKit",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "RoutineKit",
+      "deps": [
+        "ExerciseKit"
+      ],
+      "reverseDeps": [
+        "LocalAIHTTPServer"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "ScenarioHarness",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "SentryKit",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SkipKit",
+      "deps": [
+        "ChallengeKit"
+      ],
+      "reverseDeps": [
+        "FeatureDangerouslySkip"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SnapCaptureKit",
+      "deps": [
+        "LocalAIContracts",
+        "SnapDeviceCaptureKit"
+      ],
+      "reverseDeps": [
+        "FeatureQuickCapture"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SnapDeviceCaptureKit",
+      "deps": [],
+      "reverseDeps": [
+        "SnapCaptureKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SpeechPipeline",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureEvenRealities",
+        "FeatureTranslate",
+        "LocalAITranslation",
+        "LocalSpeechKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "StudioAgentBridge",
+      "deps": [
+        "DevLoopStreamKit",
+        "DevLoopUI",
+        "FrameSourceKit",
+        "LocalAIHTTPServer",
+        "StudioSceneKit"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/StudioAgentBridge/VirtualCameraConsumer.swift",
+          "line": 16
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "StudioModeKit",
+      "deps": [
+        "FramePipelineKit",
+        "FrameSourceKit",
+        "TranscriptSyncKit",
+        "VLMDispatchKit"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "StudioSceneKit",
+      "deps": [
+        "DevLoopStreamKit",
+        "FrameSourceKit",
+        "TranscriptSyncKit"
+      ],
+      "reverseDeps": [
+        "DevLoopUI",
+        "StudioAgentBridge"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "SubtitleKit",
+      "deps": [
+        "TranscriptSyncKit"
+      ],
+      "reverseDeps": [
+        "DevLoopStreamKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "Telemetry",
+      "deps": [],
+      "reverseDeps": [
+        "BetaTelemetry",
+        "LocalAITranslation"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "TranscriptSyncKit",
+      "deps": [],
+      "reverseDeps": [
+        "DevLoopStreamKit",
+        "StudioModeKit",
+        "StudioSceneKit",
+        "SubtitleKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "VLMDispatchKit",
+      "deps": [
+        "ExerciseKit",
+        "FramePipelineKit",
+        "FrameSourceKit"
+      ],
+      "reverseDeps": [
+        "StudioModeKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "WearableGlassesKit",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureEvenRealities"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "WorkbenchRouteKit",
+      "deps": [
+        "LocalAIHTTPServer"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    }
+  ]
+}

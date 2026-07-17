@@ -293,6 +293,20 @@
       }
     },
     {
+      "id": "lyrics-player",
+      "packages": [
+        "FeatureLyrics",
+        "FeatureTranslateDomain"
+      ],
+      "cases": 32,
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=8 sentry=0",
+        "provisional": true
+      }
+    },
+    {
       "id": "workout-exercise",
       "packages": [
         "ChallengeKit",

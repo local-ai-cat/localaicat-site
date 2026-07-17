@@ -135,6 +135,12 @@
       "neverDriven": true
     },
     {
+      "id": "lyrics-player",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
       "id": "workout-exercise",
       "status": "unit-only",
       "hasSnapshot": false,

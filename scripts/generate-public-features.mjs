@@ -1,5 +1,6 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import process from "node:process";
 
 const root = process.cwd();
@@ -57,6 +58,7 @@ const permissionLabels = {
   accessibility: "Accessibility",
   alarmKit: "Alarms",
   appleEvents: "Automation",
+  appleMusic: "Apple Music",
   bluetooth: "Bluetooth",
   calendar: "Calendar",
   camera: "Camera",
@@ -108,7 +110,7 @@ function validateStringArray(value, location) {
   }
 }
 
-function validateModules(modules) {
+export function validateModules(modules) {
   if (!Array.isArray(modules)) fail("modules must be an array");
   modules.forEach((module, index) => {
     const location = `modules[${index}]`;
@@ -210,7 +212,7 @@ function matchedApiPaths(feature, openApiPaths) {
   return [...new Set(matched)].sort().slice(0, maxApiPaths);
 }
 
-function projectFeature(feature, openApiPaths) {
+export function projectFeature(feature, openApiPaths) {
   const tiers = [];
   if (hasAvailability(feature, ["alpha"])) tiers.push("Alpha");
   if (hasAvailability(feature, ["beta"])) tiers.push("Beta");
@@ -249,7 +251,7 @@ function projectFeature(feature, openApiPaths) {
   };
 }
 
-function projectModule(module) {
+export function projectModule(module) {
   return {
     id: module.id,
     name: module.name,
@@ -305,4 +307,6 @@ async function main() {
   console.log(`Wrote ${features.length} public features and ${modules.length} infrastructure modules to ${path.relative(root, outputPath)}.`);
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  await main();
+}

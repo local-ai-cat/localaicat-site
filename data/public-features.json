@@ -1929,6 +1929,83 @@
       ]
     },
     {
+      "id": "lyrics-player",
+      "name": "Lyrics Player (Apple Music + live translation)",
+      "group": "utilities",
+      "lane": "stable",
+      "status": "wip",
+      "accessTier": "free",
+      "platforms": [
+        "macOS"
+      ],
+      "tiers": [
+        "Alpha",
+        "Beta",
+        "Stable"
+      ],
+      "permissions": [
+        "Apple Music"
+      ],
+      "description": "Play Apple Music (ApplicationMusicPlayer via MusadoraKit on macOS) and read lyrics translated live — whole-line contextual translation plus a per-word interlinear gloss. Lyrics come from the community LRCLIB database. Translation prefers the on-device Foundation Model (Apple Intelligence, no language-pack download) and falls back to Apple's Translation framework; both engines are vendored INTO FeatureLyrics so the feature stays App-Store-decoupled and self-contained. Core also compiles for iOS (companion mode), but ships macOS-only since there is no iOS Outdoor target.",
+      "channels": [
+        {
+          "key": "alpha",
+          "label": "Alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "beta",
+          "label": "Beta",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "outdoor",
+          "label": "Direct Download",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        {
+          "key": "main",
+          "label": "App Store",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      ],
+      "caveats": [
+        {
+          "channel": "App Store",
+          "note": "NEVER linked into an App Store build — crowd-sourced lyrics (LRCLIB) are an App Store rights risk. FeatureLyrics is attached only to the Outdoor + Beta macOS targets; the TranslateHub card is behind `#if canImport(FeatureLyrics)` so App Store builds compile it out."
+        },
+        {
+          "channel": "Direct Download",
+          "note": "Surfaced as a card on the Translate hub (dev/beta hub). Requires Apple Music access (NSAppleMusicUsageDescription) + an Apple Music subscription for catalog search/playback."
+        }
+      ],
+      "package": "FeatureLyrics (self-contained: playback + LRCLIB lyrics + Apple/FoundationModels translation) + FeatureTranslateDomain (shared value types)",
+      "ownedPackages": [],
+      "usesPackages": [],
+      "modular": "yes",
+      "goldStandard": {
+        "gap": "playback/lyrics/translation/UI all packaged in FeatureLyrics; the app shell only wires the Translate-hub card. The private Apple syllable-lyrics source (MusanovaKit) is a documented follow-up, not yet integrated.",
+        "grade": "strong"
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
+    },
+    {
       "id": "workout-exercise",
       "name": "Workout: Exercise (camera rep counter)",
       "group": "utilities",

@@ -192,6 +192,15 @@
       "linkedInProject": true
     },
     {
+      "name": "FeatureLyrics",
+      "deps": [
+        "FeatureTranslateDomain"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "FeatureManifest",
       "deps": [],
       "reverseDeps": [],
@@ -331,6 +340,7 @@
         "LocalAITextGeneration"
       ],
       "reverseDeps": [
+        "FeatureLyrics",
         "FeatureTranslate"
       ],
       "appStoreGates": [],

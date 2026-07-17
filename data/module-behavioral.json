@@ -22,9 +22,9 @@
     },
     {
       "id": "global-transcription",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "auto-paste",

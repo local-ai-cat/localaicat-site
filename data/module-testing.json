@@ -9,7 +9,12 @@
         "LocalAITextGeneration"
       ],
       "cases": 64,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "transcription",
@@ -17,7 +22,12 @@
         "LocalAITranscription"
       ],
       "cases": 56,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=2 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "wav2vec2-transcription",
@@ -26,15 +36,25 @@
         "LocalAITranscription"
       ],
       "cases": 61,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=2 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "global-transcription",
       "packages": [
         "FeatureGlobalTranscription"
       ],
-      "cases": 94,
-      "tier": "heavy"
+      "cases": 101,
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=7 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "auto-paste",
@@ -42,7 +62,12 @@
         "FeatureAutoPaste"
       ],
       "cases": 7,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "window-mgmt-others",
@@ -50,7 +75,12 @@
         "FeatureWindowManagement"
       ],
       "cases": 45,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=2 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "window-mgmt-self",
@@ -58,7 +88,12 @@
         "FeatureWindowManagement"
       ],
       "cases": 45,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=2 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "quit-apps",
@@ -66,7 +101,12 @@
         "FeatureQuitApps"
       ],
       "cases": 8,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "screen-awake",
@@ -74,7 +114,12 @@
         "FeatureScreenAwake"
       ],
       "cases": 38,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "keyboard-backlight",
@@ -82,7 +127,12 @@
         "FeatureKeyboardBacklight"
       ],
       "cases": 5,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=7 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "desktop-curtain",
@@ -90,7 +140,12 @@
         "FeatureDesktopCurtain"
       ],
       "cases": 26,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "eye-care",
@@ -98,7 +153,12 @@
         "FeatureEyeCare"
       ],
       "cases": 31,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "monitor-control",
@@ -106,7 +166,12 @@
         "FeatureMonitorControl"
       ],
       "cases": 36,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "compute",
@@ -115,7 +180,12 @@
         "LocalAIContracts"
       ],
       "cases": 49,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "openclaw",
@@ -123,7 +193,12 @@
         "FeatureOpenClaw"
       ],
       "cases": 6,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "local-api",
@@ -131,7 +206,12 @@
         "LocalAIHTTPServer"
       ],
       "cases": 202,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "app-control",
@@ -139,7 +219,12 @@
         "AppControlKit"
       ],
       "cases": 25,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "routine-kit",
@@ -148,7 +233,12 @@
         "RoutineKit"
       ],
       "cases": 270,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "mlxserve-sidecar",
@@ -156,13 +246,23 @@
         "FeatureMLXServeSidecar"
       ],
       "cases": 9,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "mlxserve-embed",
       "packages": [],
       "cases": 0,
-      "tier": "none"
+      "tier": "none",
+      "logging": {
+        "grade": "L0-L1",
+        "signal": "app-target — see logging audit",
+        "provisional": true
+      }
     },
     {
       "id": "energy-impact",
@@ -170,7 +270,12 @@
         "LocalAIEnergy"
       ],
       "cases": 27,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "dangerously-skip",
@@ -179,8 +284,13 @@
         "FeatureEyeCare",
         "SkipKit"
       ],
-      "cases": 69,
-      "tier": "heavy"
+      "cases": 71,
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "workout-exercise",
@@ -189,7 +299,12 @@
         "ExerciseKit"
       ],
       "cases": 53,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "sentry-mode",
@@ -197,7 +312,12 @@
         "SentryKit"
       ],
       "cases": 23,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "model-link",
@@ -205,7 +325,12 @@
         "FeatureModelLink"
       ],
       "cases": 7,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L1",
+        "signal": "structured=17 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "quick-capture",
@@ -214,7 +339,12 @@
         "SnapCaptureKit"
       ],
       "cases": 51,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=8 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "skip-healthkit-logging",
@@ -222,7 +352,12 @@
         "HealthKitLogging"
       ],
       "cases": 2,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "content-safety-filter",
@@ -230,7 +365,12 @@
         "FeatureContentSafety"
       ],
       "cases": 14,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "subscription",
@@ -238,7 +378,12 @@
         "FeatureSubscription"
       ],
       "cases": 45,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "beta-telemetry",
@@ -247,7 +392,12 @@
         "Telemetry"
       ],
       "cases": 9,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L2",
+        "signal": "structured=0 print=0 sentry=16",
+        "provisional": true
+      }
     },
     {
       "id": "translate",
@@ -257,7 +407,12 @@
         "LocalSpeechKit"
       ],
       "cases": 59,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=108 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "even-realities",
@@ -266,7 +421,12 @@
         "WearableGlassesKit"
       ],
       "cases": 30,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "lmstudio-interop",
@@ -275,7 +435,12 @@
         "LocalAIHTTPServer"
       ],
       "cases": 238,
-      "tier": "heavy"
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "gguf-backend",
@@ -283,7 +448,12 @@
         "FeatureGGUF"
       ],
       "cases": 22,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "omlx-sidecar",
@@ -291,7 +461,12 @@
         "FeatureOMLXSidecar"
       ],
       "cases": 2,
-      "tier": "thin"
+      "tier": "thin",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
     },
     {
       "id": "snap-capture",
@@ -300,7 +475,12 @@
         "SnapDeviceCaptureKit"
       ],
       "cases": 26,
-      "tier": "covered"
+      "tier": "covered",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=9 sentry=0",
+        "provisional": true
+      }
     }
   ]
 }

@@ -32,7 +32,10 @@ export default function ModulesPage() {
       testingStatus: module.behavioral.status,
       testingCases: module.testing.cases,
       hasSnapshot: module.behavioral.hasSnapshot,
-      neverDriven: module.behavioral.neverDriven
+      neverDriven: module.behavioral.neverDriven,
+      logging: module.testing.logging.grade,
+      loggingSignal: module.testing.logging.signal,
+      apiParity: module.api?.parity ?? "notApplicable"
     };
   });
 

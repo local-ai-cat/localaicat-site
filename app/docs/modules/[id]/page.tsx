@@ -9,6 +9,8 @@ import {
   getModules,
   moduleState,
   releaseChannels,
+  type ApiLifecycleVerb,
+  type ApiParity,
   type Availability,
   type ModulePage
 } from "../../../../lib/module-catalog";
@@ -33,6 +35,23 @@ export async function generateMetadata({ params }: ModulePageProps): Promise<Met
 }
 
 const provisionalTooltip = "Provisional signal from test-file presence — NOT the testing grade. Real grade lands with the ledger grade script.";
+const loggingTooltip = "Provisional logging/observability grade from a source scan — NOT an audited grade. L0 bare prints · L1 structured logging · L2 Sentry/telemetry.";
+
+const lifecycleVerbs: ApiLifecycleVerb[] = ["discover", "execute", "observe", "configure", "cancel/stop", "reset"];
+
+const apiParityLabels: Record<ApiParity, string> = {
+  full: "Full",
+  partial: "Partial",
+  none: "None",
+  notApplicable: "Not applicable"
+};
+
+const lifecycleStateLabels: Record<string, string> = {
+  present: "present",
+  partial: "partial",
+  "not-applicable": "not applicable",
+  absent: "absent"
+};
 
 function provisionalLabel(status: ModulePage["behavioral"]["status"]): string {
   return status === "behavioral" ? "+behavioral" : status;
@@ -112,6 +131,70 @@ function StatusSection({ module }: { module: ModulePage }) {
   );
 }
 
+function HeadlessApiSection({ module }: { module: ModulePage }) {
+  const api = module.api;
+  const parity: ApiParity = api?.parity ?? "notApplicable";
+  const capabilities = api?.capabilities ?? [];
+  const logging = module.testing.logging;
+
+  return (
+    <section className="moduleSection moduleHeadlessApi" id="headless-api">
+      <div className="moduleSectionHeading">
+        <p>Headless Local API</p>
+        <h2>Drive it over the loopback API</h2>
+      </div>
+
+      <div className="moduleStatusSummary">
+        <StatusChip kind="api" title="Coverage of this module's controls on the token-gated loopback Local API.">
+          API parity: {apiParityLabels[parity]}
+        </StatusChip>
+        <StatusChip
+          kind="logging"
+          title={`${loggingTooltip} Signal: ${logging.signal}.`}
+        >
+          Logging: {logging.grade}{logging.provisional ? " · prov." : ""}
+        </StatusChip>
+      </div>
+
+      <p className="moduleLongCopy moduleHeadlessApiCopy">
+        Logging / observability: provisional grade <strong>{logging.grade}</strong> — <span>{logging.signal}</span>.
+      </p>
+
+      <dl className="moduleStatusGrid moduleLifecycleGrid" aria-label="API lifecycle coverage">
+        {lifecycleVerbs.map((verb) => {
+          const state = api?.lifecycle?.[verb] ?? "not-applicable";
+          return (
+            <div key={verb} data-state={state}>
+              <dt>{verb}</dt>
+              <dd>{lifecycleStateLabels[state] ?? state}</dd>
+            </div>
+          );
+        })}
+      </dl>
+
+      {capabilities.length > 0 ? (
+        <div className="moduleTableChips moduleApiCapabilities">
+          {capabilities.map((capability) => (
+            <StatusChip kind="api" key={capability}>{capability}</StatusChip>
+          ))}
+        </div>
+      ) : (
+        <p className="moduleEmptyState">No API capabilities are declared for this module yet.</p>
+      )}
+
+      {module.apiPaths.length > 0 ? (
+        <ul className="moduleApiPaths" aria-label="Matched Local API operation paths">
+          {module.apiPaths.map((operationPath) => (
+            <li key={operationPath}><code>{operationPath}</code></li>
+          ))}
+        </ul>
+      ) : (
+        <p className="moduleEmptyState">No Local API operation paths are matched to this module yet.</p>
+      )}
+    </section>
+  );
+}
+
 export default async function ModuleDetailPage({ params }: ModulePageProps) {
   const { id } = await params;
   const module = getModule(id);
@@ -139,6 +222,8 @@ export default async function ModuleDetailPage({ params }: ModulePageProps) {
             {module.description ?? "A full description for this module is being prepared."}
           </p>
         </section>
+
+        <HeadlessApiSection module={module} />
 
         <section className="moduleSection">
           <div className="moduleSectionHeading">

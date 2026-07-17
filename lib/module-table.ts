@@ -1,5 +1,5 @@
 export type FilterKey = "channels" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
-export type SortKey = "name" | "status" | "modular" | "testingStatus";
+export type SortKey = "name" | "status" | "modular" | "testingStatus" | "logging" | "apiParity";
 export type SortDirection = "asc" | "desc";
 
 export type ModuleTableRow = {
@@ -15,6 +15,9 @@ export type ModuleTableRow = {
   testingCases: number;
   hasSnapshot: boolean;
   neverDriven: boolean;
+  logging: string;
+  loggingSignal: string;
+  apiParity: "full" | "partial" | "none" | "notApplicable";
 };
 
 export type ModuleFilters = Record<FilterKey, Set<string>>;
@@ -49,6 +52,8 @@ export function filterModuleRows(rows: ModuleTableRow[], filters: ModuleFilters)
 const statusOrder = ["live", "beta", "wip", "locked", "purgatory"];
 const modularOrder = ["yes", "partial", "no"];
 const testingOrder = ["untested", "unit-only", "behavioral"];
+const loggingOrder = ["L0", "L0-L1", "L1", "L2", "L3"];
+const apiParityOrder = ["none", "partial", "full"];
 
 function orderedValue(value: string, order: string[]): number {
   const index = order.indexOf(value);
@@ -59,6 +64,8 @@ function compareRows(left: ModuleTableRow, right: ModuleTableRow, key: SortKey):
   if (key === "name") return left.name.localeCompare(right.name);
   if (key === "status") return orderedValue(left.status, statusOrder) - orderedValue(right.status, statusOrder);
   if (key === "modular") return orderedValue(left.modular, modularOrder) - orderedValue(right.modular, modularOrder);
+  if (key === "logging") return orderedValue(left.logging, loggingOrder) - orderedValue(right.logging, loggingOrder);
+  if (key === "apiParity") return orderedValue(left.apiParity, apiParityOrder) - orderedValue(right.apiParity, apiParityOrder);
   return orderedValue(left.testingStatus, testingOrder) - orderedValue(right.testingStatus, testingOrder);
 }
 

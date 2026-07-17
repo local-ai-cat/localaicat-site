@@ -31,6 +31,24 @@ export function testingTier(cases) {
   return "heavy";
 }
 
+// Provisional logging/observability grade, mirroring a first-pass audit:
+// today almost everything is L0/L1 (structured logging or bare prints) and
+// nothing reaches L2 (Sentry/telemetry) — that is expected and correct.
+export function loggingGrade({ structured, prints, sentry, hasPackages }) {
+  if (sentry > 0) return "L2";
+  if (structured > 0) return "L1";
+  if (!hasPackages) return "L0-L1";
+  return "L0";
+}
+
+const structuredLogPattern = /DiagnosticLogger\.|ModelLinkLog\./g;
+const printPattern = /\bprint\(/g;
+const sentryPattern = /TelemetryRegistry|capture\(error|capture\(message/g;
+
+function countMatches(source, pattern) {
+  return source.match(pattern)?.length ?? 0;
+}
+
 function stripSwiftComments(source) {
   return source
     .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -126,6 +144,18 @@ async function countPackageTests(packageDirectory) {
   return cases;
 }
 
+async function countPackageLogging(packageDirectory) {
+  const files = await swiftFiles(packageDirectory);
+  const signals = { structured: 0, prints: 0, sentry: 0 };
+  for (const file of files) {
+    const source = await readFile(file, "utf8");
+    signals.structured += countMatches(source, structuredLogPattern);
+    signals.prints += countMatches(source, printPattern);
+    signals.sentry += countMatches(source, sentryPattern);
+  }
+  return signals;
+}
+
 async function readPackageOverrides() {
   const overrides = new Map();
   let entries;
@@ -176,6 +206,7 @@ export async function generateModuleTesting(appRoot) {
   const knownPackageNames = [...packageDirectories.keys()];
   const overrides = await readPackageOverrides();
   const packageTestCounts = new Map();
+  const packageLoggingSignals = new Map();
 
   async function testsForPackage(name) {
     if (packageTestCounts.has(name)) return packageTestCounts.get(name);
@@ -187,6 +218,16 @@ export async function generateModuleTesting(appRoot) {
     return cases;
   }
 
+  async function loggingForPackage(name) {
+    if (packageLoggingSignals.has(name)) return packageLoggingSignals.get(name);
+    const locations = packageDirectories.get(name);
+    if (!locations) fail(`package override ${JSON.stringify(name)} does not match a Package.swift in the app repo`);
+    if (locations.length !== 1) fail(`package ${JSON.stringify(name)} is ambiguous in the app repo`);
+    const signals = await countPackageLogging(locations[0]);
+    packageLoggingSignals.set(name, signals);
+    return signals;
+  }
+
   const modules = [];
   for (const feature of publicFeatures.features) {
     if (!isObject(feature) || typeof feature.id !== "string") fail("public feature entries must have an id");
@@ -195,7 +236,27 @@ export async function generateModuleTesting(appRoot) {
       : extractPackageNames(feature.package, knownPackageNames);
     let cases = 0;
     for (const packageName of packages) cases += await testsForPackage(packageName);
-    modules.push({ id: feature.id, packages, cases, tier: testingTier(cases) });
+
+    const logging = { structured: 0, prints: 0, sentry: 0 };
+    for (const packageName of packages) {
+      const signals = await loggingForPackage(packageName);
+      logging.structured += signals.structured;
+      logging.prints += signals.prints;
+      logging.sentry += signals.sentry;
+    }
+    const hasPackages = packages.length > 0;
+    const grade = loggingGrade({ ...logging, hasPackages });
+    const signal = hasPackages
+      ? `structured=${logging.structured} print=${logging.prints} sentry=${logging.sentry}`
+      : "app-target — see logging audit";
+
+    modules.push({
+      id: feature.id,
+      packages,
+      cases,
+      tier: testingTier(cases),
+      logging: { grade, signal, provisional: true }
+    });
   }
 
   const output = {

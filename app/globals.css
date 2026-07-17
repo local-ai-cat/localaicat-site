@@ -1552,8 +1552,70 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   border-color: color-mix(in srgb, var(--module-state) 28%, transparent);
 }
 
+.moduleChip[data-kind="logging"] {
+  color: #c3b1d6;
+  border-color: rgba(195, 177, 214, 0.24);
+}
+
+.moduleChip[data-kind="api"] {
+  color: #93c7c0;
+  border-color: rgba(147, 199, 192, 0.24);
+}
+
+.moduleChipProvisional {
+  margin-left: 3px;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.moduleApiLink {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.moduleApiLink:hover .moduleChip[data-kind="api"] {
+  border-color: color-mix(in srgb, #579791 44%, transparent);
+}
+
+.moduleApiCapabilities {
+  margin-top: 4px;
+}
+
+.moduleApiPaths {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moduleApiPaths code {
+  font-size: 12px;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+.moduleLifecycleGrid dd {
+  text-transform: capitalize;
+}
+
+.moduleHeadlessApiCopy span {
+  color: var(--text-dim);
+}
+
 .moduleTableExperience .moduleChip {
   background: color-mix(in srgb, var(--text) 2%, transparent);
+}
+
+.moduleTableExperience .moduleChip[data-kind="logging"] {
+  color: color-mix(in srgb, #7a5da0 54%, var(--text));
+  border-color: color-mix(in srgb, #7a5da0 24%, transparent);
+}
+
+.moduleTableExperience .moduleChip[data-kind="api"] {
+  color: color-mix(in srgb, #3f8f87 54%, var(--text));
+  border-color: color-mix(in srgb, #3f8f87 24%, transparent);
 }
 
 .moduleTableExperience .moduleChip[data-kind="channel"] {

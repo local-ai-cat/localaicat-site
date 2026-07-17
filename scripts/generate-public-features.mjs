@@ -4,7 +4,32 @@ import process from "node:process";
 
 const root = process.cwd();
 const sourcePath = path.resolve(root, "../Local-AI-Chat/docs/features.json");
+const openApiPath = path.resolve(root, "../Local-AI-Chat/docs/localapi-openapi.json");
 const outputPath = path.resolve(root, "data/public-features.json");
+
+// Maps an api capability (from features.json api.capabilities) or an inferred
+// keyword (from the feature id/name) to Local API operation-path substrings.
+// The matched paths are the "headless API" surface we cite on each module page.
+const apiPathHintsByKey = {
+  speech: ["/transcription", "/audio/transcriptions", "/studio"],
+  modelDownloads: ["/models", "/model"],
+  modelLifecycle: ["/models", "/model"],
+  model: ["/models", "/model"],
+  externalModels: ["/models", "/modellink", "/compute"],
+  localApi: ["/v1/local/"],
+  webFetch: ["/chat/completions", "/responses", "/messages"],
+  chat: ["/chat/completions", "/responses", "/messages"],
+  translate: ["/translation", "/transcription"],
+  workbench: ["/workbench"],
+  studio: ["/studio"],
+  record: ["/transcription/recordings"],
+  update: ["/update"],
+  vnc: ["/compute", "/vnc"]
+};
+const inferredKeywordKeys = [
+  "speech", "chat", "translate", "workbench", "studio", "record", "update", "vnc", "model"
+];
+const maxApiPaths = 10;
 
 const allowedTopLevelKeys = new Set([
   "$comment", "accessTiers", "apiAxis", "capabilities", "channels", "features", "lanes",
@@ -138,7 +163,25 @@ function hasAvailability(feature, channels) {
   return channels.some((channel) => availablePlatforms(feature.builds[channel]).length > 0);
 }
 
-function projectFeature(feature) {
+function matchedApiPaths(feature, openApiPaths) {
+  const keys = new Set(feature.api?.capabilities ?? []);
+  const haystack = `${feature.id} ${feature.name}`.toLowerCase();
+  for (const keyword of inferredKeywordKeys) {
+    if (haystack.includes(keyword)) keys.add(keyword);
+  }
+
+  const substrings = new Set();
+  for (const key of keys) {
+    for (const hint of apiPathHintsByKey[key] ?? []) substrings.add(hint);
+  }
+  if (substrings.size === 0) return [];
+
+  const hints = [...substrings];
+  const matched = openApiPaths.filter((operationPath) => hints.some((hint) => operationPath.includes(hint)));
+  return [...new Set(matched)].sort().slice(0, maxApiPaths);
+}
+
+function projectFeature(feature, openApiPaths) {
   const tiers = [];
   if (hasAvailability(feature, ["alpha"])) tiers.push("Alpha");
   if (hasAvailability(feature, ["beta"])) tiers.push("Beta");
@@ -169,8 +212,25 @@ function projectFeature(feature) {
     })),
     package: feature.package ?? null,
     modular: feature.modular,
-    goldStandard: feature.goldStandard ?? null
+    goldStandard: feature.goldStandard ?? null,
+    api: feature.api ?? null,
+    apiPaths: matchedApiPaths(feature, openApiPaths)
   };
+}
+
+async function readOpenApiPaths() {
+  try {
+    await access(openApiPath);
+  } catch {
+    return [];
+  }
+  try {
+    const document = JSON.parse(await readFile(openApiPath, "utf8"));
+    if (!isObject(document) || !isObject(document.paths)) return [];
+    return Object.keys(document.paths);
+  } catch {
+    return [];
+  }
 }
 
 async function main() {
@@ -190,9 +250,10 @@ async function main() {
   }
   validateManifest(manifest);
 
+  const openApiPaths = await readOpenApiPaths();
   const features = manifest.features
     .filter((feature) => !feature.internal)
-    .map(projectFeature);
+    .map((feature) => projectFeature(feature, openApiPaths));
   const output = { schemaVersion: 3, updated: manifest.updated, features };
 
   await mkdir(path.dirname(outputPath), { recursive: true });

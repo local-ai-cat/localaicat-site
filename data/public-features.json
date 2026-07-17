@@ -54,7 +54,38 @@
       "goldStandard": {
         "gap": "MLX runtime adapters, model download/selection UI, chat UI + tool-run UI/persistence still app-side; app imports packaged types directly, no backend registry seam yet",
         "grade": "partial"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi",
+          "modelLifecycle",
+          "modelDownloads",
+          "speech",
+          "webFetch",
+          "externalModels"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "partial",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "partial"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/audio/transcriptions",
+        "/v1/chat/completions",
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts"
+      ]
     },
     {
       "id": "transcription",
@@ -109,7 +140,33 @@
       "goldStandard": {
         "gap": "product logic + catalog packaged, but app imports packaged types directly and the WhisperKit/Apple live engine adapters + recording/model-selection UI are app-shell-terminal — no registry seam",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "transcription"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "present",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "full"
+      },
+      "apiPaths": [
+        "/v1/audio/transcriptions",
+        "/v1/local/studio/commands",
+        "/v1/local/studio/events",
+        "/v1/local/studio/export/gif",
+        "/v1/local/studio/frame",
+        "/v1/local/studio/outputs",
+        "/v1/local/studio/outputs/{output_id}",
+        "/v1/local/studio/outputs/{output_id}/canvas",
+        "/v1/local/studio/outputs/{output_id}/scenes",
+        "/v1/local/studio/outputs/{output_id}/switch-scene"
+      ]
     },
     {
       "id": "wav2vec2-transcription",
@@ -171,7 +228,20 @@
       "goldStandard": {
         "gap": "LocalAITranscription owns pure selection/catalog/parser/runtime contracts; macOS-only FeatureWav2Vec2 owns AVFoundation resampling, subprocess lifecycle, availability, and optional-engine registration. The app shell consumes only the feature-agnostic transcription-engine registry.",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "global-transcription",
@@ -194,7 +264,7 @@
         "Microphone",
         "Speech Recognition"
       ],
-      "description": "macOS only. FeatureGlobalTranscription owns GlobalTranscriptionFeatureController, GlobalTranscriptionLaunchParticipant, notification/hotkey/permission policy, lifecycle state, HotkeyRegistering, ActiveWindowCapturing, PermissionOrchestrating, and the live .menuBar UIContribution metadata/factory/shell. The participant is the sole startup owner; the old app BlockLaunchParticipant plus direct notification and post-launch hotkey paths are removed. MenuBarView renders the package contribution factory, which wraps the existing app-supplied detailed engine/background controls. The app injects Carbon/NSEvent hotkey registration, CGWindow active-window capture, TCC permission checks/requests, and a Whisper/runtime adapter. GlobalTranscriptionService now consumes the active-window and permission protocols instead of WindowDetectionService.shared, but the service (~1.4k lines), TranscriptionWindowManager, loading/recording panels, detailed menu controls, and active-app paste side effects remain app-side for a later stage, so modular stays partial. APPLE PERMISSION DIFFERENCE: Outdoor uses an NSEvent global monitor for a configurable modifier-only hotkey (default Right ⌘), gated on Accessibility (AXIsProcessTrusted); Indoor uses Carbon RegisterEventHotKey for a fixed ⌃⌥Space with no special permission. Screen Recording remains required for active-window title routing. PENDING: hotkey, menu-bar, permission, and active-window capture verification in a real macOS session.",
+      "description": "macOS only. FeatureGlobalTranscription owns GlobalTranscriptionService session state and public lifecycle, queue/orchestration policy, GlobalTranscriptionFeatureController/LaunchParticipant, the live .menuBar contribution and detailed engine/background controls, TranscriptionWindowManager plus loading/recording/status views, and FeatureAutoPaste completion orchestration. The package participant, contribution factory, service, and window manager are the sole live owners; the former app service/window/menu paths are removed. The app injects Whisper/audio/history runtime effects, Carbon/NSEvent hotkey registration, CGWindow active-window capture, TCC permission checks/requests, one NSPanel host, and clipboard/CGEvent/notification paste effects. APPLE PERMISSION DIFFERENCE: Outdoor uses an NSEvent global monitor for a configurable modifier-only hotkey (default Right ⌘), gated on Accessibility (AXIsProcessTrusted); Indoor uses Carbon RegisterEventHotKey for a fixed ⌃⌥Space with no special permission. Screen Recording remains required for active-window title routing. PENDING: hotkey, menu-bar, panel, permission, active-window capture, and paste verification in a real macOS session.",
       "channels": [
         {
           "key": "alpha",
@@ -231,12 +301,27 @@
           "note": "Configurable modifier-only hotkey (default Right ⌘) via NSEvent global monitor, gated on Accessibility (AXIsProcessTrusted)."
         }
       ],
-      "package": "FeatureGlobalTranscription + app platform/service adapters",
-      "modular": "partial",
+      "package": "FeatureGlobalTranscription + thin app runtime/panel/side-effect adapters",
+      "modular": "yes",
       "goldStandard": {
-        "gap": "launch/hotkey/permission lifecycle, edge protocols, and the live menu-bar contribution shell are packaged; the large recording service, Whisper runtime construction, loading/recording panels, and detailed menu controls remain staged app adapters",
-        "grade": "partial"
-      }
+        "gap": "service/session state, panel controller/views, detailed menu controls, launch lifecycle, and paste orchestration are packaged; app adapters terminate at Whisper/audio/history, NSPanel, clipboard/CGEvent, notifications, and TCC/window capture",
+        "grade": "strong"
+      },
+      "api": {
+        "capabilities": [
+          "transcription"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "partial",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": []
     },
     {
       "id": "auto-paste",
@@ -298,7 +383,20 @@
       "goldStandard": {
         "gap": "all orchestration packaged with only thin platform side-effect adapters left, but wired directly rather than registered through a provider/registry like the reference module",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "window-mgmt-others",
@@ -360,7 +458,20 @@
       "goldStandard": {
         "gap": "planning and provider contracts are packaged; AX movement and NSScreen capture remain injected terminal app adapters behind the shared settings contribution",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "window-mgmt-self",
@@ -413,7 +524,33 @@
       "goldStandard": {
         "gap": "all planning logic packaged with only NSWindow/NSScreen snapshot + frame-apply adapters left, but composed directly rather than via a registry/provider seam",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "quit-apps",
@@ -475,7 +612,33 @@
       "goldStandard": {
         "gap": "entire surface (logic + view model + SwiftUI window) packaged; app shell is gate-and-call only, but invoked directly rather than registered through a provider/registry",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "screen-awake",
@@ -528,7 +691,33 @@
       "goldStandard": {
         "gap": "full controller + IOKit orchestration + menu-bar UI packaged; only diagnostics/startup adapters remain, but registered via direct startup wiring not a provider seam",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "not-applicable",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "keyboard-backlight",
@@ -590,7 +779,33 @@
       "goldStandard": {
         "gap": "service, pure control logic, persistence keys, and menu-bar UI are packaged; app shell only links/registers the feature on Outdoor/Beta",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "present",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "desktop-curtain",
@@ -648,7 +863,33 @@
       "goldStandard": {
         "gap": "FeatureDesktopCurtain owns the fill policy (unit-tested) + generic app-provided cat-themed content hook (behavioural-tested) + AppKit overlay controller incl. the covering window-level (behavioural-tested); app shell supplies the Catty 3D ambient view, menu-bar toggle, and persisted DesktopCurtainService.",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "present",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "eye-care",
@@ -710,7 +951,33 @@
       "goldStandard": {
         "gap": "controllers/state machines/presentation packaged, but app shell still wires many side effects (keyboard-lock, notifications, Skip service injection, settings sheets/gates) directly rather than via a registry",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "not-applicable",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "monitor-control",
@@ -772,7 +1039,20 @@
       "goldStandard": {
         "gap": "DDC/media-key behavior and UI are packaged; AppKit display snapshots and Accessibility prompting are injected terminal adapters behind package protocols",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "compute",
@@ -838,7 +1118,31 @@
       "goldStandard": {
         "gap": "model surfaces contributed via the ChatBackend/ModelCatalogContributor registry, but networking/transport/SSH/Terminal3D/VNC + Compute UI remain a large app-owned (irreducible) shell",
         "grade": "partial"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": [
+        "/v1/local/model-categories",
+        "/v1/local/models",
+        "/v1/local/models/downloads",
+        "/v1/local/models/downloads/{download_id}",
+        "/v1/local/models/external",
+        "/v1/local/models/external/import",
+        "/v1/local/models/refresh",
+        "/v1/local/models/status",
+        "/v1/local/models/{model_id}",
+        "/v1/local/models/{model_id}/estimate"
+      ]
     },
     {
       "id": "openclaw",
@@ -903,7 +1207,25 @@
       "goldStandard": {
         "gap": "",
         "grade": "gold"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": [
+        "/v1/chat/completions",
+        "/v1/local/chat/sessions/{session_id}/messages",
+        "/v1/messages",
+        "/v1/responses"
+      ]
     },
     {
       "id": "local-api",
@@ -965,7 +1287,33 @@
       "goldStandard": {
         "gap": "HTTP behavior and listener lifecycle contract are packaged; NWListener binding remains an injected terminal app adapter behind shared launch and settings contribution seams",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "partial",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "app-control",
@@ -1021,7 +1369,34 @@
       "goldStandard": {
         "gap": "AppControlKit owns the navigation, AX-walking, and capture contracts plus descriptors, registry, and transactions; platform composition is injected through app conformers",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "appControl",
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "present",
+          "execute": "partial",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "routine-kit",
@@ -1083,7 +1458,34 @@
       "goldStandard": {
         "gap": "engine mutations, providers, recoverable calendar/alarm projections, screen-time thresholds, the pure planned-day planner, and the revisioned App Group command bridge are isolated behind tested package contracts",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "routines",
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "present",
+          "discover": "present",
+          "execute": "present",
+          "observe": "present",
+          "reset": "present"
+        },
+        "parity": "full"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "mlxserve-sidecar",
@@ -1145,7 +1547,33 @@
       "goldStandard": {
         "gap": "controller, process supervision, health/model discovery, settings policy, and lifecycle participant are packaged; the app injects only Bundle resolution and log forwarding",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "present",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "mlxserve-embed",
@@ -1208,7 +1636,33 @@
       "goldStandard": {
         "gap": "terminal app backend adapter remains; listener lifecycle is registered through LaunchParticipant with the shared serving handle injected",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "present",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "energy-impact",
@@ -1262,7 +1716,20 @@
       "goldStandard": {
         "gap": "estimator/ledger/UI fully packaged with only thin adapters left, but startup + live recorder wrapper are wired directly rather than registered through a provider/registry",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "dangerously-skip",
@@ -1325,7 +1792,33 @@
       "goldStandard": {
         "gap": "codec/transport/orchestration in SkipKit, live feature facade/registry plus service adapters in FeatureDangerouslySkip, and presentation primitives in FeatureEyeCare",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "present",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "workout-exercise",
@@ -1385,7 +1878,20 @@
       "goldStandard": {
         "gap": "rep counting/anti-cheat/challenge state fully packaged in ExerciseKit; the app owns only the Utilities screen and (later) the camera→VLM observer adapter",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "sentry-mode",
@@ -1446,7 +1952,20 @@
       "goldStandard": {
         "gap": "the escalation ladder/state machine is fully packaged in SentryKit; the app owns the impure edges (CGEvent listen-only tap, blocking panel, curtain, ScreenCaptureKit recorder, speech quirk)",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "model-link",
@@ -1507,7 +2026,33 @@
       "goldStandard": {
         "gap": "remote backend, P2P transport, sharing orchestration, tailnet probing, provider contracts, and chat-backend registration are packaged; CLI and KVS side effects remain terminal app adapters",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "present",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "quick-capture",
@@ -1569,7 +2114,20 @@
       "goldStandard": {
         "gap": "FeatureQuickCapture owns palette/runtime orchestration, chord policy, UI contribution, and lifecycle; app shell retains injected hotkey, SnapCaptureKit/Workbench capture, AVFoundation camera, and Desktop Curtain adapters",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "skip-healthkit-logging",
@@ -1619,7 +2177,20 @@
       "goldStandard": {
         "gap": "logging logic lives behind a package seam; app side is a thin seam but wired directly, and entitlement/provisioning follow-up still gates shipping — no registry seam",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "content-safety-filter",
@@ -1673,7 +2244,20 @@
       "goldStandard": {
         "gap": "all filter logic + enforcement packaged; app supplies only persisted setting/subscription/age inputs + Settings UI, but wired directly rather than via a provider/registry seam",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     },
     {
       "id": "subscription",
@@ -1740,7 +2324,21 @@
       "goldStandard": {
         "gap": "billing lifecycle and account UI are package-owned by build flavor; the app supplies only persistence, feature-flag, and effective-access adapters",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "notApplicable",
+        "reason": "Purchase and restore flows are policy-excluded from HTTP control."
+      },
+      "apiPaths": []
     },
     {
       "id": "beta-telemetry",
@@ -1810,7 +2408,21 @@
       "goldStandard": {
         "gap": "",
         "grade": "gold"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "notApplicable",
+        "reason": "Telemetry consent and diagnostics are deliberately not remote-controllable."
+      },
+      "apiPaths": []
     },
     {
       "id": "translate",
@@ -1864,7 +2476,34 @@
       "goldStandard": {
         "gap": "FeatureTranslate owns its UI, view model, conversation/diarization services, and feature-neutral TranslateDisplayAdapter registry; it has no dependency on the Even Realities driver",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "translate",
+          "evenG2Translation"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "present",
+          "discover": "partial",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/audio/transcriptions",
+        "/v1/even/translation/sessions",
+        "/v1/even/translation/sessions/{session_id}/audio",
+        "/v1/even/translation/sessions/{session_id}/mode",
+        "/v1/even/translation/sessions/{session_id}/state",
+        "/v1/even/translation/sessions/{session_id}/stop",
+        "/v1/even/translation/sessions/{session_id}/stream",
+        "/v1/even/translation/sessions/{session_id}/text",
+        "/v1/local/transcription/drive",
+        "/v1/local/transcription/jobs"
+      ]
     },
     {
       "id": "even-realities",
@@ -1920,7 +2559,34 @@
       "goldStandard": {
         "gap": "FeatureEvenRealities owns the generic GlassesDisplaySink, G2 driver, listener, Live Activity, companion surface, and LaunchParticipant lifecycle; feature adapters are separate products",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "evenG2Translation",
+          "translate"
+        ],
+        "lifecycle": {
+          "cancel/stop": "present",
+          "configure": "present",
+          "discover": "partial",
+          "execute": "present",
+          "observe": "present",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/audio/transcriptions",
+        "/v1/even/translation/sessions",
+        "/v1/even/translation/sessions/{session_id}/audio",
+        "/v1/even/translation/sessions/{session_id}/mode",
+        "/v1/even/translation/sessions/{session_id}/state",
+        "/v1/even/translation/sessions/{session_id}/stop",
+        "/v1/even/translation/sessions/{session_id}/stream",
+        "/v1/even/translation/sessions/{session_id}/text",
+        "/v1/local/transcription/drive",
+        "/v1/local/transcription/jobs"
+      ]
     },
     {
       "id": "lmstudio-interop",
@@ -1982,7 +2648,33 @@
       "goldStandard": {
         "gap": "terminal symlink and HubApi adapters remain app-owned; LocalAIExternalModelServing is registered through the packaged provider registry",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "externalModels"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "present",
+          "execute": "present",
+          "observe": "partial",
+          "reset": "present"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/model-categories",
+        "/v1/local/models",
+        "/v1/local/models/downloads",
+        "/v1/local/models/downloads/{download_id}",
+        "/v1/local/models/external",
+        "/v1/local/models/external/import",
+        "/v1/local/models/refresh",
+        "/v1/local/models/status",
+        "/v1/local/models/{model_id}",
+        "/v1/local/models/{model_id}/estimate"
+      ]
     },
     {
       "id": "gguf-backend",
@@ -2044,7 +2736,33 @@
       "goldStandard": {
         "gap": "sidecar lifecycle + SSE adaptation + gguf discovery + ChatBackendRegistry registration are packaged; the app supplies only binary/model-dir config at the composition root behind FEATURE_GGUF",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "present",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "omlx-sidecar",
@@ -2104,7 +2822,33 @@
       "goldStandard": {
         "gap": "FeatureOMLXSidecar owns process lifecycle, SSE adaptation, routing policy, ChatBackendRegistry registration, and termination; the app injects only native-runtime unload and logging hooks",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [
+          "localApi"
+        ],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "present",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "partial"
+      },
+      "apiPaths": [
+        "/v1/local/app/action",
+        "/v1/local/app/artifacts/{id}",
+        "/v1/local/app/navigate",
+        "/v1/local/app/screenshot",
+        "/v1/local/app/state",
+        "/v1/local/app/surfaces",
+        "/v1/local/app/transactions/{id}",
+        "/v1/local/artifacts",
+        "/v1/local/artifacts/{artifact_id}",
+        "/v1/local/artifacts/{artifact_id}/content"
+      ]
     },
     {
       "id": "snap-capture",
@@ -2165,7 +2909,20 @@
       "goldStandard": {
         "gap": "SnapCaptureKit owns the session model, transcription event contract, capture-source seam, concrete ScreenCaptureKit/AVFoundation adapters, coordinator, preview UI, and lazy lifecycle participant; the app retains only composition and the existing Quick Capture host",
         "grade": "strong"
-      }
+      },
+      "api": {
+        "capabilities": [],
+        "lifecycle": {
+          "cancel/stop": "not-applicable",
+          "configure": "not-applicable",
+          "discover": "not-applicable",
+          "execute": "not-applicable",
+          "observe": "not-applicable",
+          "reset": "not-applicable"
+        },
+        "parity": "none"
+      },
+      "apiPaths": []
     }
   ]
 }

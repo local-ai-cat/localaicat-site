@@ -9,6 +9,21 @@ export type ModuleLane = "stable" | "beta" | "alpha" | "locked" | "purgatory";
 export type ModuleStatus = "live" | "beta" | "wip";
 export type TestingTier = "none" | "thin" | "covered" | "heavy";
 export type BehavioralStatus = "untested" | "unit-only" | "behavioral";
+export type ApiParity = "full" | "partial" | "none" | "notApplicable";
+export type ApiLifecycleState = "present" | "partial" | "not-applicable";
+export type ApiLifecycleVerb = "discover" | "execute" | "observe" | "configure" | "cancel/stop" | "reset";
+
+export type ModuleApi = {
+  parity: ApiParity;
+  lifecycle: Record<ApiLifecycleVerb, ApiLifecycleState>;
+  capabilities: string[];
+};
+
+export type ModuleLogging = {
+  grade: string;
+  signal: string;
+  provisional: boolean;
+};
 
 export type PublicModule = {
   id: string;
@@ -34,6 +49,8 @@ export type PublicModule = {
     grade: "gold" | "strong" | "partial" | "weak";
     gap: string;
   } | null;
+  api: ModuleApi | null;
+  apiPaths: string[];
 };
 
 export type ModuleTesting = {
@@ -41,6 +58,7 @@ export type ModuleTesting = {
   packages: string[];
   cases: number;
   tier: TestingTier;
+  logging: ModuleLogging;
 };
 
 export type ModuleBehavioral = {

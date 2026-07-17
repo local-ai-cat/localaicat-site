@@ -75,6 +75,14 @@ const filterGroups: FilterGroup[] = [
 ];
 
 const provisionalTooltip = "Provisional signal from test-file presence — NOT the testing grade. Real grade lands with the ledger grade script.";
+const loggingTooltip = "Provisional logging/observability grade from a source scan — NOT an audited grade. L0 bare prints · L1 structured logging · L2 Sentry/telemetry.";
+
+const apiParityLabels: Record<ModuleTableRow["apiParity"], string> = {
+  full: "Full",
+  partial: "Partial",
+  none: "None",
+  notApplicable: "n·a"
+};
 
 function labelFor(value: string): string {
   if (value === "wip") return "Work in progress";
@@ -239,6 +247,8 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
               <SortHeader activeSort={sort} column="status" label="Status" onSort={changeSort} />
               <SortHeader activeSort={sort} column="modular" label="Modular" onSort={changeSort} />
               <SortHeader activeSort={sort} column="testingStatus" label="Provisional testing" onSort={changeSort} />
+              <SortHeader activeSort={sort} column="logging" label="Logging" onSort={changeSort} />
+              <SortHeader activeSort={sort} column="apiParity" label="Headless API" onSort={changeSort} />
             </tr>
           </thead>
           <tbody>
@@ -292,11 +302,24 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
                     {row.neverDriven ? <span className="moduleNeverDrivenBadge">⚠ never-driven</span> : null}
                   </div>
                 </td>
+                <td>
+                  <TableChip kind="logging" title={`${loggingTooltip} Signal: ${row.loggingSignal}.`}>
+                    {row.logging}
+                    <span className="moduleChipProvisional" aria-hidden="true"> · prov.</span>
+                  </TableChip>
+                </td>
+                <td>
+                  <Link className="moduleApiLink" href={`/docs/modules/${row.id}#headless-api`}>
+                    <TableChip kind="api" title={`Headless Local API parity: ${apiParityLabels[row.apiParity]}. Opens the API section for ${row.name}.`}>
+                      {apiParityLabels[row.apiParity]}
+                    </TableChip>
+                  </Link>
+                </td>
               </tr>
             ))}
             {visibleRows.length === 0 ? (
               <tr>
-                <td className="moduleTableEmpty" colSpan={8}>No modules match these filters. Clear a filter to widen the view.</td>
+                <td className="moduleTableEmpty" colSpan={10}>No modules match these filters. Clear a filter to widen the view.</td>
               </tr>
             ) : null}
           </tbody>

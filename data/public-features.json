@@ -3113,7 +3113,7 @@
     {
       "id": "snap-capture",
       "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
-      "group": null,
+      "group": "utilities",
       "lane": "alpha",
       "status": "wip",
       "accessTier": "free",

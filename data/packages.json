@@ -1,0 +1,1157 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-07-17",
+  "packages": [
+    {
+      "name": "AppControlKit",
+      "owner": "App Control API",
+      "ownerId": "app-control",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 25,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "AudioSession",
+      "owner": "Speech engine",
+      "ownerId": "speech-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 25,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "BetaTelemetry",
+      "owner": "Beta Telemetry (Sentry) — GOLD STANDARD MODULE",
+      "ownerId": "beta-telemetry",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 6,
+      "tier": "thin",
+      "deps": [
+        "Telemetry"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "ChallengeKit",
+      "owner": "Workout: Exercise (camera rep counter)",
+      "ownerId": "workout-exercise",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 20,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "SkipKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "DevLoopStreamKit",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 35,
+      "tier": "heavy",
+      "deps": [
+        "FramePipelineKit",
+        "FrameSourceKit",
+        "SubtitleKit",
+        "TranscriptSyncKit"
+      ],
+      "dependents": [
+        "DevLoopUI",
+        "StudioAgentBridge",
+        "StudioSceneKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "DevLoopUI",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 57,
+      "tier": "heavy",
+      "deps": [
+        "DevLoopStreamKit",
+        "FramePipelineKit",
+        "StudioSceneKit"
+      ],
+      "dependents": [
+        "StudioAgentBridge"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "ExerciseKit",
+      "owner": "Workout: Exercise (camera rep counter)",
+      "ownerId": "workout-exercise",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 33,
+      "tier": "heavy",
+      "deps": [],
+      "dependents": [
+        "RoutineKit",
+        "VLMDispatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureAutoPaste",
+      "owner": "Auto-paste transcription into active app",
+      "ownerId": "auto-paste",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 7,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "FeatureGlobalTranscription"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureCompute",
+      "owner": "Compute / Model Link (discovery, remote cat, P2P, VNC + audio, SSH, Terminal3D)",
+      "ownerId": "compute",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 27,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [
+        "FeatureModelLink"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureContentSafety",
+      "owner": "Content Safety Filter (toggle)",
+      "ownerId": "content-safety-filter",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 14,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureDangerouslySkip",
+      "owner": "Dangerously Skip (BLE jump rope)",
+      "ownerId": "dangerously-skip",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 7,
+      "tier": "thin",
+      "deps": [
+        "FeatureEyeCare",
+        "HealthKitLogging",
+        "SkipKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureDesktopCurtain",
+      "owner": "Hide Desktop Icons / Desktop Curtain",
+      "ownerId": "desktop-curtain",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 26,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureEvenG2",
+      "owner": "Even Realities / G2 display driver",
+      "ownerId": "even-realities",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 0,
+      "tier": "none",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "FeatureEvenRealities",
+      "owner": "Even Realities / G2 display driver",
+      "ownerId": "even-realities",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 17,
+      "tier": "covered",
+      "deps": [
+        "FeatureTranslate",
+        "LocalAIContracts",
+        "LocalAIHTTPServer",
+        "SpeechPipeline",
+        "WearableGlassesKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureEvenRealities/EvenRealitiesCompanionListener.swift",
+          "line": 17
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureEyeCare",
+      "owner": "Eye Care reminder (20-20-20)",
+      "ownerId": "eye-care",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 31,
+      "tier": "heavy",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [
+        "FeatureDangerouslySkip"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureGGUF",
+      "owner": "GGUF backend (llama.cpp sidecar)",
+      "ownerId": "gguf-backend",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 22,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAITextGeneration"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureGlobalTranscription",
+      "owner": "Global Transcription (menu bar)",
+      "ownerId": "global-transcription",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 103,
+      "tier": "heavy",
+      "deps": [
+        "FeatureAutoPaste",
+        "LocalAIContracts",
+        "LocalAITranscription"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureKeyboardBacklight",
+      "owner": "Keyboard Backlight",
+      "ownerId": "keyboard-backlight",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 5,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureKeyboardBacklight/KeyboardBacklightMenuContent.swift",
+          "line": 153
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureLyrics",
+      "owner": "Lyrics Player (Apple Music + live translation)",
+      "ownerId": "lyrics-player",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 20,
+      "tier": "covered",
+      "deps": [
+        "FeatureTranslateDomain"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureManifest",
+      "owner": "Feature manifest",
+      "ownerId": "manifest",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 63,
+      "tier": "heavy",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureMLXServeSidecar",
+      "owner": "MLXServe sidecar",
+      "ownerId": "mlxserve-sidecar",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 9,
+      "tier": "thin",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureModelLink",
+      "owner": "Model Link (P2P remote AI)",
+      "ownerId": "model-link",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 7,
+      "tier": "thin",
+      "deps": [
+        "FeatureCompute",
+        "LocalAIContracts",
+        "LocalAITextGeneration"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureMonitorControl",
+      "owner": "Monitor Control (external DDC)",
+      "ownerId": "monitor-control",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 36,
+      "tier": "heavy",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureMonitorControl/MonitorDDCBackend.swift",
+          "line": 53
+        },
+        {
+          "file": "Sources/FeatureMonitorControl/MonitorDDCBackend.swift",
+          "line": 117
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureOMLXSidecar",
+      "owner": "omlx sidecar (Python MLX oracle)",
+      "ownerId": "omlx-sidecar",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 2,
+      "tier": "thin",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAICore",
+        "LocalAITextGeneration"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureOpenClaw",
+      "owner": "OpenClaw (gateway chat)",
+      "ownerId": "openclaw",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 6,
+      "tier": "thin",
+      "deps": [
+        "GatewayFeatureSupport",
+        "LocalAIContracts",
+        "LocalAITextGeneration"
+      ],
+      "dependents": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/FeatureOpenClaw/Core/OpenClawGatewayCatalog.swift",
+          "line": 23
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureQuickCapture",
+      "owner": "Quick Capture (capture-chord palette)",
+      "ownerId": "quick-capture",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 28,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts",
+        "SnapCaptureKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureQuitApps",
+      "owner": "Quit Apps (force-quit running apps)",
+      "ownerId": "quit-apps",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 8,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureScreenAwake",
+      "owner": "Screen Awake",
+      "ownerId": "screen-awake",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 38,
+      "tier": "heavy",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureScreenRecording",
+      "owner": "Capture engine",
+      "ownerId": "capture-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 27,
+      "tier": "covered",
+      "deps": [
+        "FrameSourceKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureSubscription",
+      "owner": "Subscription / Payments",
+      "ownerId": "subscription",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 45,
+      "tier": "heavy",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureTranslate",
+      "owner": "Translate",
+      "ownerId": "translate",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 6,
+      "tier": "thin",
+      "deps": [
+        "AppControlKit",
+        "AudioSession",
+        "FeatureTranslateDomain",
+        "LocalAIContracts",
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration",
+        "LocalSpeechKit",
+        "SpeechPipeline"
+      ],
+      "dependents": [
+        "FeatureEvenRealities"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureTranslateDomain",
+      "owner": "Translate",
+      "ownerId": "translate",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 12,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration"
+      ],
+      "dependents": [
+        "FeatureLyrics",
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWav2Vec2",
+      "owner": "Wav2Vec2 XLSR-53 Multilingual Transcription",
+      "ownerId": "wav2vec2-transcription",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 5,
+      "tier": "thin",
+      "deps": [
+        "LocalAITranscription"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWindowManagement",
+      "owner": "Window management of other apps",
+      "ownerId": "window-mgmt-others",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 45,
+      "tier": "heavy",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FramePipelineKit",
+      "owner": "Capture engine",
+      "ownerId": "capture-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 17,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "DevLoopStreamKit",
+        "DevLoopUI",
+        "FrameSourceKit",
+        "StudioModeKit",
+        "VLMDispatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "FrameSourceKit",
+      "owner": "Capture engine",
+      "ownerId": "capture-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 19,
+      "tier": "covered",
+      "deps": [
+        "FramePipelineKit"
+      ],
+      "dependents": [
+        "DevLoopStreamKit",
+        "FeatureScreenRecording",
+        "StudioAgentBridge",
+        "StudioModeKit",
+        "StudioSceneKit",
+        "VLMDispatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "GatewayFeatureSupport",
+      "owner": "Gateway support",
+      "ownerId": "gateway-support",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 1,
+      "tier": "thin",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [
+        "FeatureOpenClaw"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "HealthKitLogging",
+      "owner": "Skip HealthKit workout logging",
+      "ownerId": "skip-healthkit-logging",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 2,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "FeatureDangerouslySkip"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIContracts",
+      "owner": "Core platform",
+      "ownerId": "core",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 24,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureCompute",
+        "FeatureEvenRealities",
+        "FeatureEyeCare",
+        "FeatureGGUF",
+        "FeatureGlobalTranscription",
+        "FeatureMLXServeSidecar",
+        "FeatureModelLink",
+        "FeatureOMLXSidecar",
+        "FeatureOpenClaw",
+        "FeatureQuickCapture",
+        "FeatureScreenAwake",
+        "FeatureSubscription",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "GatewayFeatureSupport",
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration",
+        "SnapCaptureKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAICore",
+      "owner": "Core platform",
+      "ownerId": "core",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 39,
+      "tier": "heavy",
+      "deps": [],
+      "dependents": [
+        "FeatureOMLXSidecar",
+        "LocalAIHTTPServer",
+        "LocalAIServing",
+        "LocalAITextGeneration"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIEnergy",
+      "owner": "Energy & Impact",
+      "ownerId": "energy-impact",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 27,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIHTTPServer",
+      "owner": "Local API server",
+      "ownerId": "local-api",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 203,
+      "tier": "heavy",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAICore",
+        "LocalAIServing",
+        "LocalAITextGeneration",
+        "LocalAITranscription",
+        "RoutineKit"
+      ],
+      "dependents": [
+        "FeatureEvenRealities",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAITranslation",
+        "LocalAITTS",
+        "StudioAgentBridge",
+        "WorkbenchRouteKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIServing",
+      "owner": "Serving engine",
+      "ownerId": "serving-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 38,
+      "tier": "heavy",
+      "deps": [
+        "LocalAICore",
+        "LocalAITextGeneration"
+      ],
+      "dependents": [
+        "LocalAIHTTPServer"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITextGeneration",
+      "owner": "Local LLM Chat",
+      "ownerId": "chat-local-llm",
+      "ownerKind": "feature",
+      "modular": "partial",
+      "cases": 28,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts",
+        "LocalAICore"
+      ],
+      "dependents": [
+        "FeatureGGUF",
+        "FeatureModelLink",
+        "FeatureOMLXSidecar",
+        "FeatureOpenClaw",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAIHTTPServer",
+        "LocalAIServing",
+        "LocalAITranslation"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITranscription",
+      "owner": "Transcription (Whisper / SpeechAnalyzer)",
+      "ownerId": "transcription",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 56,
+      "tier": "heavy",
+      "deps": [],
+      "dependents": [
+        "FeatureGlobalTranscription",
+        "FeatureWav2Vec2",
+        "LocalAIHTTPServer"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITranslation",
+      "owner": "Translation engine",
+      "ownerId": "translation-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 8,
+      "tier": "thin",
+      "deps": [
+        "LocalAIHTTPServer",
+        "LocalAITextGeneration",
+        "SpeechPipeline",
+        "Telemetry"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAITTS",
+      "owner": "Text-to-speech engine",
+      "ownerId": "tts-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 3,
+      "tier": "thin",
+      "deps": [
+        "LocalAIHTTPServer"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalSpeechKit",
+      "owner": "Speech engine",
+      "ownerId": "speech-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 41,
+      "tier": "heavy",
+      "deps": [
+        "SpeechPipeline"
+      ],
+      "dependents": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MigrationGateHarness",
+      "owner": "Migration & scenario harnesses",
+      "ownerId": "migration-harness",
+      "ownerKind": "harness",
+      "modular": null,
+      "cases": 8,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MonitorControlDDC",
+      "owner": "MonitorControl DDC",
+      "ownerId": "monitor-ddc",
+      "ownerKind": "vendored",
+      "modular": null,
+      "cases": 0,
+      "tier": "none",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "OpenClawKit",
+      "owner": "OpenClawKit",
+      "ownerId": "openclaw-kit",
+      "ownerKind": "vendored",
+      "modular": null,
+      "cases": 0,
+      "tier": "none",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "RoutineKit",
+      "owner": "Routines",
+      "ownerId": "routine-kit",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 68,
+      "tier": "heavy",
+      "deps": [
+        "ExerciseKit"
+      ],
+      "dependents": [
+        "LocalAIHTTPServer"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "ScenarioHarness",
+      "owner": "Migration & scenario harnesses",
+      "ownerId": "migration-harness",
+      "ownerKind": "harness",
+      "modular": null,
+      "cases": 5,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "SentryKit",
+      "owner": "Sentry Mode (away-guard lock)",
+      "ownerId": "sentry-mode",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 23,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SkipKit",
+      "owner": "Dangerously Skip (BLE jump rope)",
+      "ownerId": "dangerously-skip",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 33,
+      "tier": "heavy",
+      "deps": [
+        "ChallengeKit"
+      ],
+      "dependents": [
+        "FeatureDangerouslySkip"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SnapCaptureKit",
+      "owner": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+      "ownerId": "snap-capture",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 23,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts",
+        "SnapDeviceCaptureKit"
+      ],
+      "dependents": [
+        "FeatureQuickCapture"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SnapDeviceCaptureKit",
+      "owner": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+      "ownerId": "snap-capture",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 3,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "SnapCaptureKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SpeechPipeline",
+      "owner": "Speech engine",
+      "ownerId": "speech-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 19,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureEvenRealities",
+        "FeatureTranslate",
+        "LocalAITranslation",
+        "LocalSpeechKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "StudioAgentBridge",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 25,
+      "tier": "covered",
+      "deps": [
+        "DevLoopStreamKit",
+        "DevLoopUI",
+        "FrameSourceKit",
+        "LocalAIHTTPServer",
+        "StudioSceneKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [
+        {
+          "file": "Sources/StudioAgentBridge/VirtualCameraConsumer.swift",
+          "line": 16
+        }
+      ],
+      "linkedInProject": true
+    },
+    {
+      "name": "StudioModeKit",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 6,
+      "tier": "thin",
+      "deps": [
+        "FramePipelineKit",
+        "FrameSourceKit",
+        "TranscriptSyncKit",
+        "VLMDispatchKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "StudioSceneKit",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 10,
+      "tier": "covered",
+      "deps": [
+        "DevLoopStreamKit",
+        "FrameSourceKit",
+        "TranscriptSyncKit"
+      ],
+      "dependents": [
+        "DevLoopUI",
+        "StudioAgentBridge"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "SubtitleKit",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 7,
+      "tier": "thin",
+      "deps": [
+        "TranscriptSyncKit"
+      ],
+      "dependents": [
+        "DevLoopStreamKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "Telemetry",
+      "owner": "Telemetry facade",
+      "ownerId": "telemetry",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 3,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "BetaTelemetry",
+        "LocalAITranslation"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "TranscriptSyncKit",
+      "owner": "Studio recording & streaming",
+      "ownerId": "studio-recording",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 9,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "DevLoopStreamKit",
+        "StudioModeKit",
+        "StudioSceneKit",
+        "SubtitleKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "VLMDispatchKit",
+      "owner": "VLM dispatch",
+      "ownerId": "vlm-dispatch",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 21,
+      "tier": "covered",
+      "deps": [
+        "ExerciseKit",
+        "FramePipelineKit",
+        "FrameSourceKit"
+      ],
+      "dependents": [
+        "StudioModeKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
+      "name": "WearableGlassesKit",
+      "owner": "Even Realities / G2 display driver",
+      "ownerId": "even-realities",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 13,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureEvenRealities"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "WorkbenchRouteKit",
+      "owner": null,
+      "ownerId": null,
+      "ownerKind": "unowned",
+      "modular": null,
+      "cases": 7,
+      "tier": "thin",
+      "deps": [
+        "LocalAIHTTPServer"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    }
+  ]
+}

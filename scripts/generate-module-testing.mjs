@@ -99,7 +99,7 @@ export function extractPackageNames(description, knownPackageNames) {
     .sort((left, right) => left.localeCompare(right));
 }
 
-async function findPackageDirectories(directory, packages = new Map()) {
+export async function findPackageDirectories(directory, packages = new Map()) {
   const entries = await readdir(directory, { withFileTypes: true });
 
   if (entries.some((entry) => entry.isFile() && entry.name === "Package.swift")) {
@@ -136,7 +136,7 @@ async function swiftFiles(directory) {
   }
 }
 
-async function countPackageTests(packageDirectory) {
+export async function countPackageTests(packageDirectory) {
   const files = await swiftFiles(path.join(packageDirectory, "Tests"));
   let cases = 0;
   for (const file of files) {

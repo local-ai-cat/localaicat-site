@@ -150,3 +150,25 @@ There is NO staging gate on `main`. So:
   `feat/internal-docs`, tip `82f25a9`) — a stale July-8 static snapshot that
   duplicated this grid. Deleted; recoverable from that SHA if its gating pattern
   is ever wanted.
+
+## ADDENDUM (2026-07-19) — the Packages view (`/docs/packages`)
+
+Packages (67) outnumber modules (51), and the modules grid rolls packages UP into
+their owning module — so individual package reality wasn't first-class anywhere.
+`/docs/packages` is the flat engineering view: one row per package.
+
+- **Not a reversal** of the "grid only, no Build Anatomy page" rule — same
+  filterable-table pattern, different row entity. Complements `/docs` (the
+  Packages column there stays as the roll-up).
+- **Columns:** Package · Owner (+kind) · Testing (own tier + cases) · Modular ·
+  Deps (expand) · Used by (expand) · Build (linked + App Store gate marker).
+- **Filters:** kind (feature/engine/platform/harness/vendored/unowned), testing
+  tier, linked-only, has-gates; search by name/owner; sortable columns.
+- **Data:** `scripts/generate-packages.mjs` joins `data/module-graph.json`
+  (deps/reverseDeps/gates/linked) + `data/public-features.json` (ownership/kind/
+  modular) + per-package test counts (reused from the testing generator) →
+  `data/packages.json`. Never hand-edit; regenerate with the others.
+- **Known honest gaps (v1):** packages that live outside `Packages/` (vendored
+  public-org deps) show 0 test cases; `WorkbenchRouteKit` reads "unowned" until
+  the `catbs-workbench` ownership migration lands. Follow-ups: a per-package page
+  + a generator test.

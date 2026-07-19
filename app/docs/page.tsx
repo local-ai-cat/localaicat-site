@@ -129,6 +129,9 @@ export default function ModulesPage() {
       intro="See what every part of Local AI Cat does, where it ships, and how thoroughly it is tested — including work in progress, locked modules, and ideas in purgatory. Pick a build to see what is compiled into each flavor."
       meta={`${featureRows.length} features · ${infrastructureRows.length} infrastructure modules · Snapshot updated ${moduleCatalogUpdated}`}
     >
+      <p className="docsSubnav">
+        <Link href="/docs/packages">Packages view →</Link>
+      </p>
       <ModulesTable rows={rows} />
     </ContentPage>
   );

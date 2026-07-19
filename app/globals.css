@@ -4373,3 +4373,54 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- /docs/packages table: sub-nav, search, and package-specific chip variants
+   (reuse the global .moduleChip / .moduleTable system so it matches /docs). --- */
+.docsSubnav {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+.docsSubnav a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.docsSubnav a:hover {
+  text-decoration: underline;
+}
+.moduleSearch {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.4rem 0.7rem;
+  margin-bottom: 0.6rem;
+  background: var(--surface, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.moduleSearch::placeholder { color: var(--text-faint); }
+
+/* Owner-kind chips — mirror the .moduleKindBadge palette. */
+.moduleChip[data-kind="kind-feature"]  { color: color-mix(in srgb, #7fae8b 62%, var(--text)); border-color: color-mix(in srgb, #7fae8b 26%, transparent); }
+.moduleChip[data-kind="kind-engine"]   { color: color-mix(in srgb, #d19a5b 62%, var(--text)); border-color: color-mix(in srgb, #d19a5b 26%, transparent); }
+.moduleChip[data-kind="kind-platform"] { color: color-mix(in srgb, #6f9bd0 62%, var(--text)); border-color: color-mix(in srgb, #6f9bd0 26%, transparent); }
+.moduleChip[data-kind="kind-harness"]  { color: color-mix(in srgb, #9d84c2 62%, var(--text)); border-color: color-mix(in srgb, #9d84c2 26%, transparent); }
+.moduleChip[data-kind="kind-vendored"] { color: color-mix(in srgb, #b58686 62%, var(--text)); border-color: color-mix(in srgb, #b58686 26%, transparent); }
+.moduleChip[data-kind="kind-unowned"]  { color: var(--text-faint); border-color: var(--line); }
+
+/* Testing-tier chips. */
+.moduleChip[data-kind="tier-heavy"]   { color: color-mix(in srgb, #7fae8b 66%, var(--text)); border-color: color-mix(in srgb, #7fae8b 30%, transparent); }
+.moduleChip[data-kind="tier-covered"] { color: color-mix(in srgb, #6f9bd0 62%, var(--text)); border-color: color-mix(in srgb, #6f9bd0 26%, transparent); }
+.moduleChip[data-kind="tier-thin"]    { color: color-mix(in srgb, #d19a5b 62%, var(--text)); border-color: color-mix(in srgb, #d19a5b 26%, transparent); }
+.moduleChip[data-kind="tier-none"]    { color: var(--text-faint); border-color: var(--line); }
+
+/* Modular-state chips. */
+.moduleChip[data-kind="modular-yes"]     { color: color-mix(in srgb, #7fae8b 60%, var(--text)); }
+.moduleChip[data-kind="modular-partial"] { color: color-mix(in srgb, #d19a5b 60%, var(--text)); }
+.moduleChip[data-kind="modular-no"]      { color: var(--text-dim); }
+
+/* Build/state chips. */
+.moduleChip[data-kind="linked"]  { color: color-mix(in srgb, #7fae8b 55%, var(--text)); border-color: color-mix(in srgb, #7fae8b 22%, transparent); }
+.moduleChip[data-kind="gate"]    { color: color-mix(in srgb, #d19a5b 66%, var(--text)); border-color: color-mix(in srgb, #d19a5b 30%, transparent); }
+.moduleChip[data-kind="package"] { color: var(--text-dim); }
+.moduleChip[data-kind="muted"]   { color: var(--text-faint); border-color: var(--line); }

@@ -7,3 +7,7 @@ pnpm-debug.log*
 *.env.staging
 .env.vercel
 .env*.local
+
+# Local-only hidden design page (never deploy)
+/app/bigsecret/
+/public/bs-vendor/

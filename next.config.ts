@@ -1,11 +1,22 @@
 import type { NextConfig } from "next";
 
+// Turbopack/React dev mode needs eval() for HMR + callstack reconstruction;
+// production never does (and must not allow it). Gate 'unsafe-eval' on env.
+const isDev = process.env.NODE_ENV !== "production";
+const scriptSrc = [
+  "script-src 'self' 'unsafe-inline'",
+  isDev ? "'unsafe-eval'" : "",
+  "https://app.chatwoot.com",
+]
+  .filter(Boolean)
+  .join(" ");
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://app.chatwoot.com",
+      scriptSrc,
       "style-src 'self' 'unsafe-inline' https://app.chatwoot.com",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://app.chatwoot.com",

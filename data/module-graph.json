@@ -641,7 +641,7 @@
         "LocalSpeechKit"
       ],
       "appStoreGates": [],
-      "linkedInProject": false
+      "linkedInProject": true
     },
     {
       "name": "StudioAgentBridge",

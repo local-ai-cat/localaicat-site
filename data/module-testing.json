@@ -8,7 +8,7 @@
         "LocalAICore",
         "LocalAITextGeneration"
       ],
-      "cases": 64,
+      "cases": 67,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -48,7 +48,7 @@
       "packages": [
         "FeatureGlobalTranscription"
       ],
-      "cases": 101,
+      "cases": 103,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -179,7 +179,7 @@
         "FeatureCompute",
         "LocalAIContracts"
       ],
-      "cases": 49,
+      "cases": 51,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -205,7 +205,7 @@
       "packages": [
         "LocalAIHTTPServer"
       ],
-      "cases": 202,
+      "cases": 203,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -232,7 +232,7 @@
         "LocalAIHTTPServer",
         "RoutineKit"
       ],
-      "cases": 270,
+      "cases": 271,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -448,7 +448,7 @@
         "LocalAICore",
         "LocalAIHTTPServer"
       ],
-      "cases": 238,
+      "cases": 242,
       "tier": "heavy",
       "logging": {
         "grade": "L0",

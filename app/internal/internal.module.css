@@ -1,0 +1,185 @@
+.shell {
+  position: relative;
+  min-height: 100vh;
+  color: var(--text);
+  overflow: clip;
+}
+.glow {
+  position: fixed;
+  top: -220px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(232, 213, 176, 0.09), transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px clamp(20px, 5vw, 56px);
+  background: rgba(6, 6, 6, 0.72);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+.brandName {
+  font-family: var(--font-display), serif;
+  font-size: 20px;
+  letter-spacing: 0.01em;
+}
+.brandMark {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  background: var(--accent);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.navLink {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 999px;
+  transition: color 140ms ease, background 140ms ease;
+}
+.navLink:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+.exit {
+  color: var(--text-faint);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-left: 8px;
+  transition: color 140ms ease;
+}
+.exit:hover {
+  color: var(--accent);
+}
+
+.main {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 56px) 80px;
+}
+
+.foot {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 32px 20px 48px;
+  color: var(--text-faint);
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+}
+.foot code {
+  color: var(--text-dim);
+  font-size: 11.5px;
+}
+
+/* ─── Page header (shared) ─── */
+.pageHead {
+  margin-bottom: 8px;
+}
+.pageEyebrow {
+  margin: 0 0 14px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 700;
+}
+.pageTitle {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  font-size: clamp(38px, 6vw, 68px);
+  line-height: 0.94;
+  letter-spacing: -0.005em;
+}
+.pageIntro {
+  margin: 18px 0 0;
+  max-width: 640px;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.pageIntro b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ─── Internal index cards ─── */
+.indexGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+.indexCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.018);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+}
+.indexCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(232, 213, 176, 0.32);
+  background: rgba(255, 255, 255, 0.035);
+}
+.indexEyebrow {
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.indexCard h3 {
+  margin: 4px 0 0;
+  font-family: var(--font-display), serif;
+  font-size: 28px;
+  line-height: 1.05;
+}
+.indexCard p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.indexArrow {
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+}

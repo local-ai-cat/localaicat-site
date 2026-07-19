@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
 // Turbopack/React dev mode needs eval() for HMR + callstack reconstruction;
-// production never does (and must not allow it). Gate 'unsafe-eval' on env.
-const isDev = process.env.NODE_ENV !== "production";
+// production never does (and must not allow it). Gate 'unsafe-eval' on env,
+// FAIL-CLOSED: only an explicit "development" relaxes the CSP. Any other value
+// (unset, "test", a typo, a misconfigured deploy) keeps the strict prod policy
+// rather than silently allowing eval. `next dev` sets NODE_ENV=development.
+const isDev = process.env.NODE_ENV === "development";
 const scriptSrc = [
   "script-src 'self' 'unsafe-inline'",
   isDev ? "'unsafe-eval'" : "",

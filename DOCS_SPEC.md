@@ -126,3 +126,27 @@ grid/table:
   (FeatureManifest), `gateway-support` (GatewayFeatureSupport).
 - Harness: MigrationGateHarness, ScenarioHarness. Vendored: MonitorControlDDC, OpenClawKit.
 - DELETE: OpenClawFeatureSupport (zero references; superseded by GatewayFeatureSupport).
+
+## ⚠️ Deploy model + public/private decision (2026-07-19)
+
+**`main` auto-deploys to Vercel Production. Pushing to `main` = publishing to
+localaicat.com — immediately.** (`.vercel/project.json` → git integration; the
+manual `scripts/deploy.sh` is a *second* path, not the only one. Confirmed
+2026-07-19: three `main` pushes each produced a Production deploy within seconds.)
+There is NO staging gate on `main`. So:
+
+- **Decide public vs private BEFORE pushing to `main`.** Anything that lands on
+  `main` is live. For not-yet-public work, keep it on a branch and preview with
+  `npm run dev` locally (or a Vercel *preview* deploy), never a `main` push.
+- The public **`/docs` Modules grid is the single source of truth** — generated
+  from the app repo's `features.json` via `scripts/generate-*.mjs` → `data/*.json`.
+  Regenerate before publishing so the grid reflects current module reality.
+- It intentionally surfaces WIP / locked / purgatory modules **publicly**
+  (decided 2026-07-19: keep live, low traffic). If that ever needs gating, do NOT
+  fork a second matrix — reuse the Basic-Auth middleware pattern to serve a
+  fuller variant of the SAME grid component behind `/internal`, with public
+  `/docs` as a filtered subset. One component, one generator, two routes.
+- **Retired:** the standalone private `/internal/matrix` (branch
+  `feat/internal-docs`, tip `82f25a9`) — a stale July-8 static snapshot that
+  duplicated this grid. Deleted; recoverable from that SHA if its gating pattern
+  is ever wanted.

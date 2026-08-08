@@ -37,9 +37,11 @@ const allowedTopLevelKeys = new Set([
   "modules", "permissionCatalog", "platformAxis", "schemaVersion", "uiPlacementKinds", "updated"
 ]);
 const allowedFeatureKeys = new Set([
-  "api", "builds", "caveats", "goldStandard", "group", "id", "internal",
-  "lane", "modular", "name", "notes", "ownedPackages", "package", "permissions", "platforms",
-  "requirements", "stagedForPromotion", "status", "target", "uiPlacements", "usesPackages"
+  "api", "architectureNotes", "builds", "caveats", "defaultEnabled", "externalPackages", "goldStandard", "group", "id",
+  "internal",
+  "lane", "ledger", "modular", "modularityEvidence", "name", "notes", "ownedPackages", "package", "permissions", "platforms",
+  "relatedPackages", "requirements", "sharedPackageConsents", "sharedPackages", "stagedForPromotion", "status", "target",
+  "uiPlacements", "usesPackages"
 ]);
 // Infrastructure modules (engines / platform / harness / vendored) are projected
 // verbatim EXCEPT `notes`, which carries internal nuance (deletion-candidate remarks,
@@ -56,6 +58,7 @@ const modularValues = new Set(["yes", "partial", "no"]);
 const gradeValues = new Set(["gold", "strong", "partial", "weak"]);
 const permissionLabels = {
   accessibility: "Accessibility",
+  biometrics: "Face ID / Touch ID",
   alarmKit: "Alarms",
   appleEvents: "Automation",
   appleMusic: "Apple Music",
@@ -128,7 +131,7 @@ export function validateModules(modules) {
 function validateManifest(manifest) {
   if (!isObject(manifest)) fail("root must be an object");
   assertKnownKeys(manifest, allowedTopLevelKeys, "root");
-  if (![5, 6, 7].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
+  if (![5, 6, 7, 8, 9, 10].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
   if (typeof manifest.updated !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.updated)) {
     fail("updated must be an ISO date");
   }
@@ -146,6 +149,13 @@ function validateManifest(manifest) {
     if (!statusValues.has(feature.status)) fail(`${location}.status has unknown value ${JSON.stringify(feature.status)}`);
     if (!modularValues.has(feature.modular)) fail(`${location}.modular has unknown value ${JSON.stringify(feature.modular)}`);
     if (feature.notes !== undefined && typeof feature.notes !== "string") fail(`${location}.notes must be a string`);
+    if (feature.defaultEnabled !== undefined && typeof feature.defaultEnabled !== "boolean") {
+      fail(`${location}.defaultEnabled must be a boolean`);
+    }
+    // Schema 10: the per-feature ledger (testing rubric, stability, backlog, history,
+    // provenance). Accepted but NOT projected — backlog/history text carries internal
+    // nuance; surfacing ledger axes on the public grid is a deliberate follow-up.
+    if (feature.ledger !== undefined && !isObject(feature.ledger)) fail(`${location}.ledger must be an object`);
     if (feature.package !== undefined && typeof feature.package !== "string") fail(`${location}.package must be a string`);
     if (feature.ownedPackages !== undefined) validateStringArray(feature.ownedPackages, `${location}.ownedPackages`);
     if (feature.usesPackages !== undefined) validateStringArray(feature.usesPackages, `${location}.usesPackages`);

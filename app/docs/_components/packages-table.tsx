@@ -1,23 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  packageLockStatus,
+  selectPackageRows,
+  type PackageLockStatus,
+  type PackageRow,
+  type PackageSortDirection,
+  type PackageSortKey,
+} from "../../../lib/package-table";
 
-export type PackageRow = {
-  name: string;
-  owner: string | null;
-  ownerId: string | null;
-  ownerKind: "feature" | "engine" | "platform" | "harness" | "vendored" | "unowned";
-  modular: string | null;
-  cases: number;
-  tier: "none" | "thin" | "covered" | "heavy";
-  deps: string[];
-  dependents: string[];
-  appStoreGates: Array<{ file: string; line: number }>;
-  linkedInProject: boolean;
-};
-
-type SortKey = "name" | "owner" | "cases" | "deps" | "dependents";
-type SortDir = "asc" | "desc";
+export type { PackageRow } from "../../../lib/package-table";
 
 const KINDS: Array<PackageRow["ownerKind"]> = [
   "feature",
@@ -27,7 +20,8 @@ const KINDS: Array<PackageRow["ownerKind"]> = [
   "vendored",
   "unowned",
 ];
-const TIERS: Array<PackageRow["tier"]> = ["heavy", "covered", "thin", "none"];
+const TIERS: Array<PackageRow["testing"]["tier"]> = ["heavy", "covered", "thin", "none"];
+const LOCKS: PackageLockStatus[] = ["holds", "fails"];
 
 function titleCase(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -59,10 +53,10 @@ function SortHeader({
   numeric,
 }: {
   label: string;
-  column: SortKey;
-  sort: SortKey;
-  dir: SortDir;
-  onSort: (key: SortKey) => void;
+  column: PackageSortKey;
+  sort: PackageSortKey;
+  dir: PackageSortDirection;
+  onSort: (key: PackageSortKey) => void;
   numeric?: boolean;
 }) {
   const active = sort === column;
@@ -84,19 +78,20 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
   const [query, setQuery] = useState("");
   const [kinds, setKinds] = useState<Set<string>>(new Set());
   const [tiers, setTiers] = useState<Set<string>>(new Set());
+  const [locks, setLocks] = useState<Set<PackageLockStatus>>(new Set());
   const [linkedOnly, setLinkedOnly] = useState(false);
   const [gatesOnly, setGatesOnly] = useState(false);
-  const [sort, setSort] = useState<SortKey>("name");
-  const [dir, setDir] = useState<SortDir>("asc");
+  const [sort, setSort] = useState<PackageSortKey>("name");
+  const [dir, setDir] = useState<PackageSortDirection>("asc");
 
-  function toggle(set: Set<string>, value: string, update: (next: Set<string>) => void) {
+  function toggle<Value extends string>(set: Set<Value>, value: Value, update: (next: Set<Value>) => void) {
     const next = new Set(set);
     if (next.has(value)) next.delete(value);
     else next.add(value);
     update(next);
   }
 
-  function onSort(key: SortKey) {
+  function onSort(key: PackageSortKey) {
     if (key === sort) {
       setDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -106,33 +101,17 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
   }
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const result = rows.filter((row) => {
-      if (kinds.size > 0 && !kinds.has(row.ownerKind)) return false;
-      if (tiers.size > 0 && !tiers.has(row.tier)) return false;
-      if (linkedOnly && !row.linkedInProject) return false;
-      if (gatesOnly && row.appStoreGates.length === 0) return false;
-      if (q && !(row.name.toLowerCase().includes(q) || (row.owner ?? "").toLowerCase().includes(q))) {
-        return false;
-      }
-      return true;
+    return selectPackageRows(rows, {
+      query,
+      kinds,
+      tiers,
+      locks,
+      linkedOnly,
+      gatesOnly,
+      sort,
+      direction: dir,
     });
-    const factor = dir === "asc" ? 1 : -1;
-    return result.sort((a, b) => {
-      switch (sort) {
-        case "owner":
-          return factor * (a.owner ?? "").localeCompare(b.owner ?? "");
-        case "cases":
-          return factor * (a.cases - b.cases);
-        case "deps":
-          return factor * (a.deps.length - b.deps.length);
-        case "dependents":
-          return factor * (a.dependents.length - b.dependents.length);
-        default:
-          return factor * a.name.localeCompare(b.name);
-      }
-    });
-  }, [rows, query, kinds, tiers, linkedOnly, gatesOnly, sort, dir]);
+  }, [rows, query, kinds, tiers, locks, linkedOnly, gatesOnly, sort, dir]);
 
   return (
     <div className="moduleTableExperience">
@@ -160,7 +139,7 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
               </button>
             ))}
           </div>
-          <div className="moduleTableChips" role="group" aria-label="Filter by testing tier">
+          <div className="moduleTableChips" role="group" aria-label="Filter by testing evidence and lock">
             {TIERS.map((tier) => (
               <button
                 key={tier}
@@ -170,6 +149,17 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
                 onClick={() => toggle(tiers, tier, setTiers)}
               >
                 {titleCase(tier)}
+              </button>
+            ))}
+            {LOCKS.map((lock) => (
+              <button
+                key={lock}
+                type="button"
+                className="moduleFilterChip"
+                aria-pressed={locks.has(lock)}
+                onClick={() => toggle(locks, lock, setLocks)}
+              >
+                Lock {lock} <em>{rows.filter((row) => packageLockStatus(row) === lock).length}</em>
               </button>
             ))}
             <button
@@ -203,7 +193,8 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
               <SortHeader label="Package" column="name" sort={sort} dir={dir} onSort={onSort} />
               <SortHeader label="Owner" column="owner" sort={sort} dir={dir} onSort={onSort} />
               <th scope="col">Kind</th>
-              <SortHeader label="Testing" column="cases" sort={sort} dir={dir} onSort={onSort} numeric />
+              <SortHeader label="Testing" column="testing" sort={sort} dir={dir} onSort={onSort} numeric />
+              <SortHeader label="Lock" column="lock" sort={sort} dir={dir} onSort={onSort} />
               <th scope="col">Modular</th>
               <SortHeader label="Deps" column="deps" sort={sort} dir={dir} onSort={onSort} numeric />
               <SortHeader label="Used by" column="dependents" sort={sort} dir={dir} onSort={onSort} numeric />
@@ -217,8 +208,33 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
                 <td>{row.owner ?? <span className="moduleChip" data-kind="muted">unowned</span>}</td>
                 <td><span className="moduleChip moduleTableChip" data-kind={`kind-${row.ownerKind}`}>{row.ownerKind}</span></td>
                 <td style={{ textAlign: "right" }}>
-                  <span className="moduleChip moduleTableChip" data-kind={`tier-${row.tier}`} title={`${row.cases} test cases`}>
-                    {row.tier} · {row.cases}
+                  <span
+                    className="moduleChip moduleTableChip"
+                    data-kind={`tier-${row.testing.tier}`}
+                    title={[
+                      `${row.testing.counts.total} derived test declarations`,
+                      `${row.testing.counts.xctest} XCTest · ${row.testing.counts.swiftTesting} Swift Testing`,
+                      `Wired: ${row.testing.wiredness}`,
+                      `Suites: ${row.testing.suitePaths.join(", ") || "none"}`,
+                      `Ratchets: ${row.testing.ratchets.map((ratchet) => ratchet.id).join(", ") || "none"}`,
+                      `Real surface: ${row.testing.realSurface.status}`,
+                    ].join("\n")}
+                  >
+                    {row.testing.tier} · {row.testing.counts.total}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    className="moduleChip moduleTableChip"
+                    data-kind={`testing-lock-${packageLockStatus(row)}`}
+                    title={[
+                      `Current: ${row.testing.counts.total} · floor: ${row.testing.lock.minimumTestCount}`,
+                      `Suite required: ${row.testing.lock.suiteRequired ? "yes" : "no"}`,
+                      `Wiredness required: ${row.testing.lock.wirednessRequired ? "yes" : "no"}`,
+                      `Required ratchets: ${row.testing.lock.requiredRatchets.join(", ") || "none"}`,
+                    ].join("\n")}
+                  >
+                    {packageLockStatus(row)}
                   </span>
                 </td>
                 <td>{row.modular ? <span className="moduleChip moduleTableChip" data-kind={`modular-${row.modular}`}>{row.modular}</span> : <span className="moduleChip" data-kind="muted">n/a</span>}</td>
@@ -242,7 +258,7 @@ export function PackagesTable({ rows }: { rows: PackageRow[] }) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "2rem" }}>
+                <td colSpan={9} style={{ textAlign: "center", padding: "2rem" }}>
                   No packages match these filters.
                 </td>
               </tr>

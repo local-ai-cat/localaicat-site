@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "updated": "2026-07-17",
+  "schemaVersion": 2,
+  "updated": "2026-08-10",
   "modules": [
     {
       "id": "chat-local-llm",
@@ -8,8 +8,21 @@
         "LocalAICore",
         "LocalAITextGeneration"
       ],
-      "cases": 67,
+      "cases": 381,
       "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
+        "provisional": true
+      }
+    },
+    {
+      "id": "in-app-announcements",
+      "packages": [
+        "FeatureAnnouncements"
+      ],
+      "cases": 13,
+      "tier": "covered",
       "logging": {
         "grade": "L0",
         "signal": "structured=0 print=0 sentry=0",
@@ -21,7 +34,7 @@
       "packages": [
         "LocalAITranscription"
       ],
-      "cases": 56,
+      "cases": 103,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -35,7 +48,7 @@
         "FeatureWav2Vec2",
         "LocalAITranscription"
       ],
-      "cases": 61,
+      "cases": 108,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -48,11 +61,11 @@
       "packages": [
         "FeatureGlobalTranscription"
       ],
-      "cases": 103,
+      "cases": 190,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=7 sentry=0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     },
@@ -61,8 +74,8 @@
       "packages": [
         "FeatureAutoPaste"
       ],
-      "cases": 7,
-      "tier": "thin",
+      "cases": 11,
+      "tier": "covered",
       "logging": {
         "grade": "L0",
         "signal": "structured=0 print=0 sentry=0",
@@ -72,26 +85,26 @@
     {
       "id": "window-mgmt-others",
       "packages": [
-        "FeatureWindowManagement"
+        "FeatureWindowManagementAX"
       ],
-      "cases": 45,
-      "tier": "heavy",
+      "cases": 23,
+      "tier": "covered",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=2 sentry=0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     },
     {
       "id": "window-mgmt-self",
       "packages": [
-        "FeatureWindowManagement"
+        "FeatureWindowManagementSelf"
       ],
-      "cases": 45,
-      "tier": "heavy",
+      "cases": 22,
+      "tier": "covered",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=2 sentry=0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     },
@@ -111,9 +124,10 @@
     {
       "id": "screen-awake",
       "packages": [
-        "FeatureScreenAwake"
+        "FeatureScreenAwake",
+        "ScreenAwakeSleepLock"
       ],
-      "cases": 38,
+      "cases": 105,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -126,11 +140,11 @@
       "packages": [
         "FeatureKeyboardBacklight"
       ],
-      "cases": 5,
-      "tier": "thin",
+      "cases": 19,
+      "tier": "covered",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=7 sentry=0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     },
@@ -152,7 +166,7 @@
       "packages": [
         "FeatureEyeCare"
       ],
-      "cases": 31,
+      "cases": 39,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -165,7 +179,7 @@
       "packages": [
         "FeatureMonitorControl"
       ],
-      "cases": 36,
+      "cases": 58,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -179,7 +193,7 @@
         "FeatureCompute",
         "LocalAIContracts"
       ],
-      "cases": 51,
+      "cases": 135,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -205,7 +219,7 @@
       "packages": [
         "LocalAIHTTPServer"
       ],
-      "cases": 203,
+      "cases": 291,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -232,7 +246,7 @@
         "LocalAIHTTPServer",
         "RoutineKit"
       ],
-      "cases": 271,
+      "cases": 360,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -245,8 +259,8 @@
       "packages": [
         "FeatureMLXServeSidecar"
       ],
-      "cases": 9,
-      "tier": "thin",
+      "cases": 32,
+      "tier": "heavy",
       "logging": {
         "grade": "L0",
         "signal": "structured=0 print=0 sentry=0",
@@ -284,7 +298,7 @@
         "FeatureEyeCare",
         "SkipKit"
       ],
-      "cases": 71,
+      "cases": 79,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -298,11 +312,11 @@
         "FeatureLyrics",
         "FeatureTranslateDomain"
       ],
-      "cases": 32,
+      "cases": 80,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=8 sentry=0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     },
@@ -312,7 +326,7 @@
         "ChallengeKit",
         "ExerciseKit"
       ],
-      "cases": 53,
+      "cases": 54,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -325,7 +339,7 @@
       "packages": [
         "SentryKit"
       ],
-      "cases": 23,
+      "cases": 24,
       "tier": "covered",
       "logging": {
         "grade": "L0",
@@ -338,11 +352,11 @@
       "packages": [
         "FeatureModelLink"
       ],
-      "cases": 7,
-      "tier": "thin",
+      "cases": 23,
+      "tier": "covered",
       "logging": {
         "grade": "L1",
-        "signal": "structured=17 print=0 sentry=0",
+        "signal": "structured=19 print=0 sentry=0",
         "provisional": true
       }
     },
@@ -352,11 +366,24 @@
         "FeatureQuickCapture",
         "SnapCaptureKit"
       ],
-      "cases": 51,
+      "cases": 62,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=8 sentry=0",
+        "signal": "structured=0 print=3 sentry=0",
+        "provisional": true
+      }
+    },
+    {
+      "id": "clipboard-history",
+      "packages": [
+        "FeatureClipboardHistory"
+      ],
+      "cases": 62,
+      "tier": "heavy",
+      "logging": {
+        "grade": "L0",
+        "signal": "structured=0 print=0 sentry=0",
         "provisional": true
       }
     },
@@ -378,7 +405,7 @@
       "packages": [
         "FeatureContentSafety"
       ],
-      "cases": 14,
+      "cases": 18,
       "tier": "covered",
       "logging": {
         "grade": "L0",
@@ -405,11 +432,11 @@
         "BetaTelemetry",
         "Telemetry"
       ],
-      "cases": 9,
-      "tier": "thin",
+      "cases": 12,
+      "tier": "covered",
       "logging": {
         "grade": "L2",
-        "signal": "structured=0 print=0 sentry=16",
+        "signal": "structured=0 print=0 sentry=17",
         "provisional": true
       }
     },
@@ -420,11 +447,11 @@
         "FeatureTranslateDomain",
         "LocalSpeechKit"
       ],
-      "cases": 59,
+      "cases": 157,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=108 sentry=0",
+        "signal": "structured=0 print=75 sentry=0",
         "provisional": true
       }
     },
@@ -435,20 +462,6 @@
         "WearableGlassesKit"
       ],
       "cases": 30,
-      "tier": "heavy",
-      "logging": {
-        "grade": "L0",
-        "signal": "structured=0 print=0 sentry=0",
-        "provisional": true
-      }
-    },
-    {
-      "id": "lmstudio-interop",
-      "packages": [
-        "LocalAICore",
-        "LocalAIHTTPServer"
-      ],
-      "cases": 242,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -474,7 +487,7 @@
       "packages": [
         "FeatureOMLXSidecar"
       ],
-      "cases": 2,
+      "cases": 6,
       "tier": "thin",
       "logging": {
         "grade": "L0",
@@ -488,11 +501,11 @@
         "SnapCaptureKit",
         "SnapDeviceCaptureKit"
       ],
-      "cases": 26,
-      "tier": "covered",
+      "cases": 36,
+      "tier": "heavy",
       "logging": {
         "grade": "L0",
-        "signal": "structured=0 print=9 sentry=0",
+        "signal": "structured=0 print=4 sentry=0",
         "provisional": true
       }
     },

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-07-17",
+  "updated": "2026-08-10",
   "packages": [
     {
       "name": "AppControlKit",
@@ -8,6 +8,13 @@
       "reverseDeps": [
         "FeatureTranslate"
       ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "AudioPlaybackKit",
+      "deps": [],
+      "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -69,7 +76,9 @@
     },
     {
       "name": "ExerciseKit",
-      "deps": [],
+      "deps": [
+        "LocalAIContracts"
+      ],
       "reverseDeps": [
         "RoutineKit",
         "VLMDispatchKit"
@@ -78,11 +87,27 @@
       "linkedInProject": true
     },
     {
-      "name": "FeatureAutoPaste",
+      "name": "FeatureAnnouncements",
       "deps": [],
-      "reverseDeps": [
-        "FeatureGlobalTranscription"
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureAutoPaste",
+      "deps": [
+        "LocalAIContracts"
       ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureClipboardHistory",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -92,7 +117,8 @@
         "LocalAIContracts"
       ],
       "reverseDeps": [
-        "FeatureModelLink"
+        "FeatureModelLink",
+        "FeatureOpenClaw"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -121,13 +147,6 @@
       "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
-    },
-    {
-      "name": "FeatureEvenG2",
-      "deps": [],
-      "reverseDeps": [],
-      "appStoreGates": [],
-      "linkedInProject": false
     },
     {
       "name": "FeatureEvenRealities",
@@ -171,9 +190,10 @@
     {
       "name": "FeatureGlobalTranscription",
       "deps": [
-        "FeatureAutoPaste",
         "LocalAIContracts",
-        "LocalAITranscription"
+        "LocalAITranscription",
+        "MenuBarKit",
+        "Telemetry"
       ],
       "reverseDeps": [],
       "appStoreGates": [],
@@ -181,12 +201,14 @@
     },
     {
       "name": "FeatureKeyboardBacklight",
-      "deps": [],
+      "deps": [
+        "Telemetry"
+      ],
       "reverseDeps": [],
       "appStoreGates": [
         {
           "file": "Sources/FeatureKeyboardBacklight/KeyboardBacklightMenuContent.swift",
-          "line": 153
+          "line": 169
         }
       ],
       "linkedInProject": true
@@ -194,7 +216,10 @@
     {
       "name": "FeatureLyrics",
       "deps": [
-        "FeatureTranslateDomain"
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAIContracts",
+        "Telemetry"
       ],
       "reverseDeps": [],
       "appStoreGates": [],
@@ -248,7 +273,8 @@
       "deps": [
         "LocalAIContracts",
         "LocalAICore",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "Telemetry"
       ],
       "reverseDeps": [],
       "appStoreGates": [],
@@ -257,6 +283,7 @@
     {
       "name": "FeatureOpenClaw",
       "deps": [
+        "FeatureCompute",
         "GatewayFeatureSupport",
         "LocalAIContracts",
         "LocalAITextGeneration"
@@ -292,7 +319,9 @@
       "deps": [
         "LocalAIContracts"
       ],
-      "reverseDeps": [],
+      "reverseDeps": [
+        "ScreenAwakeSleepLock"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -321,13 +350,15 @@
         "AudioSession",
         "FeatureTranslateDomain",
         "LocalAIContracts",
-        "LocalAIHTTPServer",
+        "LocalAIDesignSystem",
         "LocalAITextGeneration",
         "LocalSpeechKit",
-        "SpeechPipeline"
+        "SpeechPipeline",
+        "Telemetry"
       ],
       "reverseDeps": [
-        "FeatureEvenRealities"
+        "FeatureEvenRealities",
+        "FeatureLyrics"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -336,8 +367,8 @@
       "name": "FeatureTranslateDomain",
       "deps": [
         "LocalAIContracts",
-        "LocalAIHTTPServer",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "Telemetry"
       ],
       "reverseDeps": [
         "FeatureLyrics",
@@ -356,9 +387,22 @@
       "linkedInProject": true
     },
     {
-      "name": "FeatureWindowManagement",
-      "deps": [],
+      "name": "FeatureWindowManagementAX",
+      "deps": [
+        "FeatureWindowManagementSelf"
+      ],
       "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWindowManagementSelf",
+      "deps": [
+        "Telemetry"
+      ],
+      "reverseDeps": [
+        "FeatureWindowManagementAX"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -415,11 +459,15 @@
       "name": "LocalAIContracts",
       "deps": [],
       "reverseDeps": [
+        "ExerciseKit",
+        "FeatureAutoPaste",
+        "FeatureClipboardHistory",
         "FeatureCompute",
         "FeatureEvenRealities",
         "FeatureEyeCare",
         "FeatureGGUF",
         "FeatureGlobalTranscription",
+        "FeatureLyrics",
         "FeatureMLXServeSidecar",
         "FeatureModelLink",
         "FeatureOMLXSidecar",
@@ -432,19 +480,35 @@
         "GatewayFeatureSupport",
         "LocalAIHTTPServer",
         "LocalAITextGeneration",
-        "SnapCaptureKit"
+        "LocalAITranslation",
+        "LocalAITTS",
+        "RoutineKit",
+        "SentryKit",
+        "SnapCaptureKit",
+        "StudioAgentBridge"
       ],
       "appStoreGates": [],
       "linkedInProject": true
     },
     {
       "name": "LocalAICore",
-      "deps": [],
+      "deps": [
+        "Telemetry"
+      ],
       "reverseDeps": [
         "FeatureOMLXSidecar",
         "LocalAIHTTPServer",
         "LocalAIServing",
         "LocalAITextGeneration"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIDesignSystem",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureTranslate"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -468,11 +532,7 @@
       ],
       "reverseDeps": [
         "FeatureEvenRealities",
-        "FeatureTranslate",
-        "FeatureTranslateDomain",
-        "LocalAITranslation",
-        "LocalAITTS",
-        "StudioAgentBridge",
+        "WorkbenchRouteContracts",
         "WorkbenchRouteKit"
       ],
       "appStoreGates": [],
@@ -516,7 +576,8 @@
       "reverseDeps": [
         "FeatureGlobalTranscription",
         "FeatureWav2Vec2",
-        "LocalAIHTTPServer"
+        "LocalAIHTTPServer",
+        "LocalSpeechKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -524,7 +585,7 @@
     {
       "name": "LocalAITranslation",
       "deps": [
-        "LocalAIHTTPServer",
+        "LocalAIContracts",
         "LocalAITextGeneration",
         "SpeechPipeline",
         "Telemetry"
@@ -536,7 +597,7 @@
     {
       "name": "LocalAITTS",
       "deps": [
-        "LocalAIHTTPServer"
+        "LocalAIContracts"
       ],
       "reverseDeps": [],
       "appStoreGates": [],
@@ -545,10 +606,21 @@
     {
       "name": "LocalSpeechKit",
       "deps": [
-        "SpeechPipeline"
+        "LocalAITranscription",
+        "SpeechPipeline",
+        "Telemetry"
       ],
       "reverseDeps": [
         "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MenuBarKit",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureGlobalTranscription"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -561,23 +633,10 @@
       "linkedInProject": true
     },
     {
-      "name": "MonitorControlDDC",
-      "deps": [],
-      "reverseDeps": [],
-      "appStoreGates": [],
-      "linkedInProject": false
-    },
-    {
-      "name": "OpenClawKit",
-      "deps": [],
-      "reverseDeps": [],
-      "appStoreGates": [],
-      "linkedInProject": false
-    },
-    {
       "name": "RoutineKit",
       "deps": [
-        "ExerciseKit"
+        "ExerciseKit",
+        "LocalAIContracts"
       ],
       "reverseDeps": [
         "LocalAIHTTPServer"
@@ -593,8 +652,19 @@
       "linkedInProject": false
     },
     {
+      "name": "ScreenAwakeSleepLock",
+      "deps": [
+        "FeatureScreenAwake"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "SentryKit",
-      "deps": [],
+      "deps": [
+        "LocalAIContracts"
+      ],
       "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
@@ -614,7 +684,8 @@
       "name": "SnapCaptureKit",
       "deps": [
         "LocalAIContracts",
-        "SnapDeviceCaptureKit"
+        "SnapDeviceCaptureKit",
+        "Telemetry"
       ],
       "reverseDeps": [
         "FeatureQuickCapture"
@@ -649,7 +720,7 @@
         "DevLoopStreamKit",
         "DevLoopUI",
         "FrameSourceKit",
-        "LocalAIHTTPServer",
+        "LocalAIContracts",
         "StudioSceneKit"
       ],
       "reverseDeps": [],
@@ -703,7 +774,17 @@
       "deps": [],
       "reverseDeps": [
         "BetaTelemetry",
-        "LocalAITranslation"
+        "FeatureGlobalTranscription",
+        "FeatureKeyboardBacklight",
+        "FeatureLyrics",
+        "FeatureOMLXSidecar",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "FeatureWindowManagementSelf",
+        "LocalAICore",
+        "LocalAITranslation",
+        "LocalSpeechKit",
+        "SnapCaptureKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -743,13 +824,25 @@
       "linkedInProject": true
     },
     {
-      "name": "WorkbenchRouteKit",
+      "name": "WorkbenchRouteContracts",
       "deps": [
         "LocalAIHTTPServer"
       ],
-      "reverseDeps": [],
+      "reverseDeps": [
+        "WorkbenchRouteKit"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
+    },
+    {
+      "name": "WorkbenchRouteKit",
+      "deps": [
+        "LocalAIHTTPServer",
+        "WorkbenchRouteContracts"
+      ],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": false
     }
   ]
 }

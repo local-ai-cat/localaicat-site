@@ -4413,6 +4413,8 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .moduleChip[data-kind="tier-covered"] { color: color-mix(in srgb, #6f9bd0 62%, var(--text)); border-color: color-mix(in srgb, #6f9bd0 26%, transparent); }
 .moduleChip[data-kind="tier-thin"]    { color: color-mix(in srgb, #d19a5b 62%, var(--text)); border-color: color-mix(in srgb, #d19a5b 26%, transparent); }
 .moduleChip[data-kind="tier-none"]    { color: var(--text-faint); border-color: var(--line); }
+.moduleChip[data-kind="testing-lock-holds"] { color: color-mix(in srgb, #7fae8b 72%, var(--text)); border-color: color-mix(in srgb, #7fae8b 34%, transparent); }
+.moduleChip[data-kind="testing-lock-fails"] { color: color-mix(in srgb, #dc6f6f 78%, var(--text)); border-color: color-mix(in srgb, #dc6f6f 38%, transparent); }
 
 /* Modular-state chips. */
 .moduleChip[data-kind="modular-yes"]     { color: color-mix(in srgb, #7fae8b 60%, var(--text)); }

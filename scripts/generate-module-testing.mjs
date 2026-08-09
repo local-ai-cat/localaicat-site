@@ -25,6 +25,67 @@ function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function nonNegativeInteger(value, location) {
+  if (!Number.isInteger(value) || value < 0) fail(`${location} must be a non-negative integer`);
+  return value;
+}
+
+export function derivedPackageTesting(manifest) {
+  if (!isObject(manifest) || !Array.isArray(manifest.packageTesting)) {
+    fail("app docs/features.json must contain the derived packageTesting array");
+  }
+
+  const packages = new Map();
+  for (const [index, row] of manifest.packageTesting.entries()) {
+    const location = `app docs/features.json packageTesting[${index}]`;
+    if (!isObject(row) || !isObject(row.evidence) || !isObject(row.lock)) {
+      fail(`${location} must contain evidence and lock objects`);
+    }
+    const name = row.evidence.package;
+    if (typeof name !== "string" || name.trim() === "") fail(`${location}.evidence.package must be a non-empty string`);
+    if (row.lock.package !== name) fail(`${location}.lock.package must match evidence.package`);
+    if (packages.has(name)) fail(`${location} duplicates package ${JSON.stringify(name)}`);
+    if (!isObject(row.evidence.counts)) fail(`${location}.evidence.counts must be an object`);
+    const xctest = nonNegativeInteger(row.evidence.counts.xctest, `${location}.evidence.counts.xctest`);
+    const swiftTesting = nonNegativeInteger(
+      row.evidence.counts.swiftTesting,
+      `${location}.evidence.counts.swiftTesting`,
+    );
+    if (!Array.isArray(row.evidence.suitePaths) || row.evidence.suitePaths.some((value) => typeof value !== "string")) {
+      fail(`${location}.evidence.suitePaths must be an array of strings`);
+    }
+    if (!["push-or-pull-request", "explicit-on-demand", "orphan"].includes(row.evidence.wiredness)) {
+      fail(`${location}.evidence.wiredness is not recognized`);
+    }
+    if (!Array.isArray(row.evidence.wiringEvidencePaths)
+      || row.evidence.wiringEvidencePaths.some((value) => typeof value !== "string")) {
+      fail(`${location}.evidence.wiringEvidencePaths must be an array of strings`);
+    }
+    if (!Array.isArray(row.evidence.ratchets)) fail(`${location}.evidence.ratchets must be an array`);
+    if (!isObject(row.evidence.realSurface)) fail(`${location}.evidence.realSurface must be an object`);
+    if (typeof row.lockSatisfied !== "boolean") fail(`${location}.lockSatisfied must be a boolean`);
+
+    packages.set(name, {
+      name,
+      counts: { xctest, swiftTesting, total: xctest + swiftTesting },
+      suitePaths: [...row.evidence.suitePaths],
+      wiredness: row.evidence.wiredness,
+      wiringEvidencePaths: [...row.evidence.wiringEvidencePaths],
+      ratchets: row.evidence.ratchets,
+      realSurface: row.evidence.realSurface,
+      lock: {
+        satisfied: row.lockSatisfied,
+        suiteRequired: row.lock.suiteRequired,
+        minimumTestCount: nonNegativeInteger(row.lock.minimumTestCount, `${location}.lock.minimumTestCount`),
+        wirednessRequired: row.lock.wirednessRequired,
+        requiredRatchets: row.lock.requiredRatchets,
+        ...(row.lock.loweredByCommit ? { loweredByCommit: row.lock.loweredByCommit } : {}),
+      },
+    });
+  }
+  return packages;
+}
+
 export function testingTier(cases) {
   if (cases === 0) return "none";
   if (cases < 10) return "thin";
@@ -48,39 +109,6 @@ const sentryPattern = /TelemetryRegistry|capture\(error|capture\(message/g;
 
 function countMatches(source, pattern) {
   return source.match(pattern)?.length ?? 0;
-}
-
-function stripSwiftComments(source) {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/.*$/gm, "$1");
-}
-
-export function countTestDeclarations(source) {
-  const lines = stripSwiftComments(source).split("\n");
-  let cases = 0;
-  let pendingSwiftTest = false;
-
-  for (const line of lines) {
-    const testAttributes = line.match(/@Test\b/g)?.length ?? 0;
-    if (testAttributes > 0) {
-      cases += testAttributes;
-      pendingSwiftTest = true;
-    }
-
-    const xctestDeclarations = line.match(/\bfunc\s+test[A-Z0-9_]\w*\s*\(/g)?.length ?? 0;
-    if (xctestDeclarations > 0) {
-      if (!pendingSwiftTest) cases += xctestDeclarations;
-      pendingSwiftTest = false;
-      continue;
-    }
-
-    if (pendingSwiftTest && /\bfunc\s+\w+\s*\(/.test(line)) {
-      pendingSwiftTest = false;
-    }
-  }
-
-  return cases;
 }
 
 function escapeRegExp(value) {
@@ -136,15 +164,6 @@ async function swiftFiles(directory) {
   }
 }
 
-export async function countPackageTests(packageDirectory) {
-  const files = await swiftFiles(path.join(packageDirectory, "Tests"));
-  let cases = 0;
-  for (const file of files) {
-    cases += countTestDeclarations(await readFile(file, "utf8"));
-  }
-  return cases;
-}
-
 async function countPackageLogging(packageDirectory) {
   const files = await swiftFiles(packageDirectory);
   const signals = { structured: 0, prints: 0, sentry: 0 };
@@ -196,27 +215,25 @@ function parseAppRoot(args) {
 }
 
 export async function generateModuleTesting(appRoot) {
-  await access(path.join(appRoot, "docs/features.json"));
+  const manifestPath = path.join(appRoot, "docs/features.json");
+  await access(manifestPath);
 
   const publicFeatures = JSON.parse(await readFile(publicFeaturesPath, "utf8"));
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   if (!isObject(publicFeatures) || !Array.isArray(publicFeatures.features)) {
     fail("data/public-features.json must contain a features array");
   }
 
+  const packageTesting = derivedPackageTesting(manifest);
   const packageDirectories = await findPackageDirectories(appRoot);
-  const knownPackageNames = [...packageDirectories.keys()];
+  const knownPackageNames = [...packageTesting.keys()];
   const overrides = await readPackageOverrides();
-  const packageTestCounts = new Map();
   const packageLoggingSignals = new Map();
 
   async function testsForPackage(name) {
-    if (packageTestCounts.has(name)) return packageTestCounts.get(name);
-    const locations = packageDirectories.get(name);
-    if (!locations) fail(`package override ${JSON.stringify(name)} does not match a Package.swift in the app repo`);
-    if (locations.length !== 1) fail(`package ${JSON.stringify(name)} is ambiguous in the app repo`);
-    const cases = await countPackageTests(locations[0]);
-    packageTestCounts.set(name, cases);
-    return cases;
+    const testing = packageTesting.get(name);
+    if (!testing) fail(`package override ${JSON.stringify(name)} does not match derived packageTesting data`);
+    return testing.counts.total;
   }
 
   async function loggingForPackage(name) {
@@ -261,7 +278,7 @@ export async function generateModuleTesting(appRoot) {
   }
 
   const output = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     updated: publicFeatures.updated,
     modules
   };

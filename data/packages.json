@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "updated": "2026-07-17",
+  "schemaVersion": 2,
+  "updated": "2026-08-10",
   "packages": [
     {
       "name": "AppControlKit",
@@ -8,12 +8,117 @@
       "ownerId": "app-control",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 25,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 25,
+          "swiftTesting": 0,
+          "total": 25
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/AppControlKit/Tests/AppControlKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 25,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "FeatureTranslate"
       ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "AudioPlaybackKit",
+      "owner": "Audio playback engine",
+      "ownerId": "audio-playback-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "testing": {
+        "counts": {
+          "xctest": 25,
+          "swiftTesting": 0,
+          "total": 25
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/AudioPlaybackKit/Tests/AudioPlaybackKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 25,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [],
+      "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -23,8 +128,54 @@
       "ownerId": "speech-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 25,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 65,
+          "total": 65
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/AudioSession/Tests/AudioSessionTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 61,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "FeatureTranslate"
@@ -38,8 +189,54 @@
       "ownerId": "beta-telemetry",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 6,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 7,
+          "swiftTesting": 0,
+          "total": 7
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/BetaTelemetry/Tests/BetaTelemetryTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 7,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "Telemetry"
       ],
@@ -53,8 +250,54 @@
       "ownerId": "workout-exercise",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 20,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 20,
+          "swiftTesting": 0,
+          "total": 20
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/ChallengeKit/Tests/ChallengeKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 20,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "SkipKit"
@@ -68,8 +311,54 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 35,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 35,
+          "swiftTesting": 0,
+          "total": 35
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/DevLoopStreamKit/Tests/DevLoopStreamKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 35,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FramePipelineKit",
         "FrameSourceKit",
@@ -90,8 +379,54 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 57,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 57,
+          "swiftTesting": 0,
+          "total": 57
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/DevLoopUI/Tests/DevLoopUITests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 57,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "DevLoopStreamKit",
         "FramePipelineKit",
@@ -109,13 +444,120 @@
       "ownerId": "workout-exercise",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 33,
-      "tier": "heavy",
-      "deps": [],
+      "testing": {
+        "counts": {
+          "xctest": 34,
+          "swiftTesting": 0,
+          "total": 34
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/ExerciseKit/Tests/ExerciseKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 34,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "LocalAIContracts"
+      ],
       "dependents": [
         "RoutineKit",
         "VLMDispatchKit"
       ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureAnnouncements",
+      "owner": "In-App Actionable Announcements",
+      "ownerId": "in-app-announcements",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 13,
+          "total": 13
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureAnnouncements/Tests/FeatureAnnouncementsTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 13,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [],
+      "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -125,12 +567,119 @@
       "ownerId": "auto-paste",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 7,
-      "tier": "thin",
-      "deps": [],
-      "dependents": [
-        "FeatureGlobalTranscription"
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 11,
+          "total": 11
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureAutoPaste/Tests/FeatureAutoPasteTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 11,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "LocalAIContracts"
       ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureClipboardHistory",
+      "owner": "Clipboard History",
+      "ownerId": "clipboard-history",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 62,
+          "total": 62
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureClipboardHistory/Tests/FeatureClipboardHistoryTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 61,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -139,14 +688,61 @@
       "owner": "Compute / Model Link (discovery, remote cat, P2P, VNC + audio, SSH, Terminal3D)",
       "ownerId": "compute",
       "ownerKind": "feature",
-      "modular": "yes",
-      "cases": 27,
-      "tier": "covered",
+      "modular": "partial",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 36,
+          "total": 36
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureCompute/Tests/FeatureComputeTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 36,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts"
       ],
       "dependents": [
-        "FeatureModelLink"
+        "FeatureModelLink",
+        "FeatureOpenClaw"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -157,8 +753,54 @@
       "ownerId": "content-safety-filter",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 14,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 18,
+          "total": 18
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureContentSafety/Tests/FeatureContentSafetyTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 18,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
@@ -170,8 +812,54 @@
       "ownerId": "dangerously-skip",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 7,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 7,
+          "total": 7
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/FeatureDangerouslySkip/Tests/FeatureDangerouslySkipTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 7,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FeatureEyeCare",
         "HealthKitLogging",
@@ -187,25 +875,58 @@
       "ownerId": "desktop-curtain",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 26,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 26,
+          "total": 26
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureDesktopCurtain/Tests/FeatureDesktopCurtainTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 26,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
-    },
-    {
-      "name": "FeatureEvenG2",
-      "owner": "Even Realities / G2 display driver",
-      "ownerId": "even-realities",
-      "ownerKind": "feature",
-      "modular": "yes",
-      "cases": 0,
-      "tier": "none",
-      "deps": [],
-      "dependents": [],
-      "appStoreGates": [],
-      "linkedInProject": false
     },
     {
       "name": "FeatureEvenRealities",
@@ -213,8 +934,55 @@
       "ownerId": "even-realities",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 17,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 9,
+          "swiftTesting": 8,
+          "total": 17
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureEvenRealities/Tests/EvenRealitiesTranslateTests",
+          "Packages/FeatureEvenRealities/Tests/FeatureEvenRealitiesTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 17,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FeatureTranslate",
         "LocalAIContracts",
@@ -237,8 +1005,54 @@
       "ownerId": "eye-care",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 31,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 39,
+          "total": 39
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureEyeCare/Tests/FeatureEyeCareTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 39,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts"
       ],
@@ -254,8 +1068,56 @@
       "ownerId": "gguf-backend",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 22,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 1,
+          "swiftTesting": 21,
+          "total": 22
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureGGUF/Tests/FeatureGGUFTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [
+            "scripts/gguf-backend-e2e.sh"
+          ],
+          "recordedEvidencePaths": [],
+          "status": "command-only"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 22,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
         "LocalAITextGeneration"
@@ -270,12 +1132,59 @@
       "ownerId": "global-transcription",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 103,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 40,
+          "swiftTesting": 150,
+          "total": 190
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureGlobalTranscription/Tests/FeatureGlobalTranscriptionTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 190,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "FeatureAutoPaste",
         "LocalAIContracts",
-        "LocalAITranscription"
+        "LocalAITranscription",
+        "MenuBarKit",
+        "Telemetry"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -287,14 +1196,62 @@
       "ownerId": "keyboard-backlight",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 5,
-      "tier": "thin",
-      "deps": [],
+      "testing": {
+        "counts": {
+          "xctest": 19,
+          "swiftTesting": 0,
+          "total": 19
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureKeyboardBacklight/Tests/FeatureKeyboardBacklightTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 19,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "Telemetry"
+      ],
       "dependents": [],
       "appStoreGates": [
         {
           "file": "Sources/FeatureKeyboardBacklight/KeyboardBacklightMenuContent.swift",
-          "line": 153
+          "line": 169
         }
       ],
       "linkedInProject": true
@@ -305,10 +1262,59 @@
       "ownerId": "lyrics-player",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 20,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 22,
+          "total": 22
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureLyrics/Tests/FeatureLyricsTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 22,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "FeatureTranslateDomain"
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAIContracts",
+        "Telemetry"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -320,8 +1326,54 @@
       "ownerId": "manifest",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 63,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 161,
+          "swiftTesting": 44,
+          "total": 205
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureManifest/Tests/FeatureManifestTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 205,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
@@ -333,8 +1385,54 @@
       "ownerId": "mlxserve-sidecar",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 9,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 1,
+          "swiftTesting": 31,
+          "total": 32
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureMLXServeSidecar/Tests/FeatureMLXServeSidecarTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 32,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts"
       ],
@@ -348,8 +1446,54 @@
       "ownerId": "model-link",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 7,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 21,
+          "swiftTesting": 2,
+          "total": 23
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureModelLink/Tests/FeatureModelLinkTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 23,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FeatureCompute",
         "LocalAIContracts",
@@ -365,8 +1509,54 @@
       "ownerId": "monitor-control",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 36,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 58,
+          "total": 58
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureMonitorControl/Tests/FeatureMonitorControlTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 58,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [
@@ -387,12 +1577,59 @@
       "ownerId": "omlx-sidecar",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 2,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 6,
+          "total": 6
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/FeatureOMLXSidecar/Tests/FeatureOMLXSidecarTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 6,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
         "LocalAICore",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "Telemetry"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -404,9 +1641,56 @@
       "ownerId": "openclaw",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 6,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 6,
+          "total": 6
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/FeatureOpenClaw/Tests/FeatureOpenClawTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 6,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
+        "FeatureCompute",
         "GatewayFeatureSupport",
         "LocalAIContracts",
         "LocalAITextGeneration"
@@ -426,8 +1710,54 @@
       "ownerId": "quick-capture",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 28,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 12,
+          "swiftTesting": 17,
+          "total": 29
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureQuickCapture/Tests/FeatureQuickCaptureTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 29,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
         "SnapCaptureKit"
@@ -442,8 +1772,54 @@
       "ownerId": "quit-apps",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 8,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 8,
+          "total": 8
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/FeatureQuitApps/Tests/FeatureQuitAppsTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 8,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
@@ -455,12 +1831,60 @@
       "ownerId": "screen-awake",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 38,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 74,
+          "total": 74
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureScreenAwake/Tests/FeatureScreenAwakeTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 74,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts"
       ],
-      "dependents": [],
+      "dependents": [
+        "ScreenAwakeSleepLock"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -470,8 +1894,54 @@
       "ownerId": "capture-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 27,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 27,
+          "total": 27
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureScreenRecording/Tests/FeatureScreenRecordingCoreTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 27,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FrameSourceKit"
       ],
@@ -485,8 +1955,56 @@
       "ownerId": "subscription",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 45,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 45,
+          "total": 45
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureSubscription/Tests/FeatureSubscriptionPolarTests",
+          "Packages/FeatureSubscription/Tests/FeatureSubscriptionStoreKitTests",
+          "Packages/FeatureSubscription/Tests/FeatureSubscriptionTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 45,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts"
       ],
@@ -500,20 +2018,72 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 6,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 31,
+          "total": 31
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureTranslate/Tests/FeatureTranslateTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [
+            "scripts/conversation-fixture-e2e.sh"
+          ],
+          "recordedEvidencePaths": [
+            "planning/runs/2026-08-09-pkg75-conversation-fixture-source/OUTCOMES.md"
+          ],
+          "status": "recorded"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 31,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "AppControlKit",
         "AudioSession",
         "FeatureTranslateDomain",
         "LocalAIContracts",
-        "LocalAIHTTPServer",
+        "LocalAIDesignSystem",
         "LocalAITextGeneration",
         "LocalSpeechKit",
-        "SpeechPipeline"
+        "SpeechPipeline",
+        "Telemetry"
       ],
       "dependents": [
-        "FeatureEvenRealities"
+        "FeatureEvenRealities",
+        "FeatureLyrics"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -524,12 +2094,58 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 12,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 24,
+          "swiftTesting": 34,
+          "total": 58
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/FeatureTranslateDomain/Tests/FeatureTranslateDomainTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 58,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
-        "LocalAIHTTPServer",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "Telemetry"
       ],
       "dependents": [
         "FeatureLyrics",
@@ -544,8 +2160,54 @@
       "ownerId": "wav2vec2-transcription",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 5,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 5,
+          "swiftTesting": 0,
+          "total": 5
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/FeatureWav2Vec2/Tests/FeatureWav2Vec2Tests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 5,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAITranscription"
       ],
@@ -554,15 +2216,126 @@
       "linkedInProject": true
     },
     {
-      "name": "FeatureWindowManagement",
+      "name": "FeatureWindowManagementAX",
       "owner": "Window management of other apps",
       "ownerId": "window-mgmt-others",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 45,
-      "tier": "heavy",
-      "deps": [],
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 23,
+          "total": 23
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureWindowManagementAX/Tests/FeatureWindowManagementAXTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 23,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "FeatureWindowManagementSelf"
+      ],
       "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWindowManagementSelf",
+      "owner": "Window management (own windows)",
+      "ownerId": "window-mgmt-self",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 22,
+          "total": 22
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FeatureWindowManagementSelf/Tests/FeatureWindowManagementSelfTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 22,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "Telemetry"
+      ],
+      "dependents": [
+        "FeatureWindowManagementAX"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -572,8 +2345,55 @@
       "ownerId": "capture-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 17,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 17,
+          "swiftTesting": 0,
+          "total": 17
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FramePipelineKit/Tests/FramePipelineKitTests",
+          "Packages/FramePipelineKit/Tests/GIFExportKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 17,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "DevLoopStreamKit",
@@ -591,8 +2411,54 @@
       "ownerId": "capture-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 19,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 19,
+          "swiftTesting": 0,
+          "total": 19
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/FrameSourceKit/Tests/FrameSourceKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 19,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FramePipelineKit"
       ],
@@ -613,8 +2479,54 @@
       "ownerId": "gateway-support",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 1,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 1,
+          "total": 1
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/GatewayFeatureSupport/Tests/GatewayFeatureSupportTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 1,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts"
       ],
@@ -630,8 +2542,54 @@
       "ownerId": "skip-healthkit-logging",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 2,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 2,
+          "swiftTesting": 0,
+          "total": 2
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/HealthKitLogging/Tests/HealthKitLoggingTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 2,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "FeatureDangerouslySkip"
@@ -645,15 +2603,65 @@
       "ownerId": "core",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 24,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 99,
+          "total": 99
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalAIContracts/Tests/LocalAIContractsTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 98,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
+        "ExerciseKit",
+        "FeatureAutoPaste",
+        "FeatureClipboardHistory",
         "FeatureCompute",
         "FeatureEvenRealities",
         "FeatureEyeCare",
         "FeatureGGUF",
         "FeatureGlobalTranscription",
+        "FeatureLyrics",
         "FeatureMLXServeSidecar",
         "FeatureModelLink",
         "FeatureOMLXSidecar",
@@ -666,7 +2674,12 @@
         "GatewayFeatureSupport",
         "LocalAIHTTPServer",
         "LocalAITextGeneration",
-        "SnapCaptureKit"
+        "LocalAITranslation",
+        "LocalAITTS",
+        "RoutineKit",
+        "SentryKit",
+        "SnapCaptureKit",
+        "StudioAgentBridge"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -677,9 +2690,57 @@
       "ownerId": "core",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 39,
-      "tier": "heavy",
-      "deps": [],
+      "testing": {
+        "counts": {
+          "xctest": 332,
+          "swiftTesting": 13,
+          "total": 345
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalAICore/Tests/LocalAICoreTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 345,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "Telemetry"
+      ],
       "dependents": [
         "FeatureOMLXSidecar",
         "LocalAIHTTPServer",
@@ -690,13 +2751,120 @@
       "linkedInProject": true
     },
     {
+      "name": "LocalAIDesignSystem",
+      "owner": "Design system",
+      "ownerId": "design-system",
+      "ownerKind": "platform",
+      "modular": null,
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 2,
+          "total": 2
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/LocalAIDesignSystem/Tests/LocalAIDesignSystemTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 2,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [],
+      "dependents": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "LocalAIEnergy",
       "owner": "Energy & Impact",
       "ownerId": "energy-impact",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 27,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 27,
+          "swiftTesting": 0,
+          "total": 27
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/LocalAIEnergy/Tests/LocalAIEnergyTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 27,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
@@ -708,8 +2876,54 @@
       "ownerId": "local-api",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 203,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 240,
+          "swiftTesting": 51,
+          "total": 291
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalAIHTTPServer/Tests/LocalAIHTTPServerTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 288,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
         "LocalAICore",
@@ -720,11 +2934,7 @@
       ],
       "dependents": [
         "FeatureEvenRealities",
-        "FeatureTranslate",
-        "FeatureTranslateDomain",
-        "LocalAITranslation",
-        "LocalAITTS",
-        "StudioAgentBridge",
+        "WorkbenchRouteContracts",
         "WorkbenchRouteKit"
       ],
       "appStoreGates": [],
@@ -736,8 +2946,54 @@
       "ownerId": "serving-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 38,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 38,
+          "total": 38
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalAIServing/Tests/LocalAIServingTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 38,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAICore",
         "LocalAITextGeneration"
@@ -753,9 +3009,55 @@
       "owner": "Local LLM Chat",
       "ownerId": "chat-local-llm",
       "ownerKind": "feature",
-      "modular": "partial",
-      "cases": 28,
-      "tier": "covered",
+      "modular": "yes",
+      "testing": {
+        "counts": {
+          "xctest": 22,
+          "swiftTesting": 14,
+          "total": 36
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalAITextGeneration/Tests/LocalAITextGenerationTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 34,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
         "LocalAICore"
@@ -780,13 +3082,60 @@
       "ownerId": "transcription",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 56,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 103,
+          "swiftTesting": 0,
+          "total": 103
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalAITranscription/Tests/LocalAITranscriptionTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 103,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "FeatureGlobalTranscription",
         "FeatureWav2Vec2",
-        "LocalAIHTTPServer"
+        "LocalAIHTTPServer",
+        "LocalSpeechKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -797,10 +3146,56 @@
       "ownerId": "translation-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 8,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 12,
+          "total": 12
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/LocalAITranslation/Tests/LocalAITranslationTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 12,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "LocalAIHTTPServer",
+        "LocalAIContracts",
         "LocalAITextGeneration",
         "SpeechPipeline",
         "Telemetry"
@@ -815,10 +3210,56 @@
       "ownerId": "tts-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 3,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 3,
+          "swiftTesting": 0,
+          "total": 3
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/LocalAITTS/Tests/LocalAITTSTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 3,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "LocalAIHTTPServer"
+        "LocalAIContracts"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -830,13 +3271,122 @@
       "ownerId": "speech-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 41,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 12,
+          "swiftTesting": 56,
+          "total": 68
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/LocalSpeechKit/Tests/LocalSpeechKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 68,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "SpeechPipeline"
+        "LocalAITranscription",
+        "SpeechPipeline",
+        "Telemetry"
       ],
       "dependents": [
         "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MenuBarKit",
+      "owner": "Menu bar kit",
+      "ownerId": "menu-bar-kit",
+      "ownerKind": "platform",
+      "modular": null,
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 3,
+          "total": 3
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/MenuBarKit/Tests/MenuBarKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 3,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [],
+      "dependents": [
+        "FeatureGlobalTranscription"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -847,38 +3397,58 @@
       "ownerId": "migration-harness",
       "ownerKind": "harness",
       "modular": null,
-      "cases": 8,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 8,
+          "swiftTesting": 0,
+          "total": 8
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/MigrationGateHarness/Tests/MigrationGateHarnessTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 8,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
-    },
-    {
-      "name": "MonitorControlDDC",
-      "owner": "MonitorControl DDC",
-      "ownerId": "monitor-ddc",
-      "ownerKind": "vendored",
-      "modular": null,
-      "cases": 0,
-      "tier": "none",
-      "deps": [],
-      "dependents": [],
-      "appStoreGates": [],
-      "linkedInProject": false
-    },
-    {
-      "name": "OpenClawKit",
-      "owner": "OpenClawKit",
-      "ownerId": "openclaw-kit",
-      "ownerKind": "vendored",
-      "modular": null,
-      "cases": 0,
-      "tier": "none",
-      "deps": [],
-      "dependents": [],
-      "appStoreGates": [],
-      "linkedInProject": false
     },
     {
       "name": "RoutineKit",
@@ -886,10 +3456,57 @@
       "ownerId": "routine-kit",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 68,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 1,
+          "swiftTesting": 68,
+          "total": 69
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/RoutineKit/Tests/RoutineKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 69,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "ExerciseKit"
+        "ExerciseKit",
+        "LocalAIContracts"
       ],
       "dependents": [
         "LocalAIHTTPServer"
@@ -903,12 +3520,119 @@
       "ownerId": "migration-harness",
       "ownerKind": "harness",
       "modular": null,
-      "cases": 5,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 5,
+          "total": 5
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/ScenarioHarness/Tests/ScenarioHarnessTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 5,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
       "linkedInProject": false
+    },
+    {
+      "name": "ScreenAwakeSleepLock",
+      "owner": "Screen Awake",
+      "ownerId": "screen-awake",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 31,
+          "total": 31
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/ScreenAwakeSleepLock/Tests/ScreenAwakeSleepLockTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 31,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "FeatureScreenAwake"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
     },
     {
       "name": "SentryKit",
@@ -916,9 +3640,57 @@
       "ownerId": "sentry-mode",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 23,
-      "tier": "covered",
-      "deps": [],
+      "testing": {
+        "counts": {
+          "xctest": 24,
+          "swiftTesting": 0,
+          "total": 24
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/SentryKit/Tests/SentryKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 24,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "LocalAIContracts"
+      ],
       "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
@@ -929,8 +3701,56 @@
       "ownerId": "dangerously-skip",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 33,
-      "tier": "heavy",
+      "testing": {
+        "counts": {
+          "xctest": 33,
+          "swiftTesting": 0,
+          "total": 33
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/SkipKit/Tests/SkipKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [
+            "scripts/skip-e2e.sh"
+          ],
+          "recordedEvidencePaths": [],
+          "status": "command-only"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 33,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "ChallengeKit"
       ],
@@ -946,11 +3766,61 @@
       "ownerId": "snap-capture",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 23,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 33,
+          "total": 33
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/SnapCaptureKit/Tests/SnapCaptureKitTests",
+          "Packages/SnapCaptureKit/Tests/SnapCapturePlatformTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [
+            "scripts/snap-capture-e2e.sh"
+          ],
+          "recordedEvidencePaths": [],
+          "status": "command-only"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 31,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "LocalAIContracts",
-        "SnapDeviceCaptureKit"
+        "SnapDeviceCaptureKit",
+        "Telemetry"
       ],
       "dependents": [
         "FeatureQuickCapture"
@@ -964,8 +3834,54 @@
       "ownerId": "snap-capture",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 3,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 3,
+          "total": 3
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/SnapDeviceCaptureKit/Tests/SnapDeviceCaptureKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 3,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "SnapCaptureKit"
@@ -979,8 +3895,54 @@
       "ownerId": "speech-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 19,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 19,
+          "swiftTesting": 0,
+          "total": 19
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/SpeechPipeline/Tests/SpeechPipelineTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 19,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "FeatureEvenRealities",
@@ -997,13 +3959,59 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 25,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 25,
+          "swiftTesting": 0,
+          "total": 25
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/StudioAgentBridge/Tests/StudioAgentBridgeTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 25,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "DevLoopStreamKit",
         "DevLoopUI",
         "FrameSourceKit",
-        "LocalAIHTTPServer",
+        "LocalAIContracts",
         "StudioSceneKit"
       ],
       "dependents": [],
@@ -1021,8 +4029,54 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 6,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 6,
+          "swiftTesting": 0,
+          "total": 6
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/StudioModeKit/Tests/StudioModeKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 6,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "FramePipelineKit",
         "FrameSourceKit",
@@ -1039,8 +4093,54 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 10,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 10,
+          "swiftTesting": 0,
+          "total": 10
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/StudioSceneKit/Tests/StudioSceneKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 10,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "DevLoopStreamKit",
         "FrameSourceKit",
@@ -1059,8 +4159,54 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 7,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 7,
+          "swiftTesting": 0,
+          "total": 7
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/SubtitleKit/Tests/SubtitleKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 7,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "TranscriptSyncKit"
       ],
@@ -1076,12 +4222,68 @@
       "ownerId": "telemetry",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 3,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 5,
+          "swiftTesting": 0,
+          "total": 5
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/Telemetry/Tests/TelemetryTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 5,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "BetaTelemetry",
-        "LocalAITranslation"
+        "FeatureGlobalTranscription",
+        "FeatureKeyboardBacklight",
+        "FeatureLyrics",
+        "FeatureOMLXSidecar",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "FeatureWindowManagementSelf",
+        "LocalAICore",
+        "LocalAITranslation",
+        "LocalSpeechKit",
+        "SnapCaptureKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -1092,8 +4294,54 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 9,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 9,
+          "swiftTesting": 0,
+          "total": 9
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/TranscriptSyncKit/Tests/TranscriptSyncKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 9,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "DevLoopStreamKit",
@@ -1110,8 +4358,54 @@
       "ownerId": "vlm-dispatch",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 21,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 21,
+          "swiftTesting": 0,
+          "total": 21
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/VLMDispatchKit/Tests/VLMDispatchKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 21,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
         "ExerciseKit",
         "FramePipelineKit",
@@ -1129,11 +4423,120 @@
       "ownerId": "even-realities",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 13,
-      "tier": "covered",
+      "testing": {
+        "counts": {
+          "xctest": 13,
+          "swiftTesting": 0,
+          "total": 13
+        },
+        "tier": "covered",
+        "suitePaths": [
+          "Packages/WearableGlassesKit/Tests/WearableGlassesKitTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 13,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [],
       "dependents": [
         "FeatureEvenRealities"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "WorkbenchRouteContracts",
+      "owner": null,
+      "ownerId": null,
+      "ownerKind": "unowned",
+      "modular": null,
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 3,
+          "total": 3
+        },
+        "tier": "thin",
+        "suitePaths": [
+          "Packages/WorkbenchRouteContracts/Tests/WorkbenchRouteContractsTests"
+        ],
+        "wiredness": "push-or-pull-request",
+        "wiringEvidencePaths": [
+          ".github/workflows/ci.yml"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 3,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
+      "deps": [
+        "LocalAIHTTPServer"
+      ],
+      "dependents": [
+        "WorkbenchRouteKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -1144,14 +4547,61 @@
       "ownerId": null,
       "ownerKind": "unowned",
       "modular": null,
-      "cases": 7,
-      "tier": "thin",
+      "testing": {
+        "counts": {
+          "xctest": 0,
+          "swiftTesting": 50,
+          "total": 50
+        },
+        "tier": "heavy",
+        "suitePaths": [
+          "Packages/WorkbenchRouteKit/Tests/WorkbenchRouteKitTests"
+        ],
+        "wiredness": "explicit-on-demand",
+        "wiringEvidencePaths": [
+          "scripts/test-workbench-route-kit.sh"
+        ],
+        "ratchets": [
+          {
+            "enforcement": "explicit-on-demand",
+            "evidencePaths": [
+              ".swift-concurrency-baseline.json",
+              "scripts/verify-concurrency-baseline.sh"
+            ],
+            "id": "swift-concurrency-warning-baseline"
+          },
+          {
+            "enforcement": "push-or-pull-request",
+            "evidencePaths": [
+              ".swiftlint-baseline.json",
+              "scripts/verify-gates.sh"
+            ],
+            "id": "swiftlint-warning-baseline"
+          }
+        ],
+        "realSurface": {
+          "commands": [],
+          "recordedEvidencePaths": [],
+          "status": "none-detected"
+        },
+        "lock": {
+          "satisfied": true,
+          "suiteRequired": true,
+          "minimumTestCount": 50,
+          "wirednessRequired": true,
+          "requiredRatchets": [
+            "swift-concurrency-warning-baseline",
+            "swiftlint-warning-baseline"
+          ]
+        }
+      },
       "deps": [
-        "LocalAIHTTPServer"
+        "LocalAIHTTPServer",
+        "WorkbenchRouteContracts"
       ],
       "dependents": [],
       "appStoreGates": [],
-      "linkedInProject": true
+      "linkedInProject": false
     }
   ]
 }

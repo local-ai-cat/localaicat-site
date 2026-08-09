@@ -1,12 +1,18 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-07-17",
+  "updated": "2026-08-10",
   "modules": [
     {
       "id": "chat-local-llm",
       "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false
+    },
+    {
+      "id": "in-app-announcements",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
     },
     {
       "id": "transcription",
@@ -34,9 +40,9 @@
     },
     {
       "id": "window-mgmt-others",
-      "status": "behavioral",
+      "status": "unit-only",
       "hasSnapshot": false,
-      "neverDriven": false
+      "neverDriven": true
     },
     {
       "id": "window-mgmt-self",
@@ -46,27 +52,27 @@
     },
     {
       "id": "quit-apps",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "screen-awake",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "keyboard-backlight",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "desktop-curtain",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "eye-care",
@@ -76,15 +82,15 @@
     },
     {
       "id": "monitor-control",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "compute",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "openclaw",
@@ -160,9 +166,15 @@
     },
     {
       "id": "quick-capture",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
+    },
+    {
+      "id": "clipboard-history",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
     },
     {
       "id": "skip-healthkit-logging",
@@ -201,12 +213,6 @@
       "neverDriven": true
     },
     {
-      "id": "lmstudio-interop",
-      "status": "behavioral",
-      "hasSnapshot": false,
-      "neverDriven": false
-    },
-    {
       "id": "gguf-backend",
       "status": "behavioral",
       "hasSnapshot": false,
@@ -220,7 +226,7 @@
     },
     {
       "id": "snap-capture",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false
     },

@@ -4,8 +4,6 @@ import { pathToFileURL } from "node:url";
 import process from "node:process";
 
 const root = process.cwd();
-const sourcePath = path.resolve(root, "../Local-AI-Chat/docs/features.json");
-const openApiPath = path.resolve(root, "../Local-AI-Chat/docs/localapi-openapi.json");
 const outputPath = path.resolve(root, "data/public-features.json");
 
 // Maps an api capability (from features.json api.capabilities) or an inferred
@@ -34,7 +32,7 @@ const maxApiPaths = 10;
 
 const allowedTopLevelKeys = new Set([
   "$comment", "accessTiers", "apiAxis", "capabilities", "channels", "features", "lanes",
-  "modules", "permissionCatalog", "platformAxis", "schemaVersion", "uiPlacementKinds", "updated"
+  "modules", "packageTesting", "permissionCatalog", "platformAxis", "schemaVersion", "uiPlacementKinds", "updated"
 ]);
 const allowedFeatureKeys = new Set([
   "api", "architectureNotes", "builds", "caveats", "defaultEnabled", "externalPackages", "goldStandard", "group", "id",
@@ -131,7 +129,7 @@ export function validateModules(modules) {
 function validateManifest(manifest) {
   if (!isObject(manifest)) fail("root must be an object");
   assertKnownKeys(manifest, allowedTopLevelKeys, "root");
-  if (![5, 6, 7, 8, 9, 10].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
+  if (![5, 6, 7, 8, 9, 10, 11].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
   if (typeof manifest.updated !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.updated)) {
     fail("updated must be an ISO date");
   }
@@ -271,7 +269,7 @@ export function projectModule(module) {
   };
 }
 
-async function readOpenApiPaths() {
+async function readOpenApiPaths(openApiPath) {
   try {
     await access(openApiPath);
   } catch {
@@ -286,7 +284,18 @@ async function readOpenApiPaths() {
   }
 }
 
+function parseAppRoot(args) {
+  const flagIndex = args.indexOf("--app-repo");
+  if (flagIndex === -1) return path.resolve(root, "../Local-AI-Chat");
+  const value = args[flagIndex + 1];
+  if (!value) fail("--app-repo requires a path");
+  return path.resolve(process.cwd(), value);
+}
+
 async function main() {
+  const appRoot = parseAppRoot(process.argv.slice(2));
+  const sourcePath = path.join(appRoot, "docs/features.json");
+  const openApiPath = path.join(appRoot, "docs/localapi-openapi.json");
   try {
     await access(sourcePath);
   } catch {
@@ -303,7 +312,7 @@ async function main() {
   }
   validateManifest(manifest);
 
-  const openApiPaths = await readOpenApiPaths();
+  const openApiPaths = await readOpenApiPaths(openApiPath);
   const features = manifest.features
     .filter((feature) => !feature.internal)
     .map((feature) => projectFeature(feature, openApiPaths));

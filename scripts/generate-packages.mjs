@@ -1,5 +1,5 @@
 // Package-centric projection for the /docs/packages table. There are more
-// packages (67) than modules, and the modules grid rolls packages UP into their
+// packages than modules, and the modules grid rolls packages UP into their
 // owning module — so this flat view surfaces each package's own reality: who
 // owns it, its kind, its own test coverage, modular state, and dependency edges.
 //
@@ -7,16 +7,13 @@
 //   - data/module-graph.json      → deps / reverseDeps / appStoreGates / linkedInProject
 //   - data/public-features.json   → ownership (feature.ownedPackages, module.packages),
 //                                     kind, modular state
-//   - the app repo's Packages/*   → per-package test-case count (reused from the
-//                                     testing generator's counters)
+//   - app docs/features.json      → repository-derived packageTesting evidence
+//                                     and deterministic lock status
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import {
-  findPackageDirectories,
-  countPackageTests,
-  testingTier,
-} from "./generate-module-testing.mjs";
+import { pathToFileURL } from "node:url";
+import { derivedPackageTesting, testingTier } from "./generate-module-testing.mjs";
 
 const root = process.cwd();
 const graphPath = path.resolve(root, "data/module-graph.json");
@@ -31,11 +28,7 @@ function parseAppRoot(args) {
   return path.resolve(root, "../Local-AI-Chat");
 }
 
-async function main() {
-  const appRoot = parseAppRoot(process.argv.slice(2));
-  const graph = JSON.parse(await readFile(graphPath, "utf8"));
-  const publicFeatures = JSON.parse(await readFile(featuresPath, "utf8"));
-
+export function packageRows(graph, publicFeatures, testingByPackage) {
   // package name -> { owner, ownerId, ownerKind, modular } from whoever OWNS it
   // (ownedPackages for features, packages for infrastructure modules). usesPackages
   // are cross-references, not ownership, so they don't set the owner here.
@@ -61,16 +54,6 @@ async function main() {
     }
   }
 
-  // Per-package test-case counts (reuses the testing generator's scanners). A
-  // package that lives outside Packages/ (e.g. a vendored public-org dep) simply
-  // has no directory here → 0 cases / tier "none", which is honest.
-  const packageDirectories = await findPackageDirectories(appRoot);
-  const testCasesFor = async (name) => {
-    const locations = packageDirectories.get(name);
-    if (!locations || locations.length === 0) return 0;
-    return countPackageTests(locations[0]);
-  };
-
   const packages = [];
   for (const node of graph.packages ?? []) {
     const ownership = owners.get(node.name) ?? {
@@ -79,15 +62,26 @@ async function main() {
       ownerKind: "unowned",
       modular: null,
     };
-    const cases = await testCasesFor(node.name);
+    const testing = testingByPackage.get(node.name);
+    if (!testing) {
+      throw new Error(`Could not generate packages data: graph package ${JSON.stringify(node.name)} is missing derived packageTesting data`);
+    }
     packages.push({
       name: node.name,
       owner: ownership.owner,
       ownerId: ownership.ownerId,
       ownerKind: ownership.ownerKind,
       modular: ownership.modular,
-      cases,
-      tier: testingTier(cases),
+      testing: {
+        counts: testing.counts,
+        tier: testingTier(testing.counts.total),
+        suitePaths: testing.suitePaths,
+        wiredness: testing.wiredness,
+        wiringEvidencePaths: testing.wiringEvidencePaths,
+        ratchets: testing.ratchets,
+        realSurface: testing.realSurface,
+        lock: testing.lock,
+      },
       deps: node.deps ?? [],
       dependents: node.reverseDeps ?? [],
       appStoreGates: node.appStoreGates ?? [],
@@ -95,9 +89,18 @@ async function main() {
     });
   }
   packages.sort((a, b) => a.name.localeCompare(b.name));
+  return packages;
+}
+
+async function main() {
+  const appRoot = parseAppRoot(process.argv.slice(2));
+  const graph = JSON.parse(await readFile(graphPath, "utf8"));
+  const publicFeatures = JSON.parse(await readFile(featuresPath, "utf8"));
+  const manifest = JSON.parse(await readFile(path.join(appRoot, "docs/features.json"), "utf8"));
+  const packages = packageRows(graph, publicFeatures, derivedPackageTesting(manifest));
 
   const output = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     updated: graph.updated ?? null,
     packages,
   };
@@ -111,7 +114,9 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

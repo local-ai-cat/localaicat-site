@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  countTestDeclarations,
+  derivedPackageTesting,
   extractPackageNames,
   loggingGrade,
   testingTier
@@ -16,19 +16,70 @@ test("testingTier uses the documented count bands", () => {
   assert.equal(testingTier(30), "heavy");
 });
 
-test("countTestDeclarations counts Swift Testing and XCTest declarations once", () => {
-  const source = `
-    @Test func inlineTest() {}
+test("derivedPackageTesting reads only the emitted derived axis", () => {
+  const packages = derivedPackageTesting({
+    packageTesting: [{
+      evidence: {
+        package: "FeatureExample",
+        counts: { xctest: 4, swiftTesting: 7 },
+        suitePaths: ["Packages/FeatureExample/Tests/FeatureExampleTests"],
+        wiredness: "push-or-pull-request",
+        wiringEvidencePaths: [".github/workflows/ci.yml"],
+        ratchets: [{
+          id: "swiftlint-warning-baseline",
+          enforcement: "push-or-pull-request",
+          evidencePaths: [".swiftlint-baseline.json"],
+        }],
+        realSurface: { status: "none-detected", commands: [], recordedEvidencePaths: [] },
+      },
+      lock: {
+        package: "FeatureExample",
+        suiteRequired: true,
+        minimumTestCount: 10,
+        wirednessRequired: true,
+        requiredRatchets: ["swiftlint-warning-baseline"],
+      },
+      lockSatisfied: true,
+    }],
+  });
 
-    @Test("A named test")
-    func testSwiftStyleName() {}
+  assert.deepEqual(packages.get("FeatureExample").counts, {
+    xctest: 4,
+    swiftTesting: 7,
+    total: 11,
+  });
+  assert.equal(packages.get("FeatureExample").lock.satisfied, true);
+  assert.equal(packages.get("FeatureExample").wiredness, "push-or-pull-request");
+});
 
-    func testXCTestStyle() {}
-    // func testCommentedOut() {}
-    /* @Test func blockCommentedOut() {} */
-  `;
+test("derivedPackageTesting rejects authored manifests without the derived axis", () => {
+  assert.throws(
+    () => derivedPackageTesting({ features: [{ package: "FeatureExample", testing: "gold" }] }),
+    /must contain the derived packageTesting array/,
+  );
+});
 
-  assert.equal(countTestDeclarations(source), 3);
+test("derivedPackageTesting rejects duplicate package evidence", () => {
+  const row = {
+    evidence: {
+      package: "FeatureExample",
+      counts: { xctest: 1, swiftTesting: 0 },
+      suitePaths: [],
+      wiredness: "orphan",
+      wiringEvidencePaths: [],
+      ratchets: [],
+      realSurface: { status: "none-detected", commands: [], recordedEvidencePaths: [] },
+    },
+    lock: {
+      package: "FeatureExample",
+      suiteRequired: false,
+      minimumTestCount: 0,
+      wirednessRequired: false,
+      requiredRatchets: [],
+    },
+    lockSatisfied: true,
+  };
+  assert.throws(() => derivedPackageTesting({ packageTesting: [row, row] }), /duplicates package/);
 });
 
 test("loggingGrade escalates on the strongest observability signal", () => {

@@ -7,7 +7,7 @@ import packagesData from "../../../data/packages.json";
 export const metadata: Metadata = {
   title: "Packages",
   description:
-    "Every Swift package in Local AI Cat — its owning module, test coverage, modular state, and dependency edges.",
+    "Every Swift package in Local AI Cat — its owning module, derived testing evidence and lock, modular state, and dependency edges.",
 };
 
 export default function PackagesPage() {
@@ -16,7 +16,7 @@ export default function PackagesPage() {
     <ContentPage
       kicker="Inside Local AI Cat"
       title="Packages"
-      intro="The flat engineering view beneath the modules grid: every Swift package, who owns it, how well it is tested on its own, and what it depends on (and what depends on it). There are more packages than modules because a single module can own several."
+      intro="The flat engineering view beneath the modules grid: every Swift package, who owns it, its repository-derived test evidence and deterministic lock, and what it depends on (and what depends on it). Test counts are evidence, not a quality grade."
       meta={`${rows.length} packages · Snapshot updated ${packagesData.updated ?? "—"}`}
     >
       <p className="docsSubnav">

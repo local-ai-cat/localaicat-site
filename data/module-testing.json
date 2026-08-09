@@ -516,7 +516,7 @@
         "StudioModeKit",
         "StudioSceneKit"
       ],
-      "cases": 41,
+      "cases": 44,
       "tier": "heavy",
       "logging": {
         "grade": "L0",

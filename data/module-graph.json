@@ -40,6 +40,7 @@
       "name": "ChallengeKit",
       "deps": [],
       "reverseDeps": [
+        "ExerciseKit",
         "SkipKit"
       ],
       "appStoreGates": [],
@@ -77,6 +78,7 @@
     {
       "name": "ExerciseKit",
       "deps": [
+        "ChallengeKit",
         "LocalAIContracts"
       ],
       "reverseDeps": [

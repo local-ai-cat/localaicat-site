@@ -676,7 +676,7 @@
       "permissions": [
         "No special permission"
       ],
-      "description": "macOS, Outdoor only (unsandboxed). FeatureQuitApps owns running-app classification, exclusion policy, app snapshotting, terminate/escalate policy, view model, window, and SwiftUI surface. The app shell only gates availability through FeatureFlags/Pro access and calls the package presenter.",
+      "description": "macOS, Outdoor only (unsandboxed). FeatureQuitApps owns running-app classification, exclusion policy, app snapshotting, terminate/escalate policy, view model, window, and SwiftUI surface. The app shell gates availability through FeatureManager and calls the package presenter.",
       "channels": [
         {
           "key": "alpha",
@@ -2046,7 +2046,7 @@
       "permissions": [
         "Camera"
       ],
-      "description": "The workout-gate concept, native: an ExerciseObserver emits phase observations, ExerciseKit's RepCounter/ExerciseChallenge count reps with hysteresis + anti-cheat (minimum rep duration, confidence gates, liveness). Current slice ships both a deterministic demo observer and a live AVCapture/Vision body-pose observer through ExerciseCameraRunner/VisionPoseExerciseObserver, so camera permission is required. Camera→VLM observer (CameraFrameSource + VLMDispatchKit) remains a later enhancement.",
+      "description": "The workout-gate concept, native: an ExerciseObserver emits phase observations, ExerciseKit's RepCounter/ExerciseChallenge count reps with hysteresis + anti-cheat (minimum rep duration, confidence gates, liveness). ExerciseKit ships the terminal UI plus deterministic demo and live AVCapture/Vision body-pose observers through its injected ExerciseUIContributionContext, so camera permission is required. Camera→VLM observer (CameraFrameSource + VLMDispatchKit) remains a later enhancement.",
       "channels": [
         {
           "key": "alpha",
@@ -2083,7 +2083,7 @@
           "note": "Surfaced through the Outdoor macOS Utilities hub with live camera and demo observers."
         }
       ],
-      "package": "ExerciseKit + ChallengeKit + app Utilities screen",
+      "package": "ExerciseKit + ChallengeKit",
       "ownedPackages": [
         "ChallengeKit",
         "ExerciseKit"

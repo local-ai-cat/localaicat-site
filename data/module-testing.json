@@ -326,7 +326,7 @@
         "ChallengeKit",
         "ExerciseKit"
       ],
-      "cases": 54,
+      "cases": 61,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -516,7 +516,7 @@
         "StudioModeKit",
         "StudioSceneKit"
       ],
-      "cases": 44,
+      "cases": 46,
       "tier": "heavy",
       "logging": {
         "grade": "L0",

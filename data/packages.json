@@ -305,6 +305,7 @@
       },
       "deps": [],
       "dependents": [
+        "ExerciseKit",
         "SkipKit"
       ],
       "appStoreGates": [],
@@ -318,9 +319,9 @@
       "modular": "yes",
       "testing": {
         "counts": {
-          "xctest": 35,
+          "xctest": 37,
           "swiftTesting": 0,
-          "total": 35
+          "total": 37
         },
         "tier": "heavy",
         "suitePaths": [
@@ -453,9 +454,9 @@
       "modular": "yes",
       "testing": {
         "counts": {
-          "xctest": 34,
+          "xctest": 41,
           "swiftTesting": 0,
-          "total": 34
+          "total": 41
         },
         "tier": "heavy",
         "suitePaths": [
@@ -501,6 +502,7 @@
         }
       },
       "deps": [
+        "ChallengeKit",
         "LocalAIContracts"
       ],
       "dependents": [
@@ -4023,9 +4025,9 @@
       "modular": "yes",
       "testing": {
         "counts": {
-          "xctest": 26,
+          "xctest": 28,
           "swiftTesting": 0,
-          "total": 26
+          "total": 28
         },
         "tier": "covered",
         "suitePaths": [

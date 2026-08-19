@@ -1,0 +1,148 @@
+.section {
+  margin-top: 3.5rem;
+}
+
+.sectionEyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 0.4rem;
+}
+
+.sectionTitle {
+  font-size: 1.35rem;
+  margin: 0 0 0.75rem;
+  text-wrap: balance;
+}
+
+.prose {
+  max-width: 46rem;
+  line-height: 1.65;
+  opacity: 0.88;
+}
+
+.prose p {
+  margin: 0 0 0.9rem;
+}
+
+.prose code {
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.diagram {
+  margin: 1.4rem 0 0.6rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.018);
+  overflow-x: auto;
+}
+
+.diagram :global(svg) {
+  max-width: 100%;
+}
+
+.caption {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  margin: 0.4rem 0 0;
+}
+
+.grades {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 0.4rem;
+}
+
+.grade {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-variant-numeric: tabular-nums;
+}
+
+.gradeCount {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.gradeGold {
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.gradeStrong {
+  border-color: rgba(120, 170, 255, 0.4);
+  background: rgba(120, 170, 255, 0.06);
+}
+
+.gradePartial {
+  border-color: rgba(255, 120, 120, 0.4);
+  background: rgba(255, 120, 120, 0.06);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin-top: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.table th {
+  text-align: left;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: top;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table td:first-child {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+
+.note {
+  margin-top: 1.4rem;
+  padding: 0.9rem 1.1rem;
+  border-left: 2px solid rgba(212, 175, 55, 0.6);
+  background: rgba(212, 175, 55, 0.05);
+  border-radius: 0 8px 8px 0;
+  max-width: 46rem;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.provenance {
+  margin-top: 3rem;
+  font-size: 0.78rem;
+  opacity: 0.45;
+  line-height: 1.6;
+}

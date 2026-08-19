@@ -28,6 +28,9 @@ export function middleware(req: NextRequest) {
 
   return new NextResponse("Authentication required.", {
     status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Local AI Cat — Internal"' },
+    // Header values must be Latin-1 (ByteString). A non-ASCII character here (this realm
+    // used an em dash) throws while constructing the response, turning every
+    // unauthenticated request into a 500 instead of a login prompt.
+    headers: { "WWW-Authenticate": 'Basic realm="Local AI Cat Internal"' },
   });
 }

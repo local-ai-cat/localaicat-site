@@ -1,0 +1,16 @@
+# Vercel uses THIS file instead of .gitignore when it exists. It mirrors .gitignore
+# with one deliberate exception: /app/shh/ is NOT excluded, so the private dossier
+# ships to production even though it is never committed to this public repo.
+.git
+.next
+node_modules
+.vercel
+.playwright-mcp
+.env
+.env.local
+.env.staging
+.env.vercel
+.env*.local
+pnpm-debug.log*
+/app/bigsecret/
+/public/bs-vendor/

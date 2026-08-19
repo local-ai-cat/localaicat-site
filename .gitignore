@@ -11,3 +11,8 @@ pnpm-debug.log*
 # Local-only hidden design page (never deploy)
 /app/bigsecret/
 /public/bs-vendor/
+
+# Private /shh dossier — deployed to prod via the Vercel CLI, but NEVER committed:
+# this repo is public, so committing it would defeat the password gate.
+# See .vercelignore, which deliberately does NOT exclude it.
+/app/shh/

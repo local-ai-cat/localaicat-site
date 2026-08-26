@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-07-17",
+  "updated": "2026-08-10",
   "packages": [
     {
       "name": "AppControlKit",
@@ -18,16 +18,59 @@
       "linkedInProject": true
     },
     {
-      "name": "AudioSession",
-      "owner": "Speech engine",
-      "ownerId": "speech-engine",
+      "name": "AudioPlaybackKit",
+      "owner": "Audio playback engine",
+      "ownerId": "audio-playback-engine",
       "ownerKind": "engine",
       "modular": null,
       "cases": 25,
       "tier": "covered",
       "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "AudioSession",
+      "owner": "Speech engine",
+      "ownerId": "speech-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 65,
+      "tier": "heavy",
+      "deps": [],
       "dependents": [
         "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "BatteryPowerControl",
+      "owner": "Battery Cat",
+      "ownerId": "battery-cat",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 12,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "BatteryStateKit",
+      "owner": "Battery Cat",
+      "ownerId": "battery-cat",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 21,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureBattery",
+        "FeatureScreenAwake",
+        "FeatureSystemStats"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -38,7 +81,7 @@
       "ownerId": "beta-telemetry",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 6,
+      "cases": 7,
       "tier": "thin",
       "deps": [
         "Telemetry"
@@ -57,10 +100,27 @@
       "tier": "covered",
       "deps": [],
       "dependents": [
+        "ExerciseKit",
         "SkipKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
+    },
+    {
+      "name": "CompositionKit",
+      "owner": "Composition engine",
+      "ownerId": "composition-engine",
+      "ownerKind": "engine",
+      "modular": null,
+      "cases": 27,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "StudioSceneKit",
+        "WorkbenchRouteKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
     },
     {
       "name": "DevLoopStreamKit",
@@ -68,7 +128,7 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 35,
+      "cases": 37,
       "tier": "heavy",
       "deps": [
         "FramePipelineKit",
@@ -104,18 +164,49 @@
       "linkedInProject": true
     },
     {
+      "name": "DownloadActivityKit",
+      "owner": "Unified Model Downloads & Live Activities",
+      "ownerId": "model-downloads",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 2,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "ExerciseKit",
       "owner": "Workout: Exercise (camera rep counter)",
       "ownerId": "workout-exercise",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 33,
+      "cases": 41,
       "tier": "heavy",
-      "deps": [],
+      "deps": [
+        "ChallengeKit",
+        "LocalAIContracts"
+      ],
       "dependents": [
         "RoutineKit",
         "VLMDispatchKit"
       ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureAnnouncements",
+      "owner": "In-App Actionable Announcements",
+      "ownerId": "in-app-announcements",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 13,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -125,12 +216,42 @@
       "ownerId": "auto-paste",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 7,
-      "tier": "thin",
-      "deps": [],
-      "dependents": [
-        "FeatureGlobalTranscription"
+      "cases": 23,
+      "tier": "covered",
+      "deps": [
+        "LocalAIContracts"
       ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureBattery",
+      "owner": "Battery Cat",
+      "ownerId": "battery-cat",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 31,
+      "tier": "heavy",
+      "deps": [
+        "BatteryStateKit"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureClipboardHistory",
+      "owner": "Clipboard History",
+      "ownerId": "clipboard-history",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 62,
+      "tier": "heavy",
+      "deps": [
+        "LocalAIContracts"
+      ],
+      "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -139,14 +260,15 @@
       "owner": "Compute / Model Link (discovery, remote cat, P2P, VNC + audio, SSH, Terminal3D)",
       "ownerId": "compute",
       "ownerKind": "feature",
-      "modular": "yes",
-      "cases": 27,
-      "tier": "covered",
+      "modular": "partial",
+      "cases": 37,
+      "tier": "heavy",
       "deps": [
         "LocalAIContracts"
       ],
       "dependents": [
-        "FeatureModelLink"
+        "FeatureModelLink",
+        "FeatureOpenClaw"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -157,7 +279,7 @@
       "ownerId": "content-safety-filter",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 14,
+      "cases": 18,
       "tier": "covered",
       "deps": [],
       "dependents": [],
@@ -195,31 +317,20 @@
       "linkedInProject": true
     },
     {
-      "name": "FeatureEvenG2",
-      "owner": "Even Realities / G2 display driver",
-      "ownerId": "even-realities",
-      "ownerKind": "feature",
-      "modular": "yes",
-      "cases": 0,
-      "tier": "none",
-      "deps": [],
-      "dependents": [],
-      "appStoreGates": [],
-      "linkedInProject": false
-    },
-    {
       "name": "FeatureEvenRealities",
       "owner": "Even Realities / G2 display driver",
       "ownerId": "even-realities",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 17,
-      "tier": "covered",
+      "cases": 57,
+      "tier": "heavy",
       "deps": [
         "FeatureTranslate",
         "LocalAIContracts",
         "LocalAIHTTPServer",
+        "LocalSpeechKit",
         "SpeechPipeline",
+        "Telemetry",
         "WearableGlassesKit"
       ],
       "dependents": [],
@@ -237,7 +348,7 @@
       "ownerId": "eye-care",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 31,
+      "cases": 39,
       "tier": "heavy",
       "deps": [
         "LocalAIContracts"
@@ -270,12 +381,13 @@
       "ownerId": "global-transcription",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 103,
+      "cases": 182,
       "tier": "heavy",
       "deps": [
-        "FeatureAutoPaste",
         "LocalAIContracts",
-        "LocalAITranscription"
+        "LocalAITranscription",
+        "MenuBarKit",
+        "Telemetry"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -287,14 +399,16 @@
       "ownerId": "keyboard-backlight",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 5,
-      "tier": "thin",
-      "deps": [],
+      "cases": 19,
+      "tier": "covered",
+      "deps": [
+        "Telemetry"
+      ],
       "dependents": [],
       "appStoreGates": [
         {
           "file": "Sources/FeatureKeyboardBacklight/KeyboardBacklightMenuContent.swift",
-          "line": 153
+          "line": 168
         }
       ],
       "linkedInProject": true
@@ -305,10 +419,13 @@
       "ownerId": "lyrics-player",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 20,
+      "cases": 22,
       "tier": "covered",
       "deps": [
-        "FeatureTranslateDomain"
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "LocalAIContracts",
+        "Telemetry"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -320,7 +437,7 @@
       "ownerId": "manifest",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 63,
+      "cases": 212,
       "tier": "heavy",
       "deps": [],
       "dependents": [],
@@ -333,8 +450,8 @@
       "ownerId": "mlxserve-sidecar",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 9,
-      "tier": "thin",
+      "cases": 32,
+      "tier": "heavy",
       "deps": [
         "LocalAIContracts"
       ],
@@ -348,8 +465,8 @@
       "ownerId": "model-link",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 7,
-      "tier": "thin",
+      "cases": 23,
+      "tier": "covered",
       "deps": [
         "FeatureCompute",
         "LocalAIContracts",
@@ -365,7 +482,7 @@
       "ownerId": "monitor-control",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 36,
+      "cases": 58,
       "tier": "heavy",
       "deps": [],
       "dependents": [],
@@ -387,12 +504,13 @@
       "ownerId": "omlx-sidecar",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 2,
+      "cases": 6,
       "tier": "thin",
       "deps": [
         "LocalAIContracts",
         "LocalAICore",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "Telemetry"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -407,6 +525,7 @@
       "cases": 6,
       "tier": "thin",
       "deps": [
+        "FeatureCompute",
         "GatewayFeatureSupport",
         "LocalAIContracts",
         "LocalAITextGeneration"
@@ -426,7 +545,7 @@
       "ownerId": "quick-capture",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 28,
+      "cases": 29,
       "tier": "covered",
       "deps": [
         "LocalAIContracts",
@@ -455,12 +574,15 @@
       "ownerId": "screen-awake",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 38,
+      "cases": 105,
       "tier": "heavy",
       "deps": [
+        "BatteryStateKit",
         "LocalAIContracts"
       ],
-      "dependents": [],
+      "dependents": [
+        "ScreenAwakeSleepLock"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -495,25 +617,47 @@
       "linkedInProject": true
     },
     {
+      "name": "FeatureSystemStats",
+      "owner": "System Stats menu bar strip",
+      "ownerId": "system-stats",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 108,
+      "tier": "heavy",
+      "deps": [
+        "BatteryStateKit",
+        "LocalAIContracts",
+        "LocalAIDesignSystem",
+        "SystemStatsKit",
+        "SystemStatsSMC"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "FeatureTranslate",
       "owner": "Translate",
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 6,
-      "tier": "thin",
+      "cases": 117,
+      "tier": "heavy",
       "deps": [
         "AppControlKit",
         "AudioSession",
+        "DownloadActivityKit",
         "FeatureTranslateDomain",
         "LocalAIContracts",
-        "LocalAIHTTPServer",
+        "LocalAIDesignSystem",
         "LocalAITextGeneration",
         "LocalSpeechKit",
-        "SpeechPipeline"
+        "SpeechPipeline",
+        "Telemetry"
       ],
       "dependents": [
-        "FeatureEvenRealities"
+        "FeatureEvenRealities",
+        "FeatureLyrics"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -524,12 +668,12 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 12,
-      "tier": "covered",
+      "cases": 129,
+      "tier": "heavy",
       "deps": [
         "LocalAIContracts",
-        "LocalAIHTTPServer",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "Telemetry"
       ],
       "dependents": [
         "FeatureLyrics",
@@ -554,15 +698,34 @@
       "linkedInProject": true
     },
     {
-      "name": "FeatureWindowManagement",
+      "name": "FeatureWindowManagementAX",
       "owner": "Window management of other apps",
       "ownerId": "window-mgmt-others",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 45,
-      "tier": "heavy",
-      "deps": [],
+      "cases": 23,
+      "tier": "covered",
+      "deps": [
+        "FeatureWindowManagementSelf"
+      ],
       "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "FeatureWindowManagementSelf",
+      "owner": "Window management (own windows)",
+      "ownerId": "window-mgmt-self",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 22,
+      "tier": "covered",
+      "deps": [
+        "Telemetry"
+      ],
+      "dependents": [
+        "FeatureWindowManagementAX"
+      ],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -645,15 +808,19 @@
       "ownerId": "core",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 24,
-      "tier": "covered",
+      "cases": 108,
+      "tier": "heavy",
       "deps": [],
       "dependents": [
+        "ExerciseKit",
+        "FeatureAutoPaste",
+        "FeatureClipboardHistory",
         "FeatureCompute",
         "FeatureEvenRealities",
         "FeatureEyeCare",
         "FeatureGGUF",
         "FeatureGlobalTranscription",
+        "FeatureLyrics",
         "FeatureMLXServeSidecar",
         "FeatureModelLink",
         "FeatureOMLXSidecar",
@@ -661,12 +828,18 @@
         "FeatureQuickCapture",
         "FeatureScreenAwake",
         "FeatureSubscription",
+        "FeatureSystemStats",
         "FeatureTranslate",
         "FeatureTranslateDomain",
         "GatewayFeatureSupport",
         "LocalAIHTTPServer",
         "LocalAITextGeneration",
-        "SnapCaptureKit"
+        "LocalAITranslation",
+        "LocalAITTS",
+        "RoutineKit",
+        "SentryKit",
+        "SnapCaptureKit",
+        "StudioAgentBridge"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -677,14 +850,33 @@
       "ownerId": "core",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 39,
+      "cases": 348,
       "tier": "heavy",
-      "deps": [],
+      "deps": [
+        "Telemetry"
+      ],
       "dependents": [
         "FeatureOMLXSidecar",
         "LocalAIHTTPServer",
         "LocalAIServing",
-        "LocalAITextGeneration"
+        "LocalAITextGeneration",
+        "LocalSpeechKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "LocalAIDesignSystem",
+      "owner": "Design system",
+      "ownerId": "design-system",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 2,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "FeatureSystemStats",
+        "FeatureTranslate"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -708,7 +900,7 @@
       "ownerId": "local-api",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 203,
+      "cases": 363,
       "tier": "heavy",
       "deps": [
         "LocalAIContracts",
@@ -720,11 +912,7 @@
       ],
       "dependents": [
         "FeatureEvenRealities",
-        "FeatureTranslate",
-        "FeatureTranslateDomain",
-        "LocalAITranslation",
-        "LocalAITTS",
-        "StudioAgentBridge",
+        "WorkbenchRouteContracts",
         "WorkbenchRouteKit"
       ],
       "appStoreGates": [],
@@ -753,9 +941,9 @@
       "owner": "Local LLM Chat",
       "ownerId": "chat-local-llm",
       "ownerKind": "feature",
-      "modular": "partial",
-      "cases": 28,
-      "tier": "covered",
+      "modular": "yes",
+      "cases": 42,
+      "tier": "heavy",
       "deps": [
         "LocalAIContracts",
         "LocalAICore"
@@ -780,13 +968,14 @@
       "ownerId": "transcription",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 56,
+      "cases": 118,
       "tier": "heavy",
       "deps": [],
       "dependents": [
         "FeatureGlobalTranscription",
         "FeatureWav2Vec2",
-        "LocalAIHTTPServer"
+        "LocalAIHTTPServer",
+        "LocalSpeechKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -797,10 +986,10 @@
       "ownerId": "translation-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 8,
-      "tier": "thin",
+      "cases": 12,
+      "tier": "covered",
       "deps": [
-        "LocalAIHTTPServer",
+        "LocalAIContracts",
         "LocalAITextGeneration",
         "SpeechPipeline",
         "Telemetry"
@@ -818,7 +1007,7 @@
       "cases": 3,
       "tier": "thin",
       "deps": [
-        "LocalAIHTTPServer"
+        "LocalAIContracts"
       ],
       "dependents": [],
       "appStoreGates": [],
@@ -830,13 +1019,32 @@
       "ownerId": "speech-engine",
       "ownerKind": "engine",
       "modular": null,
-      "cases": 41,
+      "cases": 106,
       "tier": "heavy",
       "deps": [
-        "SpeechPipeline"
+        "LocalAICore",
+        "LocalAITranscription",
+        "SpeechPipeline",
+        "Telemetry"
       ],
       "dependents": [
+        "FeatureEvenRealities",
         "FeatureTranslate"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "MenuBarKit",
+      "owner": "Menu bar kit",
+      "ownerId": "menu-bar-kit",
+      "ownerKind": "platform",
+      "modular": null,
+      "cases": 3,
+      "tier": "thin",
+      "deps": [],
+      "dependents": [
+        "FeatureGlobalTranscription"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -847,38 +1055,12 @@
       "ownerId": "migration-harness",
       "ownerKind": "harness",
       "modular": null,
-      "cases": 8,
-      "tier": "thin",
+      "cases": 17,
+      "tier": "covered",
       "deps": [],
       "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
-    },
-    {
-      "name": "MonitorControlDDC",
-      "owner": "MonitorControl DDC",
-      "ownerId": "monitor-ddc",
-      "ownerKind": "vendored",
-      "modular": null,
-      "cases": 0,
-      "tier": "none",
-      "deps": [],
-      "dependents": [],
-      "appStoreGates": [],
-      "linkedInProject": false
-    },
-    {
-      "name": "OpenClawKit",
-      "owner": "OpenClawKit",
-      "ownerId": "openclaw-kit",
-      "ownerKind": "vendored",
-      "modular": null,
-      "cases": 0,
-      "tier": "none",
-      "deps": [],
-      "dependents": [],
-      "appStoreGates": [],
-      "linkedInProject": false
     },
     {
       "name": "RoutineKit",
@@ -886,10 +1068,11 @@
       "ownerId": "routine-kit",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 68,
+      "cases": 70,
       "tier": "heavy",
       "deps": [
-        "ExerciseKit"
+        "ExerciseKit",
+        "LocalAIContracts"
       ],
       "dependents": [
         "LocalAIHTTPServer"
@@ -911,14 +1094,31 @@
       "linkedInProject": false
     },
     {
+      "name": "ScreenAwakeSleepLock",
+      "owner": "Screen Awake",
+      "ownerId": "screen-awake",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 34,
+      "tier": "heavy",
+      "deps": [
+        "FeatureScreenAwake"
+      ],
+      "dependents": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "SentryKit",
       "owner": "Sentry Mode (away-guard lock)",
       "ownerId": "sentry-mode",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 23,
+      "cases": 24,
       "tier": "covered",
-      "deps": [],
+      "deps": [
+        "LocalAIContracts"
+      ],
       "dependents": [],
       "appStoreGates": [],
       "linkedInProject": true
@@ -946,11 +1146,12 @@
       "ownerId": "snap-capture",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 23,
-      "tier": "covered",
+      "cases": 35,
+      "tier": "heavy",
       "deps": [
         "LocalAIContracts",
-        "SnapDeviceCaptureKit"
+        "SnapDeviceCaptureKit",
+        "Telemetry"
       ],
       "dependents": [
         "FeatureQuickCapture"
@@ -964,7 +1165,7 @@
       "ownerId": "snap-capture",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 3,
+      "cases": 8,
       "tier": "thin",
       "deps": [],
       "dependents": [
@@ -997,13 +1198,13 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 25,
+      "cases": 29,
       "tier": "covered",
       "deps": [
         "DevLoopStreamKit",
         "DevLoopUI",
         "FrameSourceKit",
-        "LocalAIHTTPServer",
+        "LocalAIContracts",
         "StudioSceneKit"
       ],
       "dependents": [],
@@ -1039,9 +1240,10 @@
       "ownerId": "studio-recording",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 10,
+      "cases": 20,
       "tier": "covered",
       "deps": [
+        "CompositionKit",
         "DevLoopStreamKit",
         "FrameSourceKit",
         "TranscriptSyncKit"
@@ -1071,17 +1273,61 @@
       "linkedInProject": false
     },
     {
+      "name": "SystemStatsKit",
+      "owner": "System Stats menu bar strip",
+      "ownerId": "system-stats",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 72,
+      "tier": "heavy",
+      "deps": [
+        "Telemetry"
+      ],
+      "dependents": [
+        "FeatureSystemStats"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "SystemStatsSMC",
+      "owner": "System Stats menu bar strip",
+      "ownerId": "system-stats",
+      "ownerKind": "feature",
+      "modular": "yes",
+      "cases": 13,
+      "tier": "covered",
+      "deps": [],
+      "dependents": [
+        "FeatureSystemStats"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
+    },
+    {
       "name": "Telemetry",
       "owner": "Telemetry facade",
       "ownerId": "telemetry",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 3,
+      "cases": 5,
       "tier": "thin",
       "deps": [],
       "dependents": [
         "BetaTelemetry",
-        "LocalAITranslation"
+        "FeatureEvenRealities",
+        "FeatureGlobalTranscription",
+        "FeatureKeyboardBacklight",
+        "FeatureLyrics",
+        "FeatureOMLXSidecar",
+        "FeatureTranslate",
+        "FeatureTranslateDomain",
+        "FeatureWindowManagementSelf",
+        "LocalAICore",
+        "LocalAITranslation",
+        "LocalSpeechKit",
+        "SnapCaptureKit",
+        "SystemStatsKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -1129,11 +1375,28 @@
       "ownerId": "even-realities",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 13,
+      "cases": 20,
       "tier": "covered",
       "deps": [],
       "dependents": [
         "FeatureEvenRealities"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "WorkbenchRouteContracts",
+      "owner": null,
+      "ownerId": null,
+      "ownerKind": "unowned",
+      "modular": null,
+      "cases": 3,
+      "tier": "thin",
+      "deps": [
+        "LocalAIHTTPServer"
+      ],
+      "dependents": [
+        "WorkbenchRouteKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -1144,14 +1407,16 @@
       "ownerId": null,
       "ownerKind": "unowned",
       "modular": null,
-      "cases": 7,
-      "tier": "thin",
+      "cases": 76,
+      "tier": "heavy",
       "deps": [
-        "LocalAIHTTPServer"
+        "CompositionKit",
+        "LocalAIHTTPServer",
+        "WorkbenchRouteContracts"
       ],
       "dependents": [],
       "appStoreGates": [],
-      "linkedInProject": true
+      "linkedInProject": false
     }
   ]
 }

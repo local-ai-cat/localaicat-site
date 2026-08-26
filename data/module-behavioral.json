@@ -1,12 +1,24 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-07-17",
+  "updated": "2026-08-10",
   "modules": [
     {
       "id": "chat-local-llm",
       "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false
+    },
+    {
+      "id": "model-downloads",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "in-app-announcements",
+      "status": "unit-only",
+      "hasSnapshot": false,
+      "neverDriven": true
     },
     {
       "id": "transcription",
@@ -28,9 +40,9 @@
     },
     {
       "id": "auto-paste",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "window-mgmt-others",
@@ -46,45 +58,57 @@
     },
     {
       "id": "quit-apps",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "screen-awake",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "battery-cat",
       "status": "unit-only",
       "hasSnapshot": false,
       "neverDriven": true
     },
     {
-      "id": "screen-awake",
+      "id": "system-stats",
       "status": "unit-only",
       "hasSnapshot": false,
       "neverDriven": true
     },
     {
       "id": "keyboard-backlight",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "desktop-curtain",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "eye-care",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "monitor-control",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "compute",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "openclaw",
@@ -100,7 +124,7 @@
     },
     {
       "id": "app-control",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false
     },
@@ -112,9 +136,9 @@
     },
     {
       "id": "mlxserve-sidecar",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "mlxserve-embed",
@@ -130,9 +154,9 @@
     },
     {
       "id": "dangerously-skip",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "lyrics-player",
@@ -148,7 +172,7 @@
     },
     {
       "id": "sentry-mode",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false
     },
@@ -160,21 +184,27 @@
     },
     {
       "id": "quick-capture",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
+    },
+    {
+      "id": "clipboard-history",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
     },
     {
       "id": "skip-healthkit-logging",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "content-safety-filter",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "subscription",
@@ -201,12 +231,6 @@
       "neverDriven": true
     },
     {
-      "id": "lmstudio-interop",
-      "status": "behavioral",
-      "hasSnapshot": false,
-      "neverDriven": false
-    },
-    {
       "id": "gguf-backend",
       "status": "behavioral",
       "hasSnapshot": false,
@@ -214,21 +238,21 @@
     },
     {
       "id": "omlx-sidecar",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     },
     {
       "id": "snap-capture",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false
     },
     {
       "id": "studio-recording",
-      "status": "unit-only",
+      "status": "behavioral",
       "hasSnapshot": false,
-      "neverDriven": true
+      "neverDriven": false
     }
   ]
 }

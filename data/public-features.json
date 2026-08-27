@@ -3225,21 +3225,19 @@
       "id": "gguf-backend",
       "name": "GGUF backend (llama.cpp sidecar)",
       "group": null,
-      "lane": "stable",
+      "lane": "alpha",
       "status": "beta",
       "accessTier": "free",
       "platforms": [
         "macOS"
       ],
       "tiers": [
-        "Alpha",
-        "Beta",
-        "Stable"
+        "Alpha"
       ],
       "permissions": [
         "No special permission"
       ],
-      "description": "macOS / Outdoor + Beta only. Sidecar-first (see docs/planning/done/gguf-backend-spike-notes.md): FeatureGGUF's LlamaServerSidecar actor locates a llama-server binary, spawns it on a free loopback port for the selected .gguf model, health-checks /health, detects crashes and restarts (bounded), and terminates gracefully. GGUFChatBackend proxies /v1/chat/completions SSE into LocalAITextGenerationEvents behind the SAME LocalAITextGenerating seam RemoteCatBackend uses, registered through ChatBackendRegistry with a `gguf:`-prefixed model contributor. GGUF-only LM Studio dirs are no longer rejected by ExternalModelSource — they carry format=.gguf and are served here instead of the MLX loader. Physically absent from App Store + iOS (package unlinked, FEATURE_GGUF undefined). Deferred: bundling llama-server (size + signing/notarization) and GGUF model-download UX.",
+      "description": "macOS ALPHA ONLY since 2026-08-26 (package 121) — it was Outdoor + Beta until then. Sidecar-first (see docs/planning/done/gguf-backend-spike-notes.md): FeatureGGUF's LlamaServerSidecar actor locates a llama-server binary, spawns it on a free loopback port for the selected .gguf model, health-checks /health, detects crashes and restarts (bounded), and terminates gracefully. GGUFChatBackend proxies /v1/chat/completions SSE into LocalAITextGenerationEvents behind the SAME LocalAITextGenerating seam RemoteCatBackend uses, registered through ChatBackendRegistry with a `gguf:`-prefixed model contributor. GGUF-only LM Studio dirs are no longer rejected by ExternalModelSource — they carry format=.gguf and are served here instead of the MLX loader. Physically absent from App Store + iOS (package unlinked, FEATURE_GGUF undefined). Deferred: bundling llama-server (size + signing/notarization) and GGUF model-download UX. Those two deferrals are WHY it is parked to alpha: with no bundled binary the ModelCatalogContributor still contributed every discovered .gguf file, so an Outdoor user with an LM Studio library could pick a model and only learn at send time that it needed `brew install llama.cpp`. `target` records the intended end-state (Outdoor + Beta); package 121 carries the bundling, the binary-gated contributor and the promotion gate.",
       "channels": [
         {
           "key": "alpha",
@@ -3251,13 +3249,13 @@
           "key": "beta",
           "label": "Beta",
           "iOS": "no",
-          "macOS": "yes"
+          "macOS": "no"
         },
         {
           "key": "outdoor",
           "label": "Direct Download",
           "iOS": "no",
-          "macOS": "yes"
+          "macOS": "no"
         },
         {
           "key": "main",
@@ -3273,7 +3271,15 @@
         },
         {
           "channel": "Direct Download",
-          "note": "Discovers .gguf files in the model cache + LM Studio library and serves a selected one via a locally-spawned llama-server (OpenAI-compatible loopback)."
+          "note": "PARKED 2026-08-26 (package 121, Phil): llama-server is not bundled, so the model contributor offered every discovered .gguf file and the failure — \"install it (brew install llama.cpp)\" — only surfaced at send time. Removed from this channel until the binary ships with the app."
+        },
+        {
+          "channel": "Beta",
+          "note": "PARKED 2026-08-26 (package 121, Phil) for the same reason as Outdoor — a prerelease tester has no more Homebrew than a stable one."
+        },
+        {
+          "channel": "Alpha",
+          "note": "Discovers .gguf files in the model cache + LM Studio library and serves a selected one via a locally-spawned llama-server (OpenAI-compatible loopback). Still requires a llama-server on PATH or LOCALAI_LLAMA_SERVER_PATH — acceptable on the alpha, which is a developer surface."
         }
       ],
       "package": "FeatureGGUF + app composition-root wiring",

@@ -179,7 +179,7 @@
         "FeatureSystemStats",
         "SystemStatsKit"
       ],
-      "cases": 180,
+      "cases": 186,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -374,7 +374,7 @@
         "FeatureLyrics",
         "FeatureTranslateDomain"
       ],
-      "cases": 151,
+      "cases": 157,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -516,7 +516,7 @@
         "FeatureTranslateDomain",
         "LocalSpeechKit"
       ],
-      "cases": 352,
+      "cases": 359,
       "tier": "heavy",
       "logging": {
         "grade": "L0",

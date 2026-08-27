@@ -622,7 +622,7 @@
       "ownerId": "system-stats",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 108,
+      "cases": 114,
       "tier": "heavy",
       "deps": [
         "BatteryStateKit",
@@ -641,7 +641,7 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 117,
+      "cases": 118,
       "tier": "heavy",
       "deps": [
         "AppControlKit",
@@ -668,7 +668,7 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 129,
+      "cases": 135,
       "tier": "heavy",
       "deps": [
         "LocalAIContracts",

@@ -10,6 +10,9 @@ const scriptSrc = [
   "script-src 'self' 'unsafe-inline'",
   isDev ? "'unsafe-eval'" : "",
   "https://app.chatwoot.com",
+  // Vercel Speed Insights loads its collector from va.vercel-scripts.com;
+  // without this entry the CSP silently blocks all analytics.
+  "https://va.vercel-scripts.com",
 ]
   .filter(Boolean)
   .join(" ");

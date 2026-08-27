@@ -35,13 +35,14 @@ export default function DirectDownloadPage() {
         <section className="contentCard contentCardTight">
           <h2>Download</h2>
           <p>
-            Outdoor Cat is the direct-download Mac build. It uses web billing and
-            includes the full macOS desktop feature set.
+            Outdoor Cat is the direct-download Mac build — the one we recommend.
+            No sandbox means the complete desktop feature set, including tools
+            the App Store build can&apos;t offer. Signed and notarized by Apple.
           </p>
           <div className="routeActions">
             {downloadUrl ? (
               <a className="planButton" href={downloadUrl}>
-                Download for Mac
+                Download the DMG
               </a>
             ) : (
               <span className="secondaryButton secondaryButtonStatic">
@@ -54,15 +55,31 @@ export default function DirectDownloadPage() {
           </div>
 
           {scriptCmd && (
-            <pre className="commandBlock">
-              <code>{scriptCmd}</code>
-            </pre>
+            <>
+              <p className="downloadOptionLabel">Or install from the terminal:</p>
+              <pre className="commandBlock">
+                <code>{scriptCmd}</code>
+              </pre>
+              <div className="braveVideoFrame">
+                <video
+                  aria-label="Terminal recording of the one-line Local AI Cat install"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  src="/assets/install-demo.mp4"
+                />
+              </div>
+            </>
           )}
 
           {homebrewCmd && (
-            <pre className="commandBlock">
-              <code>{homebrewCmd}</code>
-            </pre>
+            <>
+              <p className="downloadOptionLabel">Or with Homebrew:</p>
+              <pre className="commandBlock">
+                <code>{homebrewCmd}</code>
+              </pre>
+            </>
           )}
 
           {(version || filename || sha256) && (

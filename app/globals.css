@@ -4424,3 +4424,304 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .moduleChip[data-kind="gate"]    { color: color-mix(in srgb, #d19a5b 66%, var(--text)); border-color: color-mix(in srgb, #d19a5b 30%, transparent); }
 .moduleChip[data-kind="package"] { color: var(--text-dim); }
 .moduleChip[data-kind="muted"]   { color: var(--text-faint); border-color: var(--line); }
+
+/* ─── Home landing refresh (download-first) ─── */
+
+.heroModeFade {
+  animation: heroModeFadeIn 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes heroModeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.heroCtaRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.dualCardBadge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.planButtonQuiet {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+
+/* "For the brave" command block */
+
+.braveBlock {
+  max-width: 640px;
+  margin: 40px auto 0;
+  text-align: center;
+}
+
+.braveTitle {
+  margin: 0 0 6px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.braveIntro {
+  margin: 0 0 18px;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.braveCommand + .braveCommand {
+  margin-top: 14px;
+}
+
+.braveCommandLabel {
+  margin: 0 0 6px;
+  text-align: left;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.braveCommandRow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.braveCommandBlock {
+  flex: 1;
+  margin: 0;
+  text-align: left;
+  overflow-x: auto;
+}
+
+.copyButton {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 76px;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+.copyButton:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Homepage pricing */
+
+.homePlanGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  max-width: 960px;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.homePlanCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 26px 22px;
+  background: var(--bg);
+  text-align: left;
+}
+
+.homePlanPrice {
+  margin: 0;
+  color: var(--text);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.homePlanCadence {
+  margin-left: 4px;
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.pricingActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.bizBand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 960px;
+  margin: 44px auto 0;
+  padding: 20px 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: left;
+}
+
+.bizBandText {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 520px;
+}
+
+.bizBandText strong {
+  color: var(--text);
+}
+
+.bizBandActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Homepage feature grid */
+
+.featureGridHome {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  max-width: 1080px;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.featureCellHome {
+  padding: 22px 20px;
+  background: var(--bg);
+  text-align: left;
+}
+
+.featureCellHome h3 {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.featureCellHome p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.featureBadgeOutdoor {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 1120px) {
+  .featureGridHome {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .homePlanGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bizBand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .featureGridHome {
+    grid-template-columns: 1fr;
+  }
+
+  .homePlanGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .braveCommandRow {
+    flex-direction: column;
+  }
+
+  .copyButton {
+    min-height: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroModeFade {
+    animation: none;
+  }
+}
+
+.downloadOptionLabel {
+  margin: 18px 0 8px;
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.braveVideoFrame {
+  margin: 0 0 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #090909;
+}
+
+.braveVideoFrame video {
+  display: block;
+  width: 100%;
+  height: auto;
+}

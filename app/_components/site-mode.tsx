@@ -11,7 +11,7 @@ type SiteModeProps = {
 
 export function SiteMode({ force }: SiteModeProps) {
   useEffect(() => {
-    const mode = force || localStorage.getItem(STORAGE_KEY) || "business";
+    const mode = force || localStorage.getItem(STORAGE_KEY) || "personal";
     document.body.dataset.homeMode = mode;
 
     return () => {

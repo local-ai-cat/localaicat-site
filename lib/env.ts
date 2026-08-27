@@ -73,9 +73,11 @@ export function getHomebrewInstallCommand() {
     return null;
   }
 
+  // Single line: the commandBlock styling collapses newlines, and a one-liner
+  // is what people paste into a terminal anyway.
   const tap = getHomebrewTap();
   return tap
-    ? `brew tap ${tap}\nbrew install --cask ${cask}`
+    ? `brew tap ${tap} && brew install --cask ${cask}`
     : `brew install --cask ${cask}`;
 }
 

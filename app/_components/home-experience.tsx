@@ -3,7 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DragToggle } from "./drag-toggle";
+import {
+  getAppStoreUrl,
+  getDirectDownloadUrl,
+  getDirectDownloadVersion,
+  getDirectInstallScriptCommand,
+  getHomebrewInstallCommand
+} from "../../lib/env";
+import { directPlans } from "../../lib/catalog";
 import { persistSiteMode } from "./site-mode";
 
 type Mode = "personal" | "business";
@@ -13,19 +20,97 @@ function getInitialMode(): Mode {
     const stored = localStorage.getItem("site-mode");
     if (stored === "personal" || stored === "business") return stored;
   }
-  return "business";
+  return "personal";
+}
+
+const marqueeFeatures = [
+  {
+    name: "Local AI chat",
+    blurb: "Chat with open models running on your Mac's own silicon. Nothing leaves the device.",
+    outdoorOnly: false
+  },
+  {
+    name: "Transcription",
+    blurb: "Fast, private speech-to-text. Record or import audio; everything is processed locally.",
+    outdoorOnly: false
+  },
+  {
+    name: "Menu-bar transcription",
+    blurb: "A global hotkey that transcribes into any app, from the menu bar.",
+    outdoorOnly: true
+  },
+  {
+    name: "Translate",
+    blurb: "On-device translation, including live two-way conversation mode.",
+    outdoorOnly: false
+  },
+  {
+    name: "Window management",
+    blurb: "Snap and arrange windows across every app on your Mac.",
+    outdoorOnly: true
+  },
+  {
+    name: "Monitor control",
+    blurb: "Brightness and volume for external displays, right from the menu bar.",
+    outdoorOnly: true
+  },
+  {
+    name: "Screen Awake & Eye Care",
+    blurb: "Keep the screen awake when it matters and rest your eyes when it doesn't.",
+    outdoorOnly: false
+  },
+  {
+    name: "Local API",
+    blurb: "An OpenAI-compatible endpoint on localhost, so your tools and agents can use your local models.",
+    outdoorOnly: true
+  }
+] as const;
+
+function CopyCommand({ command, label }: { command: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = useCallback(() => {
+    navigator.clipboard
+      .writeText(command)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      })
+      .catch(() => {
+        /* clipboard unavailable — leave the text selectable */
+      });
+  }, [command]);
+
+  return (
+    <div className="braveCommand">
+      <p className="braveCommandLabel">{label}</p>
+      <div className="commandBlockWrap braveCommandRow">
+        <pre className="commandBlock braveCommandBlock">
+          <code>{command}</code>
+        </pre>
+        <button className="copyButton" onClick={copy} type="button">
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function HomeExperience() {
   const [mode, setMode] = useState<Mode>(getInitialMode);
-  const [businessPath, setBusinessPath] = useState<"team" | "enterprise">("team");
-  const [detailsVisible, setDetailsVisible] = useState(false);
   const detailsRef = useRef<HTMLElement | null>(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
   const switchRef = useRef<HTMLDivElement | null>(null);
   const sliderRef = useRef<HTMLSpanElement | null>(null);
   const personalImgRef = useRef<HTMLImageElement | null>(null);
   const businessImgRef = useRef<HTMLImageElement | null>(null);
   const dragState = useRef<{ startX: number; startMode: Mode; dragging: boolean } | null>(null);
+
+  const downloadUrl = getDirectDownloadUrl();
+  const version = getDirectDownloadVersion();
+  const appStoreUrl = getAppStoreUrl();
+  const scriptCmd = downloadUrl ? getDirectInstallScriptCommand() : null;
+  const homebrewCmd = getHomebrewInstallCommand();
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -217,8 +302,10 @@ export function HomeExperience() {
           </div>
 
           <div className="heroHeadline">
-            <h1>{mode === "personal" ? "Private AI.\nYour device." : "Serious local AI\nfor teams."}</h1>
-            <p className="heroTagline">
+            <h1 className="heroModeFade" key={`h1-${mode}`}>
+              {mode === "personal" ? "Private AI.\nYour device." : "Serious local AI\nfor teams."}
+            </h1>
+            <p className="heroTagline heroModeFade" key={`tag-${mode}`}>
               {mode === "personal"
                 ? "On-device chat, transcription, and models. No cloud. No tracking. Just you and your cat."
                 : "Secure AI, transcription, window management and wellness."}
@@ -226,6 +313,11 @@ export function HomeExperience() {
           </div>
 
           <div className="heroControlStack heroControlStackCentered">
+            <div className="heroCtaRow">
+              <a className="planButton" href="#download">Download for Mac</a>
+              <a className="secondaryButton" href="#pricing">See pricing</a>
+            </div>
+
             <div
               aria-label="Audience mode"
               className="modeSwitch"
@@ -244,7 +336,7 @@ export function HomeExperience() {
               <button
                 aria-selected={mode === "personal"}
                 className={mode === "personal" ? "isActive" : undefined}
-                onClick={() => setMode(mode === "personal" ? "business" : "personal")}
+                onClick={() => setMode("personal")}
                 role="tab"
                 type="button"
               >
@@ -253,7 +345,7 @@ export function HomeExperience() {
               <button
                 aria-selected={mode === "business"}
                 className={mode === "business" ? "isActive" : undefined}
-                onClick={() => setMode(mode === "business" ? "personal" : "business")}
+                onClick={() => setMode("business")}
                 role="tab"
                 type="button"
               >
@@ -274,112 +366,169 @@ export function HomeExperience() {
         </div>
       </section>
 
-      {/* ── Paths section ── */}
+      {/* ── Download ── */}
       <section
         className={`detailBand detailBandMinimal sectionReveal ${detailsVisible ? "isVisible" : ""}`}
-        id="download-paths"
+        id="download"
         ref={detailsRef}
       >
         <div className="sectionHeading sectionHeadingCentered">
-          <p className="sectionEyebrow">
-            {mode === "personal" ? "Choose your path" : "Two lanes"}
+          <p className="sectionEyebrow">Get the app</p>
+          <h2>Free to start.</h2>
+          <p className="detailIntro">
+            Two ways to run Local AI Cat on your Mac. We recommend{" "}
+            <strong>Outdoor Cat</strong> — the direct download with the complete
+            desktop feature set.
           </p>
-          <h2>{mode === "personal" ? "Free to start." : "Team or Enterprise."}</h2>
         </div>
 
-        {mode === "personal" ? (
-          <div className="dualCards sectionChildReveal">
-            {/* ─── Indoor Cat / App Store ─── */}
-            <article className="dualCard">
-              <p className="dualCardEyebrow">Indoor Cat</p>
-              <p className="dualCardDescriptor">Within the App Store</p>
-              <h3>App Store for iPhone, iPad &amp; Mac.</h3>
-              <p className="dualCardBody">
-                Apple billing and the simplest install path. On Mac, sandboxing limits some desktop features.
-              </p>
-              <ul className="dualCardList">
-                <li>iPhone, iPad &amp; Mac</li>
-                <li>Apple billing &amp; restore flow</li>
-                <li>On-device chat, transcription &amp; models</li>
-                <li>Automatic App Store updates</li>
-              </ul>
-              <div className="dualCardActions">
-                <Link className="planButton" href="/download/app-store">App Store</Link>
-                <Link className="secondaryButton" href="/pricing/app-store">Pricing</Link>
-              </div>
-            </article>
-
-            {/* ─── Outdoor Cat / direct download ─── */}
-            <article className="dualCard dualCardStrong">
-              <p className="dualCardEyebrow">Outdoor Cat</p>
-              <p className="dualCardDescriptor">External install for Mac</p>
-              <h3>Direct download for Mac.</h3>
-              <p className="dualCardBody">
-                Downloaded straight from the web, with no sandbox — the complete macOS feature set, including desktop tools the App Store build can&apos;t offer.
-              </p>
-              <ul className="dualCardList">
-                <li>Everything in Indoor Cat, plus:</li>
-                <li>Global menu-bar transcription</li>
-                <li>Window management across apps</li>
-                <li>System-wide hotkeys &amp; shortcuts</li>
-                <li>Keyboard cleaning mode</li>
-                <li>Web billing &amp; portable license keys</li>
-              </ul>
-              <div className="dualCardActions">
-                <Link className="planButton" href="/download/direct">Download</Link>
-                <Link className="secondaryButton" href="/pricing/direct">Pricing</Link>
-              </div>
-            </article>
-          </div>
-        ) : (
-          <div className="toggleCardSection sectionChildReveal">
-            <DragToggle
-              labels={["Team", "Enterprise"]}
-              onChange={setBusinessPath}
-              options={["team", "enterprise"] as const}
-              size="compact"
-              value={businessPath}
-            />
-            <div className="toggleCardPanel">
-              {businessPath === "team" ? (
-                <article className="toggleCard" key="team">
-                  <p className="dualCardEyebrow">Team</p>
-                  <h3>Self-serve rollout.</h3>
-                  <p className="dualCardPrice">from £40/seat/year</p>
-                  <p className="dualCardBody">Seat-based access for small teams that want the full Mac feature set and more granular security controls.</p>
-                  <ul className="dualCardList">
-                    <li>Minimum 2 seats</li>
-                    <li>Direct app rollout</li>
-                    <li>Can stay fully local without iCloud</li>
-                    <li>Self-serve billing</li>
-                    <li>Standard support</li>
-                  </ul>
-                  <div className="dualCardActions">
-                    <Link className="planButton" href="/team">Get started</Link>
-                    <Link className="secondaryButton" href="/pricing/direct">View pricing</Link>
-                  </div>
-                </article>
+        <div className="dualCards sectionChildReveal">
+          {/* ─── Outdoor Cat / direct download — recommended ─── */}
+          <article className="dualCard dualCardStrong">
+            <p className="dualCardEyebrow">
+              Outdoor Cat <span className="dualCardBadge">Recommended</span>
+            </p>
+            <p className="dualCardDescriptor">Direct download for Mac</p>
+            <h3>The full feature set.</h3>
+            <p className="dualCardBody">
+              Downloaded straight from the web, with no sandbox — every desktop
+              feature, including the ones the App Store build can&apos;t offer.
+            </p>
+            <ul className="dualCardList">
+              <li>Everything in Indoor Cat, plus:</li>
+              <li>Global menu-bar transcription</li>
+              <li>Window management across apps</li>
+              <li>System-wide hotkeys &amp; shortcuts</li>
+              <li>Web billing &amp; portable license keys</li>
+            </ul>
+            <div className="dualCardActions">
+              {downloadUrl ? (
+                <a className="planButton" href={downloadUrl}>
+                  Download for Mac{version ? ` · ${version}` : ""}
+                </a>
               ) : (
-                <article className="toggleCard" key="enterprise">
-                  <p className="dualCardEyebrow">Enterprise</p>
-                  <h3>Sales-led path.</h3>
-                  <p className="dualCardPrice">custom</p>
-                  <p className="dualCardBody">Deployment, invoicing, packaging, rollout support, and more granular security controls.</p>
-                  <ul className="dualCardList">
-                    <li>Custom seat count</li>
-                    <li>Fully local-only rollout options</li>
-                    <li>Managed rollout &amp; packaging</li>
-                    <li>Procurement &amp; invoicing</li>
-                    <li>Custom onboarding</li>
-                  </ul>
-                  <div className="dualCardActions">
-                    <Link className="planButton" href="/contact">Contact sales</Link>
-                  </div>
-                </article>
+                <Link className="planButton" href="/download/direct">Download</Link>
               )}
+              <Link className="secondaryButton" href="/download/direct">All install options</Link>
             </div>
+          </article>
+
+          {/* ─── Indoor Cat / App Store ─── */}
+          <article className="dualCard">
+            <p className="dualCardEyebrow">Indoor Cat</p>
+            <p className="dualCardDescriptor">App Store for iPhone, iPad &amp; Mac</p>
+            <h3>The easy path.</h3>
+            <p className="dualCardBody">
+              Apple billing and the simplest install. On Mac, sandboxing limits
+              some desktop features — on iPhone and iPad it&apos;s the only cat in town.
+            </p>
+            <ul className="dualCardList">
+              <li>iPhone, iPad &amp; Mac</li>
+              <li>Apple billing &amp; restore flow</li>
+              <li>On-device chat, transcription &amp; models</li>
+              <li>Automatic App Store updates</li>
+            </ul>
+            <div className="dualCardActions">
+              <a className="planButton planButtonQuiet" href={appStoreUrl}>App Store</a>
+            </div>
+          </article>
+        </div>
+
+        {(scriptCmd || homebrewCmd) && (
+          <div className="braveBlock sectionChildReveal">
+            <p className="braveTitle">For the brave</p>
+            <p className="braveIntro">
+              One line in the terminal — downloads, verifies, and installs the
+              latest Outdoor Cat.
+            </p>
+            <div className="braveVideoFrame">
+              <video
+                aria-label="Terminal recording of the one-line Local AI Cat install"
+                autoPlay
+                loop
+                muted
+                playsInline
+                src="/assets/install-demo.mp4"
+              />
+            </div>
+            {scriptCmd && <CopyCommand command={scriptCmd} label="Install script" />}
+            {homebrewCmd && <CopyCommand command={homebrewCmd} label="Homebrew" />}
           </div>
         )}
+      </section>
+
+      {/* ── Pricing ── */}
+      <section className="detailBand" id="pricing">
+        <div className="sectionHeading sectionHeadingCentered">
+          <p className="sectionEyebrow">Pricing</p>
+          <h2>Free core. Fair upgrades.</h2>
+          <p className="detailIntro">
+            The app is free — chat, transcription, and models included, no account
+            required. Pro and Developer Mode unlock the extras.
+          </p>
+        </div>
+
+        <div className="homePlanGrid">
+          <article className="homePlanCard">
+            <p className="dualCardEyebrow">Free</p>
+            <p className="homePlanPrice">£0</p>
+            <p className="dualCardBody">The full local core, forever. No account, no trial clock.</p>
+          </article>
+          {directPlans.map((plan) => (
+            <article className="homePlanCard" key={plan.name}>
+              <p className="dualCardEyebrow">{plan.name}</p>
+              <p className="homePlanPrice">
+                {plan.price}
+                <span className="homePlanCadence">{plan.cadence}</span>
+              </p>
+              <p className="dualCardBody">{plan.note}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="pricingActions">
+          <Link className="planButton" href="/pricing/direct">Full pricing</Link>
+          <Link className="secondaryButton" href="/pricing/app-store">App Store pricing</Link>
+        </div>
+
+        <div className="bizBand">
+          <p className="bizBandText">
+            <strong>Teams &amp; enterprise</strong> — seat-based rollout from
+            £40/seat/year, or a sales-led path with invoicing and managed rollout.
+          </p>
+          <div className="bizBandActions">
+            <Link className="secondaryButton" href="/team">Team checkout</Link>
+            <Link className="secondaryButton" href="/contact">Contact sales</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Feature set ── */}
+      <section className="detailBand" id="features">
+        <div className="sectionHeading sectionHeadingCentered">
+          <p className="sectionEyebrow">What&apos;s inside</p>
+          <h2>One cat, many tricks.</h2>
+          <p className="detailIntro">
+            Everything runs on your device. Features marked Outdoor need the
+            direct-download build.
+          </p>
+        </div>
+
+        <div className="featureGridHome">
+          {marqueeFeatures.map((feature) => (
+            <article className="featureCellHome" key={feature.name}>
+              <h3>
+                {feature.name}
+                {feature.outdoorOnly && <span className="featureBadgeOutdoor">Outdoor</span>}
+              </h3>
+              <p>{feature.blurb}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="pricingActions">
+          <Link className="secondaryButton" href="/outdoor">See the full Outdoor feature set</Link>
+        </div>
       </section>
     </div>
   );

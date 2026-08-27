@@ -56,7 +56,7 @@ MOUNT_POINT=""
 
 print_banner
 echo "==> Downloading..."
-/usr/bin/curl -fL "$DOWNLOAD_URL" -o "$DMG_PATH"
+/usr/bin/curl -fL --progress-bar "$DOWNLOAD_URL" -o "$DMG_PATH"
 
 echo "==> Mounting... *paws at disk*"
 HDIUTIL_OUT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly)

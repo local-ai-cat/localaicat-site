@@ -26,45 +26,74 @@ function getInitialMode(): Mode {
 const marqueeFeatures = [
   {
     name: "Local AI chat",
+    icon: "chat",
     blurb: "Chat with open models running on your Mac's own silicon. Nothing leaves the device.",
     outdoorOnly: false
   },
   {
     name: "Transcription",
+    icon: "mic",
     blurb: "Fast, private speech-to-text. Record or import audio; everything is processed locally.",
     outdoorOnly: false
   },
   {
     name: "Menu-bar transcription",
+    icon: "menubar",
     blurb: "A global hotkey that transcribes into any app, from the menu bar.",
     outdoorOnly: true
   },
   {
     name: "Translate",
+    icon: "translate",
     blurb: "On-device translation, including live two-way conversation mode.",
     outdoorOnly: false
   },
   {
     name: "Window management",
+    icon: "windows",
     blurb: "Snap and arrange windows across every app on your Mac.",
     outdoorOnly: true
   },
   {
     name: "Monitor control",
+    icon: "monitor",
     blurb: "Brightness and volume for external displays, right from the menu bar.",
     outdoorOnly: true
   },
   {
     name: "Screen Awake & Eye Care",
+    icon: "eye",
     blurb: "Keep the screen awake when it matters and rest your eyes when it doesn't.",
     outdoorOnly: false
   },
   {
     name: "Local API",
+    icon: "terminal",
     blurb: "An OpenAI-compatible endpoint on localhost, so your tools and agents can use your local models.",
     outdoorOnly: true
   }
 ] as const;
+
+const featureIconPaths: Record<string, string> = {
+  chat: "M4 5.5h16v10.5H9.5L5 20v-4H4z",
+  mic: "M9 4a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0zM6 11a6 6 0 0 0 12 0M12 17v3.5",
+  menubar: "M3 4.5h18v15H3zM3 8.5h18M16.8 6.5h.01",
+  translate: "M3.5 5.5h9M8 5.5c-.3 4-2 6.8-4.5 8.7M6 8c1.6 3 3.9 5 6.5 6.2M13.5 19l3.6-9 3.4 9M14.9 16h4.4",
+  windows: "M4 4h10v10H4zM10 10h10v10H10z",
+  monitor: "M3 5h18v12H3zM12 17v3M8.5 20h7",
+  eye: "M2.5 12S6.4 6 12 6s9.5 6 9.5 6-3.9 6-9.5 6-9.5-6-9.5-6zM14.5 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z",
+  terminal: "M5.5 8.5l4 3.5-4 3.5M12.5 15.5h6"
+};
+
+function FeatureIcon({ kind }: { kind: string }) {
+  return (
+    <span aria-hidden="true" className="featureIcon">
+      <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" viewBox="0 0 24 24" width="20">
+        <path d={featureIconPaths[kind] ?? featureIconPaths.chat} />
+      </svg>
+    </span>
+  );
+}
 
 function CopyCommand({ command, label }: { command: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -92,8 +121,24 @@ function CopyCommand({ command, label }: { command: string; label: string }) {
   );
 }
 
+function AppStoreBadge({ href }: { href: string }) {
+  return (
+    <a aria-label="Download on the App Store" className="appStoreBadge" href={href}>
+      <svg aria-hidden="true" fill="currentColor" height="26" viewBox="0 0 384 512" width="20">
+        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+      </svg>
+      <span className="appStoreBadgeText">
+        <small>Download on the</small>
+        App Store
+      </span>
+    </a>
+  );
+}
+
 export function HomeExperience() {
   const [mode, setMode] = useState<Mode>(getInitialMode);
+  const [heroSwitchVisible, setHeroSwitchVisible] = useState(true);
+  const [chipLift, setChipLift] = useState(0);
   const switchRef = useRef<HTMLDivElement | null>(null);
   const sliderRef = useRef<HTMLSpanElement | null>(null);
   const personalImgRef = useRef<HTMLImageElement | null>(null);
@@ -220,6 +265,41 @@ export function HomeExperience() {
   }, []);
 
   useEffect(() => {
+    const node = switchRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => setHeroSwitchVisible(entry.isIntersecting));
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (heroSwitchVisible) return;
+
+    // The cookie-consent banner is a fixed full-width dialog at the bottom;
+    // float the chip above it while it's on screen.
+    const update = () => {
+      const banner = document.getElementById("cookie-consent-banner");
+      setChipLift(banner ? banner.getBoundingClientRect().height + 12 : 0);
+    };
+    update();
+
+    const observer = new MutationObserver(update);
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [heroSwitchVisible]);
+
+  useEffect(() => {
     persistSiteMode(mode);
     const stem = mode === "business" ? "cat-business-favicon" : "cat-personal-favicon";
     const targets: Array<[string, string]> = [
@@ -328,60 +408,53 @@ export function HomeExperience() {
 
       {/* ── Download: both cats, immediately ── */}
       <section className="downloadBand heroEnter heroEnter4" id="download">
-        <div className="pathCards">
-          <article className="pathCard pathCardOutdoor">
-            <div className="pathCardTop">
-              <p className="pathCardEyebrow">
-                Outdoor Cat <span className="dualCardBadge">Recommended</span>
-              </p>
-              <h2>The full feature set.</h2>
-              <p className="pathCardBody">
-                Downloaded straight from the web, with no sandbox — every desktop
-                feature, including the ones the App Store build can&apos;t offer.
-              </p>
-              <ul className="pathCardList">
-                <li>Everything in Indoor Cat, plus:</li>
-                <li>Global menu-bar transcription</li>
-                <li>Window management across apps</li>
-                <li>System-wide hotkeys &amp; shortcuts</li>
-                <li>Web billing &amp; portable license keys</li>
-              </ul>
+        {mode === "business" && (
+          <div className="bizBand bizBandCompact heroModeFade" key="biz-note">
+            <p className="bizBandText">
+              <strong>For teams &amp; enterprise</strong> — seat-based pricing,
+              granular security controls, and compile-time feature stripping for
+              custom builds.
+            </p>
+            <div className="bizBandActions">
+              <Link className="secondaryButton" href="/team">Team pricing</Link>
+              <Link className="secondaryButton" href="/contact">Talk to us</Link>
             </div>
+          </div>
+        )}
+        <div className="pathCards pathCardsSlim">
+          <article className="pathCard pathCardSlim pathCardOutdoor">
+            <p className="pathCardEyebrow">
+              Outdoor Cat <span className="dualCardBadge">Recommended</span>
+            </p>
+            <h2>Direct download for Mac.</h2>
+            <p className="pathCardBody">
+              No sandbox — the complete desktop feature set.
+            </p>
             <div className="pathCardActions">
               <a className="planButton planButtonAccent" href={downloadUrl}>
                 Download for Mac
               </a>
               <p className="pathCardMeta">
-                {version ? `Version ${version} · ` : ""}Free to start · Signed &amp;
+                {version ? `Version ${version} · ` : ""}Free · Signed &amp;
                 notarized by Apple
               </p>
             </div>
           </article>
 
-          <article className="pathCard">
-            <div className="pathCardTop">
-              <p className="pathCardEyebrow">Indoor Cat</p>
-              <h2>The easy path.</h2>
-              <p className="pathCardBody">
-                Apple billing and the simplest install. On Mac, sandboxing limits
-                some desktop features — on iPhone and iPad it&apos;s the only cat in
-                town.
-              </p>
-              <ul className="pathCardList">
-                <li>iPhone, iPad &amp; Mac</li>
-                <li>Apple billing &amp; restore flow</li>
-                <li>On-device chat, transcription &amp; models</li>
-                <li>Automatic App Store updates</li>
-              </ul>
-            </div>
+          <article className="pathCard pathCardSlim">
+            <p className="pathCardEyebrow">Indoor Cat</p>
+            <h2>App Store for iPhone, iPad &amp; Mac.</h2>
+            <p className="pathCardBody">
+              The simplest install — and the only cat on iOS.
+            </p>
             <div className="pathCardActions">
-              <a className="planButton planButtonQuiet" href={appStoreUrl}>
-                App Store
-              </a>
-              <p className="pathCardMeta">iPhone · iPad · Mac · Free to start</p>
+              <AppStoreBadge href={appStoreUrl} />
+              <p className="pathCardMeta">Free · Apple billing</p>
             </div>
           </article>
         </div>
+
+        <p className="orCliLabel">…or install with the CLI or brew:</p>
 
         <div className="termWindow">
           <div className="termBar">
@@ -406,6 +479,34 @@ export function HomeExperience() {
         </div>
       </section>
 
+      {!heroSwitchVisible && (
+        <div
+          aria-label="Audience mode"
+          className="modeChip"
+          role="tablist"
+          style={chipLift ? { bottom: 22 + chipLift } : undefined}
+        >
+          <button
+            aria-selected={mode === "personal"}
+            className={mode === "personal" ? "isActive" : undefined}
+            onClick={() => setMode("personal")}
+            role="tab"
+            type="button"
+          >
+            Personal
+          </button>
+          <button
+            aria-selected={mode === "business"}
+            className={mode === "business" ? "isActive" : undefined}
+            onClick={() => setMode("business")}
+            role="tab"
+            type="button"
+          >
+            Business
+          </button>
+        </div>
+      )}
+
       {/* ── Pricing ── */}
       <section className="detailBand" id="pricing">
         <div className="sectionHeading sectionHeadingCentered">
@@ -423,16 +524,22 @@ export function HomeExperience() {
             <p className="homePlanPrice">£0</p>
             <p className="dualCardBody">The full local core, forever. No account, no trial clock.</p>
           </article>
-          {directPlans.map((plan) => (
-            <article className="homePlanCard" key={plan.name}>
-              <p className="dualCardEyebrow">{plan.name}</p>
-              <p className="homePlanPrice">
-                {plan.price}
-                <span className="homePlanCadence">{plan.cadence}</span>
-              </p>
-              <p className="dualCardBody">{plan.note}</p>
-            </article>
-          ))}
+          {directPlans.map((plan) => {
+            const best = plan.name === "Pro Annual";
+            return (
+              <article className={best ? "homePlanCard homePlanCardBest" : "homePlanCard"} key={plan.name}>
+                <p className="dualCardEyebrow">
+                  {plan.name}
+                  {best && <span className="dualCardBadge">Best value</span>}
+                </p>
+                <p className="homePlanPrice">
+                  {plan.price}
+                  <span className="homePlanCadence">{plan.cadence}</span>
+                </p>
+                <p className="dualCardBody">{plan.note}</p>
+              </article>
+            );
+          })}
         </div>
 
         <div className="pricingActions">
@@ -466,6 +573,7 @@ export function HomeExperience() {
         <div className="featureGridHome">
           {marqueeFeatures.map((feature) => (
             <article className="featureCellHome" key={feature.name}>
+              <FeatureIcon kind={feature.icon} />
               <h3>
                 {feature.name}
                 {feature.outdoorOnly && <span className="featureBadgeOutdoor">Outdoor</span>}

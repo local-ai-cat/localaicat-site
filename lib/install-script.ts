@@ -98,10 +98,10 @@ MOUNT_POINT=""
 
 print_banner
 echo "==> Downloading..."
-# Use curl's default progress meter (speed + ETA) instead of --progress-bar.
-# --progress-bar renders as nearly-blank whitespace for the first few seconds
-# at low percentages, which looks like a stalled/broken bar to users.
-/usr/bin/curl -fL "$DOWNLOAD_URL" -o "$DMG_PATH"
+# --progress-bar over curl's default stats table (Phil, 2026-08-27: the table
+# is ugly). The "==> Downloading..." line above keeps the first near-blank
+# seconds of the bar from reading as a stall.
+/usr/bin/curl -fL --progress-bar "$DOWNLOAD_URL" -o "$DMG_PATH"
 
 echo "==> Mounting... *paws at disk*"
 HDIUTIL_OUT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly)

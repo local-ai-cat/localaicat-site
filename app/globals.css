@@ -4770,29 +4770,50 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .homePlanGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 2px;
-  max-width: 960px;
+  gap: 14px;
+  max-width: 1000px;
   margin: 0 auto;
-  border-radius: 20px;
-  overflow: hidden;
-  background: var(--line);
 }
 
 .homePlanCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 26px 22px;
-  background: var(--bg);
+  gap: 10px;
+  padding: 26px 24px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface);
   text-align: left;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.homePlanCard:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+.homePlanCardBest {
+  border-color: color-mix(in srgb, var(--accent) 34%, transparent);
+  background: linear-gradient(
+    175deg,
+    color-mix(in srgb, var(--accent) 7%, var(--surface)) 0%,
+    var(--surface) 60%
+  );
+  box-shadow: 0 20px 60px -32px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.homePlanCardBest:hover {
+  border-color: color-mix(in srgb, var(--accent) 48%, transparent);
 }
 
 .homePlanPrice {
-  margin: 0;
+  margin: 2px 0 0;
   color: var(--text);
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-family: var(--font-display), serif;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .homePlanCadence {
@@ -4848,18 +4869,36 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 .featureGridHome {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 2px;
-  max-width: 1080px;
+  gap: 14px;
+  max-width: 1120px;
   margin: 0 auto;
-  border-radius: 20px;
-  overflow: hidden;
-  background: var(--line);
 }
 
 .featureCellHome {
   padding: 22px 20px;
-  background: var(--bg);
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface);
   text-align: left;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.featureCellHome:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+.featureIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 14px;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  color: color-mix(in srgb, var(--accent) 82%, var(--text));
 }
 
 .featureCellHome h3 {
@@ -4968,4 +5007,128 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   color: var(--text-faint);
   font-size: 13px;
   font-weight: 600;
+}
+
+.bizBandCompact {
+  margin: 0;
+  width: min(100%, 920px);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+
+
+/* ─── Slim path cards / badge / chip (landing v3) ─── */
+
+.pathCardsSlim {
+  align-items: stretch;
+}
+
+.pathCard.pathCardSlim {
+  gap: 18px;
+  padding: 28px 28px 24px;
+  justify-content: flex-start;
+}
+
+.pathCardSlim h2 {
+  font-size: clamp(22px, 2.6vw, 28px);
+}
+
+.pathCardSlim .pathCardActions {
+  margin-top: auto;
+}
+
+.appStoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: var(--text);
+  transition: border-color 150ms ease, background 150ms ease, transform 120ms ease;
+  align-self: stretch;
+  justify-content: center;
+}
+
+.appStoreBadge:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.appStoreBadgeText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.appStoreBadgeText small {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+.orCliLabel {
+  margin: -8px 0 0;
+  color: var(--text-faint);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modeChip {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 12, 11, 0.82);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 50px -18px rgba(0, 0, 0, 0.9);
+  animation: chipIn 260ms cubic-bezier(0.3, 0.9, 0.3, 1);
+}
+
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.modeChip button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  min-width: 88px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.modeChip button.isActive {
+  background: var(--text);
+  color: var(--bg);
+}
+
+@media (max-width: 640px) {
+  .modeChip {
+    bottom: 14px;
+  }
 }

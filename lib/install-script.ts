@@ -99,9 +99,12 @@ MOUNT_POINT=""
 print_banner
 echo "==> Downloading..."
 # --progress-bar over curl's default stats table (Phil, 2026-08-27: the table
-# is ugly). The "==> Downloading..." line above keeps the first near-blank
-# seconds of the bar from reading as a stall.
-/usr/bin/curl -fL --progress-bar "$DOWNLOAD_URL" -o "$DMG_PATH"
+# is ugly). Resolve redirects FIRST: with -L, --progress-bar draws a flying
+# -=O=- meter for each redirect hop (no content-length), which looks broken.
+# One silent HEAD resolves the CDN URL, then a single clean bar downloads it.
+FINAL_URL=$(/usr/bin/curl -fsIL -o /dev/null -w '%{url_effective}' "$DOWNLOAD_URL" || true)
+FINAL_URL=\${FINAL_URL:-$DOWNLOAD_URL}
+/usr/bin/curl -fL --progress-bar "$FINAL_URL" -o "$DMG_PATH"
 
 echo "==> Mounting... *paws at disk*"
 HDIUTIL_OUT=$(/usr/bin/hdiutil attach "$DMG_PATH" -nobrowse -readonly)

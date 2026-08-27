@@ -4534,7 +4534,7 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   text-align: left;
 }
 
-.pathCardOutdoor {
+.pathCardHighlight {
   border-color: color-mix(in srgb, var(--accent) 32%, transparent);
   background:
     linear-gradient(
@@ -4562,7 +4562,7 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   font-weight: 700;
 }
 
-.pathCardOutdoor .pathCardEyebrow {
+.pathCardHighlight .pathCardEyebrow {
   color: color-mix(in srgb, var(--accent) 80%, var(--text));
 }
 
@@ -4609,7 +4609,7 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   background: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
-.pathCard:not(.pathCardOutdoor) .pathCardList li::before {
+.pathCard:not(.pathCardHighlight) .pathCardList li::before {
   background: rgba(255, 255, 255, 0.2);
 }
 
@@ -5130,5 +5130,148 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
 @media (max-width: 640px) {
   .modeChip {
     bottom: 14px;
+  }
+}
+
+.orCliToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -8px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.orCliToggle:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.orCliChevron {
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.orCliChevron.isOpen {
+  transform: rotate(180deg);
+}
+
+.termWindowReveal {
+  animation: termReveal 300ms cubic-bezier(0.3, 0.9, 0.3, 1);
+  transform-origin: top center;
+}
+
+@keyframes termReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pathCardFootnote {
+  color: var(--text-faint);
+  font-size: 11px;
+  font-style: italic;
+}
+
+
+/* ─── Business pricing + enterprise band ─── */
+
+.bizPlanGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.bizPlanCard {
+  gap: 12px;
+  padding: 30px 28px;
+}
+
+.bizPlanCard .dualCardList {
+  margin: 4px 0 10px;
+}
+
+.bizPlanButton {
+  margin-top: auto;
+  align-self: stretch;
+}
+
+.enterpriseBand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  max-width: 900px;
+  margin: 40px auto 0;
+  padding: 30px 32px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  background: linear-gradient(
+    172deg,
+    color-mix(in srgb, var(--accent) 6%, var(--surface)) 0%,
+    var(--surface) 65%
+  );
+  text-align: left;
+}
+
+.enterpriseBandText {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.enterpriseBandText h3 {
+  font-family: var(--font-display), serif;
+  font-size: clamp(22px, 2.6vw, 30px);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.enterpriseBandText p:not(.sectionEyebrow) {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.appStoreBadgeAccent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #090909;
+}
+
+.appStoreBadgeAccent .appStoreBadgeText small {
+  color: rgba(9, 9, 9, 0.65);
+}
+
+.appStoreBadgeAccent:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  opacity: 0.94;
+}
+
+@media (max-width: 720px) {
+  .bizPlanGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .enterpriseBand {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

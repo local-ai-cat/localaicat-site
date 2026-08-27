@@ -151,19 +151,7 @@
             '.cookie-btn-reject{background:transparent;color:#b8b0a4;border:1px solid rgba(255,255,255,0.15)}',
             '.cookie-btn-reject:hover{color:#f0ece4;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.03)}',
             '@media (min-width:768px){.cookie-banner-content{flex-direction:row;justify-content:space-between;text-align:left;gap:24px}.cookie-banner-text{flex:1;min-width:0}.cookie-banner-text strong{display:inline;margin-right:6px}.cookie-banner-text p:first-child{margin-bottom:4px}.cookie-banner-actions{flex-shrink:0}}',
-            '@media (max-width:767px){#cookie-consent-banner{padding:16px}.cookie-banner-text p{font-size:13px}.cookie-btn{padding:0 18px;font-size:12px;min-width:104px;min-height:42px}}',
-            '.chat-placeholder{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#0c0c0b;color:#e8d5b0;font-size:24px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 8px 24px rgba(0,0,0,0.4);cursor:pointer;opacity:0;transform:translateY(20px);transition:opacity 0.3s,transform 0.3s;z-index:999998}',
-            '.chat-placeholder.show{opacity:1;transform:translateY(0)}',
-            '.chat-placeholder-tooltip{position:fixed;bottom:90px;right:20px;max-width:320px;padding:18px 20px;background:rgba(12,12,11,0.98);color:#f0ece4;font-family:var(--font-body),ui-sans-serif,system-ui,sans-serif;border-radius:14px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 12px 32px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity 0.2s,transform 0.2s;z-index:999999}',
-            '.chat-placeholder-tooltip.show{opacity:1;pointer-events:auto;transform:translateY(0)}',
-            '.chat-placeholder-tooltip h4{margin:0 0 8px 0;font-family:var(--font-display),serif;font-weight:600;font-size:18px;letter-spacing:-0.02em;color:#f0ece4}',
-            '.chat-placeholder-tooltip p{margin:0 0 10px 0;font-size:13px;line-height:1.55;color:#b8b0a4}',
-            '.tooltip-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}',
-            '.tooltip-actions button{min-height:38px;padding:0 16px;border-radius:999px;border:0;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:transform 120ms ease,opacity 120ms ease}',
-            '.tooltip-actions .btn-enable{background:#f0ece4;color:#060606}',
-            '.tooltip-actions .btn-enable:hover{transform:translateY(-1px);opacity:0.92}',
-            '.tooltip-actions .btn-close{background:transparent;color:#b8b0a4;border:1px solid rgba(255,255,255,0.15)}',
-            '.tooltip-actions .btn-close:hover{color:#f0ece4;border-color:rgba(255,255,255,0.3)}'
+            '@media (max-width:767px){#cookie-consent-banner{padding:16px}.cookie-banner-text p{font-size:13px}.cookie-btn{padding:0 18px;font-size:12px;min-width:104px;min-height:42px}}'
         ].join('\n');
 
         document.head.appendChild(style);
@@ -178,7 +166,35 @@
         }
     }
 
+    function ensureChatPlaceholderStyles() {
+        if (document.getElementById('chat-placeholder-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'chat-placeholder-styles';
+        style.textContent = [
+            '.chat-placeholder{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;background:#0c0c0b;color:#e8d5b0;font-size:24px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 8px 24px rgba(0,0,0,0.4);cursor:pointer;opacity:0;transform:translateY(20px);transition:opacity 0.3s,transform 0.3s;z-index:999998;display:flex;align-items:center;justify-content:center}',
+            '.chat-placeholder.show{opacity:1;transform:translateY(0)}',
+            '.chat-placeholder:hover{background:#141413;border-color:rgba(255,255,255,0.12);transform:translateY(-2px)}',
+            '.chat-placeholder-tooltip{position:fixed;bottom:90px;left:20px;max-width:320px;padding:18px 20px;background:rgba(9,9,9,0.98);color:#f0ece4;font-family:Manrope,var(--font-body),ui-sans-serif,system-ui,sans-serif;border-radius:14px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 12px 32px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity 0.2s,transform 0.2s;z-index:999999}',
+            '.chat-placeholder-tooltip.show{opacity:1;pointer-events:auto;transform:translateY(0)}',
+            '.chat-placeholder-tooltip h4{margin:0 0 8px 0;font-family:var(--font-display),serif;font-weight:600;font-size:18px;letter-spacing:-0.02em;color:#f0ece4}',
+            '.chat-placeholder-tooltip p{margin:0 0 10px 0;font-size:13px;line-height:1.55;color:#b8b0a4}',
+            '.chat-placeholder-tooltip a{color:#e8d5b0;text-decoration:none;border-bottom:1px solid rgba(232,213,176,0.35);transition:border-color 160ms ease,color 160ms ease}',
+            '.chat-placeholder-tooltip a:hover{color:#f0ece4;border-bottom-color:#f0ece4}',
+            '.tooltip-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}',
+            '.tooltip-actions button{min-height:38px;padding:0 16px;border-radius:999px;border:0;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:transform 120ms ease,opacity 120ms ease}',
+            '.tooltip-actions .btn-enable{background:#f0ece4;color:#060606}',
+            '.tooltip-actions .btn-enable:hover{transform:translateY(-1px);opacity:0.92}',
+            '.tooltip-actions .btn-close{background:transparent;color:#b8b0a4;border:1px solid rgba(255,255,255,0.15)}',
+            '.tooltip-actions .btn-close:hover{color:#f0ece4;border-color:rgba(255,255,255,0.3)}'
+        ].join('\n');
+
+        document.head.appendChild(style);
+    }
+
     function showChatPlaceholder() {
+        ensureChatPlaceholderStyles();
+
         if (document.getElementById('chat-placeholder')) {
             document.getElementById('chat-placeholder').classList.add('show');
             return;
@@ -192,8 +208,6 @@
         });
 
         const privacyLink = el('a', { href: '/privacy', rel: 'noopener noreferrer', text: 'View Privacy Policy' });
-        privacyLink.style.color = '#60a5fa';
-        privacyLink.style.textDecoration = 'underline';
 
         const btnEnable = el('button', { className: 'btn-enable', text: 'Enable Cookies' });
         const btnClose = el('button', { className: 'btn-close', text: 'Close' });
@@ -204,7 +218,7 @@
         }, [
             el('h4', { text: 'Chat Disabled' }),
             el('p', { text: 'To use our live chat support, you need to enable cookies. This allows us to maintain your chat session.' }),
-            el('p', { style: { fontSize: '0.85rem', marginBottom: '1rem' } }, [privacyLink]),
+            el('p', null, [privacyLink]),
             el('div', { className: 'tooltip-actions' }, [btnEnable, btnClose])
         ]);
 

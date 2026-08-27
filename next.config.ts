@@ -55,6 +55,13 @@ const nextConfig: NextConfig = {
   env: {
     BUILD_COMMIT: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "dev",
   },
+  async redirects() {
+    // Downloads live on the landing page now; the old pages are gone.
+    return [
+      { source: "/download", destination: "/#download", permanent: true },
+      { source: "/download/direct", destination: "/#download", permanent: true }
+    ];
+  },
   async headers() {
     return [
       {

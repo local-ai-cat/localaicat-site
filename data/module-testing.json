@@ -374,7 +374,7 @@
         "FeatureLyrics",
         "FeatureTranslateDomain"
       ],
-      "cases": 157,
+      "cases": 160,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -516,7 +516,7 @@
         "FeatureTranslateDomain",
         "LocalSpeechKit"
       ],
-      "cases": 359,
+      "cases": 362,
       "tier": "heavy",
       "logging": {
         "grade": "L0",

@@ -18,7 +18,7 @@ const navLinks =
   [
     { href: "/pricing", label: "Pricing" },
     { href: "/support", label: "FAQ" },
-    { href: "/download", label: "Download", cta: true }
+    { href: "/#download", label: "Download", cta: true }
   ] as const;
 
 const legalLinks =

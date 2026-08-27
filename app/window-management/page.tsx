@@ -20,7 +20,7 @@ export default function WindowManagementPage() {
           <p>
             The Mac App Store build can only move the Local AI Cat window
             itself. Controlling other apps&apos; windows requires the{" "}
-            <Link className="textLink" href="/download/direct">
+            <Link className="textLink" href="/#download">
               direct build
             </Link>{" "}
             because App Store sandboxing blocks that access.
@@ -35,7 +35,7 @@ export default function WindowManagementPage() {
             <li>Full macOS system integration outside sandbox limits</li>
           </ul>
           <div className="routeActions">
-            <Link className="planButton" href="/download/direct">
+            <Link className="planButton" href="/#download">
               Get the direct build
             </Link>
           </div>

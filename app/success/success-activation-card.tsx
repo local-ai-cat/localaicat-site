@@ -517,7 +517,7 @@ export function SuccessActivationCard({
           </a>
         ) : null}
         {!licenseKey ? (
-          <a className="secondaryButton" href="/download/direct">
+          <a className="secondaryButton" href="/#download">
             Download Outdoor Cat
           </a>
         ) : null}

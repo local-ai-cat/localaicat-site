@@ -82,24 +82,18 @@ function CopyCommand({ command, label }: { command: string; label: string }) {
   }, [command]);
 
   return (
-    <div className="braveCommand">
-      <p className="braveCommandLabel">{label}</p>
-      <div className="commandBlockWrap braveCommandRow">
-        <pre className="commandBlock braveCommandBlock">
-          <code>{command}</code>
-        </pre>
-        <button className="copyButton" onClick={copy} type="button">
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
+    <div className="termCommandRow">
+      <span className="termCommandLabel">{label}</span>
+      <code className="termCommandCode">{command}</code>
+      <button className="termCopyButton" onClick={copy} type="button">
+        {copied ? "Copied" : "Copy"}
+      </button>
     </div>
   );
 }
 
 export function HomeExperience() {
   const [mode, setMode] = useState<Mode>(getInitialMode);
-  const detailsRef = useRef<HTMLElement | null>(null);
-  const [detailsVisible, setDetailsVisible] = useState(false);
   const switchRef = useRef<HTMLDivElement | null>(null);
   const sliderRef = useRef<HTMLSpanElement | null>(null);
   const personalImgRef = useRef<HTMLImageElement | null>(null);
@@ -109,7 +103,7 @@ export function HomeExperience() {
   const downloadUrl = getDirectDownloadUrl();
   const version = getDirectDownloadVersion();
   const appStoreUrl = getAppStoreUrl();
-  const scriptCmd = downloadUrl ? getDirectInstallScriptCommand() : null;
+  const scriptCmd = getDirectInstallScriptCommand();
   const homebrewCmd = getHomebrewInstallCommand();
 
   const handlePointerDown = useCallback(
@@ -240,28 +234,10 @@ export function HomeExperience() {
     });
   }, [mode]);
 
-  useEffect(() => {
-    const node = detailsRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setDetailsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className={`homeMode homeMode${mode === "personal" ? "Personal" : "Business"}`}>
-      {/* ── Hero ── */}
-      <section className="homeHero homeHeroCompact">
+      {/* ── Hero: headline → switch → cat ── */}
+      <section className="heroTight">
         <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="" className="floatingCat floatingCatOne" src="/assets/cat.webp" width={56} height={56} />
@@ -273,8 +249,55 @@ export function HomeExperience() {
           <img alt="" className="floatingCat floatingCatFour" src="/assets/cat.webp" width={54} height={54} />
         </div>
 
-        <div className="heroMinimalFrame heroMinimalFrameCompact">
-          <div className="heroImageFrame heroImageFrameCompact">
+        <div className="heroTightInner">
+          <div className="heroHeadline heroEnter heroEnter1">
+            <h1 className="heroModeFade" key={`h1-${mode}`}>
+              {mode === "personal" ? "Private AI.\nYour device." : "Serious local AI\nfor teams."}
+            </h1>
+            <p className="heroTagline heroModeFade" key={`tag-${mode}`}>
+              {mode === "personal"
+                ? "On-device chat, transcription, and models. No cloud. No tracking. Just you and your cat."
+                : "Secure AI, transcription, window management and wellness — rolled out on your terms."}
+            </p>
+          </div>
+
+          <div
+            aria-label="Audience mode"
+            className="modeSwitch heroEnter heroEnter2"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            ref={switchRef}
+            role="tablist"
+            style={{ touchAction: "pan-y" }}
+          >
+            <span
+              aria-hidden="true"
+              className={`modeSwitchSlider ${mode === "business" ? "modeSwitchSliderRight" : ""}`}
+              ref={sliderRef}
+            />
+            <button
+              aria-selected={mode === "personal"}
+              className={mode === "personal" ? "isActive" : undefined}
+              onClick={() => setMode("personal")}
+              role="tab"
+              type="button"
+            >
+              Personal
+            </button>
+            <button
+              aria-selected={mode === "business"}
+              className={mode === "business" ? "isActive" : undefined}
+              onClick={() => setMode("business")}
+              role="tab"
+              type="button"
+            >
+              Business
+            </button>
+          </div>
+
+          <div className="heroFigure heroEnter heroEnter3">
+            <span aria-hidden="true" className="heroGlow" />
             <span
               className={`heroCatImage ${mode === "personal" ? "isVisible" : ""}`}
               ref={personalImgRef}
@@ -283,7 +306,7 @@ export function HomeExperience() {
                 alt="Local AI Cat personal mark"
                 src="/assets/cat-personal.png"
                 fill
-                sizes="(max-width: 760px) 100vw, 640px"
+                sizes="(max-width: 760px) 90vw, 460px"
                 priority
               />
             </span>
@@ -295,166 +318,92 @@ export function HomeExperience() {
                 alt="Local AI Cat business mark"
                 src="/assets/cat-business.png"
                 fill
-                sizes="(max-width: 760px) 100vw, 640px"
+                sizes="(max-width: 760px) 90vw, 460px"
                 priority
               />
             </span>
           </div>
-
-          <div className="heroHeadline">
-            <h1 className="heroModeFade" key={`h1-${mode}`}>
-              {mode === "personal" ? "Private AI.\nYour device." : "Serious local AI\nfor teams."}
-            </h1>
-            <p className="heroTagline heroModeFade" key={`tag-${mode}`}>
-              {mode === "personal"
-                ? "On-device chat, transcription, and models. No cloud. No tracking. Just you and your cat."
-                : "Secure AI, transcription, window management and wellness."}
-            </p>
-          </div>
-
-          <div className="heroControlStack heroControlStackCentered">
-            <div className="heroCtaRow">
-              <a className="planButton" href="#download">Download for Mac</a>
-              <a className="secondaryButton" href="#pricing">See pricing</a>
-            </div>
-
-            <div
-              aria-label="Audience mode"
-              className="modeSwitch"
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              ref={switchRef}
-              role="tablist"
-              style={{ touchAction: "pan-y" }}
-            >
-              <span
-                aria-hidden="true"
-                className={`modeSwitchSlider ${mode === "business" ? "modeSwitchSliderRight" : ""}`}
-                ref={sliderRef}
-              />
-              <button
-                aria-selected={mode === "personal"}
-                className={mode === "personal" ? "isActive" : undefined}
-                onClick={() => setMode("personal")}
-                role="tab"
-                type="button"
-              >
-                Personal
-              </button>
-              <button
-                aria-selected={mode === "business"}
-                className={mode === "business" ? "isActive" : undefined}
-                onClick={() => setMode("business")}
-                role="tab"
-                type="button"
-              >
-                Business
-              </button>
-            </div>
-
-            <svg aria-hidden="true" className="heroScrollHint" fill="none" height="20" viewBox="0 0 24 24" width="20">
-              <path
-                d="M12 5v14M6 13l6 6 6-6"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.8"
-              />
-            </svg>
-          </div>
         </div>
       </section>
 
-      {/* ── Download ── */}
-      <section
-        className={`detailBand detailBandMinimal sectionReveal ${detailsVisible ? "isVisible" : ""}`}
-        id="download"
-        ref={detailsRef}
-      >
-        <div className="sectionHeading sectionHeadingCentered">
-          <p className="sectionEyebrow">Get the app</p>
-          <h2>Free to start.</h2>
-          <p className="detailIntro">
-            Two ways to run Local AI Cat on your Mac. We recommend{" "}
-            <strong>Outdoor Cat</strong> — the direct download with the complete
-            desktop feature set.
-          </p>
-        </div>
-
-        <div className="dualCards sectionChildReveal">
-          {/* ─── Outdoor Cat / direct download — recommended ─── */}
-          <article className="dualCard dualCardStrong">
-            <p className="dualCardEyebrow">
-              Outdoor Cat <span className="dualCardBadge">Recommended</span>
-            </p>
-            <p className="dualCardDescriptor">Direct download for Mac</p>
-            <h3>The full feature set.</h3>
-            <p className="dualCardBody">
-              Downloaded straight from the web, with no sandbox — every desktop
-              feature, including the ones the App Store build can&apos;t offer.
-            </p>
-            <ul className="dualCardList">
-              <li>Everything in Indoor Cat, plus:</li>
-              <li>Global menu-bar transcription</li>
-              <li>Window management across apps</li>
-              <li>System-wide hotkeys &amp; shortcuts</li>
-              <li>Web billing &amp; portable license keys</li>
-            </ul>
-            <div className="dualCardActions">
-              {downloadUrl ? (
-                <a className="planButton" href={downloadUrl}>
-                  Download for Mac{version ? ` · ${version}` : ""}
-                </a>
-              ) : (
-                <Link className="planButton" href="/download/direct">Download</Link>
-              )}
-              <Link className="secondaryButton" href="/download/direct">All install options</Link>
+      {/* ── Download: both cats, immediately ── */}
+      <section className="downloadBand heroEnter heroEnter4" id="download">
+        <div className="pathCards">
+          <article className="pathCard pathCardOutdoor">
+            <div className="pathCardTop">
+              <p className="pathCardEyebrow">
+                Outdoor Cat <span className="dualCardBadge">Recommended</span>
+              </p>
+              <h2>The full feature set.</h2>
+              <p className="pathCardBody">
+                Downloaded straight from the web, with no sandbox — every desktop
+                feature, including the ones the App Store build can&apos;t offer.
+              </p>
+              <ul className="pathCardList">
+                <li>Everything in Indoor Cat, plus:</li>
+                <li>Global menu-bar transcription</li>
+                <li>Window management across apps</li>
+                <li>System-wide hotkeys &amp; shortcuts</li>
+                <li>Web billing &amp; portable license keys</li>
+              </ul>
+            </div>
+            <div className="pathCardActions">
+              <a className="planButton planButtonAccent" href={downloadUrl}>
+                Download for Mac
+              </a>
+              <p className="pathCardMeta">
+                {version ? `Version ${version} · ` : ""}Free to start · Signed &amp;
+                notarized by Apple
+              </p>
             </div>
           </article>
 
-          {/* ─── Indoor Cat / App Store ─── */}
-          <article className="dualCard">
-            <p className="dualCardEyebrow">Indoor Cat</p>
-            <p className="dualCardDescriptor">App Store for iPhone, iPad &amp; Mac</p>
-            <h3>The easy path.</h3>
-            <p className="dualCardBody">
-              Apple billing and the simplest install. On Mac, sandboxing limits
-              some desktop features — on iPhone and iPad it&apos;s the only cat in town.
-            </p>
-            <ul className="dualCardList">
-              <li>iPhone, iPad &amp; Mac</li>
-              <li>Apple billing &amp; restore flow</li>
-              <li>On-device chat, transcription &amp; models</li>
-              <li>Automatic App Store updates</li>
-            </ul>
-            <div className="dualCardActions">
-              <a className="planButton planButtonQuiet" href={appStoreUrl}>App Store</a>
+          <article className="pathCard">
+            <div className="pathCardTop">
+              <p className="pathCardEyebrow">Indoor Cat</p>
+              <h2>The easy path.</h2>
+              <p className="pathCardBody">
+                Apple billing and the simplest install. On Mac, sandboxing limits
+                some desktop features — on iPhone and iPad it&apos;s the only cat in
+                town.
+              </p>
+              <ul className="pathCardList">
+                <li>iPhone, iPad &amp; Mac</li>
+                <li>Apple billing &amp; restore flow</li>
+                <li>On-device chat, transcription &amp; models</li>
+                <li>Automatic App Store updates</li>
+              </ul>
+            </div>
+            <div className="pathCardActions">
+              <a className="planButton planButtonQuiet" href={appStoreUrl}>
+                App Store
+              </a>
+              <p className="pathCardMeta">iPhone · iPad · Mac · Free to start</p>
             </div>
           </article>
         </div>
 
-        {(scriptCmd || homebrewCmd) && (
-          <div className="braveBlock sectionChildReveal">
-            <p className="braveTitle">For the brave</p>
-            <p className="braveIntro">
-              One line in the terminal — downloads, verifies, and installs the
-              latest Outdoor Cat.
-            </p>
-            <div className="braveVideoFrame">
-              <video
-                aria-label="Terminal recording of the one-line Local AI Cat install"
-                autoPlay
-                loop
-                muted
-                playsInline
-                src="/assets/install-demo.mp4"
-              />
-            </div>
-            {scriptCmd && <CopyCommand command={scriptCmd} label="Install script" />}
-            {homebrewCmd && <CopyCommand command={homebrewCmd} label="Homebrew" />}
+        <div className="termWindow">
+          <div className="termBar">
+            <span aria-hidden="true" className="termDot termDotRed" />
+            <span aria-hidden="true" className="termDot termDotYellow" />
+            <span aria-hidden="true" className="termDot termDotGreen" />
+            <span className="termTitle">for the brave — one line installs it</span>
           </div>
-        )}
+          <video
+            aria-label="Terminal recording of the one-line Local AI Cat install"
+            autoPlay
+            className="termVideo"
+            loop
+            muted
+            playsInline
+            src="/assets/install-demo.mp4"
+          />
+          <div className="termBody">
+            {scriptCmd && <CopyCommand command={scriptCmd} label="script" />}
+            {homebrewCmd && <CopyCommand command={homebrewCmd} label="brew" />}
+          </div>
+        </div>
       </section>
 
       {/* ── Pricing ── */}

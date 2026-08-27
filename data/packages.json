@@ -668,7 +668,7 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 135,
+      "cases": 138,
       "tier": "heavy",
       "deps": [
         "LocalAIContracts",

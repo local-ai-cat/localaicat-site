@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
-import { DownloadExperience } from "../download/download-experience";
+import { DownloadExperience } from "../_components/download-experience";
 import {
   getAppStoreUrl,
   getCustomerPortalUrl,

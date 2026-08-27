@@ -34,8 +34,17 @@ export function getAppStoreUrl() {
   return (process.env.NEXT_PUBLIC_APP_STORE_URL || DEFAULT_APP_STORE_URL).trim();
 }
 
+const DEFAULT_DIRECT_DOWNLOAD_URL =
+  "https://github.com/local-ai-cat/localaicat-site/releases/latest/download/LocalAIChatDirect.dmg";
+
 export function getDirectDownloadUrl() {
-  return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_URL);
+  // The GitHub "latest" alias is a stable fallback so preview deployments
+  // (where the NEXT_PUBLIC_* release env is production-scoped) still offer a
+  // real download instead of "Coming soon".
+  return (
+    optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_URL) ??
+    DEFAULT_DIRECT_DOWNLOAD_URL
+  );
 }
 
 export function getDirectDownloadVersion() {
@@ -59,11 +68,11 @@ export function getDirectDownloadSha256() {
 }
 
 export function getHomebrewTap() {
-  return optionalValue(process.env.NEXT_PUBLIC_HOMEBREW_TAP);
+  return optionalValue(process.env.NEXT_PUBLIC_HOMEBREW_TAP) ?? "local-ai-cat/tap";
 }
 
 export function getHomebrewCask() {
-  return optionalValue(process.env.NEXT_PUBLIC_HOMEBREW_CASK);
+  return optionalValue(process.env.NEXT_PUBLIC_HOMEBREW_CASK) ?? "local-ai-cat";
 }
 
 export function getHomebrewInstallCommand() {

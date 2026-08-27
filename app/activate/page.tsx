@@ -59,7 +59,7 @@ export default async function ActivatePage({ searchParams }: ActivatePageProps) 
             activation link or use the customer portal to recover your license.
           </p>
           <div className="routeActions">
-            <Link className="planButton" href="/download/direct">
+            <Link className="planButton" href="/#download">
               Download Outdoor Cat
             </Link>
             <Link className="secondaryButton" href="/support">

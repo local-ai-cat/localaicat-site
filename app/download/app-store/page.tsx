@@ -41,14 +41,14 @@ export default function AppStoreDownloadPage() {
             <li>
               The Mac App Store build runs sandboxed, so some desktop features
               like window management for other apps are only in{" "}
-              <Link className="textLink" href="/download/direct">
+              <Link className="textLink" href="/#download">
                 Outdoor Cat
               </Link>
               .
             </li>
             <li>
               Need the full macOS desktop feature set? Try the{" "}
-              <Link className="textLink" href="/download/direct">
+              <Link className="textLink" href="/#download">
                 Outdoor Cat
               </Link>{" "}
               direct-download build.

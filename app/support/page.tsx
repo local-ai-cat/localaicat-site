@@ -60,7 +60,7 @@ const faqSections: readonly FAQSection[] = [
       {
         question: "How do I install Outdoor Cat on Mac?",
         answer:
-          "Three options: download the DMG from localaicat.com/download/direct, install via Homebrew (brew tap local-ai-cat/tap && brew install --cask local-ai-cat), or use the curl install script (curl -fsSL localaicat.com/install | sh)."
+          "Three options: download the DMG from the localaicat.com homepage, install via Homebrew (brew tap local-ai-cat/tap && brew install --cask local-ai-cat), or use the curl install script (curl -fsSL localaicat.com/install | sh)."
       },
       {
         question: "How do updates work for Outdoor Cat?",

@@ -41,7 +41,9 @@ const allowedFeatureKeys = new Set([
   "internal",
   "lane", "ledger", "modular", "modularityEvidence", "name", "notes", "ownedPackages", "package", "permissions", "platforms",
   "relatedPackages", "requirements", "sharedPackageConsents", "sharedPackages", "stagedForPromotion", "status", "target",
-  "uiPlacements", "usesPackages"
+  "uiPlacements", "usesPackages",
+  // schema 12: user-facing copy written for humans, preferred over `notes`
+  "userDescription", "userHighlights"
 ]);
 // Infrastructure modules (engines / platform / harness / vendored) are projected
 // verbatim EXCEPT `notes`, which carries internal nuance (deletion-candidate remarks,
@@ -131,7 +133,7 @@ export function validateModules(modules) {
 function validateManifest(manifest) {
   if (!isObject(manifest)) fail("root must be an object");
   assertKnownKeys(manifest, allowedTopLevelKeys, "root");
-  if (![5, 6, 7, 8, 9, 10, 11].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
+  if (![5, 6, 7, 8, 9, 10, 11, 12].includes(manifest.schemaVersion)) fail(`unsupported schemaVersion ${JSON.stringify(manifest.schemaVersion)}`);
   if (typeof manifest.updated !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.updated)) {
     fail("updated must be an ISO date");
   }
@@ -245,7 +247,10 @@ export function projectFeature(feature, openApiPaths) {
     platforms: availablePlatforms(feature.platforms),
     tiers,
     permissions: feature.permissions.map((permission) => permissionLabels[permission]),
-    description: feature.notes ?? null,
+    // Prefer the catalog's user-facing copy (schema 12+); `notes` is
+    // engineering prose and only stands in until every feature has copy.
+    description: feature.userDescription ?? feature.notes ?? null,
+    highlights: feature.userHighlights ?? [],
     channels,
     caveats: (feature.caveats ?? []).map((caveat) => ({
       channel: channelLabels[caveat.scope],

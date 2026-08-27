@@ -433,7 +433,8 @@
       "deps": [
         "LocalAIContracts",
         "LocalAITextGeneration",
-        "Telemetry"
+        "Telemetry",
+        "WearableGlassesKit"
       ],
       "reverseDeps": [
         "FeatureLyrics",
@@ -911,7 +912,8 @@
       "name": "WearableGlassesKit",
       "deps": [],
       "reverseDeps": [
-        "FeatureEvenRealities"
+        "FeatureEvenRealities",
+        "FeatureTranslateDomain"
       ],
       "appStoreGates": [],
       "linkedInProject": true

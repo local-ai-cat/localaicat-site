@@ -641,7 +641,7 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 118,
+      "cases": 119,
       "tier": "heavy",
       "deps": [
         "AppControlKit",
@@ -668,12 +668,13 @@
       "ownerId": "translate",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 138,
+      "cases": 145,
       "tier": "heavy",
       "deps": [
         "LocalAIContracts",
         "LocalAITextGeneration",
-        "Telemetry"
+        "Telemetry",
+        "WearableGlassesKit"
       ],
       "dependents": [
         "FeatureLyrics",
@@ -808,7 +809,7 @@
       "ownerId": "core",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 108,
+      "cases": 109,
       "tier": "heavy",
       "deps": [],
       "dependents": [
@@ -942,7 +943,7 @@
       "ownerId": "chat-local-llm",
       "ownerKind": "feature",
       "modular": "yes",
-      "cases": 42,
+      "cases": 46,
       "tier": "heavy",
       "deps": [
         "LocalAIContracts",
@@ -1310,7 +1311,7 @@
       "ownerId": "telemetry",
       "ownerKind": "platform",
       "modular": null,
-      "cases": 5,
+      "cases": 7,
       "tier": "thin",
       "deps": [],
       "dependents": [
@@ -1379,7 +1380,8 @@
       "tier": "covered",
       "deps": [],
       "dependents": [
-        "FeatureEvenRealities"
+        "FeatureEvenRealities",
+        "FeatureTranslateDomain"
       ],
       "appStoreGates": [],
       "linkedInProject": true

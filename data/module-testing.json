@@ -9,7 +9,7 @@
         "LocalAICore",
         "LocalAITextGeneration"
       ],
-      "cases": 3307,
+      "cases": 3311,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -249,7 +249,7 @@
         "FeatureCompute",
         "LocalAIContracts"
       ],
-      "cases": 145,
+      "cases": 146,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -374,7 +374,7 @@
         "FeatureLyrics",
         "FeatureTranslateDomain"
       ],
-      "cases": 160,
+      "cases": 167,
       "tier": "heavy",
       "logging": {
         "grade": "L0",
@@ -501,11 +501,11 @@
         "BetaTelemetry",
         "Telemetry"
       ],
-      "cases": 12,
+      "cases": 14,
       "tier": "covered",
       "logging": {
         "grade": "L2",
-        "signal": "structured=0 print=0 sentry=17",
+        "signal": "structured=0 print=0 sentry=18",
         "provisional": true
       }
     },
@@ -516,7 +516,7 @@
         "FeatureTranslateDomain",
         "LocalSpeechKit"
       ],
-      "cases": 362,
+      "cases": 370,
       "tier": "heavy",
       "logging": {
         "grade": "L0",

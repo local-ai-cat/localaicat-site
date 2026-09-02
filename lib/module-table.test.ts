@@ -15,6 +15,7 @@ function featureRow(overrides: Partial<ModuleTableRow>): ModuleTableRow {
     clickable: true,
     description: "",
     channels: [],
+    published: { outdoor: "absent", beta: "absent", alpha: "absent" },
     platforms: [],
     distributions: [],
     status: "live",
@@ -187,4 +188,20 @@ test("sorts semantic status and provisional testing status in either direction",
     sortModuleRows(rows, { key: "testingStatus", direction: "desc" }).map((row) => row.id),
     ["stable", "beta", "parked"]
   );
+});
+
+test("the published facet reads the snapshot presence, not the trunk-head channels", () => {
+  const onStable = featureRow({ id: "on-stable", channels: ["alpha"], published: { outdoor: "yes", beta: "yes", alpha: "yes" } });
+  const alphaOnly = featureRow({ id: "alpha-only", channels: ["alpha"], published: { outdoor: "absent", beta: "no", alpha: "partial" } });
+  const nowhere = featureRow({ id: "nowhere", channels: ["alpha"], published: { outdoor: "absent", beta: "absent", alpha: "no" } });
+  const infra = featureRow({ id: "engine", kind: "engine", clickable: false });
+
+  const outdoor = { ...emptyModuleFilters(), published: new Set(["outdoor"]) };
+  assert.deepEqual(filterModuleRows([onStable, alphaOnly, nowhere, infra], outdoor).map((row) => row.id), ["on-stable"]);
+
+  const alpha = { ...emptyModuleFilters(), published: new Set(["alpha"]) };
+  assert.deepEqual(filterModuleRows([onStable, alphaOnly, nowhere, infra], alpha).map((row) => row.id), ["on-stable", "alpha-only"]);
+
+  const none = { ...emptyModuleFilters(), published: new Set(["none"]) };
+  assert.deepEqual(filterModuleRows([onStable, alphaOnly, nowhere, infra], none).map((row) => row.id), ["nowhere"]);
 });

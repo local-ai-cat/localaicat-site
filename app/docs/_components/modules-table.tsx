@@ -15,6 +15,13 @@ import {
   type SortKey
 } from "../../../lib/module-table";
 import { flavorLabels, flavorOrder, stateGlyphs, stateLabels, type Flavor } from "../../../lib/build-anatomy";
+import {
+  presenceGlyphs,
+  presenceLabels,
+  publishedChannelOrder,
+  publishedFacetValues,
+  type PublishedChannelKey
+} from "../../../lib/channel-presence";
 import styles from "./modules-table.module.css";
 
 type FilterOption = { value: string; label: string };
@@ -40,6 +47,16 @@ const filterGroups: FilterGroup[] = [
       { value: "beta", label: "Beta" },
       { value: "alpha", label: "Alpha" },
       { value: "none", label: "No channel" }
+    ]
+  },
+  {
+    key: "published",
+    label: "Published in",
+    options: [
+      { value: "outdoor", label: "Direct Download" },
+      { value: "beta", label: "Beta" },
+      { value: "alpha", label: "Alpha" },
+      { value: "none", label: "No published build" }
     ]
   },
   {
@@ -297,6 +314,7 @@ function FilterControls({
             if (group.key === "statuses") return isFeatureRow(row) && row.status === option.value;
             if (group.key === "testingStatuses") return isFeatureRow(row) && row.testingStatus === option.value;
             if (group.key === "neverDriven") return isFeatureRow(row) && row.neverDriven && option.value === "yes";
+            if (group.key === "published") return publishedFacetValues(row.published, isFeatureRow(row)).includes(option.value);
             return row[group.key].includes(option.value);
           }));
 
@@ -347,7 +365,36 @@ function FilterControls({
   );
 }
 
-export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
+export type PublishedBuildLabel = { label: string; version: string; build: number };
+
+function PublishedCell({ builds, row }: { builds: Record<PublishedChannelKey, PublishedBuildLabel>; row: ModuleTableRow }) {
+  return (
+    <div className={styles.publishedCell} aria-label="Presence in published builds">
+      {publishedChannelOrder.map((key) => {
+        const presence = row.published[key];
+        const build = builds[key];
+        return (
+          <span
+            className={`${styles.publishedMark} ${styles[`presence_${presence}`]}`}
+            key={key}
+            title={`${build.label} ${build.version} (build ${build.build}): ${presenceLabels[presence]}`}
+          >
+            <span aria-hidden="true">{presenceGlyphs[presence]}</span>
+            <span className="visuallyHidden">{build.label}: {presenceLabels[presence]}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+export function ModulesTable({
+  publishedBuilds,
+  rows
+}: {
+  publishedBuilds: Record<PublishedChannelKey, PublishedBuildLabel>;
+  rows: ModuleTableRow[];
+}) {
   const router = useRouter();
   const [filters, setFilters] = useState<ModuleFilters>(emptyModuleFilters);
   const [sort, setSort] = useState<ModuleSort>({ key: "name", direction: "asc" });
@@ -452,6 +499,9 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
               <th scope="col">Description</th>
               <th scope="col">Packages</th>
               <th scope="col">Channel</th>
+              <th scope="col" title="What the Direct Download, Beta and Alpha builds people can install today actually contain — from the published snapshot, not trunk head">
+                Published
+              </th>
               <th scope="col">Platforms</th>
               <th scope="col">Indoor / Outdoor</th>
               <SortHeader activeSort={sort} column="status" label="Status" onSort={changeSort} />
@@ -507,6 +557,7 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
                     </div>
                   ) : <NotApplicable />}
                 </td>
+                <td>{feature ? <PublishedCell builds={publishedBuilds} row={row} /> : <NotApplicable />}</td>
                 <td>
                   {feature ? (
                     <div className="moduleTableChips">
@@ -562,7 +613,7 @@ export function ModulesTable({ rows }: { rows: ModuleTableRow[] }) {
             })}
             {visibleRows.length === 0 ? (
               <tr>
-                <td className="moduleTableEmpty" colSpan={11}>No modules match these filters. Clear a filter to widen the view.</td>
+                <td className="moduleTableEmpty" colSpan={12}>No modules match these filters. Clear a filter to widen the view.</td>
               </tr>
             ) : null}
           </tbody>

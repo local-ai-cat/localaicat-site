@@ -1,7 +1,8 @@
 import type { Flavor, PackageState } from "./build-anatomy.ts";
+import { publishedFacetValues, type PublishedPresence } from "./channel-presence.ts";
 
 export type RowKind = "feature" | "engine" | "platform" | "harness" | "vendored";
-export type FilterKey = "kinds" | "channels" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
+export type FilterKey = "kinds" | "channels" | "published" | "platforms" | "distributions" | "statuses" | "testingStatuses" | "neverDriven";
 export type SortKey = "name" | "status" | "modular" | "testingStatus" | "logging" | "apiParity";
 export type SortDirection = "asc" | "desc";
 
@@ -14,6 +15,9 @@ export type ModuleTableRow = {
   clickable: boolean;
   description: string;
   channels: string[];
+  // Presence in the builds each update channel is serving right now (the
+  // published snapshot), as opposed to `channels`, which is trunk head.
+  published: PublishedPresence;
   platforms: string[];
   distributions: string[];
   status: string;
@@ -42,6 +46,7 @@ export function emptyModuleFilters(): ModuleFilters {
   return {
     kinds: new Set(),
     channels: new Set(),
+    published: new Set(),
     platforms: new Set(),
     distributions: new Set(),
     statuses: new Set(),
@@ -66,6 +71,7 @@ export function filterModuleRows(rows: ModuleTableRow[], filters: ModuleFilters)
   return rows.filter((row) =>
     matchesFacet(filters.kinds, [row.kind]) &&
     matchesFacet(filters.channels, row.channels) &&
+    matchesFacet(filters.published, publishedFacetValues(row.published, isFeatureRow(row))) &&
     matchesFacet(filters.platforms, row.platforms) &&
     matchesFacet(filters.distributions, row.distributions) &&
     matchesFeatureFacet(filters.statuses, row, row.status) &&

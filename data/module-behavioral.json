@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-08-10",
+  "updated": "2026-08-27",
   "modules": [
     {
       "id": "chat-local-llm",
@@ -153,6 +153,12 @@
       "neverDriven": false
     },
     {
+      "id": "inference-analytics",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
       "id": "dangerously-skip",
       "status": "behavioral",
       "hasSnapshot": false,
@@ -184,6 +190,12 @@
     },
     {
       "id": "quick-capture",
+      "status": "behavioral",
+      "hasSnapshot": false,
+      "neverDriven": false
+    },
+    {
+      "id": "birdwatcher",
       "status": "behavioral",
       "hasSnapshot": false,
       "neverDriven": false

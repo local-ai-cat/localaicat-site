@@ -1,0 +1,894 @@
+{
+  "schemaVersion": 1,
+  "synced": "2026-09-02",
+  "appcast": "https://github.com/local-ai-cat/localaicat-site/releases/latest/download/appcast.xml",
+  "trunk": {
+    "ref": "origin/outdoor-cat",
+    "commit": "fe75622b3",
+    "date": "2026-09-02"
+  },
+  "channels": [
+    {
+      "key": "outdoor",
+      "label": "Direct Download",
+      "sparkleChannel": "stable",
+      "version": "1.4.0",
+      "build": 238,
+      "publishedAt": "2026-07-09",
+      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/latest/download/LocalAIChatDirect-1.4.0.dmg",
+      "tag": "released/v1.4.0+238",
+      "commit": "250c2d10d",
+      "commitDate": "2026-07-09",
+      "trunkCommitsSince": 3529,
+      "manifest": {
+        "schemaVersion": 4,
+        "updated": "2026-07-08",
+        "featureCount": 34,
+        "shippingCount": 23
+      },
+      "features": {
+        "auto-paste": {
+          "name": "Auto-paste transcription into active app",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "beta-telemetry": {
+          "name": "Beta Telemetry (Sentry) — GOLD STANDARD MODULE",
+          "status": "beta",
+          "lane": "locked",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "chat-local-llm": {
+          "name": "Local LLM Chat",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "compute": {
+          "name": "Compute / Model Link (discovery, remote cat, P2P, VNC, SSH, Terminal3D)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        "content-safety-filter": {
+          "name": "Content Safety Filter (toggle)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "dangerously-skip": {
+          "name": "Dangerously Skip (BLE jump rope)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "desktop-curtain": {
+          "name": "Hide Desktop Icons",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "energy-impact": {
+          "name": "Energy & Impact",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "even-realities": {
+          "name": "Even Realities / G2 (translation glasses)",
+          "status": "wip",
+          "lane": "beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "eye-care": {
+          "name": "Eye Care reminder (20-20-20)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "gguf-backend": {
+          "name": "GGUF backend (llama.cpp sidecar)",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "global-transcription": {
+          "name": "Global Transcription (menu bar)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "keyboard-backlight": {
+          "name": "Keyboard Backlight",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "lmstudio-interop": {
+          "name": "LM Studio model interop",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "local-api": {
+          "name": "Local API server",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "mlxserve-embed": {
+          "name": "MLXServe embedded listener",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        "mlxserve-sidecar": {
+          "name": "MLXServe sidecar",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "model-link": {
+          "name": "Model Link (P2P remote AI)",
+          "status": "live",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "monitor-control": {
+          "name": "Monitor Control (external DDC)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "omlx-sidecar": {
+          "name": "omlx sidecar (Python MLX oracle)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "openclaw": {
+          "name": "OpenClaw (gateway chat)",
+          "status": "beta",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "quit-apps": {
+          "name": "Quit Apps (force-quit running apps)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "screen-awake": {
+          "name": "Screen Awake",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "screen-recording": {
+          "name": "Screen Recording (demo capture)",
+          "status": "live",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "sentry-mode": {
+          "name": "Sentry Mode (away-guard lock)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "skip-healthkit-logging": {
+          "name": "Skip HealthKit workout logging",
+          "status": "wip",
+          "lane": "beta",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "snap-capture": {
+          "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "subscription": {
+          "name": "Subscription / Payments",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "transcription": {
+          "name": "Transcription (Whisper / SpeechAnalyzer)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "translate": {
+          "name": "Translate (Even G2 live translation)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "wav2vec2-transcription": {
+          "name": "Wav2Vec2 XLSR-53 Multilingual Transcription",
+          "status": "beta",
+          "lane": "purgatory",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "window-mgmt-others": {
+          "name": "Window management of other apps",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "window-mgmt-self": {
+          "name": "Window management (own windows)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "workout-exercise": {
+          "name": "Workout: Exercise (camera rep counter)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      }
+    },
+    {
+      "key": "beta",
+      "label": "Beta",
+      "sparkleChannel": "beta",
+      "version": "1.4.0-b5",
+      "build": 336,
+      "publishedAt": "2026-08-16",
+      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/download/v1.4.0-b5/LocalAIChatDirect-1.4.0-b5.dmg",
+      "tag": "beta/v1.4.0+336",
+      "commit": "7f5daf987",
+      "commitDate": "2026-08-16",
+      "trunkCommitsSince": 1123,
+      "manifest": {
+        "schemaVersion": 11,
+        "updated": "2026-08-10",
+        "featureCount": 39,
+        "shippingCount": 26
+      },
+      "features": {
+        "app-control": {
+          "name": "App Control API",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "auto-paste": {
+          "name": "Auto-paste transcription into active app",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "beta-telemetry": {
+          "name": "Beta Telemetry (Sentry) — GOLD STANDARD MODULE",
+          "status": "beta",
+          "lane": "locked",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "chat-local-llm": {
+          "name": "Local LLM Chat",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "clipboard-history": {
+          "name": "Clipboard History",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "compute": {
+          "name": "Compute / Model Link (discovery, remote cat, P2P, VNC + audio, SSH, Terminal3D)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        "content-safety-filter": {
+          "name": "Content Safety Filter (toggle)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "dangerously-skip": {
+          "name": "Dangerously Skip (BLE jump rope)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "desktop-curtain": {
+          "name": "Hide Desktop Icons / Desktop Curtain",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "energy-impact": {
+          "name": "Energy & Impact",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "even-realities": {
+          "name": "Even Realities / G2 display driver",
+          "status": "wip",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "eye-care": {
+          "name": "Eye Care reminder (20-20-20)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "gguf-backend": {
+          "name": "GGUF backend (llama.cpp sidecar)",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "global-transcription": {
+          "name": "Global Transcription (menu bar)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "in-app-announcements": {
+          "name": "In-App Actionable Announcements",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "keyboard-backlight": {
+          "name": "Keyboard Backlight",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "local-api": {
+          "name": "Local API server",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "lyrics-player": {
+          "name": "Lyrics Player (Apple Music + live translation)",
+          "status": "wip",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "mlxserve-embed": {
+          "name": "MLXServe embedded listener",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        "mlxserve-sidecar": {
+          "name": "MLXServe sidecar",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "model-link": {
+          "name": "Model Link (P2P remote AI)",
+          "status": "live",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "monitor-control": {
+          "name": "Monitor Control (external DDC)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "omlx-sidecar": {
+          "name": "omlx sidecar (Python MLX oracle)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "openclaw": {
+          "name": "OpenClaw (gateway chat)",
+          "status": "beta",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "quick-capture": {
+          "name": "Quick Capture (capture-chord palette)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "quit-apps": {
+          "name": "Quit Apps (force-quit running apps)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "routine-kit": {
+          "name": "Routines",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "screen-awake": {
+          "name": "Screen Awake",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "sentry-mode": {
+          "name": "Sentry Mode (away-guard lock)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "skip-healthkit-logging": {
+          "name": "Skip HealthKit workout logging",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "snap-capture": {
+          "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "studio-recording": {
+          "name": "Studio recording & streaming",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "subscription": {
+          "name": "Subscription / Payments",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "transcription": {
+          "name": "Transcription (Whisper / SpeechAnalyzer)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "translate": {
+          "name": "Translate",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "wav2vec2-transcription": {
+          "name": "Wav2Vec2 XLSR-53 Multilingual Transcription",
+          "status": "beta",
+          "lane": "purgatory",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "window-mgmt-others": {
+          "name": "Window management of other apps",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "window-mgmt-self": {
+          "name": "Window management (own windows)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "workout-exercise": {
+          "name": "Workout: Exercise (camera rep counter)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "no"
+        }
+      }
+    },
+    {
+      "key": "alpha",
+      "label": "Alpha",
+      "sparkleChannel": "alpha",
+      "version": "1.4.0-a158",
+      "build": 391,
+      "publishedAt": "2026-09-02",
+      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/download/v1.4.0-a158/LocalAIChatDirect-1.4.0-a158.dmg",
+      "tag": "alpha/v1.4.0+391",
+      "commit": "dcf5b036a",
+      "commitDate": "2026-09-02",
+      "trunkCommitsSince": 9,
+      "manifest": {
+        "schemaVersion": 12,
+        "updated": "2026-08-27",
+        "featureCount": 44,
+        "shippingCount": 42
+      },
+      "features": {
+        "app-control": {
+          "name": "App Control API",
+          "status": "wip",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "partial"
+        },
+        "auto-paste": {
+          "name": "Auto-paste transcription into active app",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "battery-cat": {
+          "name": "Battery Cat",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "beta-telemetry": {
+          "name": "Beta Telemetry (Sentry) — GOLD STANDARD MODULE",
+          "status": "beta",
+          "lane": "locked",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "birdwatcher": {
+          "name": "Birdwatcher (window watch set + lenses)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "chat-local-llm": {
+          "name": "Local LLM Chat",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "clipboard-history": {
+          "name": "Clipboard History",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "compute": {
+          "name": "Compute / Model Link (discovery, remote cat, P2P, VNC + audio, SSH, Terminal3D)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "partial",
+          "macOS": "yes"
+        },
+        "content-safety-filter": {
+          "name": "Content Safety Filter (toggle)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "dangerously-skip": {
+          "name": "Dangerously Skip (BLE jump rope)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "desktop-curtain": {
+          "name": "Hide Desktop Icons / Desktop Curtain",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "energy-impact": {
+          "name": "Energy & Impact",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "even-realities": {
+          "name": "Even Realities / G2 display driver",
+          "status": "wip",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "eye-care": {
+          "name": "Eye Care reminder (20-20-20)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "gguf-backend": {
+          "name": "GGUF backend (llama.cpp sidecar)",
+          "status": "beta",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "global-transcription": {
+          "name": "Global Transcription (menu bar)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "in-app-announcements": {
+          "name": "In-App Actionable Announcements",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "inference-analytics": {
+          "name": "Inference Analytics",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "keyboard-backlight": {
+          "name": "Keyboard Backlight",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "local-api": {
+          "name": "Local API server",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "lyrics-player": {
+          "name": "Lyrics Player (Apple Music + live translation)",
+          "status": "wip",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "mlxserve-embed": {
+          "name": "MLXServe embedded listener",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        "mlxserve-sidecar": {
+          "name": "MLXServe sidecar",
+          "status": "beta",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "model-downloads": {
+          "name": "Unified Model Downloads & Live Activities",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "model-link": {
+          "name": "Model Link (P2P remote AI)",
+          "status": "live",
+          "lane": "alpha",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "monitor-control": {
+          "name": "Monitor Control (external DDC)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "omlx-sidecar": {
+          "name": "omlx sidecar (Python MLX oracle)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "openclaw": {
+          "name": "OpenClaw (gateway chat)",
+          "status": "beta",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "quick-capture": {
+          "name": "Quick Capture (capture-chord palette)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "quit-apps": {
+          "name": "Quit Apps (force-quit running apps)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "routine-kit": {
+          "name": "Routines",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "partial",
+          "macOS": "partial"
+        },
+        "screen-awake": {
+          "name": "Screen Awake",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "sentry-mode": {
+          "name": "Sentry Mode (away-guard lock)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "skip-healthkit-logging": {
+          "name": "Skip HealthKit workout logging",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "snap-capture": {
+          "name": "Device Snap Capture (timestamped multi-source screenshots + transcript)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "studio-recording": {
+          "name": "Studio recording & streaming",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "partial"
+        },
+        "subscription": {
+          "name": "Subscription / Payments",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "system-stats": {
+          "name": "System Stats menu bar strip",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "transcription": {
+          "name": "Transcription (Whisper / SpeechAnalyzer)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "translate": {
+          "name": "Translate",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "yes",
+          "macOS": "yes"
+        },
+        "wav2vec2-transcription": {
+          "name": "Wav2Vec2 XLSR-53 Multilingual Transcription",
+          "status": "beta",
+          "lane": "purgatory",
+          "iOS": "no",
+          "macOS": "no"
+        },
+        "window-mgmt-others": {
+          "name": "Window management of other apps",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "window-mgmt-self": {
+          "name": "Window management (own windows)",
+          "status": "live",
+          "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "workout-exercise": {
+          "name": "Workout: Exercise (camera rep counter)",
+          "status": "wip",
+          "lane": "alpha",
+          "iOS": "no",
+          "macOS": "yes"
+        }
+      }
+    }
+  ]
+}

@@ -14,6 +14,8 @@ import {
   type Availability,
   type ModulePage
 } from "../../../../lib/module-catalog";
+import { presenceLabels, presenceOf, publishedPlatforms } from "../../../../lib/channel-presence";
+import { channelSnapshot, publishedChannels } from "../../../../lib/channel-snapshot";
 import { ModuleMedia } from "./module-media";
 
 type ModulePageProps = {
@@ -73,6 +75,36 @@ function availabilityPlatforms(module: ModulePage, key: ModulePage["channels"][n
   });
 }
 
+// What the builds people can install today actually contain for this module,
+// from the published snapshot — as opposed to the availability list above,
+// which is trunk head. "Did not exist yet" is the honest state for most modules
+// against a stable build cut months ago.
+function PublishedBuildsList({ module }: { module: ModulePage }) {
+  return (
+    <div className="modulePublished">
+      <p className="modulePublishedHeading">
+        In published builds
+        <span> · synced <time dateTime={channelSnapshot.synced}>{channelSnapshot.synced}</time></span>
+      </p>
+      <ul className="moduleShippingList" aria-label="Presence in published builds">
+        {publishedChannels().map((channel) => {
+          const feature = channel.features[module.id];
+          const presence = presenceOf(feature);
+          const detail = presence === "yes" || presence === "partial"
+            ? publishedPlatforms(feature!).join(" · ")
+            : presenceLabels[presence];
+          return (
+            <li key={channel.key} data-presence={presence}>
+              <strong>{channel.label} {channel.version} · build {channel.build}</strong>
+              <span>{detail}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 function StatusSection({ module }: { module: ModulePage }) {
   const state = moduleState(module);
   const channels = releaseChannels(module);
@@ -127,6 +159,8 @@ function StatusSection({ module }: { module: ModulePage }) {
           );
         })}
       </ul>
+
+      <PublishedBuildsList module={module} />
     </section>
   );
 }

@@ -21,7 +21,10 @@ import {
   type RowInput
 } from "../../lib/build-anatomy";
 import graphData from "../../data/module-graph.json";
-import { ModulesTable } from "./_components/modules-table";
+import { absentPresence, type PublishedChannelKey } from "../../lib/channel-presence";
+import { publishedChannel, publishedPresence } from "../../lib/channel-snapshot";
+import { ChannelStrip } from "./_components/channel-strip";
+import { ModulesTable, type PublishedBuildLabel } from "./_components/modules-table";
 
 export const metadata: Metadata = {
   title: "Modules",
@@ -75,6 +78,7 @@ export default function ModulesPage() {
       clickable: true,
       description: module.description ?? "Details for this module are being prepared.",
       channels: channels.length > 0 ? channels : ["none"],
+      published: publishedPresence(module.id),
       platforms: module.platforms,
       distributions: routes.length > 0 ? routes : ["none"],
       status: moduleState(module),
@@ -103,6 +107,7 @@ export default function ModulesPage() {
     clickable: false,
     description: module.description,
     channels: [],
+    published: absentPresence(),
     platforms: [],
     distributions: [],
     status: "n/a",
@@ -122,17 +127,24 @@ export default function ModulesPage() {
 
   const rows = [...featureRows, ...infrastructureRows];
 
+  const publishedBuilds = {} as Record<PublishedChannelKey, PublishedBuildLabel>;
+  for (const key of ["outdoor", "beta", "alpha"] as PublishedChannelKey[]) {
+    const channel = publishedChannel(key);
+    publishedBuilds[key] = { label: channel.label, version: channel.version, build: channel.build };
+  }
+
   return (
     <ContentPage
       kicker="Inside Local AI Cat"
       title="Modules"
-      intro="See what every part of Local AI Cat does, where it ships, and how thoroughly it is tested — including work in progress, locked modules, and ideas in purgatory. Pick a build to see what is compiled into each flavor."
+      intro="See what every part of Local AI Cat does, where it ships, and how thoroughly it is tested — including work in progress, locked modules, and ideas in purgatory. The cards show what each update channel is serving today; the table reads trunk head, and the Published column marks which of those builds each module has actually reached."
       meta={`${featureRows.length} features · ${infrastructureRows.length} infrastructure modules · Snapshot updated ${moduleCatalogUpdated}`}
     >
+      <ChannelStrip />
       <p className="docsSubnav">
         <Link href="/docs/packages">Packages view →</Link>
       </p>
-      <ModulesTable rows={rows} />
+      <ModulesTable publishedBuilds={publishedBuilds} rows={rows} />
     </ContentPage>
   );
 }

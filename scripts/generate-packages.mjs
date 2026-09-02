@@ -28,7 +28,7 @@ function parseAppRoot(args) {
   if (flagIndex !== -1 && args[flagIndex + 1]) {
     return path.resolve(process.cwd(), args[flagIndex + 1]);
   }
-  return path.resolve(root, "../Local-AI-Chat");
+  return process.env.LOCAL_AI_CHAT_ROOT ?? path.resolve(root, "../Local-AI-Chat");
 }
 
 async function main() {

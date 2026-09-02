@@ -10,7 +10,8 @@
     "test": "node --experimental-strip-types --test lib/*.test.ts scripts/*.test.mjs",
     "deploy:staging": "./scripts/deploy.sh staging",
     "deploy:prod": "./scripts/deploy.sh prod",
-    "deploy": "./scripts/deploy.sh"
+    "deploy": "./scripts/deploy.sh",
+    "sync:channels": "node scripts/generate-channel-manifests.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.37.0",

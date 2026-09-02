@@ -4,8 +4,11 @@ import { pathToFileURL } from "node:url";
 import process from "node:process";
 
 const root = process.cwd();
-const sourcePath = path.resolve(root, "../Local-AI-Chat/docs/features.json");
-const openApiPath = path.resolve(root, "../Local-AI-Chat/docs/localapi-openapi.json");
+// The Cat checkout: a sibling by default, or wherever LOCAL_AI_CHAT_ROOT points
+// (the nested external/localaicat-site clone has no sibling).
+const appRoot = process.env.LOCAL_AI_CHAT_ROOT ?? path.resolve(root, "../Local-AI-Chat");
+const sourcePath = path.resolve(appRoot, "docs/features.json");
+const openApiPath = path.resolve(appRoot, "docs/localapi-openapi.json");
 const outputPath = path.resolve(root, "data/public-features.json");
 
 // Maps an api capability (from features.json api.capabilities) or an inferred

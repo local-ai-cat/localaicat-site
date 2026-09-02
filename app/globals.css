@@ -5275,3 +5275,28 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
     align-items: flex-start;
   }
 }
+
+/* Per-module "In published builds" list (docs/modules/[id]). */
+.modulePublished {
+  margin-top: 24px;
+}
+
+.modulePublishedHeading {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.modulePublishedHeading span {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.moduleShippingList li[data-presence="no"] span,
+.moduleShippingList li[data-presence="absent"] span {
+  color: var(--text-faint);
+}

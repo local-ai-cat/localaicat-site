@@ -1,0 +1,110 @@
+.strip {
+  margin: 8px 0 28px;
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin-bottom: 14px;
+}
+
+.heading p {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.heading span {
+  font-size: 0.86rem;
+  color: var(--text-dim);
+}
+
+.heading code {
+  font-size: 0.8em;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  padding: 16px 18px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.card[data-channel="alpha"] {
+  border-style: dashed;
+}
+
+.label {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.version {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.build {
+  font-size: 0.86rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
+  gap: 12px;
+  margin: 0;
+}
+
+.facts div {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.facts dt {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.facts dd {
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.blurb {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}

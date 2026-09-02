@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-08-10",
+  "updated": "2026-08-27",
   "packages": [
     {
       "name": "AppControlKit",
@@ -22,7 +22,8 @@
       "name": "AudioSession",
       "deps": [],
       "reverseDeps": [
-        "FeatureTranslate"
+        "FeatureTranslate",
+        "FeatureTranslateDomain"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -144,7 +145,8 @@
     {
       "name": "FeatureBattery",
       "deps": [
-        "BatteryStateKit"
+        "BatteryStateKit",
+        "LocalAIDesignSystem"
       ],
       "reverseDeps": [],
       "appStoreGates": [],
@@ -181,8 +183,9 @@
     {
       "name": "FeatureDangerouslySkip",
       "deps": [
-        "FeatureEyeCare",
         "HealthKitLogging",
+        "LocalAIContracts",
+        "LogKit",
         "SkipKit"
       ],
       "reverseDeps": [],
@@ -221,9 +224,7 @@
       "deps": [
         "LocalAIContracts"
       ],
-      "reverseDeps": [
-        "FeatureDangerouslySkip"
-      ],
+      "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
     },
@@ -231,6 +232,7 @@
       "name": "FeatureGGUF",
       "deps": [
         "LocalAIContracts",
+        "LocalAICore",
         "LocalAITextGeneration"
       ],
       "reverseDeps": [],
@@ -277,7 +279,9 @@
     },
     {
       "name": "FeatureManifest",
-      "deps": [],
+      "deps": [
+        "SkillsKit"
+      ],
       "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
@@ -351,6 +355,7 @@
       "name": "FeatureQuickCapture",
       "deps": [
         "LocalAIContracts",
+        "LogKit",
         "SnapCaptureKit"
       ],
       "reverseDeps": [],
@@ -368,7 +373,8 @@
       "name": "FeatureScreenAwake",
       "deps": [
         "BatteryStateKit",
-        "LocalAIContracts"
+        "LocalAIContracts",
+        "LogKit"
       ],
       "reverseDeps": [
         "ScreenAwakeSleepLock"
@@ -418,8 +424,10 @@
         "LocalAIDesignSystem",
         "LocalAITextGeneration",
         "LocalSpeechKit",
+        "LogKit",
         "SpeechPipeline",
-        "Telemetry"
+        "Telemetry",
+        "TranslateImageKit"
       ],
       "reverseDeps": [
         "FeatureEvenRealities",
@@ -431,6 +439,7 @@
     {
       "name": "FeatureTranslateDomain",
       "deps": [
+        "AudioSession",
         "LocalAIContracts",
         "LocalAITextGeneration",
         "Telemetry",
@@ -522,6 +531,13 @@
       "linkedInProject": true
     },
     {
+      "name": "InferenceAnalytics",
+      "deps": [],
+      "reverseDeps": [],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "LocalAIContracts",
       "deps": [],
       "reverseDeps": [
@@ -529,6 +545,7 @@
         "FeatureAutoPaste",
         "FeatureClipboardHistory",
         "FeatureCompute",
+        "FeatureDangerouslySkip",
         "FeatureEvenRealities",
         "FeatureEyeCare",
         "FeatureGGUF",
@@ -563,6 +580,7 @@
         "Telemetry"
       ],
       "reverseDeps": [
+        "FeatureGGUF",
         "FeatureOMLXSidecar",
         "LocalAIHTTPServer",
         "LocalAIServing",
@@ -576,6 +594,7 @@
       "name": "LocalAIDesignSystem",
       "deps": [],
       "reverseDeps": [
+        "FeatureBattery",
         "FeatureSystemStats",
         "FeatureTranslate"
       ],
@@ -597,7 +616,8 @@
         "LocalAIServing",
         "LocalAITextGeneration",
         "LocalAITranscription",
-        "RoutineKit"
+        "RoutineKit",
+        "SkillsKit"
       ],
       "reverseDeps": [
         "FeatureEvenRealities",
@@ -688,6 +708,21 @@
       "linkedInProject": true
     },
     {
+      "name": "LogKit",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureDangerouslySkip",
+        "FeatureQuickCapture",
+        "FeatureScreenAwake",
+        "FeatureTranslate",
+        "SkipKit",
+        "TranslateImageKit",
+        "WindowWatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "MenuBarKit",
       "deps": [],
       "reverseDeps": [
@@ -702,6 +737,15 @@
       "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
+    },
+    {
+      "name": "PixelDiffKit",
+      "deps": [],
+      "reverseDeps": [
+        "TranslateImageKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": false
     },
     {
       "name": "RoutineKit",
@@ -741,9 +785,22 @@
       "linkedInProject": true
     },
     {
+      "name": "SkillsKit",
+      "deps": [],
+      "reverseDeps": [
+        "FeatureManifest",
+        "LocalAIHTTPServer",
+        "StudioAgentBridge",
+        "WindowWatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "SkipKit",
       "deps": [
-        "ChallengeKit"
+        "ChallengeKit",
+        "LogKit"
       ],
       "reverseDeps": [
         "FeatureDangerouslySkip"
@@ -759,7 +816,8 @@
         "Telemetry"
       ],
       "reverseDeps": [
-        "FeatureQuickCapture"
+        "FeatureQuickCapture",
+        "WindowWatchKit"
       ],
       "appStoreGates": [],
       "linkedInProject": true
@@ -792,6 +850,7 @@
         "DevLoopUI",
         "FrameSourceKit",
         "LocalAIContracts",
+        "SkillsKit",
         "StudioSceneKit"
       ],
       "reverseDeps": [],
@@ -896,6 +955,19 @@
       "linkedInProject": false
     },
     {
+      "name": "TranslateImageKit",
+      "deps": [
+        "LogKit",
+        "PixelDiffKit"
+      ],
+      "reverseDeps": [
+        "FeatureTranslate",
+        "WindowWatchKit"
+      ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
       "name": "VLMDispatchKit",
       "deps": [
         "ExerciseKit",
@@ -915,6 +987,18 @@
         "FeatureEvenRealities",
         "FeatureTranslateDomain"
       ],
+      "appStoreGates": [],
+      "linkedInProject": true
+    },
+    {
+      "name": "WindowWatchKit",
+      "deps": [
+        "LogKit",
+        "SkillsKit",
+        "SnapCaptureKit",
+        "TranslateImageKit"
+      ],
+      "reverseDeps": [],
       "appStoreGates": [],
       "linkedInProject": true
     },

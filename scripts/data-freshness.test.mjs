@@ -18,8 +18,11 @@ import test from "node:test";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
-const manifest = path.resolve(root, "../Local-AI-Chat/docs/features.json");
+const manifest = path.resolve(process.env.LOCAL_AI_CHAT_ROOT ?? path.resolve(root, "../Local-AI-Chat"), "docs/features.json");
 
+// generate-channel-manifests.mjs is deliberately absent: it reads the live
+// appcast and counts commits against a moving trunk, so its output changes
+// without anything here being wrong. Its `synced` stamp is the freshness signal.
 const generators = [
   ["generate-public-features.mjs", "public-features.json"],
   ["generate-module-testing.mjs", "module-testing.json"],

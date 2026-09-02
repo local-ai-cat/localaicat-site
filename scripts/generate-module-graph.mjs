@@ -175,7 +175,7 @@ export async function generateModuleGraph(appRoot) {
 
 function parseAppRoot(args) {
   const flagIndex = args.indexOf("--app-repo");
-  if (flagIndex === -1) return path.resolve(root, "../Local-AI-Chat");
+  if (flagIndex === -1) return process.env.LOCAL_AI_CHAT_ROOT ?? path.resolve(root, "../Local-AI-Chat");
   const value = args[flagIndex + 1];
   if (!value) fail("--app-repo requires a path");
   return path.resolve(process.cwd(), value);

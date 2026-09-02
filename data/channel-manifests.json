@@ -4,8 +4,8 @@
   "appcast": "https://github.com/local-ai-cat/localaicat-site/releases/latest/download/appcast.xml",
   "trunk": {
     "ref": "origin/outdoor-cat",
-    "commit": "fe75622b3",
-    "date": "2026-09-02"
+    "commit": "7d46e2116",
+    "date": "2026-09-03"
   },
   "channels": [
     {
@@ -19,7 +19,7 @@
       "tag": "released/v1.4.0+238",
       "commit": "250c2d10d",
       "commitDate": "2026-07-09",
-      "trunkCommitsSince": 3529,
+      "trunkCommitsSince": 3547,
       "manifest": {
         "schemaVersion": 4,
         "updated": "2026-07-08",
@@ -278,7 +278,7 @@
       "tag": "beta/v1.4.0+336",
       "commit": "7f5daf987",
       "commitDate": "2026-08-16",
-      "trunkCommitsSince": 1123,
+      "trunkCommitsSince": 1141,
       "manifest": {
         "schemaVersion": 11,
         "updated": "2026-08-10",
@@ -565,14 +565,14 @@
       "key": "alpha",
       "label": "Alpha",
       "sparkleChannel": "alpha",
-      "version": "1.4.0-a158",
-      "build": 391,
+      "version": "1.4.0-a160",
+      "build": 393,
       "publishedAt": "2026-09-02",
-      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/download/v1.4.0-a158/LocalAIChatDirect-1.4.0-a158.dmg",
-      "tag": "alpha/v1.4.0+391",
-      "commit": "dcf5b036a",
-      "commitDate": "2026-09-02",
-      "trunkCommitsSince": 9,
+      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/download/v1.4.0-a160/LocalAIChatDirect-1.4.0-a160.dmg",
+      "tag": "alpha/v1.4.0+393",
+      "commit": "7d46e2116",
+      "commitDate": "2026-09-03",
+      "trunkCommitsSince": 0,
       "manifest": {
         "schemaVersion": 12,
         "updated": "2026-08-27",
@@ -723,7 +723,7 @@
         "lyrics-player": {
           "name": "Lyrics Player (Apple Music + live translation)",
           "status": "wip",
-          "lane": "stable",
+          "lane": "alpha",
           "iOS": "no",
           "macOS": "yes"
         },

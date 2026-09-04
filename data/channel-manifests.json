@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "synced": "2026-09-02",
+  "synced": "2026-09-04",
   "appcast": "https://github.com/local-ai-cat/localaicat-site/releases/latest/download/appcast.xml",
   "trunk": {
     "ref": "origin/outdoor-cat",
-    "commit": "7d46e2116",
-    "date": "2026-09-03"
+    "commit": "d9412b2e2",
+    "date": "2026-09-04"
   },
   "channels": [
     {
@@ -19,7 +19,7 @@
       "tag": "released/v1.4.0+238",
       "commit": "250c2d10d",
       "commitDate": "2026-07-09",
-      "trunkCommitsSince": 3547,
+      "trunkCommitsSince": 3640,
       "manifest": {
         "schemaVersion": 4,
         "updated": "2026-07-08",
@@ -278,7 +278,7 @@
       "tag": "beta/v1.4.0+336",
       "commit": "7f5daf987",
       "commitDate": "2026-08-16",
-      "trunkCommitsSince": 1141,
+      "trunkCommitsSince": 1234,
       "manifest": {
         "schemaVersion": 11,
         "updated": "2026-08-10",
@@ -565,19 +565,19 @@
       "key": "alpha",
       "label": "Alpha",
       "sparkleChannel": "alpha",
-      "version": "1.4.0-a160",
-      "build": 393,
-      "publishedAt": "2026-09-02",
-      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/download/v1.4.0-a160/LocalAIChatDirect-1.4.0-a160.dmg",
-      "tag": "alpha/v1.4.0+393",
-      "commit": "7d46e2116",
-      "commitDate": "2026-09-03",
-      "trunkCommitsSince": 0,
+      "version": "1.4.0-a161",
+      "build": 394,
+      "publishedAt": "2026-09-04",
+      "downloadURL": "https://github.com/local-ai-cat/localaicat-site/releases/download/v1.4.0-a161/LocalAIChatDirect-1.4.0-a161.dmg",
+      "tag": "alpha/v1.4.0+394",
+      "commit": "96f12dfea",
+      "commitDate": "2026-09-04",
+      "trunkCommitsSince": 1,
       "manifest": {
         "schemaVersion": 12,
         "updated": "2026-08-27",
-        "featureCount": 44,
-        "shippingCount": 42
+        "featureCount": 45,
+        "shippingCount": 43
       },
       "features": {
         "app-control": {
@@ -787,6 +787,13 @@
           "name": "Quit Apps (force-quit running apps)",
           "status": "live",
           "lane": "stable",
+          "iOS": "no",
+          "macOS": "yes"
+        },
+        "remote-sessions": {
+          "name": "Remote Sessions (durable SSH/VNC sessions + Cat portal)",
+          "status": "wip",
+          "lane": "alpha",
           "iOS": "no",
           "macOS": "yes"
         },

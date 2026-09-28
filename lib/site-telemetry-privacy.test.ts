@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import test from "node:test";
-import { goatCounterPixelUrl, sanitizeSpeedEvent } from "./site-telemetry-privacy.ts";
+import { goatCounterEventUrl, goatCounterPixelUrl, sanitizeSpeedEvent } from "./site-telemetry-privacy.ts";
 import { supportChatUrl } from "./support-chat.ts";
 
 test("GoatCounter receives only public paths and a cache buster, never bearer or referrer data", () => {
@@ -15,6 +15,16 @@ test("GoatCounter receives only public paths and a cache buster, never bearer or
     assert.equal(goatCounterPixelUrl(`https://${host}/`, true, 123), null);
   }
   assert.equal(goatCounterPixelUrl("https://localaicat.com/", false, 123), null);
+});
+
+test("GoatCounter events send only the event name, on production hosts, when counting is on", () => {
+  const url = new URL(goatCounterEventUrl("purrdain-src-card", "localaicat.com", true, 123)!);
+  assert.equal(url.origin, "https://localaicat.goatcounter.com");
+  assert.deepEqual([...url.searchParams], [["p", "purrdain-src-card"], ["e", "true"], ["rnd", "123"]]);
+  assert.equal(goatCounterEventUrl("purrdain-src-card", "localaicat.com", false, 123), null);
+  for (const host of ["localhost", "preview.vercel.app"]) {
+    assert.equal(goatCounterEventUrl("purrdain-src-card", host, true, 123), null);
+  }
 });
 
 test("Speed Insights strips every query, fragment and supplied private route", () => {

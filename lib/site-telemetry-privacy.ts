@@ -26,3 +26,22 @@ export function goatCounterPixelUrl(url: string, enabled: boolean, cacheBust: nu
   pixel.searchParams.set("rnd", String(cacheBust));
   return pixel.toString();
 }
+
+/**
+ * A named GoatCounter event: the event name is the only thing sent, never the
+ * page URL, its query or a referrer. Production hosts only.
+ */
+export function goatCounterEventUrl(
+  event: string,
+  hostname: string,
+  enabled: boolean,
+  cacheBust: number
+): string | null {
+  if (!enabled) return null;
+  if (hostname !== "localaicat.com" && hostname !== "www.localaicat.com") return null;
+  const pixel = new URL("https://localaicat.goatcounter.com/count");
+  pixel.searchParams.set("p", event);
+  pixel.searchParams.set("e", "true");
+  pixel.searchParams.set("rnd", String(cacheBust));
+  return pixel.toString();
+}

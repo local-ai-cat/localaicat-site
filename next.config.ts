@@ -13,6 +13,8 @@ const scriptSrc = [
   // Vercel Speed Insights loads its collector from va.vercel-scripts.com;
   // without this entry the CSP silently blocks all analytics.
   "https://va.vercel-scripts.com",
+  // GoatCounter's count.js; its beacons are covered by connect-src https:.
+  "https://gc.zgo.at",
 ]
   .filter(Boolean)
   .join(" ");

@@ -10,3 +10,8 @@ repository:
     - git@github-atlascodesai:local-ai-cat/localaicat-site.git
 integrations:
   copy: []
+  analytics:
+    provider: goatcounter
+    siteId: localaicat
+    publicDashboard: https://localaicat.goatcounter.com
+    searchConsole: pending

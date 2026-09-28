@@ -704,7 +704,7 @@ export function HomeExperience() {
         </div>
 
         <div className="pricingActions">
-          <Link className="secondaryButton" href="/outdoor">See the full Outdoor feature set</Link>
+          <Link className="secondaryButton" href="/docs">See every feature and which edition has it</Link>
         </div>
       </section>
     </div>

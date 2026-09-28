@@ -12,6 +12,8 @@ integrations:
   copy: []
   analytics:
     provider: goatcounter
+    domain: localaicat.com
+    searchConsoleProperty: sc-domain:localaicat.com
     siteId: localaicat
     publicDashboard: https://localaicat.goatcounter.com
     searchConsole: pending

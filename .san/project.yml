@@ -1,0 +1,19 @@
+schemaVersion: 1
+id: localaicat-site
+name: localaicat-site
+kind: webApplication
+summary: "the next.js marketing and checkout site for the direct-download cat, and the repo that hosts the outdoor-channel release artifacts and appcast."
+capabilities: []
+platforms: []
+repository:
+  canonicalRemotes:
+    - git@github-atlascodesai:local-ai-cat/localaicat-site.git
+integrations:
+  copy: []
+  analytics:
+    provider: goatcounter
+    domain: localaicat.com
+    searchConsoleProperty: sc-domain:localaicat.com
+    siteId: localaicat
+    publicDashboard: https://localaicat.goatcounter.com
+    searchConsole: pending

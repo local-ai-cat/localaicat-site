@@ -3,6 +3,7 @@ import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { getSiteUrl } from "../lib/env";
+import { GoatCounter } from "./goat-counter";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -70,6 +71,7 @@ export default function RootLayout({
         {children}
         <SpeedInsights />
         <Script src="/js/cookie-consent.js" strategy="afterInteractive" />
+      <GoatCounter />
       </body>
     </html>
   );

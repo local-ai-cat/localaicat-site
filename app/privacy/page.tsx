@@ -88,6 +88,17 @@ export default function PrivacyPage() {
         </section>
 
         <section className="contentCard">
+          <h2>This website</h2>
+          <p>
+            This website counts page views with GoatCounter. It sets no cookies,
+            does not store IP addresses, and builds no visitor profiles. This
+            applies to the website only, not the app. The totals are public
+            at{" "}
+            <a href="https://localaicat.goatcounter.com">localaicat.goatcounter.com</a>.
+          </p>
+        </section>
+
+        <section className="contentCard">
           <h2>Questions</h2>
           <p>
             For privacy questions, contact{" "}

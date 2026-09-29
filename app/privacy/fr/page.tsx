@@ -95,6 +95,17 @@ export default function PrivacyPageFr() {
         </section>
 
         <section className="contentCard">
+          <h2>Ce site web</h2>
+          <p>
+            Ce site web compte les pages vues avec GoatCounter. Il ne dépose
+            aucun cookie, ne conserve pas les adresses IP et ne crée aucun
+            profil de visiteur. Cela concerne uniquement le site, pas
+            l'application. Les totaux sont publics sur{" "}
+            <a href="https://localaicat.goatcounter.com">localaicat.goatcounter.com</a>.
+          </p>
+        </section>
+
+        <section className="contentCard">
           <h2>Questions</h2>
           <p>
             Pour toute question relative à la confidentialité, contactez{" "}

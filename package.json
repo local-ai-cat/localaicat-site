@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test": "node --experimental-strip-types --test lib/*.test.ts scripts/*.test.mjs",
+    "check": "tsc --noEmit && next build",
     "deploy:staging": "./scripts/deploy.sh staging",
     "deploy:prod": "./scripts/deploy.sh prod",
     "deploy": "./scripts/deploy.sh"

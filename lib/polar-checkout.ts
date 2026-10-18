@@ -52,6 +52,7 @@ type PolarSubscription = {
   cancel_at_period_end?: boolean | null;
   status?: string;
   product_id?: string | null;
+  created_at?: string;
 };
 
 /**
@@ -237,13 +238,18 @@ async function fetchSubscription(
  * Fallback for the case where a confirmed checkout doesn't yet expose its
  * `subscription_id` (Polar can return the checkout as confirmed before the
  * subscription_id field propagates). Lists the customer's active
- * subscriptions and picks the most recently updated one.
+ * subscriptions and picks the most recently updated one for this checkout's
+ * product that started after the checkout did, so another purchase on the
+ * same customer record never supplies the plan or renewal date.
  */
 async function fetchLatestSubscriptionForCustomer(
   customerId: string,
+  productId: string | null | undefined,
+  checkoutCreatedAt: number,
   adminKey: string,
   apiBase: string
 ): Promise<PolarSubscription | null> {
+  if (!productId || !Number.isFinite(checkoutCreatedAt)) return null;
   const url = `${apiBase}/v1/subscriptions/?customer_id=${encodeURIComponent(customerId)}&active=true&limit=5`;
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${adminKey}` },
@@ -254,7 +260,9 @@ async function fetchLatestSubscriptionForCustomer(
     items?: PolarSubscription[];
     result?: PolarSubscription[];
   };
-  const items = payload.items ?? payload.result ?? [];
+  const items = (payload.items ?? payload.result ?? []).filter((item) =>
+    item.product_id === productId && Date.parse(item.created_at ?? "") >= checkoutCreatedAt
+  );
   if (items.length === 0) return null;
   // Most recent first by current_period_end (renewals get pushed forward).
   return items
@@ -419,8 +427,8 @@ export async function resolveCheckoutSuccessState(
     if (licenseKey) {
       const subscription = checkout.subscription_id
         ? await fetchSubscription(checkout.subscription_id, adminKey, apiBase)
-          ?? await fetchLatestSubscriptionForCustomer(customerId, adminKey, apiBase)
-        : await fetchLatestSubscriptionForCustomer(customerId, adminKey, apiBase);
+          ?? await fetchLatestSubscriptionForCustomer(customerId, checkout.product_id, checkoutCreatedAt, adminKey, apiBase)
+        : await fetchLatestSubscriptionForCustomer(customerId, checkout.product_id, checkoutCreatedAt, adminKey, apiBase);
       plan = planSlugForInterval(subscription?.recurring_interval);
       renewsAt = subscription?.current_period_end ?? null;
     }

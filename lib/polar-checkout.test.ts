@@ -231,6 +231,8 @@ test("resolveCheckoutSuccessState falls back to customer subscription list when 
         items: [
           {
             id: "sub_recent",
+            product_id: "prod_pro",
+            created_at: freshTimestamp,
             recurring_interval: "year",
             current_period_end: renewsAt,
             cancel_at_period_end: false,
@@ -571,4 +573,37 @@ test("resolveCheckoutSuccessState does not reveal a same-benefit key that predat
     cookieIssuedAt: Date.now()
   });
   assert.equal(after?.licenseKey, "MEOW-PRO-THIS-PURCHASE");
+});
+
+test("resolveCheckoutSuccessState ignores another purchase's subscription in the customer fallback", async () => {
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+  globalThis.fetch = async (input) => {
+    const url = input.toString();
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_other_sub") {
+      return Response.json({ status: "confirmed", customer_id: "cust_os", product_id: "prod_pro", created_at: freshTimestamp, modified_at: freshTimestamp });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      return Response.json({ token: "polar_cst_os" }, { status: 201 });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100") {
+      return Response.json({ items: [{ key: "MEOW-PRO-OS", status: "granted", benefit_id: "ben_pro", created_at: freshTimestamp }] });
+    }
+    if (url.startsWith("https://sandbox-api.polar.sh/v1/subscriptions/?customer_id=")) {
+      return Response.json({ items: [
+        { id: "sub_older", product_id: "prod_pro", created_at: "2026-01-01T00:00:00Z", recurring_interval: "month", current_period_end: "2026-11-01T00:00:00Z" },
+        { id: "sub_other_product", product_id: "prod_dev", created_at: freshTimestamp, recurring_interval: "year", current_period_end: "2027-10-01T00:00:00Z" }
+      ] });
+    }
+    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const state = await resolveCheckoutSuccessState("chk_other_sub", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+
+  assert.equal(state?.licenseKey, "MEOW-PRO-OS");
+  assert.equal(state?.plan, null, "neither an older subscription nor another product's may supply the plan");
+  assert.equal(state?.renewsAt, null);
 });

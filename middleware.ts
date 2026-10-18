@@ -1,15 +1,30 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // Gate the private /internal area with HTTP Basic Auth. The username is ignored; the password
-// must equal INTERNAL_PASSWORD. Fail-closed in production if the env var isn't set, and open in
-// local dev so the area is viewable without a password.
+// must equal INTERNAL_PASSWORD. Fail-closed everywhere except local development when the env var
+// isn't set, so a preview or staging build with an unexpected NODE_ENV never opens the area.
 export const config = { matcher: ["/internal/:path*"] };
 
-export function middleware(req: NextRequest) {
+async function sha256(value: string) {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+}
+
+// Edge has no node:crypto timingSafeEqual; comparing fixed-length digests byte by byte without an
+// early exit keeps the comparison time independent of where the inputs differ.
+async function passwordMatches(candidate: string, expected: string) {
+  const [left, right] = await Promise.all([sha256(candidate), sha256(expected)]);
+  let difference = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    difference |= left[index] ^ right[index];
+  }
+  return difference === 0;
+}
+
+export async function middleware(req: NextRequest) {
   const expected = process.env.INTERNAL_PASSWORD;
 
   if (!expected) {
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV !== "development") {
       return new NextResponse("Internal area is not configured.", { status: 503 });
     }
     return NextResponse.next(); // dev convenience
@@ -20,7 +35,7 @@ export function middleware(req: NextRequest) {
     try {
       const decoded = atob(header.slice(6));
       const password = decoded.slice(decoded.indexOf(":") + 1);
-      if (password === expected) return NextResponse.next();
+      if (await passwordMatches(password, expected)) return NextResponse.next();
     } catch {
       // fall through to 401
     }

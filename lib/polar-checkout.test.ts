@@ -687,3 +687,34 @@ test("resolveCheckoutSuccessState finds this checkout's key however many older k
   });
   assert.equal(state?.licenseKey, "MEOW-PRO-NEW");
 });
+
+test("a seat-based (Team) checkout reports its seats and looks up no key", async () => {
+  const requestedUrls: string[] = [];
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+  globalThis.fetch = async (input) => {
+    const url = input.toString();
+    requestedUrls.push(url);
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_team") {
+      return Response.json({
+        status: "succeeded",
+        customer_id: "cust_team",
+        product_id: "prod_team_seats",
+        seats: 4,
+        created_at: freshTimestamp,
+        modified_at: freshTimestamp
+      });
+    }
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+
+  const state = await resolveCheckoutSuccessState("chk_team", {
+    activationTokenStore: createInMemoryActivationTokenStore()
+  });
+
+  assert.equal(state?.seats, 4);
+  assert.equal(state?.licenseKey, null);
+  assert.equal(state?.activationToken, null);
+  assert.equal(state?.revealBlockedReason, null);
+  assert.deepEqual(requestedUrls, ["https://sandbox-api.polar.sh/v1/checkouts/chk_team"],
+    "no customer session, order or key lookup for a purchase whose keys belong to its members");
+});

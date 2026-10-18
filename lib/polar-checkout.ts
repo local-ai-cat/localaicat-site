@@ -25,6 +25,8 @@ type PolarCheckout = {
   modified_at?: string;
   subscription_id?: string | null;
   product_id?: string | null;
+  /** Set only on a checkout for a seat-based price. */
+  seats?: number | null;
 };
 
 type PolarBenefitGrant = {
@@ -159,6 +161,12 @@ export type CheckoutSuccessState = {
   plan: string | null;
   /** ISO-8601 wall-clock time at which the subscription renews. Null for non-recurring or unknown. */
   renewsAt: string | null;
+  /**
+   * Seats bought, for a seat-based (Team) checkout. Polar grants benefits to
+   * the members the buyer assigns, never to the buyer, so such a checkout has
+   * no license key of its own.
+   */
+  seats?: number;
 };
 
 function isConfirmedCheckout(status: string | undefined) {
@@ -354,6 +362,25 @@ export async function resolveCheckoutSuccessState(
         revealBlockedReason: null,
         plan: null,
         renewsAt: null
+      };
+    }
+
+    // A Team purchase reveals no key: the buyer assigns its seats in the
+    // customer portal and each member claims their own. Nothing secret is
+    // returned, so the reveal gates below do not apply.
+    if (typeof checkout.seats === "number" && checkout.seats > 0) {
+      return {
+        checkoutStatus,
+        customerId,
+        customerPortalUrl: null,
+        licenseKey: null,
+        activationToken: null,
+        activationTokenExpiresAt: null,
+        revealExpiresAt: null,
+        revealBlockedReason: null,
+        plan: "team-annual",
+        renewsAt: null,
+        seats: checkout.seats
       };
     }
 

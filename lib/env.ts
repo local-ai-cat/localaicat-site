@@ -150,6 +150,15 @@ export function getPolarProductId(slug: "team-annual" | "pro-annual") {
   return optionalValue(ids[slug]);
 }
 
+export function getTeamCheckoutConfig() {
+  return {
+    adminKey: getPolarAdminKey(),
+    teamProductId: getPolarProductId("team-annual"),
+    proAnnualProductId: getPolarProductId("pro-annual"),
+    staticTeamUrl: getCheckoutUrl("team-annual")
+  };
+}
+
 export function getDirectInstallScriptUrl() {
   return `${getSiteUrl().replace(/\/$/, "")}/install`;
 }

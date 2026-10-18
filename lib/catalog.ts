@@ -34,7 +34,7 @@ export const businessPlans = [
     price: "from £40",
     cadence: "/seat/year",
     note: "Seat-based access for small teams.",
-    bullets: ["Minimum 2 seats", "Seat billing", "Built on Outdoor Cat"],
+    bullets: ["Minimum 2 seats", "A license key per person", "£35 from 11 seats, £30 from 26"],
     ctaHref: "/team",
     ctaLabel: "Get started"
   },

@@ -194,7 +194,7 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
           <ul className="dualCardList">
             <li>Full Pro access on Mac</li>
             <li>Direct-download build</li>
-            <li>{sellsSeats ? "Its own license key, sent by email" : `Up to ${SINGLE_LICENSE_DEVICES} Macs on one key`}</li>
+            <li>{sellsSeats ? "Its own license key, claimed from the seat's email invite" : `Up to ${SINGLE_LICENSE_DEVICES} Macs on one key`}</li>
             <li>Standard support</li>
           </ul>
         </div>

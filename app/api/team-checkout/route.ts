@@ -6,10 +6,11 @@ import {
   getPolarProductId,
   getSiteUrl
 } from "../../../lib/env";
+import { seatCount } from "../../../lib/team-seats";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
-  const seats = Math.max(2, Math.min(100, Number(body?.seats) || 2));
+  const seats = seatCount(body?.seats);
 
   const adminKey = getPolarAdminKey();
   const productId = getPolarProductId("team-annual");

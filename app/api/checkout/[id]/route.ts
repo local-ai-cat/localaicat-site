@@ -90,6 +90,10 @@ export async function GET(
     );
   }
 
+  if (state.seats) {
+    return NextResponse.json({ seats: state.seats }, { headers: noStoreHeaders });
+  }
+
   if (state.revealBlockedReason === "expired") {
     return NextResponse.json(
       {

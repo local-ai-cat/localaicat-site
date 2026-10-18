@@ -17,6 +17,8 @@ type CheckoutActivationResponse = {
   expires_at?: string | null;
   reveal_expires_at?: string | null;
   reveal_blocked_reason?: "expired" | "cookie_required" | null;
+  /** A Team purchase: no key here, the buyer assigns seats instead. */
+  seats?: number;
   error?: string;
 };
 
@@ -69,6 +71,7 @@ export function SuccessActivationCard({
     "expired" | "cookie_required" | null
   >(null);
   const [revealRemainingSeconds, setRevealRemainingSeconds] = useState<number | null>(null);
+  const [teamSeats, setTeamSeats] = useState<number | null>(null);
   const didAttemptOpenRef = useRef(false);
 
   // The deeplink carries the single-use activation token, not the key (see
@@ -190,6 +193,11 @@ export function SuccessActivationCard({
 
         if (response.ok) {
           const data = (await response.json()) as CheckoutActivationResponse;
+          if (data.seats) {
+            setTeamSeats(data.seats);
+            setIsPolling(false);
+            return;
+          }
           if (data.reveal_expires_at) {
             setRevealExpiresAt(data.reveal_expires_at);
           }
@@ -387,6 +395,35 @@ export function SuccessActivationCard({
 
   if (isDismissed) {
     return null;
+  }
+
+  if (teamSeats !== null) {
+    return (
+      <section className="contentCard contentCardTight successFlowCard">
+        <div className="successFlowHeader">
+          <div>
+            <h2>Assign your {teamSeats} seats</h2>
+            <p>
+              Your team plan is active. Open the customer portal and assign
+              each seat by email, including one for yourself if you need it.
+              Every person gets an invite and their own license key, which
+              they paste into Settings → Activate License.
+            </p>
+          </div>
+          <span className="successStateBadge successStateBadgeReady">Seats ready</span>
+        </div>
+        <div className="routeActions">
+          {customerPortalUrl ? (
+            <a className="planButton" href={customerPortalUrl}>
+              Assign seats
+            </a>
+          ) : null}
+          <a className="secondaryButton" href="/#download">
+            Download Outdoor Cat
+          </a>
+        </div>
+      </section>
+    );
   }
 
   const headlineLabel = revealBlockedReason === "expired"

@@ -72,13 +72,13 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
             key: "LOCALAI-PRO-OLDER",
             status: "granted",
             benefit_id: "ben_pro",
-            created_at: "2026-04-25T10:00:00Z"
+            created_at: new Date(Date.now() - 20 * 1000).toISOString()
           },
           {
             key: "LOCALAI-PRO-CURRENT",
             status: "granted",
             benefit_id: "ben_pro",
-            created_at: "2026-04-25T11:00:00Z"
+            created_at: new Date(Date.now() - 10 * 1000).toISOString()
           }
         ]
       });
@@ -458,6 +458,10 @@ test("resolveCheckoutSuccessState reveals the license key to the cookie-bound vi
   assert.ok(state?.revealExpiresAt);
 });
 
+function secondsAgo(seconds: number) {
+  return new Date(Date.now() - seconds * 1000).toISOString();
+}
+
 function confirmedCheckoutFetch(checkoutId: string, keys: { key: string; benefit_id: string; created_at: string }[]) {
   const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
   return async (input: string | URL | Request) => {
@@ -501,7 +505,7 @@ test("resolveCheckoutSuccessState rejects ids outside the Polar id alphabet with
 test("resolveCheckoutSuccessState grants the cookieless first-visit grace only once per checkout", async () => {
   const store = createInMemoryActivationTokenStore();
   globalThis.fetch = confirmedCheckoutFetch("chk_once", [
-    { key: "MEOW-PRO-ONCE", benefit_id: "ben_pro", created_at: "2026-10-01T00:00:00Z" }
+    { key: "MEOW-PRO-ONCE", benefit_id: "ben_pro", created_at: secondsAgo(10) }
   ]);
 
   const first = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null });
@@ -516,7 +520,7 @@ test("resolveCheckoutSuccessState grants the cookieless first-visit grace only o
 
 test("resolveCheckoutSuccessState keeps the grace closed when no store can record the claim", async () => {
   globalThis.fetch = confirmedCheckoutFetch("chk_nostore", [
-    { key: "MEOW-PRO-NOSTORE", benefit_id: "ben_pro", created_at: "2026-10-01T00:00:00Z" }
+    { key: "MEOW-PRO-NOSTORE", benefit_id: "ben_pro", created_at: secondsAgo(10) }
   ]);
 
   const state = await resolveCheckoutSuccessState("chk_nostore", { activationTokenStore: null, cookieIssuedAt: null });
@@ -527,8 +531,8 @@ test("resolveCheckoutSuccessState keeps the grace closed when no store can recor
 
 test("resolveCheckoutSuccessState reveals only keys granted by the checkout's own product", async () => {
   globalThis.fetch = confirmedCheckoutFetch("chk_bound", [
-    { key: "MEOW-DEV-NEWER", benefit_id: "ben_dev", created_at: "2026-10-02T00:00:00Z" },
-    { key: "MEOW-PRO-OWN", benefit_id: "ben_pro", created_at: "2026-10-01T00:00:00Z" }
+    { key: "MEOW-DEV-NEWER", benefit_id: "ben_dev", created_at: secondsAgo(5) },
+    { key: "MEOW-PRO-OWN", benefit_id: "ben_pro", created_at: secondsAgo(10) }
   ]);
   const bound = await resolveCheckoutSuccessState("chk_bound", {
     activationTokenStore: createInMemoryActivationTokenStore(),
@@ -537,11 +541,34 @@ test("resolveCheckoutSuccessState reveals only keys granted by the checkout's ow
   assert.equal(bound?.licenseKey, "MEOW-PRO-OWN", "a newer key from another product must not be revealed");
 
   globalThis.fetch = confirmedCheckoutFetch("chk_other", [
-    { key: "MEOW-DEV-ONLY", benefit_id: "ben_dev", created_at: "2026-10-02T00:00:00Z" }
+    { key: "MEOW-DEV-ONLY", benefit_id: "ben_dev", created_at: secondsAgo(5) }
   ]);
   const other = await resolveCheckoutSuccessState("chk_other", {
     activationTokenStore: createInMemoryActivationTokenStore(),
     cookieIssuedAt: Date.now()
   });
   assert.equal(other?.licenseKey, null, "keys from other purchases stay hidden until this product's key is granted");
+});
+
+test("resolveCheckoutSuccessState does not reveal a same-benefit key that predates the checkout", async () => {
+  // Polar attaches checkouts to customers by the email typed at checkout, so
+  // an earlier Pro key on the same customer record may be someone else's.
+  globalThis.fetch = confirmedCheckoutFetch("chk_shared", [
+    { key: "MEOW-PRO-EARLIER-PURCHASE", benefit_id: "ben_pro", created_at: secondsAgo(3600) }
+  ]);
+  const before = await resolveCheckoutSuccessState("chk_shared", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(before?.licenseKey, null, "a key created before this checkout is not this checkout's key");
+
+  globalThis.fetch = confirmedCheckoutFetch("chk_shared", [
+    { key: "MEOW-PRO-EARLIER-PURCHASE", benefit_id: "ben_pro", created_at: secondsAgo(3600) },
+    { key: "MEOW-PRO-THIS-PURCHASE", benefit_id: "ben_pro", created_at: secondsAgo(5) }
+  ]);
+  const after = await resolveCheckoutSuccessState("chk_shared", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(after?.licenseKey, "MEOW-PRO-THIS-PURCHASE");
 });

@@ -170,12 +170,20 @@ async function fetchLicenseKeyBenefitIds(
   );
 }
 
+/**
+ * The key this checkout produced: granted by one of the product's license-key
+ * benefits and created after the checkout itself. A key that already existed
+ * cannot be this purchase's, and Polar attaches checkouts to customers by the
+ * email typed at checkout, so an older key may belong to someone else's earlier
+ * purchase on that customer record.
+ */
 async function lookupGrantedLicenseKey(
   customerSessionToken: string,
   benefitIds: Set<string>,
+  checkoutCreatedAt: number,
   apiBase: string
 ): Promise<string | null> {
-  if (benefitIds.size === 0) return null;
+  if (benefitIds.size === 0 || !Number.isFinite(checkoutCreatedAt)) return null;
   const response = await fetch(
     `${apiBase}/v1/customer-portal/license-keys?limit=${LICENSE_KEY_PAGE_SIZE}`,
     {
@@ -194,7 +202,10 @@ async function lookupGrantedLicenseKey(
   };
   const items = payload.items ?? payload.result ?? [];
   const activeKey = items
-    .filter((item) => item.status === "granted" && item.key && benefitIds.has(item.benefit_id ?? ""))
+    .filter((item) => item.status === "granted"
+      && item.key
+      && benefitIds.has(item.benefit_id ?? "")
+      && Date.parse(item.created_at ?? "") >= checkoutCreatedAt)
     .sort((left, right) => {
       const leftCreatedAt = Date.parse(left.created_at ?? "");
       const rightCreatedAt = Date.parse(right.created_at ?? "");
@@ -393,7 +404,7 @@ export async function resolveCheckoutSuccessState(
       ? await createCustomerSession(customerId, adminKey, apiBase)
       : null;
     const licenseKey = customerSession?.token
-      ? await lookupGrantedLicenseKey(customerSession.token, benefitIds, apiBase)
+      ? await lookupGrantedLicenseKey(customerSession.token, benefitIds, checkoutCreatedAt, apiBase)
       : null;
 
     // Resolve plan + renewal date from the underlying subscription, when one

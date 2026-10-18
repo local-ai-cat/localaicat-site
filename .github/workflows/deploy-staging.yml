@@ -20,6 +20,10 @@ concurrency:
   group: deploy-staging
   cancel-in-progress: true
 
+# The job only reads the repo; VERCEL_TOKEN carries the deploy authority.
+permissions:
+  contents: read
+
 env:
   VERCEL_ORG_ID: team_7uzsygdbkRuhjIqBIAhNH3nl
   VERCEL_PROJECT_ID: prj_kFvVJKcYuy33sFNDr2NTZs00nlyO
@@ -30,10 +34,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@51.8.0
 
       - name: Verify token is configured
         env:

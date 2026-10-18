@@ -29,8 +29,42 @@ type PolarCheckout = {
 
 type PolarBenefitGrant = {
   is_granted?: boolean;
+  order_id?: string | null;
+  subscription_id?: string | null;
   properties?: { license_key_id?: string | null } | null;
 };
+
+type PolarOrder = {
+  id?: string;
+  checkout_id?: string | null;
+  subscription_id?: string | null;
+};
+
+type CheckoutOrders = { orderIds: Set<string>; subscriptionIds: Set<string> };
+
+/**
+ * Orders Polar created for this checkout. Each item's own checkout_id is
+ * compared, so the result is right even if the query filter were ignored.
+ */
+async function fetchCheckoutOrders(
+  checkoutId: string,
+  adminKey: string,
+  apiBase: string
+): Promise<CheckoutOrders> {
+  const orders: CheckoutOrders = { orderIds: new Set(), subscriptionIds: new Set() };
+  const response = await fetch(
+    `${apiBase}/v1/orders/?checkout_id=${encodeURIComponent(checkoutId)}&limit=10`,
+    { headers: { Authorization: `Bearer ${adminKey}` }, cache: "no-store" }
+  );
+  if (!response.ok) return orders;
+  const payload = (await response.json()) as { items?: PolarOrder[]; result?: PolarOrder[] };
+  for (const order of payload.items ?? payload.result ?? []) {
+    if (order.checkout_id !== checkoutId || !order.id) continue;
+    orders.orderIds.add(order.id);
+    if (order.subscription_id) orders.subscriptionIds.add(order.subscription_id);
+  }
+  return orders;
+}
 
 /**
  * Polar ids are UUIDs. Anything outside this alphabet (slashes, dots, `?`,
@@ -167,8 +201,10 @@ async function listCustomerPortal<T>(path: string, customerSessionToken: string,
 async function lookupGrantedLicenseKey(
   customerSessionToken: string,
   checkoutId: string,
+  orders: CheckoutOrders,
   apiBase: string
 ): Promise<string | null> {
+  if (orders.orderIds.size === 0) return null;
   const grants = await listCustomerPortal<PolarBenefitGrant>(
     `/v1/customer-portal/benefit-grants/?checkout_id=${encodeURIComponent(checkoutId)}&type=license_keys&limit=${LICENSE_KEY_PAGE_SIZE}`,
     customerSessionToken,
@@ -176,7 +212,9 @@ async function lookupGrantedLicenseKey(
   );
   const grantedKeyIds = new Set(
     (grants ?? [])
-      .filter((grant) => grant.is_granted && grant.properties?.license_key_id)
+      .filter((grant) => grant.is_granted
+        && grant.properties?.license_key_id
+        && (orders.orderIds.has(grant.order_id ?? "") || orders.subscriptionIds.has(grant.subscription_id ?? "")))
       .map((grant) => grant.properties?.license_key_id as string)
   );
   if (grantedKeyIds.size === 0) return null;
@@ -386,9 +424,12 @@ export async function resolveCheckoutSuccessState(
       return cookieRequired;
     }
 
-    const customerSession = await createCustomerSession(customerId, adminKey, apiBase);
+    const orders = await fetchCheckoutOrders(checkoutId, adminKey, apiBase);
+    const customerSession = orders.orderIds.size > 0
+      ? await createCustomerSession(customerId, adminKey, apiBase)
+      : null;
     const licenseKey = customerSession?.token
-      ? await lookupGrantedLicenseKey(customerSession.token, checkoutId, apiBase)
+      ? await lookupGrantedLicenseKey(customerSession.token, checkoutId, orders, apiBase)
       : null;
 
     // Resolve plan + renewal date from the underlying subscription, when one

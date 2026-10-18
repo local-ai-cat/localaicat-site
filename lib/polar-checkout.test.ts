@@ -20,12 +20,24 @@ const CHECKOUT_GRANTS = new Map<string, string[]>([
   ["chk_other_sub", ["MEOW-PRO-OS"]]
 ]);
 
+const ORDERS_PREFIX = "https://sandbox-api.polar.sh/v1/orders/?checkout_id=";
+
 function grantsResponse(url: string) {
   const checkoutId = decodeURIComponent(url.slice(GRANTS_PREFIX.length).split("&")[0]);
   assert.ok(url.includes("&type=license_keys"), "only license-key grants are requested");
   return Response.json({
-    items: (CHECKOUT_GRANTS.get(checkoutId) ?? []).map((keyId) => ({ is_granted: true, properties: { license_key_id: keyId } }))
+    items: (CHECKOUT_GRANTS.get(checkoutId) ?? []).map((keyId) => ({
+      is_granted: true,
+      order_id: `ord_${checkoutId}`,
+      properties: { license_key_id: keyId }
+    }))
   });
+}
+
+/** Each checkout has one order, ord_<checkout id>. */
+function ordersResponse(url: string) {
+  const checkoutId = decodeURIComponent(url.slice(ORDERS_PREFIX.length).split("&")[0]);
+  return Response.json({ items: [{ id: `ord_${checkoutId}`, checkout_id: checkoutId, subscription_id: null }] });
 }
 
 const originalFetch = globalThis.fetch;
@@ -105,6 +117,7 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
       });
     }
 
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
 
     return Response.json({ error: "unexpected request" }, { status: 500 });
@@ -183,6 +196,7 @@ test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subsc
       });
     }
 
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
 
     return Response.json({ error: "unexpected request" }, { status: 500 });
@@ -263,6 +277,7 @@ test("resolveCheckoutSuccessState falls back to customer subscription list when 
       });
     }
 
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
 
     return Response.json({ error: "unexpected request" }, { status: 500 });
@@ -313,6 +328,7 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
         ]
       });
     }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -367,6 +383,7 @@ test("resolveCheckoutSuccessState refuses to reveal the key without the per-brow
         ]
       });
     }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -418,6 +435,7 @@ test("resolveCheckoutSuccessState reveals the key during the first-visit grace e
         ]
       });
     }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -467,6 +485,7 @@ test("resolveCheckoutSuccessState reveals the license key to the cookie-bound vi
         ]
       });
     }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -487,7 +506,7 @@ function secondsAgo(seconds: number) {
 
 type KeyFixture = { key: string; created_at: string };
 
-function confirmedCheckoutFetch(checkoutId: string, keys: KeyFixture[], grantedToCheckout: string[]) {
+function confirmedCheckoutFetch(checkoutId: string, keys: KeyFixture[], grantedToCheckout: string[], otherOrderGrants: string[] = []) {
   const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
   return async (input: string | URL | Request) => {
     const url = input.toString();
@@ -506,8 +525,12 @@ function confirmedCheckoutFetch(checkoutId: string, keys: KeyFixture[], grantedT
     if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100") {
       return Response.json({ items: keys.map((key) => ({ ...key, id: key.key, status: "granted" })) });
     }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) {
-      return Response.json({ items: grantedToCheckout.map((keyId) => ({ is_granted: true, properties: { license_key_id: keyId } })) });
+      return Response.json({ items: [
+        ...grantedToCheckout.map((keyId) => ({ is_granted: true, order_id: `ord_${checkoutId}`, properties: { license_key_id: keyId } })),
+        ...otherOrderGrants.map((keyId) => ({ is_granted: true, order_id: "ord_someone_else", properties: { license_key_id: keyId } }))
+      ] });
     }
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -599,6 +622,7 @@ test("resolveCheckoutSuccessState ignores another purchase's subscription in the
         { id: "sub_other_product", product_id: "prod_dev", created_at: freshTimestamp, recurring_interval: "year", current_period_end: "2027-10-01T00:00:00Z" }
       ] });
     }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -611,4 +635,25 @@ test("resolveCheckoutSuccessState ignores another purchase's subscription in the
   assert.equal(state?.licenseKey, "MEOW-PRO-OS");
   assert.equal(state?.plan, null, "neither an older subscription nor another product's may supply the plan");
   assert.equal(state?.renewsAt, null);
+});
+
+test("resolveCheckoutSuccessState ignores grants from other orders even if Polar ignored the checkout filter", async () => {
+  globalThis.fetch = confirmedCheckoutFetch("chk_filter", [
+    { key: "MEOW-PRO-SOMEONE-ELSE", created_at: secondsAgo(2) },
+    { key: "MEOW-PRO-MINE", created_at: secondsAgo(10) }
+  ], ["MEOW-PRO-MINE"], ["MEOW-PRO-SOMEONE-ELSE"]);
+  const mine = await resolveCheckoutSuccessState("chk_filter", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(mine?.licenseKey, "MEOW-PRO-MINE");
+
+  globalThis.fetch = confirmedCheckoutFetch("chk_filter_none", [
+    { key: "MEOW-PRO-SOMEONE-ELSE", created_at: secondsAgo(2) }
+  ], [], ["MEOW-PRO-SOMEONE-ELSE"]);
+  const none = await resolveCheckoutSuccessState("chk_filter_none", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(none?.licenseKey, null);
 });

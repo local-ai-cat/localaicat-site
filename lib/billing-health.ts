@@ -13,11 +13,11 @@ import {
 import { successUrl, teamCheckoutMode } from "./team-checkout.ts";
 
 /**
- * A read-mostly billing check for the weekly job: does every piece the
+ * A read-only billing check for the weekly job: does every piece the
  * checkout and the success page depend on still answer? Results name what is
  * wrong, never a configured value.
  */
-export type CheckResult = { ok: boolean; detail: string };
+export type CheckResult = { ok: boolean; detail: string; skipped?: boolean };
 
 export type BillingHealthReport = {
   ok: boolean;
@@ -29,11 +29,12 @@ export type BillingHealthReport = {
 const STATIC_CHECKOUT_SLUGS = ["pro-monthly", "pro-annual", "developer-mode"] as const;
 
 const REQUEST_TIMEOUT_MS = 10_000;
-const MAX_LINK_REDIRECTS = 3;
 const USER_AGENT = "localaicat-billing-health/1";
+const LINK_PAGE_SIZE = 100;
+const MAX_LINK_PAGES = 5;
 
-/** Polar's hosted checkout page: https://polar.sh/checkout/<client secret>. */
-const CHECKOUT_PAGE_PATH = /^\/checkout\/(polar_c_[A-Za-z0-9_-]+)\/?$/;
+/** A hosted link names itself by client secret: …/checkout-links/polar_cl_…/redirect or buy.polar.sh/polar_cl_…. */
+const LINK_SECRET = /(polar_cl_[A-Za-z0-9_-]+)/;
 
 export type RedisPing = () => Promise<unknown>;
 
@@ -62,13 +63,14 @@ function fail(detail: string): CheckResult {
   return { ok: false, detail };
 }
 
-/** A failure this module words itself, so its message is safe to report. */
-class LinkCheckError extends Error {}
+/** Passes, but says the check could not run with the key's current scopes. */
+function skip(detail: string): CheckResult {
+  return { ok: true, skipped: true, detail };
+}
 
 /** Library and network errors are reported by kind only: their messages can carry URLs or ids. */
 function describeError(error: unknown) {
-  if (error instanceof LinkCheckError) return error.message;
-  return error instanceof Error ? `${error.name}` : "request failed";
+  return error instanceof Error ? error.name : "request failed";
 }
 
 function checkConfiguration(): CheckResult {
@@ -114,36 +116,45 @@ async function checkRedis(ping: RedisPing | null): Promise<CheckResult> {
   }
 }
 
-function isPolarHost(hostname: string) {
-  return hostname === "polar.sh" || hostname.endsWith(".polar.sh");
-}
+type PolarCheckoutLink = { client_secret?: string; success_url?: string | null };
+
+type LinkLookup =
+  | { kind: "listed"; links: PolarCheckoutLink[] }
+  | { kind: "skipped" }
+  | { kind: "failed"; detail: string };
 
 /**
- * Follows a hosted checkout link to the checkout page it opens and returns
- * that checkout's client secret. Following the link makes Polar open an
- * unpaid checkout session, which expires on its own; no credential is sent.
+ * Every checkout link of the organization, read with the admin key
+ * (checkout_links:read). A key without that scope skips the link checks
+ * instead of failing them.
  */
-async function openCheckoutFromLink(linkUrl: string, fetchImpl: typeof fetch) {
-  let url = new URL(linkUrl);
-  for (let hop = 0; hop <= MAX_LINK_REDIRECTS; hop += 1) {
-    if (url.protocol !== "https:" || !isPolarHost(url.hostname)) {
-      throw new LinkCheckError(`the link leads off Polar, to ${url.hostname}`);
+async function listCheckoutLinks(fetchImpl: typeof fetch): Promise<LinkLookup> {
+  const adminKey = getPolarAdminKey();
+  if (!adminKey) return { kind: "failed", detail: "POLAR_ADMIN_KEY is not set" };
+  const links: PolarCheckoutLink[] = [];
+  try {
+    for (let page = 1; page <= MAX_LINK_PAGES; page += 1) {
+      const response = await fetchImpl(`${getPolarApiBaseUrl()}/v1/checkout-links/?limit=${LINK_PAGE_SIZE}&page=${page}`, {
+        headers: { Authorization: `Bearer ${adminKey}`, "User-Agent": USER_AGENT },
+        cache: "no-store",
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+      });
+      if (response.status === 403) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        if (body?.error === "insufficient_scope") return { kind: "skipped" };
+      }
+      if (!response.ok) return { kind: "failed", detail: `Polar answered ${response.status} listing checkout links` };
+      const payload = (await response.json()) as {
+        items?: PolarCheckoutLink[];
+        pagination?: { max_page?: number };
+      };
+      links.push(...(payload.items ?? []));
+      if (page >= (payload.pagination?.max_page ?? 1)) break;
     }
-    const secret = CHECKOUT_PAGE_PATH.exec(url.pathname)?.[1];
-    if (secret) return secret;
-    const response = await fetchImpl(url, {
-      redirect: "manual",
-      headers: { "User-Agent": USER_AGENT },
-      cache: "no-store",
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
-    });
-    const location = response.headers.get("location");
-    if (response.status < 300 || response.status >= 400 || !location) {
-      throw new LinkCheckError(`the link answered ${response.status} instead of opening a checkout`);
-    }
-    url = new URL(location, url);
+  } catch (error) {
+    return { kind: "failed", detail: `Polar unreachable: ${describeError(error)}` };
   }
-  throw new LinkCheckError("the link redirected too many times");
+  return { kind: "listed", links };
 }
 
 function describeSuccessUrl(value: string | null | undefined, siteOrigin: string): CheckResult {
@@ -163,21 +174,19 @@ function describeSuccessUrl(value: string | null | undefined, siteOrigin: string
   return pass(`returns buyers to ${url.origin}/success`);
 }
 
-async function checkStaticCheckout(slug: BuySlug, siteOrigin: string, fetchImpl: typeof fetch): Promise<CheckResult> {
+function checkStaticCheckout(slug: BuySlug, siteOrigin: string, lookup: LinkLookup): CheckResult {
   const linkUrl = getCheckoutUrl(slug);
   if (!linkUrl) return fail("no checkout link configured");
-  try {
-    const secret = await openCheckoutFromLink(linkUrl, fetchImpl);
-    const response = await fetchImpl(`${getPolarApiBaseUrl()}/v1/checkouts/client/${encodeURIComponent(secret)}`, {
-      headers: { "User-Agent": USER_AGENT },
-      cache: "no-store",
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
-    });
-    if (!response.ok) return fail(`Polar answered ${response.status} for the opened checkout`);
-    const checkout = (await response.json()) as { success_url?: string | null };
-    return describeSuccessUrl(checkout.success_url, siteOrigin);
-  } catch (error) {
-    return fail(describeError(error));
+  const secret = LINK_SECRET.exec(linkUrl)?.[1];
+  if (!secret) return fail("the checkout URL names no Polar checkout link");
+  switch (lookup.kind) {
+  case "skipped": return skip("skipped: needs checkout_links:read");
+  case "failed": return fail(lookup.detail);
+  case "listed": {
+    const link = lookup.links.find((item) => item.client_secret === secret);
+    if (!link) return fail("Polar has no such checkout link: deleted, or another organization's");
+    return describeSuccessUrl(link.success_url, siteOrigin);
+  }
   }
 }
 
@@ -202,17 +211,17 @@ export async function runBillingHealth(
   fetchImpl: typeof fetch = fetch,
   ping: RedisPing | null = upstashPing()
 ): Promise<BillingHealthReport> {
-  const [polarAdminKey, redis, ...staticCheckouts] = await Promise.all([
+  const [polarAdminKey, redis, links] = await Promise.all([
     checkPolarAdminKey(fetchImpl),
     checkRedis(ping),
-    ...STATIC_CHECKOUT_SLUGS.map((slug) => checkStaticCheckout(slug, siteOrigin, fetchImpl))
+    listCheckoutLinks(fetchImpl)
   ]);
   const checks: Record<string, CheckResult> = {
     configuration: checkConfiguration(),
     polar_admin_key: polarAdminKey,
     redis,
     site_url: checkSiteUrl(siteOrigin),
-    ...Object.fromEntries(STATIC_CHECKOUT_SLUGS.map((slug, index) => [`success_url_${slug}`, staticCheckouts[index]])),
+    ...Object.fromEntries(STATIC_CHECKOUT_SLUGS.map((slug) => [`success_url_${slug}`, checkStaticCheckout(slug, siteOrigin, links)])),
     // Team checkouts are opened by /api/team-checkout with this success URL.
     "success_url_team-annual": describeSuccessUrl(successUrl(getSiteUrl()).replace("{CHECKOUT_ID}", "x"), siteOrigin)
   };

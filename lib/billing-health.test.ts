@@ -35,21 +35,38 @@ test.after(() => {
 
 type Calls = { url: string; init?: RequestInit }[];
 
-/** A Polar whose links each open a checkout with the given success URL. */
-function polar(successUrls: Record<string, string | null>, calls: Calls, adminStatus = 200): typeof fetch {
+const LINKS_PAGE = new RegExp(`^${API.replace(/\./g, "\\.")}/v1/checkout-links/\\?limit=100&page=(\\d+)$`);
+
+type PolarOptions = { adminStatus?: number; linksStatus?: number; linksPerPage?: number };
+
+/**
+ * A Polar whose organization lists the site's three links (polar_cl_monthly,
+ * polar_cl_annual, polar_cl_dev) with the given success URLs, after another
+ * product's link.
+ */
+function polar(successUrls: Record<string, string | null>, calls: Calls, options: PolarOptions = {}): typeof fetch {
+  const links = [
+    { client_secret: "polar_cl_other", success_url: "https://elsewhere.example/thanks" },
+    ...Object.entries(successUrls).map(([name, success_url]) => ({ client_secret: `polar_cl_${name}`, success_url }))
+  ];
+  const perPage = options.linksPerPage ?? links.length;
   return (async (input: string | URL | Request, init?: RequestInit) => {
     const url = input.toString();
     calls.push({ url, init });
     if (url === `${API}/v1/checkouts/?limit=1`) {
-      return Response.json({ items: [] }, { status: adminStatus });
+      return Response.json({ items: [] }, { status: options.adminStatus ?? 200 });
     }
-    const link = /\/v1\/checkout-links\/(polar_cl_[a-z]+)\/redirect$/.exec(url);
-    if (link) {
-      return new Response(null, { status: 307, headers: { location: `https://sandbox.polar.sh/checkout/polar_c_${link[1].slice(9)}` } });
-    }
-    const client = /\/v1\/checkouts\/client\/polar_c_([a-z]+)$/.exec(url);
-    if (client) {
-      return Response.json({ success_url: successUrls[client[1]] ?? null });
+    const page = LINKS_PAGE.exec(url);
+    if (page) {
+      if (options.linksStatus === 403) {
+        return Response.json({ error: "insufficient_scope", error_description: "The request requires higher privileges" }, { status: 403 });
+      }
+      if (options.linksStatus) return Response.json({ error: "boom" }, { status: options.linksStatus });
+      const index = Number(page[1]) - 1;
+      return Response.json({
+        items: links.slice(index * perPage, (index + 1) * perPage),
+        pagination: { total_count: links.length, max_page: Math.ceil(links.length / perPage) }
+      });
     }
     return Response.json({ error: "unexpected request" }, { status: 500 });
   }) as typeof fetch;
@@ -80,25 +97,46 @@ test("a healthy setup passes every check", async () => {
   ]);
 });
 
-test("only the admin read carries the admin key; links and opened checkouts get no credential", async () => {
+test("the check only reads: two admin-key GETs against the Polar API, no checkout opened", async () => {
   const calls: Calls = [];
   await runBillingHealth(SITE, polar(HEALTHY, calls), pong);
 
+  assert.deepEqual(calls.map((call) => call.url).sort(), [
+    `${API}/v1/checkout-links/?limit=100&page=1`,
+    `${API}/v1/checkouts/?limit=1`
+  ]);
   for (const call of calls) {
-    const authorization = (call.init?.headers as Record<string, string> | undefined)?.Authorization;
-    if (call.url === `${API}/v1/checkouts/?limit=1`) {
-      assert.equal(authorization, `Bearer ${ADMIN_KEY}`);
-    } else {
-      assert.equal(authorization, undefined, `${call.url} must not see the admin key`);
-    }
-  }
-  for (const call of calls.filter((entry) => entry.url.includes("/checkout-links/"))) {
-    assert.equal(call.init?.redirect, "manual", "a redirect must never be followed blindly");
+    assert.equal(call.init?.method ?? "GET", "GET");
+    assert.equal((call.init?.headers as Record<string, string>).Authorization, `Bearer ${ADMIN_KEY}`);
   }
 });
 
+test("links on a later page are found", async () => {
+  const calls: Calls = [];
+  const report = await runBillingHealth(SITE, polar(HEALTHY, calls, { linksPerPage: 1 }), pong);
+
+  assert.equal(report.ok, true, JSON.stringify(report.checks));
+  assert.equal(calls.filter((call) => LINKS_PAGE.test(call.url)).length, 4);
+});
+
+test("a key without checkout_links:read skips the link checks instead of failing them", async () => {
+  const report = await runBillingHealth(SITE, polar(HEALTHY, [], { linksStatus: 403 }), pong);
+
+  assert.equal(report.ok, true, JSON.stringify(report.checks));
+  for (const slug of ["pro-monthly", "pro-annual", "developer-mode"]) {
+    assert.deepEqual(report.checks[`success_url_${slug}`], { ok: true, skipped: true, detail: "skipped: needs checkout_links:read" });
+  }
+});
+
+test("any other link-listing failure fails the link checks", async () => {
+  const report = await runBillingHealth(SITE, polar(HEALTHY, [], { linksStatus: 500 }), pong);
+
+  assert.equal(report.ok, false);
+  assert.equal(report.checks["success_url_pro-annual"].detail, "Polar answered 500 listing checkout links");
+});
+
 test("the report never contains a configured secret or a checkout client secret", async () => {
-  const report = await runBillingHealth(SITE, polar({ monthly: null, annual: "https://evil.example/success", dev: HEALTHY.dev }, [], 401), async () => {
+  const report = await runBillingHealth(SITE, polar({ monthly: null, annual: "https://evil.example/success", dev: HEALTHY.dev }, [], { adminStatus: 401 }), async () => {
     throw new Error("connection refused");
   });
   const text = JSON.stringify(report);
@@ -128,7 +166,7 @@ test("a link without a success URL, or one that leaves the site, fails its own c
 test("a rejected admin key, a dead Redis and missing variables are reported by name", async () => {
   delete process.env.POLAR_CHECKOUT_URL_DEVELOPER_MODE;
   delete process.env.POLAR_PRODUCT_ID_TEAM_ANNUAL;
-  const report = await runBillingHealth(SITE, polar(HEALTHY, [], 401), async () => {
+  const report = await runBillingHealth(SITE, polar(HEALTHY, [], { adminStatus: 401 }), async () => {
     throw new Error("connection refused");
   });
 
@@ -146,14 +184,22 @@ test("an unconfigured Redis fails rather than passing silently", async () => {
   assert.equal(report.checks.redis.ok, false);
 });
 
-test("a checkout link that redirects off Polar is not followed", async () => {
-  process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY = "https://buy.example.com/pro";
+test("a configured link Polar does not list, or a URL naming no link, fails", async () => {
+  process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY = "https://buy.polar.sh/polar_cl_deleted";
+  process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL = "https://buy.example.com/pro";
   const calls: Calls = [];
   const report = await runBillingHealth(SITE, polar(HEALTHY, calls), pong);
 
   assert.equal(report.checks["success_url_pro-monthly"].ok, false);
-  assert.match(report.checks["success_url_pro-monthly"].detail, /leads off Polar/);
-  assert.ok(!calls.some((call) => call.url.startsWith("https://buy.example.com")));
+  assert.match(report.checks["success_url_pro-monthly"].detail, /no such checkout link/);
+  assert.equal(report.checks["success_url_pro-annual"].ok, false);
+  assert.match(report.checks["success_url_pro-annual"].detail, /names no Polar checkout link/);
+  assert.ok(!calls.some((call) => !call.url.startsWith(API)), "only the Polar API is called");
+});
+
+test("a link's {CHECKOUT_ID} placeholder counts as carrying the checkout id", async () => {
+  const report = await runBillingHealth(SITE, polar({ ...HEALTHY, monthly: `${SITE}/success?checkout_id={CHECKOUT_ID}` }, []), pong);
+  assert.equal(report.checks["success_url_pro-monthly"].ok, true);
 });
 
 test("the check fails when the site URL is not the origin it ran on", async () => {

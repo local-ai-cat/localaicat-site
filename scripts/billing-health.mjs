@@ -39,6 +39,12 @@ function isCheck(value) {
   return typeof value === "object" && value !== null && typeof value.ok === "boolean";
 }
 
+/** A skipped check passes: the key lacks a scope it needs, which is not a billing fault. */
+function checkLabel(check) {
+  if (!check.ok) return "FAIL";
+  return check.skipped ? "skip" : "ok  ";
+}
+
 /**
  * One line per check, failures first; returns the exit code. The route answers
  * 200 when healthy and 503 when a check failed; anything else, or a reply
@@ -52,7 +58,7 @@ export function summarize(status, report) {
     return { code: EXIT_UNAVAILABLE, lines: [`billing health: the site answered ${status} without a usable report`] };
   }
   entries.sort(([, left], [, right]) => Number(left.ok) - Number(right.ok));
-  const lines = entries.map(([name, check]) => `${check.ok ? "ok  " : "FAIL"} ${name}: ${check.detail}`);
+  const lines = entries.map(([name, check]) => `${checkLabel(check)} ${name}: ${check.detail}`);
   const ok = status === 200 && report.ok === true && entries.every(([, check]) => check.ok);
   lines.unshift(`billing health ${ok ? "ok" : "FAILED"} (${report.checkedAt ?? "unknown time"})`);
   return { code: ok ? EXIT_OK : EXIT_FAILED, lines };

@@ -145,9 +145,10 @@ a wrong token and 404 when `BILLING_HEALTH_TOKEN` is unset. It checks:
 - each hosted checkout link (Pro Monthly, Pro Annual, Developer Mode) still
   returns buyers to `/success` on this site, and so does Team's own checkout.
 
-Reading a link's success URL with the current key scopes means following the
-link, so each run opens one unpaid Polar checkout session per link; they
-expire on their own. No value is ever echoed.
+Every call is a read. The link checks list the organization's checkout links
+with the admin key, which needs `checkout_links:read`; a key without that
+scope reports them as `skipped`, which still counts as passing. No value is
+ever echoed.
 
 `node scripts/billing-health.mjs [--url …]` calls the route for a launchd job:
 the token comes from `$BILLING_HEALTH_TOKEN` or the keychain item

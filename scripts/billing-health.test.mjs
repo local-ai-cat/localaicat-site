@@ -24,6 +24,16 @@ test("summarize passes a healthy report and lists failures first", () => {
   assert.deepEqual(failing.lines.slice(1), ["FAIL polar_admin_key: Polar answered 401", "ok   redis: PONG"]);
 });
 
+test("summarize passes a skipped check and labels it", () => {
+  const skipped = summarize(200, {
+    ok: true,
+    checkedAt: "2026-10-18T00:00:00.000Z",
+    checks: { "success_url_pro-annual": { ok: true, skipped: true, detail: "skipped: needs checkout_links:read" } }
+  });
+  assert.equal(skipped.code, EXIT_OK);
+  assert.equal(skipped.lines[1], "skip success_url_pro-annual: skipped: needs checkout_links:read");
+});
+
 test("summarize treats a reply without a usable report as unavailable", () => {
   assert.equal(summarize(502, null).code, EXIT_UNAVAILABLE);
   assert.equal(summarize(500, HEALTHY).code, EXIT_UNAVAILABLE, "only 200 and 503 carry a report");

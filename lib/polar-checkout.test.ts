@@ -688,6 +688,77 @@ test("resolveCheckoutSuccessState finds this checkout's key however many older k
   assert.equal(state?.licenseKey, "MEOW-PRO-NEW");
 });
 
+/**
+ * A Developer Mode checkout by an email that bought Team seats before: Polar
+ * refuses a session without a member for such a "team customer".
+ */
+function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[]) {
+  const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+  return async (input: string | URL | Request, init?: RequestInit) => {
+    const url = input.toString();
+    if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_team_then_dev") {
+      return Response.json({ status: "succeeded", customer_id: "cust_team_buyer", product_id: "prod_dev", created_at: freshTimestamp, modified_at: freshTimestamp });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
+      const body = String(init?.body);
+      sessionBodies.push(body);
+      if (!JSON.parse(body).member_id) {
+        return Response.json({ error: "PolarRequestValidationError", detail: [{ loc: ["body", "member_id"], msg: "member_id is required for team customers." }] }, { status: 422 });
+      }
+      return Response.json({ token: "polar_cst_owner", customer_portal_url: "https://polar.sh/portal/owner" }, { status: 201 });
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/members/?customer_id=cust_team_buyer&role=owner&limit=1") {
+      return ownerLookup();
+    }
+    if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100") {
+      assert.equal((init?.headers as Record<string, string>)?.Authorization, "Bearer polar_cst_owner");
+      return Response.json({ items: [{ id: "MEOW-DEV-OWNER", key: "MEOW-DEV-OWNER", status: "granted", created_at: freshTimestamp }] });
+    }
+    if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
+    if (url.startsWith(GRANTS_PREFIX)) {
+      return Response.json({ items: [{ is_granted: true, order_id: "ord_chk_team_then_dev", properties: { license_key_id: "MEOW-DEV-OWNER" } }] });
+    }
+    return Response.json({ error: "unexpected request" }, { status: 500 });
+  };
+}
+
+test("a Team buyer's later purchase reveals its key through the owner member's session", async () => {
+  const sessionBodies: string[] = [];
+  globalThis.fetch = teamCustomerFetch(() => Response.json({ items: [{ id: "mem_owner", role: "owner" }] }), sessionBodies);
+
+  const state = await resolveCheckoutSuccessState("chk_team_then_dev", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+
+  assert.equal(state?.licenseKey, "MEOW-DEV-OWNER");
+  assert.equal(state?.customerPortalUrl, "https://polar.sh/portal/owner");
+  assert.deepEqual(sessionBodies, [
+    JSON.stringify({ customer_id: "cust_team_buyer" }),
+    JSON.stringify({ customer_id: "cust_team_buyer", member_id: "mem_owner" })
+  ]);
+});
+
+test("a Team buyer's later purchase reveals nothing when the key cannot list members", async () => {
+  const sessionBodies: string[] = [];
+  const originalError = console.error;
+  console.error = () => {};
+  try {
+    globalThis.fetch = teamCustomerFetch(() => Response.json({ error: "insufficient_scope" }, { status: 403 }), sessionBodies);
+
+    const state = await resolveCheckoutSuccessState("chk_team_then_dev", {
+      activationTokenStore: createInMemoryActivationTokenStore(),
+      cookieIssuedAt: Date.now()
+    });
+
+    assert.equal(state?.licenseKey, null);
+    assert.equal(state?.customerPortalUrl, null);
+    assert.equal(sessionBodies.length, 1, "no member-less retry");
+  } finally {
+    console.error = originalError;
+  }
+});
+
 test("a seat-based (Team) checkout reports its seats and looks up no key", async () => {
   const requestedUrls: string[] = [];
   const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();

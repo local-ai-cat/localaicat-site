@@ -306,20 +306,66 @@ async function fetchLatestSubscriptionForCustomer(
     })[0];
 }
 
-async function createCustomerSession(
-  customerId: string,
+function postCustomerSession(
+  body: { customer_id: string; member_id?: string },
   adminKey: string,
   apiBase: string
-): Promise<PolarCustomerSession | null> {
-  const response = await fetch(`${apiBase}/v1/customer-sessions`, {
+) {
+  return fetch(`${apiBase}/v1/customer-sessions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${adminKey}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ customer_id: customerId }),
+    body: JSON.stringify(body),
     cache: "no-store"
   });
+}
+
+/**
+ * The owner member of a team customer. Needs the admin key's members:read
+ * scope; without it Polar answers 403 and the buyer recovers the key from the
+ * customer portal instead.
+ */
+async function fetchOwnerMemberId(
+  customerId: string,
+  adminKey: string,
+  apiBase: string
+): Promise<string | null> {
+  const response = await fetch(
+    `${apiBase}/v1/members/?customer_id=${encodeURIComponent(customerId)}&role=owner&limit=1`,
+    { headers: { Authorization: `Bearer ${adminKey}` }, cache: "no-store" }
+  );
+  if (!response.ok) {
+    console.error("Polar owner-member lookup failed:", response.status);
+    return null;
+  }
+  const payload = (await response.json()) as { items?: { id?: string }[] };
+  const memberId = payload.items?.[0]?.id;
+  return memberId && isPlausiblePolarId(memberId) ? memberId : null;
+}
+
+/**
+ * Once an email has bought Team seats, Polar makes its customer a team
+ * customer and refuses a session that names no member ("member_id is
+ * required for team customers"). A later Pro or Developer Mode purchase on
+ * that email belongs to the buyer, the team's owner member, so the session is
+ * retried as that member.
+ */
+async function createCustomerSession(
+  customerId: string,
+  adminKey: string,
+  apiBase: string
+): Promise<PolarCustomerSession | null> {
+  let response = await postCustomerSession({ customer_id: customerId }, adminKey, apiBase);
+
+  if (response.status === 422 && (await response.text()).includes("member_id")) {
+    const memberId = await fetchOwnerMemberId(customerId, adminKey, apiBase);
+    if (!memberId) {
+      return null;
+    }
+    response = await postCustomerSession({ customer_id: customerId, member_id: memberId }, adminKey, apiBase);
+  }
 
   if (!response.ok) {
     return null;

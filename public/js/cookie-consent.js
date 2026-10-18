@@ -253,7 +253,20 @@
         }
     }
 
+    // /success?checkout_id= and /activate?t= carry bearers for a license key, so the
+    // third-party chat SDK never loads there (mirrors lib/bearer-urls.ts).
+    const BEARER_PATHS = ['/success', '/activate'];
+
+    function isBearerPage() {
+        const path = window.location.pathname.replace(/\/+$/, '') || '/';
+        return BEARER_PATHS.includes(path);
+    }
+
     async function init() {
+        if (isBearerPage()) {
+            return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const hasConsentParam = urlParams.get('consent') === 'chat';
         const isAppUserAgent = navigator.userAgent.includes('LocalAICat/') || navigator.userAgent.includes('AtlasLogged/');

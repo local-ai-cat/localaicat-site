@@ -697,8 +697,10 @@ type TeamCustomerOptions = {
   checkout?: Record<string, unknown>;
   /** False: Polar has no order for this checkout yet. */
   hasOrder?: boolean;
-  /** Grants the owner member can see: [order id, key]. Defaults to this checkout's own key. */
-  grants?: [string, string][];
+  /** The order row Polar lists for the checkout, when it is not the plain ord_<checkout id>. */
+  orderRow?: { id: string; checkout_id: string; subscription_id: string | null };
+  /** Grants the owner member can see: [order id, key, subscription id]. Defaults to this checkout's own key. */
+  grants?: [string | null, string, string?][];
   /** Every URL requested, in order. */
   requested?: string[];
 };
@@ -707,7 +709,7 @@ const MEMBERS_URL = "https://sandbox-api.polar.sh/v1/members/?customer_id=cust_t
 
 function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[], options: TeamCustomerOptions = {}) {
   const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
-  const grants = options.grants ?? [["ord_chk_team_then_dev", "MEOW-DEV-OWNER"]];
+  const grants: [string | null, string, string?][] = options.grants ?? [["ord_chk_team_then_dev", "MEOW-DEV-OWNER"]];
   return async (input: string | URL | Request, init?: RequestInit) => {
     const url = input.toString();
     options.requested?.push(url);
@@ -718,6 +720,7 @@ function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[],
       });
     }
     if (url.startsWith(ORDERS_PREFIX) && options.hasOrder === false) return Response.json({ items: [] });
+    if (url.startsWith(ORDERS_PREFIX) && options.orderRow) return Response.json({ items: [options.orderRow] });
     if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
       const body = String(init?.body);
       sessionBodies.push(body);
@@ -735,7 +738,9 @@ function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[],
     }
     if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) {
-      return Response.json({ items: grants.map(([orderId, key]) => ({ is_granted: true, order_id: orderId, properties: { license_key_id: key } })) });
+      return Response.json({ items: grants.map(([orderId, key, subscriptionId]) => ({
+        is_granted: true, order_id: orderId, subscription_id: subscriptionId ?? null, properties: { license_key_id: key }
+      })) });
     }
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -783,7 +788,9 @@ const OWNER_FOUND = () => Response.json({ items: [{ id: "mem_owner", role: "owne
 test("invariant 1: the owner lookup runs only after the checkout passes every gate a non-team reveal needs", async () => {
   const cases: [string, TeamCustomerOptions, { cookieIssuedAt: number | null; store?: boolean }][] = [
     ["an unconfirmed checkout", { checkout: { status: "open" } }, { cookieIssuedAt: Date.now() }],
-    ["an expired reveal window", { checkout: { created_at: secondsAgo(25 * 3600), modified_at: secondsAgo(25 * 3600) } }, { cookieIssuedAt: Date.now() }],
+    ["a checkout past the 24-hour ceiling", { checkout: { created_at: secondsAgo(25 * 3600), modified_at: secondsAgo(25 * 3600) } }, { cookieIssuedAt: Date.now() }],
+    ["a cookie past its 30-minute window", { checkout: { created_at: secondsAgo(3600), modified_at: secondsAgo(3600) } }, { cookieIssuedAt: Date.now() - 31 * 60 * 1000 }],
+    ["an order row that belongs to another checkout", { orderRow: { id: "ord_other", checkout_id: "chk_other", subscription_id: null } }, { cookieIssuedAt: Date.now() }],
     ["a cookieless viewer after the first-visit grace", { checkout: { modified_at: secondsAgo(6 * 60) } }, { cookieIssuedAt: null }],
     ["a cookieless viewer with no store to claim the grace", {}, { cookieIssuedAt: null, store: false }],
     ["a checkout with no order of its own", { hasOrder: false }, { cookieIssuedAt: Date.now() }]
@@ -835,6 +842,26 @@ test("invariant 2: the owner member's session reveals only this checkout's grant
     cookieIssuedAt: Date.now()
   });
   assert.equal(none?.licenseKey, null, "until this checkout's own grant exists, nothing is revealed");
+});
+
+test("invariant 2: a subscription grant counts only for this checkout's own subscription", async () => {
+  const orderRow = { id: "ord_chk_team_then_dev", checkout_id: "chk_team_then_dev", subscription_id: "sub_this" };
+  globalThis.fetch = teamCustomerFetch(OWNER_FOUND, [], {
+    orderRow,
+    grants: [[null, "MEOW-PRO-OTHER-SUB", "sub_other"], [null, "MEOW-PRO-THIS-SUB", "sub_this"]]
+  });
+  const own = await resolveCheckoutSuccessState("chk_team_then_dev", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(own?.licenseKey, "MEOW-PRO-THIS-SUB");
+
+  globalThis.fetch = teamCustomerFetch(OWNER_FOUND, [], { orderRow, grants: [[null, "MEOW-PRO-OTHER-SUB", "sub_other"]] });
+  const none = await resolveCheckoutSuccessState("chk_team_then_dev", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(none?.licenseKey, null, "another subscription's grant is never revealed");
 });
 
 test("invariant 3: only a positive numeric seat count takes the Team branch; anything else meets every gate", async () => {

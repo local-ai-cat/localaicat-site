@@ -34,7 +34,7 @@ const LINK_PAGE_SIZE = 100;
 const MAX_LINK_PAGES = 5;
 
 /** A hosted link names itself by client secret: …/checkout-links/polar_cl_…/redirect or buy.polar.sh/polar_cl_…. */
-const LINK_SECRET = /(polar_cl_[A-Za-z0-9_-]+)/;
+const LINK_SECRET = /^polar_cl_[A-Za-z0-9_-]+$/;
 
 export type RedisPing = () => Promise<unknown>;
 
@@ -149,12 +149,24 @@ async function listCheckoutLinks(fetchImpl: typeof fetch): Promise<LinkLookup> {
         pagination?: { max_page?: number };
       };
       links.push(...(payload.items ?? []));
-      if (page >= (payload.pagination?.max_page ?? 1)) break;
+      if (page >= (payload.pagination?.max_page ?? 1)) return { kind: "listed", links };
     }
   } catch (error) {
     return { kind: "failed", detail: `Polar unreachable: ${describeError(error)}` };
   }
-  return { kind: "listed", links };
+  return { kind: "failed", detail: `more than ${MAX_LINK_PAGES * LINK_PAGE_SIZE} checkout links; the list was not read to the end` };
+}
+
+/** The link's client secret, from a Polar URL whose path names it. */
+function linkSecret(linkUrl: string) {
+  let url: URL;
+  try {
+    url = new URL(linkUrl);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" || !(url.hostname === "polar.sh" || url.hostname.endsWith(".polar.sh"))) return null;
+  return url.pathname.split("/").find((segment) => LINK_SECRET.test(segment)) ?? null;
 }
 
 function describeSuccessUrl(value: string | null | undefined, siteOrigin: string): CheckResult {
@@ -177,8 +189,8 @@ function describeSuccessUrl(value: string | null | undefined, siteOrigin: string
 function checkStaticCheckout(slug: BuySlug, siteOrigin: string, lookup: LinkLookup): CheckResult {
   const linkUrl = getCheckoutUrl(slug);
   if (!linkUrl) return fail("no checkout link configured");
-  const secret = LINK_SECRET.exec(linkUrl)?.[1];
-  if (!secret) return fail("the checkout URL names no Polar checkout link");
+  const secret = linkSecret(linkUrl);
+  if (!secret) return fail("the checkout URL is not a Polar checkout link");
   switch (lookup.kind) {
   case "skipped": return skip("skipped: needs checkout_links:read");
   case "failed": return fail(lookup.detail);

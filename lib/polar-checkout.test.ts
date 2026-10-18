@@ -788,6 +788,7 @@ const OWNER_FOUND = () => Response.json({ items: [{ id: "mem_owner", role: "owne
 test("invariant 1: the owner lookup runs only after the checkout passes every gate a non-team reveal needs", async () => {
   const cases: [string, TeamCustomerOptions, { cookieIssuedAt: number | null; store?: boolean }][] = [
     ["an unconfirmed checkout", { checkout: { status: "open" } }, { cookieIssuedAt: Date.now() }],
+    ["a confirmed checkout without a customer", { checkout: { customer_id: null } }, { cookieIssuedAt: Date.now() }],
     ["a checkout past the 24-hour ceiling", { checkout: { created_at: secondsAgo(25 * 3600), modified_at: secondsAgo(25 * 3600) } }, { cookieIssuedAt: Date.now() }],
     ["a cookie past its 30-minute window", { checkout: { created_at: secondsAgo(3600), modified_at: secondsAgo(3600) } }, { cookieIssuedAt: Date.now() - 31 * 60 * 1000 }],
     ["an order row that belongs to another checkout", { orderRow: { id: "ord_other", checkout_id: "chk_other", subscription_id: null } }, { cookieIssuedAt: Date.now() }],

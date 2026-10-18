@@ -62,8 +62,13 @@ function fail(detail: string): CheckResult {
   return { ok: false, detail };
 }
 
+/** A failure this module words itself, so its message is safe to report. */
+class LinkCheckError extends Error {}
+
+/** Library and network errors are reported by kind only: their messages can carry URLs or ids. */
 function describeError(error: unknown) {
-  return error instanceof Error ? error.message : "request failed";
+  if (error instanceof LinkCheckError) return error.message;
+  return error instanceof Error ? `${error.name}` : "request failed";
 }
 
 function checkConfiguration(): CheckResult {
@@ -122,7 +127,7 @@ async function openCheckoutFromLink(linkUrl: string, fetchImpl: typeof fetch) {
   let url = new URL(linkUrl);
   for (let hop = 0; hop <= MAX_LINK_REDIRECTS; hop += 1) {
     if (url.protocol !== "https:" || !isPolarHost(url.hostname)) {
-      throw new Error(`the link leads off Polar, to ${url.hostname}`);
+      throw new LinkCheckError(`the link leads off Polar, to ${url.hostname}`);
     }
     const secret = CHECKOUT_PAGE_PATH.exec(url.pathname)?.[1];
     if (secret) return secret;
@@ -134,11 +139,11 @@ async function openCheckoutFromLink(linkUrl: string, fetchImpl: typeof fetch) {
     });
     const location = response.headers.get("location");
     if (response.status < 300 || response.status >= 400 || !location) {
-      throw new Error(`the link answered ${response.status} instead of opening a checkout`);
+      throw new LinkCheckError(`the link answered ${response.status} instead of opening a checkout`);
     }
     url = new URL(location, url);
   }
-  throw new Error("the link redirected too many times");
+  throw new LinkCheckError("the link redirected too many times");
 }
 
 function describeSuccessUrl(value: string | null | undefined, siteOrigin: string): CheckResult {
@@ -149,12 +154,13 @@ function describeSuccessUrl(value: string | null | undefined, siteOrigin: string
   } catch {
     return fail("the success URL is not a URL");
   }
-  const shown = `${url.origin}${url.pathname}`;
-  if (url.origin !== siteOrigin || url.pathname !== "/success") {
-    return fail(`the success URL is ${shown}, not ${siteOrigin}/success`);
+  // Only the origin is echoed: a wrong path could hold a checkout secret.
+  if (url.origin !== siteOrigin) {
+    return fail(`the success URL goes to ${url.origin}, not ${siteOrigin}`);
   }
-  if (!url.searchParams.get("checkout_id")) return fail(`the success URL ${shown} carries no checkout_id`);
-  return pass(`returns buyers to ${shown}`);
+  if (url.pathname !== "/success") return fail(`the success URL is on ${url.origin} but not its /success page`);
+  if (!url.searchParams.get("checkout_id")) return fail("the success URL carries no checkout_id");
+  return pass(`returns buyers to ${url.origin}/success`);
 }
 
 async function checkStaticCheckout(slug: BuySlug, siteOrigin: string, fetchImpl: typeof fetch): Promise<CheckResult> {

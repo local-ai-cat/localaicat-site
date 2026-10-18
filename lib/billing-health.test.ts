@@ -120,7 +120,7 @@ test("a link without a success URL, or one that leaves the site, fails its own c
   assert.equal(report.checks["success_url_pro-monthly"].ok, false);
   assert.match(report.checks["success_url_pro-monthly"].detail, /no success URL/);
   assert.equal(report.checks["success_url_pro-annual"].ok, false);
-  assert.match(report.checks["success_url_pro-annual"].detail, /meow\.localaicat\.com\/success, not https:\/\/localaicat\.com\/success/);
+  assert.match(report.checks["success_url_pro-annual"].detail, /goes to https:\/\/meow\.localaicat\.com, not https:\/\/localaicat\.com/);
   assert.equal(report.checks["success_url_developer-mode"].ok, false);
   assert.equal(report.checks.polar_admin_key.ok, true);
 });
@@ -135,7 +135,7 @@ test("a rejected admin key, a dead Redis and missing variables are reported by n
   assert.equal(report.checks.polar_admin_key.ok, false);
   assert.match(report.checks.polar_admin_key.detail, /401/);
   assert.equal(report.checks.redis.ok, false);
-  assert.match(report.checks.redis.detail, /connection refused/);
+  assert.equal(report.checks.redis.detail, "Upstash Redis unreachable: Error", "error messages are reported by kind only");
   assert.equal(report.checks.configuration.ok, false);
   assert.equal(report.checks.configuration.detail, "missing POLAR_CHECKOUT_URL_DEVELOPER_MODE, POLAR_PRODUCT_ID_TEAM_ANNUAL");
   assert.equal(report.checks["success_url_developer-mode"].ok, false);
@@ -160,6 +160,12 @@ test("the check fails when the site URL is not the origin it ran on", async () =
   const report = await runBillingHealth("https://meow.localaicat.com", polar(HEALTHY, []), pong);
   assert.equal(report.checks.site_url.ok, false);
   assert.equal(report.checks["success_url_team-annual"].ok, false);
+});
+
+test("a success URL on the site's own origin but the wrong page is not echoed", async () => {
+  const report = await runBillingHealth(SITE, polar({ ...HEALTHY, monthly: `${SITE}/checkout/polar_c_leaked` }, []), pong);
+  assert.equal(report.checks["success_url_pro-monthly"].ok, false);
+  assert.ok(!JSON.stringify(report).includes("polar_c_"));
 });
 
 test("isAuthorizedHealthCaller accepts only the exact bearer token", () => {

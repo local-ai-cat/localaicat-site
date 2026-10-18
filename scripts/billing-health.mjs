@@ -35,14 +35,25 @@ function readToken(env) {
   }
 }
 
-/** One line per check, failures first; returns the exit code. */
+function isCheck(value) {
+  return typeof value === "object" && value !== null && typeof value.ok === "boolean";
+}
+
+/**
+ * One line per check, failures first; returns the exit code. The route answers
+ * 200 when healthy and 503 when a check failed; anything else, or a reply
+ * that is not a report, means the check itself did not run.
+ */
 export function summarize(status, report) {
-  if (!report || typeof report.checks !== "object" || report.checks === null) {
-    return { code: EXIT_UNAVAILABLE, lines: [`billing health: the site answered ${status} without a report`] };
+  const entries = report && typeof report.checks === "object" && report.checks !== null
+    ? Object.entries(report.checks)
+    : [];
+  if ((status !== 200 && status !== 503) || entries.length === 0 || !entries.every(([, check]) => isCheck(check))) {
+    return { code: EXIT_UNAVAILABLE, lines: [`billing health: the site answered ${status} without a usable report`] };
   }
-  const entries = Object.entries(report.checks).sort(([, left], [, right]) => Number(left.ok) - Number(right.ok));
+  entries.sort(([, left], [, right]) => Number(left.ok) - Number(right.ok));
   const lines = entries.map(([name, check]) => `${check.ok ? "ok  " : "FAIL"} ${name}: ${check.detail}`);
-  const ok = report.ok === true && entries.every(([, check]) => check.ok);
+  const ok = status === 200 && report.ok === true && entries.every(([, check]) => check.ok);
   lines.unshift(`billing health ${ok ? "ok" : "FAILED"} (${report.checkedAt ?? "unknown time"})`);
   return { code: ok ? EXIT_OK : EXIT_FAILED, lines };
 }

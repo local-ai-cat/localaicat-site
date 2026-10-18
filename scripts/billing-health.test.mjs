@@ -24,8 +24,11 @@ test("summarize passes a healthy report and lists failures first", () => {
   assert.deepEqual(failing.lines.slice(1), ["FAIL polar_admin_key: Polar answered 401", "ok   redis: PONG"]);
 });
 
-test("summarize treats a reply without a report as unavailable", () => {
+test("summarize treats a reply without a usable report as unavailable", () => {
   assert.equal(summarize(502, null).code, EXIT_UNAVAILABLE);
+  assert.equal(summarize(500, HEALTHY).code, EXIT_UNAVAILABLE, "only 200 and 503 carry a report");
+  assert.equal(summarize(200, { ok: true, checks: { redis: null } }).code, EXIT_UNAVAILABLE);
+  assert.equal(summarize(200, { ok: true, checks: {} }).code, EXIT_UNAVAILABLE);
 });
 
 test("main sends the token as a bearer header and maps answers to exit codes", async () => {

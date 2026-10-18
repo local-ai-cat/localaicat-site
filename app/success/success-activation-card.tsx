@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { activationLinkForLicenseKey } from "../../lib/license-activation";
+import { activationLinkForToken } from "../../lib/license-activation";
 
 type SuccessActivationCardProps = {
   checkoutId?: string | null;
@@ -71,13 +71,15 @@ export function SuccessActivationCard({
   const [revealRemainingSeconds, setRevealRemainingSeconds] = useState<number | null>(null);
   const didAttemptOpenRef = useRef(false);
 
-  // The deeplink now embeds the license key directly. Token-based
-  // activation is still supported by the API but no longer used here —
-  // see lib/license-activation.ts for the deprecation note.
+  // The deeplink carries the single-use activation token, not the key (see
+  // lib/license-activation.ts). Once the token is claimed or expired there is
+  // no link; the key panel stays available for copy-paste.
   const canUseLicenseKey = Boolean(licenseKey && !revealBlockedReason);
   const activationLink = useMemo(
-    () => (canUseLicenseKey && licenseKey ? activationLinkForLicenseKey(licenseKey) : null),
-    [canUseLicenseKey, licenseKey]
+    () => (canUseLicenseKey && activationToken && tokenStatus === "pending"
+      ? activationLinkForToken(activationToken)
+      : null),
+    [canUseLicenseKey, activationToken, tokenStatus]
   );
   const statusTone =
     tokenStatus === "claimed"

@@ -1,5 +1,8 @@
 import type { DirectDownloadReleaseInfo } from "./direct-download-release";
 
+/** Apple Developer team that signs every Local AI Cat build. */
+export const EXPECTED_TEAM_ID = "599WAZ6282";
+
 function shellQuote(value: string) {
   return `'${value.replace(/'/g, `'\"'\"'`)}'`;
 }
@@ -23,6 +26,7 @@ set -eu
 
 DOWNLOAD_URL=${shellQuote(downloadUrl)}
 RELEASE_META=${shellQuote(releaseMeta)}
+EXPECTED_TEAM_ID=${shellQuote(EXPECTED_TEAM_ID)}
 TMP_DIR=$(mktemp -d)
 TARGET_DIR="/Applications"
 if [ -t 1 ]; then
@@ -120,6 +124,18 @@ done
 
 if [ -z "$APP_PATH" ]; then
   echo "==> Meow! No app bundle found in DMG." >&2
+  exit 1
+fi
+
+# The quarantine flag is cleared below, which skips Gatekeeper, so the bundle
+# must prove itself first: a valid signature from our own Apple team.
+if ! /usr/bin/codesign --verify --deep --strict "$APP_PATH" 2>/dev/null; then
+  echo "==> Hiss! The downloaded app's code signature is not valid. Nothing was installed." >&2
+  exit 1
+fi
+TEAM_ID=$(/usr/bin/codesign -dv "$APP_PATH" 2>&1 | /usr/bin/sed -n 's/^TeamIdentifier=//p')
+if [ "$TEAM_ID" != "$EXPECTED_TEAM_ID" ]; then
+  echo "==> Hiss! The downloaded app is not signed by Local AI Cat (team $TEAM_ID). Nothing was installed." >&2
   exit 1
 fi
 

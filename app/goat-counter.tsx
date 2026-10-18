@@ -37,12 +37,16 @@ function countPageview(): void {
   window.goatcounter?.count?.({ path: pathname, referrer: withoutQuery(document.referrer) });
 }
 
-export function GoatCounter(): React.JSX.Element {
+export function GoatCounter(): React.JSX.Element | null {
   const pathname = usePathname();
 
   useEffect(() => {
     countPageview();
   }, [pathname]);
+
+  if (isBearerPath(pathname)) {
+    return null;
+  }
 
   return (
     <Script

@@ -61,6 +61,10 @@
         g.defer = true;
         g.async = true;
         g.onload = function() {
+            // The page may have moved to a bearer page while the SDK loaded.
+            if (isBearerPage()) {
+                return;
+            }
             if (window.chatwootSDK) {
                 window.chatwootSDK.run({ websiteToken: CHATWOOT_CONFIG.websiteToken, baseUrl: BASE_URL });
                 if (autoOpen) {

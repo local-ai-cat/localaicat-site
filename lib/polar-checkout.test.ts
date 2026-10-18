@@ -4,8 +4,29 @@ import { createInMemoryActivationTokenStore } from "./activation-token-store.ts"
 import { redeemActivationToken } from "./activation-redeem.ts";
 import { resolveCheckoutSuccessState } from "./polar-checkout.ts";
 
-const PRO_PRODUCT_URL = "https://sandbox-api.polar.sh/v1/products/prod_pro";
-const PRO_PRODUCT = { benefits: [{ id: "ben_pro", type: "license_keys" }, { id: "ben_flag", type: "feature_flag" }] };
+const GRANTS_PREFIX = "https://sandbox-api.polar.sh/v1/customer-portal/benefit-grants/?checkout_id=";
+
+/** License-key ids Polar granted to each checkout; anything else on the customer record is someone else's purchase. */
+const CHECKOUT_GRANTS = new Map<string, string[]>([
+  ["chk_123", ["LOCALAI-PRO-OLDER", "LOCALAI-PRO-CURRENT"]],
+  ["chk_recurring", ["LOCALAI-PRO-MONTHLY"]],
+  ["chk_no_subid", ["LOCALAI-PRO-ANNUAL"]],
+  ["chk_old", ["MEOW-PRO-LEAKED"]],
+  ["chk_post_grace", ["MEOW-PRO-POST"]],
+  ["chk_just_now", ["MEOW-PRO-JUSTNOW"]],
+  ["chk_ok", ["MEOW-PRO-OK"]],
+  ["chk_once", ["MEOW-PRO-ONCE"]],
+  ["chk_nostore", ["MEOW-PRO-NOSTORE"]],
+  ["chk_other_sub", ["MEOW-PRO-OS"]]
+]);
+
+function grantsResponse(url: string) {
+  const checkoutId = decodeURIComponent(url.slice(GRANTS_PREFIX.length).split("&")[0]);
+  assert.ok(url.includes("&type=license_keys"), "only license-key grants are requested");
+  return Response.json({
+    items: (CHECKOUT_GRANTS.get(checkoutId) ?? []).map((keyId) => ({ is_granted: true, properties: { license_key_id: keyId } }))
+  });
+}
 
 const originalFetch = globalThis.fetch;
 const originalEnv = {
@@ -69,22 +90,22 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
       return Response.json({
         items: [
           {
+            id: "LOCALAI-PRO-OLDER",
             key: "LOCALAI-PRO-OLDER",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: new Date(Date.now() - 20 * 1000).toISOString()
           },
           {
+            id: "LOCALAI-PRO-CURRENT",
             key: "LOCALAI-PRO-CURRENT",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: new Date(Date.now() - 10 * 1000).toISOString()
           }
         ]
       });
     }
 
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
 
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -142,9 +163,9 @@ test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subsc
       return Response.json({
         items: [
           {
+            id: "LOCALAI-PRO-MONTHLY",
             key: "LOCALAI-PRO-MONTHLY",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: freshTimestamp
           }
         ]
@@ -162,7 +183,7 @@ test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subsc
       });
     }
 
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
 
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -217,9 +238,9 @@ test("resolveCheckoutSuccessState falls back to customer subscription list when 
       return Response.json({
         items: [
           {
+            id: "LOCALAI-PRO-ANNUAL",
             key: "LOCALAI-PRO-ANNUAL",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: freshTimestamp
           }
         ]
@@ -242,7 +263,7 @@ test("resolveCheckoutSuccessState falls back to customer subscription list when 
       });
     }
 
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
 
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -284,15 +305,15 @@ test("resolveCheckoutSuccessState redacts the license key after the reveal windo
       return Response.json({
         items: [
           {
+            id: "MEOW-PRO-LEAKED",
             key: "MEOW-PRO-LEAKED",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: staleCreated
           }
         ]
       });
     }
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
 
@@ -338,15 +359,15 @@ test("resolveCheckoutSuccessState refuses to reveal the key without the per-brow
       return Response.json({
         items: [
           {
+            id: "MEOW-PRO-POST",
             key: "MEOW-PRO-POST",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: postGraceTimestamp
           }
         ]
       });
     }
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
 
@@ -389,15 +410,15 @@ test("resolveCheckoutSuccessState reveals the key during the first-visit grace e
       return Response.json({
         items: [
           {
+            id: "MEOW-PRO-JUSTNOW",
             key: "MEOW-PRO-JUSTNOW",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: justNowTimestamp
           }
         ]
       });
     }
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
 
@@ -438,15 +459,15 @@ test("resolveCheckoutSuccessState reveals the license key to the cookie-bound vi
       return Response.json({
         items: [
           {
+            id: "MEOW-PRO-OK",
             key: "MEOW-PRO-OK",
             status: "granted",
-            benefit_id: "ben_pro",
             created_at: freshTimestamp
           }
         ]
       });
     }
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
 
@@ -464,7 +485,9 @@ function secondsAgo(seconds: number) {
   return new Date(Date.now() - seconds * 1000).toISOString();
 }
 
-function confirmedCheckoutFetch(checkoutId: string, keys: { key: string; benefit_id: string; created_at: string }[]) {
+type KeyFixture = { key: string; created_at: string };
+
+function confirmedCheckoutFetch(checkoutId: string, keys: KeyFixture[], grantedToCheckout: string[]) {
   const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
   return async (input: string | URL | Request) => {
     const url = input.toString();
@@ -481,9 +504,11 @@ function confirmedCheckoutFetch(checkoutId: string, keys: { key: string; benefit
       return Response.json({ token: "polar_cst_shared" }, { status: 201 });
     }
     if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100") {
-      return Response.json({ items: keys.map((key) => ({ ...key, status: "granted" })) });
+      return Response.json({ items: keys.map((key) => ({ ...key, id: key.key, status: "granted" })) });
     }
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) {
+      return Response.json({ items: grantedToCheckout.map((keyId) => ({ is_granted: true, properties: { license_key_id: keyId } })) });
+    }
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
 }
@@ -507,8 +532,8 @@ test("resolveCheckoutSuccessState rejects ids outside the Polar id alphabet with
 test("resolveCheckoutSuccessState grants the cookieless first-visit grace only once per checkout", async () => {
   const store = createInMemoryActivationTokenStore();
   globalThis.fetch = confirmedCheckoutFetch("chk_once", [
-    { key: "MEOW-PRO-ONCE", benefit_id: "ben_pro", created_at: secondsAgo(10) }
-  ]);
+    { key: "MEOW-PRO-ONCE", created_at: secondsAgo(10) }
+  ], ["MEOW-PRO-ONCE"]);
 
   const first = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null });
   const second = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null });
@@ -522,8 +547,8 @@ test("resolveCheckoutSuccessState grants the cookieless first-visit grace only o
 
 test("resolveCheckoutSuccessState keeps the grace closed when no store can record the claim", async () => {
   globalThis.fetch = confirmedCheckoutFetch("chk_nostore", [
-    { key: "MEOW-PRO-NOSTORE", benefit_id: "ben_pro", created_at: secondsAgo(10) }
-  ]);
+    { key: "MEOW-PRO-NOSTORE", created_at: secondsAgo(10) }
+  ], ["MEOW-PRO-NOSTORE"]);
 
   const state = await resolveCheckoutSuccessState("chk_nostore", { activationTokenStore: null, cookieIssuedAt: null });
 
@@ -531,48 +556,28 @@ test("resolveCheckoutSuccessState keeps the grace closed when no store can recor
   assert.equal(state?.revealBlockedReason, "cookie_required");
 });
 
-test("resolveCheckoutSuccessState reveals only keys granted by the checkout's own product", async () => {
+test("resolveCheckoutSuccessState reveals only keys whose grant belongs to this checkout", async () => {
+  // The customer record can hold newer keys from other purchases (another
+  // product, or someone who checked out with the same email).
   globalThis.fetch = confirmedCheckoutFetch("chk_bound", [
-    { key: "MEOW-DEV-NEWER", benefit_id: "ben_dev", created_at: secondsAgo(5) },
-    { key: "MEOW-PRO-OWN", benefit_id: "ben_pro", created_at: secondsAgo(10) }
-  ]);
+    { key: "MEOW-DEV-OTHER-PURCHASE", created_at: secondsAgo(5) },
+    { key: "MEOW-PRO-OTHER-PERSON", created_at: secondsAgo(3) },
+    { key: "MEOW-PRO-OWN", created_at: secondsAgo(10) }
+  ], ["MEOW-PRO-OWN"]);
   const bound = await resolveCheckoutSuccessState("chk_bound", {
     activationTokenStore: createInMemoryActivationTokenStore(),
     cookieIssuedAt: Date.now()
   });
-  assert.equal(bound?.licenseKey, "MEOW-PRO-OWN", "a newer key from another product must not be revealed");
+  assert.equal(bound?.licenseKey, "MEOW-PRO-OWN");
 
-  globalThis.fetch = confirmedCheckoutFetch("chk_other", [
-    { key: "MEOW-DEV-ONLY", benefit_id: "ben_dev", created_at: secondsAgo(5) }
-  ]);
-  const other = await resolveCheckoutSuccessState("chk_other", {
+  globalThis.fetch = confirmedCheckoutFetch("chk_pending", [
+    { key: "MEOW-PRO-OTHER-PERSON", created_at: secondsAgo(3) }
+  ], []);
+  const pending = await resolveCheckoutSuccessState("chk_pending", {
     activationTokenStore: createInMemoryActivationTokenStore(),
     cookieIssuedAt: Date.now()
   });
-  assert.equal(other?.licenseKey, null, "keys from other purchases stay hidden until this product's key is granted");
-});
-
-test("resolveCheckoutSuccessState does not reveal a same-benefit key that predates the checkout", async () => {
-  // Polar attaches checkouts to customers by the email typed at checkout, so
-  // an earlier Pro key on the same customer record may be someone else's.
-  globalThis.fetch = confirmedCheckoutFetch("chk_shared", [
-    { key: "MEOW-PRO-EARLIER-PURCHASE", benefit_id: "ben_pro", created_at: secondsAgo(3600) }
-  ]);
-  const before = await resolveCheckoutSuccessState("chk_shared", {
-    activationTokenStore: createInMemoryActivationTokenStore(),
-    cookieIssuedAt: Date.now()
-  });
-  assert.equal(before?.licenseKey, null, "a key created before this checkout is not this checkout's key");
-
-  globalThis.fetch = confirmedCheckoutFetch("chk_shared", [
-    { key: "MEOW-PRO-EARLIER-PURCHASE", benefit_id: "ben_pro", created_at: secondsAgo(3600) },
-    { key: "MEOW-PRO-THIS-PURCHASE", benefit_id: "ben_pro", created_at: secondsAgo(5) }
-  ]);
-  const after = await resolveCheckoutSuccessState("chk_shared", {
-    activationTokenStore: createInMemoryActivationTokenStore(),
-    cookieIssuedAt: Date.now()
-  });
-  assert.equal(after?.licenseKey, "MEOW-PRO-THIS-PURCHASE");
+  assert.equal(pending?.licenseKey, null, "nothing is revealed until this checkout's own grant exists");
 });
 
 test("resolveCheckoutSuccessState ignores another purchase's subscription in the customer fallback", async () => {
@@ -586,7 +591,7 @@ test("resolveCheckoutSuccessState ignores another purchase's subscription in the
       return Response.json({ token: "polar_cst_os" }, { status: 201 });
     }
     if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100") {
-      return Response.json({ items: [{ key: "MEOW-PRO-OS", status: "granted", benefit_id: "ben_pro", created_at: freshTimestamp }] });
+      return Response.json({ items: [{ id: "MEOW-PRO-OS", key: "MEOW-PRO-OS", status: "granted", created_at: freshTimestamp }] });
     }
     if (url.startsWith("https://sandbox-api.polar.sh/v1/subscriptions/?customer_id=")) {
       return Response.json({ items: [
@@ -594,7 +599,7 @@ test("resolveCheckoutSuccessState ignores another purchase's subscription in the
         { id: "sub_other_product", product_id: "prod_dev", created_at: freshTimestamp, recurring_interval: "year", current_period_end: "2027-10-01T00:00:00Z" }
       ] });
     }
-    if (url === PRO_PRODUCT_URL) return Response.json(PRO_PRODUCT);
+    if (url.startsWith(GRANTS_PREFIX)) return grantsResponse(url);
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
 

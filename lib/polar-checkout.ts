@@ -27,8 +27,9 @@ type PolarCheckout = {
   product_id?: string | null;
 };
 
-type PolarProduct = {
-  benefits?: { id?: string; type?: string }[];
+type PolarBenefitGrant = {
+  is_granted?: boolean;
+  properties?: { license_key_id?: string | null } | null;
 };
 
 /**
@@ -103,10 +104,10 @@ type PolarCustomerSession = {
 };
 
 type PolarLicenseKey = {
+  id?: string;
   key?: string;
   status?: string;
   created_at?: string;
-  benefit_id?: string;
 };
 
 export type CheckoutSuccessState = {
@@ -147,66 +148,46 @@ async function fetchCheckout(
   return (await response.json()) as PolarCheckout;
 }
 
-/**
- * The license-key benefits the checkout's product grants. A customer can hold
- * keys from several purchases (Pro and Developer Mode use different benefits),
- * so the reveal is limited to keys this product issues.
- */
-async function fetchLicenseKeyBenefitIds(
-  productId: string,
-  adminKey: string,
-  apiBase: string
-): Promise<Set<string>> {
-  if (!isPlausiblePolarId(productId)) return new Set();
-  const response = await fetch(`${apiBase}/v1/products/${encodeURIComponent(productId)}`, {
-    headers: { Authorization: `Bearer ${adminKey}` },
+async function listCustomerPortal<T>(path: string, customerSessionToken: string, apiBase: string) {
+  const response = await fetch(`${apiBase}${path}`, {
+    headers: { Authorization: `Bearer ${customerSessionToken}` },
     cache: "no-store"
   });
-  if (!response.ok) return new Set();
-  const product = (await response.json()) as PolarProduct;
-  return new Set(
-    (product.benefits ?? [])
-      .filter((benefit) => benefit.type === "license_keys" && benefit.id)
-      .map((benefit) => benefit.id as string)
-  );
+  if (!response.ok) return null;
+  const payload = (await response.json()) as { items?: T[]; result?: T[] };
+  return payload.items ?? payload.result ?? [];
 }
 
 /**
- * The key this checkout produced: granted by one of the product's license-key
- * benefits and created after the checkout itself. A key that already existed
- * cannot be this purchase's, and Polar attaches checkouts to customers by the
- * email typed at checkout, so an older key may belong to someone else's earlier
- * purchase on that customer record.
+ * The license key this checkout produced. Polar attaches a checkout to a
+ * customer by the email typed at checkout, so the customer record can hold
+ * keys from other people's purchases; only keys whose grant belongs to this
+ * checkout are eligible.
  */
 async function lookupGrantedLicenseKey(
   customerSessionToken: string,
-  benefitIds: Set<string>,
-  checkoutCreatedAt: number,
+  checkoutId: string,
   apiBase: string
 ): Promise<string | null> {
-  if (benefitIds.size === 0 || !Number.isFinite(checkoutCreatedAt)) return null;
-  const response = await fetch(
-    `${apiBase}/v1/customer-portal/license-keys?limit=${LICENSE_KEY_PAGE_SIZE}`,
-    {
-      headers: { Authorization: `Bearer ${customerSessionToken}` },
-      cache: "no-store"
-    }
+  const grants = await listCustomerPortal<PolarBenefitGrant>(
+    `/v1/customer-portal/benefit-grants/?checkout_id=${encodeURIComponent(checkoutId)}&type=license_keys&limit=${LICENSE_KEY_PAGE_SIZE}`,
+    customerSessionToken,
+    apiBase
   );
+  const grantedKeyIds = new Set(
+    (grants ?? [])
+      .filter((grant) => grant.is_granted && grant.properties?.license_key_id)
+      .map((grant) => grant.properties?.license_key_id as string)
+  );
+  if (grantedKeyIds.size === 0) return null;
 
-  if (!response.ok) {
-    return null;
-  }
-
-  const payload = (await response.json()) as {
-    items?: PolarLicenseKey[];
-    result?: PolarLicenseKey[];
-  };
-  const items = payload.items ?? payload.result ?? [];
-  const activeKey = items
-    .filter((item) => item.status === "granted"
-      && item.key
-      && benefitIds.has(item.benefit_id ?? "")
-      && Date.parse(item.created_at ?? "") >= checkoutCreatedAt)
+  const keys = await listCustomerPortal<PolarLicenseKey>(
+    `/v1/customer-portal/license-keys?limit=${LICENSE_KEY_PAGE_SIZE}`,
+    customerSessionToken,
+    apiBase
+  );
+  const activeKey = (keys ?? [])
+    .filter((item) => item.status === "granted" && item.key && grantedKeyIds.has(item.id ?? ""))
     .sort((left, right) => {
       const leftCreatedAt = Date.parse(left.created_at ?? "");
       const rightCreatedAt = Date.parse(right.created_at ?? "");
@@ -405,14 +386,9 @@ export async function resolveCheckoutSuccessState(
       return cookieRequired;
     }
 
-    const benefitIds = checkout.product_id
-      ? await fetchLicenseKeyBenefitIds(checkout.product_id, adminKey, apiBase)
-      : new Set<string>();
-    const customerSession = benefitIds.size > 0
-      ? await createCustomerSession(customerId, adminKey, apiBase)
-      : null;
+    const customerSession = await createCustomerSession(customerId, adminKey, apiBase);
     const licenseKey = customerSession?.token
-      ? await lookupGrantedLicenseKey(customerSession.token, benefitIds, checkoutCreatedAt, apiBase)
+      ? await lookupGrantedLicenseKey(customerSession.token, checkoutId, apiBase)
       : null;
 
     // Resolve plan + renewal date from the underlying subscription, when one

@@ -110,15 +110,21 @@ pnpm start
 
 ## Vercel deployment
 
-This site is deployed via Vercel's GitHub integration:
+Both Vercel projects deploy through Vercel's GitHub integration; no GitHub
+workflow or stored Vercel token is involved.
 
-1. Connect the GitHub repo in the Vercel dashboard
-2. Set the root directory to `localaicat-site`
-3. Framework preset: Next.js (auto-detected)
-4. Add environment variables in the Vercel dashboard
-5. Pushes to `main` auto-deploy to production
+| Project | Domain | Production branch | Polar |
+|---|---|---|---|
+| `localaicat-site` | localaicat.com | `main` | production |
+| `localaicat-site-staging` | meow.localaicat.com | `staging` | sandbox |
 
-Preview deployments are created for each pull request.
+- Pushes to `main` deploy production. Pull requests get previews on the
+  production project only.
+- Pushes to `staging` deploy meow.localaicat.com. The staging project has
+  preview deployments turned off and an Ignored Build Step
+  (`[ "$VERCEL_GIT_COMMIT_REF" != "staging" ]`), so it builds nothing but the
+  `staging` branch; it also posts no PR comments.
+- To put main on staging: `git push origin origin/main:staging` (fast-forward).
 
 ## Health check
 

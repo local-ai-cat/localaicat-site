@@ -6,9 +6,19 @@ import {
   getPolarProductId,
   getSiteUrl
 } from "../../../lib/env";
+import { callerAddress, isRateLimited } from "../../../lib/rate-limit";
 import { seatCount } from "../../../lib/team-seats";
 
+/** Each call creates a Polar checkout session with the admin key. */
+const CHECKOUTS_PER_MINUTE = 10;
+
 export async function POST(request: Request) {
+  if (await isRateLimited("team-checkout", callerAddress(request.headers), CHECKOUTS_PER_MINUTE, 60)) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again in a minute." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
   const body = await request.json().catch(() => null);
   const seats = seatCount(body?.seats);
 

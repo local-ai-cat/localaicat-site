@@ -165,12 +165,13 @@ export function SuccessActivationCard({
     // activation-token chain takes a few seconds to land. The API returns:
     //   404 — license not yet issued
     //   422 — checkout/customer not yet confirmed
+    //   429 — rate limited; the next poll falls in a fresh window
     //   503 — license exists but activation token not yet minted (or config)
     //   5xx — transient infra
     // Treat all of those as "keep waiting" until maxAttempts. Only give up on
     // a 4xx that indicates a permanent client-side problem (bad checkout id).
     const isTransient = (status: number) =>
-      status === 404 || status === 422 || status === 503 || status >= 500;
+      status === 404 || status === 422 || status === 429 || status === 503 || status >= 500;
 
     const lookup = async () => {
       attempts += 1;

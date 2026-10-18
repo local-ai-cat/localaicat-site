@@ -271,6 +271,15 @@
             return;
         }
 
+        // Back/Forward onto a bearer page is a client-side navigation that would keep a loaded
+        // SDK alive and let it read the URL once the page re-renders. Reloading synchronously in
+        // popstate swaps the document before that render.
+        window.addEventListener('popstate', function() {
+            if (isBearerPage() && window.$chatwoot) {
+                window.location.reload();
+            }
+        });
+
         const urlParams = new URLSearchParams(window.location.search);
         const hasConsentParam = urlParams.get('consent') === 'chat';
         const isAppUserAgent = navigator.userAgent.includes('LocalAICat/') || navigator.userAgent.includes('AtlasLogged/');

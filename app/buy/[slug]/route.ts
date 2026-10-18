@@ -19,6 +19,12 @@ export async function GET(
     return NextResponse.redirect(fallback, { status: 302 });
   }
 
+  // Team goes through /team, which says what the checkout actually sells
+  // (per-seat keys, or one license until seat billing is configured).
+  if (slug === "team-annual") {
+    return NextResponse.redirect(new URL("/team", request.url), { status: 302 });
+  }
+
   const checkoutUrl = getCheckoutUrl(slug as BuySlug);
 
   if (checkoutUrl) {

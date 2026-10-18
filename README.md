@@ -110,18 +110,46 @@ pnpm start
 
 ## Vercel deployment
 
-This site is deployed via Vercel's GitHub integration:
+Both Vercel projects deploy through Vercel's GitHub integration; no GitHub
+workflow or stored Vercel token is involved.
 
-1. Connect the GitHub repo in the Vercel dashboard
-2. Set the root directory to `localaicat-site`
-3. Framework preset: Next.js (auto-detected)
-4. Add environment variables in the Vercel dashboard
-5. Pushes to `main` auto-deploy to production
+| Project | Domain | Production branch | Polar |
+|---|---|---|---|
+| `localaicat-site` | localaicat.com | `main` | production |
+| `localaicat-site-staging` | meow.localaicat.com | `staging` | sandbox |
 
-Preview deployments are created for each pull request.
+- Pushes to `main` deploy production. Pull requests get previews on the
+  production project only.
+- Pushes to `staging` deploy meow.localaicat.com. The staging project has
+  preview deployments turned off and an Ignored Build Step
+  (`[ "$VERCEL_GIT_COMMIT_REF" != "staging" ]`), so it builds nothing but the
+  `staging` branch; it also posts no PR comments.
+- To put main on staging: `git push origin origin/main:staging` (fast-forward).
 
 ## Health check
 
 - `GET /api/health`
 
 Returns build commit SHA and timestamp.
+
+- `GET /api/health/billing` with `Authorization: Bearer $BILLING_HEALTH_TOKEN`
+
+The weekly billing check. It returns JSON with `ok` and one `{ ok, detail }`
+entry per check, and answers 200 when all pass, 503 when any fails, 401 for
+a wrong token and 404 when `BILLING_HEALTH_TOKEN` is unset. It checks:
+
+- the billing variables are set and Team sells seats;
+- `POLAR_ADMIN_KEY` works (one authenticated read, `checkouts:read`);
+- Upstash Redis answers a ping;
+- `NEXT_PUBLIC_SITE_URL` is the origin the check was called on;
+- each hosted checkout link (Pro Monthly, Pro Annual, Developer Mode) still
+  returns buyers to `/success` on this site, and so does Team's own checkout.
+
+Every call is a read. The link checks list the organization's checkout links
+with the admin key, which needs `checkout_links:read`; a key without that
+scope reports them as `skipped`, which still counts as passing. No value is
+ever echoed.
+
+`node scripts/billing-health.mjs [--url …]` calls the route for a launchd job:
+the token comes from `$BILLING_HEALTH_TOKEN` or the keychain item
+`localaicat-billing-health`; exit 0 is healthy, 1 a failed check, 2 no answer.

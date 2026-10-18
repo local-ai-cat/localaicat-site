@@ -177,7 +177,8 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
             <p className="teamCheckoutNote">
               Billed annually via Polar. After checkout, assign each seat in the{" "}
               <Link href="/manage">customer portal</Link>: each person gets an
-              email invite and their own license key.
+              email invite and their own license key. Using it yourself?
+              Assign yourself a seat; there&rsquo;s no separate Pro to buy.
             </p>
           ) : (
             <p className="teamCheckoutNote">
@@ -194,7 +195,7 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
           <ul className="dualCardList">
             <li>Full Pro access on Mac</li>
             <li>Direct-download build</li>
-            <li>{sellsSeats ? "Its own license key, sent by email" : `Up to ${SINGLE_LICENSE_DEVICES} Macs on one key`}</li>
+            <li>{sellsSeats ? "Its own license key, claimed from the seat's email invite" : `Up to ${SINGLE_LICENSE_DEVICES} Macs on one key`}</li>
             <li>Standard support</li>
           </ul>
         </div>

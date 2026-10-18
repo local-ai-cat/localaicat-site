@@ -85,17 +85,22 @@ const faqSections: readonly FAQSection[] = [
       {
         question: "How do I activate a license key for Outdoor Cat?",
         answer:
-          "Buy on the pricing page, receive your license key by email, then paste it into Settings → Billing to activate."
+          "Buy on the pricing page. The success page opens the app to claim the license, or shows your key to paste into Settings → Activate License. The key also stays in the customer portal."
       },
       {
         question: "Can I use my license on more than one Mac?",
         answer:
-          "License seat limits depend on the plan you purchased. Check your license details in the customer portal or contact support@localaicat.com for clarification."
+          "Activation limits depend on the plan you purchased. Your key's details, including its activations, are in the customer portal. On Team, every person has their own seat and key. Questions: support@localaicat.com."
+      },
+      {
+        question: "I bought Team. Do I need Pro for myself too?",
+        answer:
+          "No. Assign yourself one of your seats in the customer portal: a seat is full Pro access with its own key. A second subscription on the same email isn't possible, because each email holds one. Developer Mode is a one-time purchase, so you can still add it on the same email."
       },
       {
         question: "How do teams buy?",
         answer:
-          "Use the Team checkout page for self-serve seat-based billing (minimum 2 seats, volume discounts at 11+). For Enterprise with invoicing, MDM, or custom rollout, contact serious@localaicat.com."
+          "The Team page sells seats from 2 upwards: £40 per seat per year, £35 from 11 seats and £30 from 26. After checkout you assign each seat by email in the customer portal, including one for yourself if you need it, and each person gets their own license key. For Enterprise with invoicing, MDM, or custom rollout, contact serious@localaicat.com."
       }
     ]
   },

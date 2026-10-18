@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { activationTokenExpiresAt } from "../../../../lib/activation-tokens";
 import {
-  issueRevealCookieValue,
-  parseRevealCookieValue,
+  isPlausiblePolarId,
   REVEAL_WINDOW_MS,
   resolveCheckoutSuccessState
 } from "../../../../lib/polar-checkout";
@@ -44,6 +43,12 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
+  if (!isPlausiblePolarId(id)) {
+    return NextResponse.json(
+      { error: "Unknown checkout." },
+      { status: 400, headers: noStoreHeaders }
+    );
+  }
   const cookieName = revealCookieName(id);
   const cookieValue = request.cookies.get(cookieName)?.value;
   const verified = verifyRevealCookieValue(id, cookieValue);

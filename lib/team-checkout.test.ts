@@ -35,8 +35,8 @@ test("a static link alone still sells one license; nothing configured is unavail
   assert.equal(teamCheckoutMode({ ...staticOnly, staticTeamUrl: null }), "unavailable");
 });
 
-test("a seat product without the admin key cannot create seat checkouts", () => {
-  assert.equal(teamCheckoutMode({ ...SEAT_BILLING, adminKey: null }), "single-license");
+test("a seat product without the admin key fails closed instead of selling one license", () => {
+  assert.equal(teamCheckoutMode({ ...SEAT_BILLING, adminKey: null }), "unavailable");
 });
 
 test("successUrl tolerates a trailing slash on the site URL", () => {

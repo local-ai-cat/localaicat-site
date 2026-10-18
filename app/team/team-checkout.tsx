@@ -51,7 +51,7 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
       const res = await fetch("/api/team-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seats })
+        body: JSON.stringify({ seats, mode })
       });
 
       const data = await res.json();
@@ -66,7 +66,7 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
       setError("Could not connect. Please try again.");
       setLoading(false);
     }
-  }, [seats]);
+  }, [seats, mode]);
 
   return (
     <div className="contentPage">

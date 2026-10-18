@@ -22,6 +22,13 @@ export async function POST(request: Request) {
   const seats = seatCount(body?.seats);
   const config = getTeamCheckoutConfig();
   const mode = teamCheckoutMode(config);
+  // The page priced one mode; a deploy since it loaded may have changed it.
+  if (body?.mode !== mode) {
+    return NextResponse.json(
+      { error: "This page is out of date. Reload it to see the current Team offer." },
+      { status: 409 }
+    );
+  }
   const checkoutBody = teamCheckoutBody(mode, seats, config, getSiteUrl());
 
   if (checkoutBody && config.adminKey) {

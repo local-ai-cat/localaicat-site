@@ -5,8 +5,11 @@
  *   buyer pays per seat and assigns each seat to a person, who gets their own
  *   license key.
  * - "single-license": no seat product, so the checkout is one Pro Annual
- *   license (one key, up to 5 Macs) whatever seat count was picked.
- * - "unavailable": neither is configured.
+ *   license (one key, up to 5 Macs) whatever seat count was picked. The
+ *   static POLAR_CHECKOUT_URL_TEAM_ANNUAL link must sell exactly that (in
+ *   production it is the fixed £40 "Team Annual" product with the Pro key).
+ * - "unavailable": nothing usable is configured, or a seat product is
+ *   configured without the admin key to open seat checkouts.
  */
 export type TeamCheckoutMode = "seats" | "single-license" | "unavailable";
 
@@ -18,7 +21,7 @@ export type TeamCheckoutConfig = {
 };
 
 export function teamCheckoutMode(config: TeamCheckoutConfig): TeamCheckoutMode {
-  if (config.adminKey && config.teamProductId) return "seats";
+  if (config.teamProductId) return config.adminKey ? "seats" : "unavailable";
   if ((config.adminKey && config.proAnnualProductId) || config.staticTeamUrl) return "single-license";
   return "unavailable";
 }

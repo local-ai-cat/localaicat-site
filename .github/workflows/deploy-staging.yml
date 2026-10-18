@@ -31,6 +31,8 @@ env:
 jobs:
   deploy:
     name: Deploy to meow.localaicat.com
+    # workflow_dispatch can name any branch; only staging's own tree may build with the token.
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # VERCEL_TOKEN belongs in this environment's secrets, with deployments

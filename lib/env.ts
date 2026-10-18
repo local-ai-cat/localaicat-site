@@ -126,6 +126,11 @@ export function getActivationTokenSecret() {
   return optionalValue(process.env.ACTIVATION_TOKEN_SECRET);
 }
 
+/** Bearer token for /api/health/billing. Unset means the route does not exist. */
+export function getBillingHealthToken() {
+  return optionalValue(process.env.BILLING_HEALTH_TOKEN);
+}
+
 export function getActivationTokenRedisConfig() {
   const url =
     optionalValue(process.env.KV_REST_API_URL) ??

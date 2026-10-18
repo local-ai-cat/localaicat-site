@@ -131,3 +131,24 @@ workflow or stored Vercel token is involved.
 - `GET /api/health`
 
 Returns build commit SHA and timestamp.
+
+- `GET /api/health/billing` with `Authorization: Bearer $BILLING_HEALTH_TOKEN`
+
+The weekly billing check. It returns JSON with `ok` and one `{ ok, detail }`
+entry per check, and answers 200 when all pass, 503 when any fails, 401 for
+a wrong token and 404 when `BILLING_HEALTH_TOKEN` is unset. It checks:
+
+- the billing variables are set and Team sells seats;
+- `POLAR_ADMIN_KEY` works (one authenticated read, `checkouts:read`);
+- Upstash Redis answers a ping;
+- `NEXT_PUBLIC_SITE_URL` is the origin the check was called on;
+- each hosted checkout link (Pro Monthly, Pro Annual, Developer Mode) still
+  returns buyers to `/success` on this site, and so does Team's own checkout.
+
+Reading a link's success URL with the current key scopes means following the
+link, so each run opens one unpaid Polar checkout session per link; they
+expire on their own. No value is ever echoed.
+
+`node scripts/billing-health.mjs [--url …]` calls the route for a launchd job:
+the token comes from `$BILLING_HEALTH_TOKEN` or the keychain item
+`localaicat-billing-health`; exit 0 is healthy, 1 a failed check, 2 no answer.

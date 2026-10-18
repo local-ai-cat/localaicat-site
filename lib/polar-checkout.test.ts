@@ -692,13 +692,32 @@ test("resolveCheckoutSuccessState finds this checkout's key however many older k
  * A Developer Mode checkout by an email that bought Team seats before: Polar
  * refuses a session without a member for such a "team customer".
  */
-function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[]) {
+type TeamCustomerOptions = {
+  /** Fields that override the confirmed, fresh Developer Mode checkout. */
+  checkout?: Record<string, unknown>;
+  /** False: Polar has no order for this checkout yet. */
+  hasOrder?: boolean;
+  /** Grants the owner member can see: [order id, key]. Defaults to this checkout's own key. */
+  grants?: [string, string][];
+  /** Every URL requested, in order. */
+  requested?: string[];
+};
+
+const MEMBERS_URL = "https://sandbox-api.polar.sh/v1/members/?customer_id=cust_team_buyer&role=owner&limit=1";
+
+function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[], options: TeamCustomerOptions = {}) {
   const freshTimestamp = new Date(Date.now() - 30 * 1000).toISOString();
+  const grants = options.grants ?? [["ord_chk_team_then_dev", "MEOW-DEV-OWNER"]];
   return async (input: string | URL | Request, init?: RequestInit) => {
     const url = input.toString();
+    options.requested?.push(url);
     if (url === "https://sandbox-api.polar.sh/v1/checkouts/chk_team_then_dev") {
-      return Response.json({ status: "succeeded", customer_id: "cust_team_buyer", product_id: "prod_dev", created_at: freshTimestamp, modified_at: freshTimestamp });
+      return Response.json({
+        status: "succeeded", customer_id: "cust_team_buyer", product_id: "prod_dev", created_at: freshTimestamp, modified_at: freshTimestamp,
+        ...options.checkout
+      });
     }
+    if (url.startsWith(ORDERS_PREFIX) && options.hasOrder === false) return Response.json({ items: [] });
     if (url === "https://sandbox-api.polar.sh/v1/customer-sessions") {
       const body = String(init?.body);
       sessionBodies.push(body);
@@ -707,16 +726,16 @@ function teamCustomerFetch(ownerLookup: () => Response, sessionBodies: string[])
       }
       return Response.json({ token: "polar_cst_owner", customer_portal_url: "https://polar.sh/portal/owner" }, { status: 201 });
     }
-    if (url === "https://sandbox-api.polar.sh/v1/members/?customer_id=cust_team_buyer&role=owner&limit=1") {
+    if (url === MEMBERS_URL) {
       return ownerLookup();
     }
     if (url === "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100") {
       assert.equal((init?.headers as Record<string, string>)?.Authorization, "Bearer polar_cst_owner");
-      return Response.json({ items: [{ id: "MEOW-DEV-OWNER", key: "MEOW-DEV-OWNER", status: "granted", created_at: freshTimestamp }] });
+      return Response.json({ items: grants.map(([, key]) => ({ id: key, key, status: "granted", created_at: freshTimestamp })) });
     }
     if (url.startsWith(ORDERS_PREFIX)) return ordersResponse(url);
     if (url.startsWith(GRANTS_PREFIX)) {
-      return Response.json({ items: [{ is_granted: true, order_id: "ord_chk_team_then_dev", properties: { license_key_id: "MEOW-DEV-OWNER" } }] });
+      return Response.json({ items: grants.map(([orderId, key]) => ({ is_granted: true, order_id: orderId, properties: { license_key_id: key } })) });
     }
     return Response.json({ error: "unexpected request" }, { status: 500 });
   };
@@ -757,6 +776,100 @@ test("a Team buyer's later purchase reveals nothing when the key cannot list mem
   } finally {
     console.error = originalError;
   }
+});
+
+const OWNER_FOUND = () => Response.json({ items: [{ id: "mem_owner", role: "owner" }] });
+
+test("invariant 1: the owner lookup runs only after the checkout passes every gate a non-team reveal needs", async () => {
+  const cases: [string, TeamCustomerOptions, { cookieIssuedAt: number | null; store?: boolean }][] = [
+    ["an unconfirmed checkout", { checkout: { status: "open" } }, { cookieIssuedAt: Date.now() }],
+    ["an expired reveal window", { checkout: { created_at: secondsAgo(25 * 3600), modified_at: secondsAgo(25 * 3600) } }, { cookieIssuedAt: Date.now() }],
+    ["a cookieless viewer after the first-visit grace", { checkout: { modified_at: secondsAgo(6 * 60) } }, { cookieIssuedAt: null }],
+    ["a cookieless viewer with no store to claim the grace", {}, { cookieIssuedAt: null, store: false }],
+    ["a checkout with no order of its own", { hasOrder: false }, { cookieIssuedAt: Date.now() }]
+  ];
+  for (const [label, options, viewer] of cases) {
+    const requested: string[] = [];
+    const sessionBodies: string[] = [];
+    globalThis.fetch = teamCustomerFetch(OWNER_FOUND, sessionBodies, { ...options, requested });
+
+    const state = await resolveCheckoutSuccessState("chk_team_then_dev", {
+      activationTokenStore: viewer.store === false ? null : createInMemoryActivationTokenStore(),
+      cookieIssuedAt: viewer.cookieIssuedAt
+    });
+
+    assert.equal(state?.licenseKey ?? null, null, label);
+    assert.equal(state?.customerPortalUrl ?? null, null, label);
+    assert.ok(!requested.includes(MEMBERS_URL), `${label}: no owner lookup`);
+    assert.deepEqual(sessionBodies, [], `${label}: no customer session`);
+  }
+});
+
+test("invariant 1: a second cookieless viewer of a team customer's checkout gets nothing once the grace is claimed", async () => {
+  const store = createInMemoryActivationTokenStore();
+  globalThis.fetch = teamCustomerFetch(OWNER_FOUND, []);
+
+  const first = await resolveCheckoutSuccessState("chk_team_then_dev", { activationTokenStore: store, cookieIssuedAt: null });
+  const second = await resolveCheckoutSuccessState("chk_team_then_dev", { activationTokenStore: store, cookieIssuedAt: null });
+
+  assert.equal(first?.licenseKey, "MEOW-DEV-OWNER");
+  assert.equal(second?.licenseKey, null);
+  assert.equal(second?.activationToken, null);
+  assert.equal(second?.customerPortalUrl, null);
+  assert.equal(second?.revealBlockedReason, "cookie_required");
+});
+
+test("invariant 2: the owner member's session reveals only this checkout's grant, never another the owner can see", async () => {
+  // The owner can also see their own Team seat key and an older Pro purchase.
+  const foreign: [string, string][] = [["ord_team_seat", "MEOW-PRO-OWNERS-SEAT"], ["ord_older_pro", "MEOW-PRO-OLDER"]];
+  globalThis.fetch = teamCustomerFetch(OWNER_FOUND, [], { grants: [...foreign, ["ord_chk_team_then_dev", "MEOW-DEV-OWNER"]] });
+  const own = await resolveCheckoutSuccessState("chk_team_then_dev", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(own?.licenseKey, "MEOW-DEV-OWNER");
+
+  globalThis.fetch = teamCustomerFetch(OWNER_FOUND, [], { grants: foreign });
+  const none = await resolveCheckoutSuccessState("chk_team_then_dev", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(none?.licenseKey, null, "until this checkout's own grant exists, nothing is revealed");
+});
+
+test("invariant 3: only a positive numeric seat count takes the Team branch; anything else meets every gate", async () => {
+  for (const seats of [null, 0, -1, "2", undefined]) {
+    const requested: string[] = [];
+    globalThis.fetch = teamCustomerFetch(OWNER_FOUND, [], {
+      checkout: { seats, modified_at: secondsAgo(6 * 60) },
+      requested
+    });
+
+    const state = await resolveCheckoutSuccessState("chk_team_then_dev", {
+      activationTokenStore: createInMemoryActivationTokenStore(),
+      cookieIssuedAt: null
+    });
+
+    assert.equal(state?.seats, undefined, `seats ${JSON.stringify(seats)} is not a Team checkout`);
+    assert.equal(state?.revealBlockedReason, "cookie_required", `seats ${JSON.stringify(seats)} still meets the cookie gate`);
+    assert.equal(state?.licenseKey, null);
+  }
+});
+
+test("invariant 3: the Team branch returns no key, token or portal URL, even to a cookie holder", async () => {
+  const requested: string[] = [];
+  globalThis.fetch = teamCustomerFetch(OWNER_FOUND, [], { checkout: { seats: 3 }, requested });
+
+  const state = await resolveCheckoutSuccessState("chk_team_then_dev", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+
+  assert.equal(state?.seats, 3);
+  assert.equal(state?.licenseKey, null);
+  assert.equal(state?.activationToken, null);
+  assert.equal(state?.customerPortalUrl, null);
+  assert.deepEqual(requested, ["https://sandbox-api.polar.sh/v1/checkouts/chk_team_then_dev"]);
 });
 
 test("a seat-based (Team) checkout reports its seats and looks up no key", async () => {

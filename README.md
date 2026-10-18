@@ -90,9 +90,9 @@ For production, configure:
 - `KV_REST_API_URL` and `KV_REST_API_TOKEN` from the Vercel Marketplace
   `upstash/upstash-kv` integration for one-time-use enforcement
 
-If `ACTIVATION_TOKEN_SECRET` is omitted, the site falls back to `POLAR_ADMIN_KEY`
-for token crypto, which is acceptable for local development but not the cleanest
-production separation of concerns.
+`ACTIVATION_TOKEN_SECRET` is required for activation tokens and reveal cookies;
+there is no fallback to `POLAR_ADMIN_KEY`. For local development set any long
+random value.
 
 ## Local development
 

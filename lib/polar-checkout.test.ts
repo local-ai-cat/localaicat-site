@@ -41,6 +41,26 @@ function ordersResponse(url: string) {
 }
 
 const originalFetch = globalThis.fetch;
+const KEY_LIST_URL = "https://sandbox-api.polar.sh/v1/customer-portal/license-keys?limit=100";
+const KEY_BY_ID = /^https:\/\/sandbox-api\.polar\.sh\/v1\/customer-portal\/license-keys\/([^/?]+)$/;
+
+// Each test mocks the customer's key list; the code fetches keys one id at a
+// time, so this adapter answers those lookups from the test's list.
+let testFetch: typeof fetch = originalFetch;
+async function keyByIdAdapter(input: string | URL | Request, init?: RequestInit) {
+  const match = KEY_BY_ID.exec(input.toString());
+  if (!match) return testFetch(input, init);
+  const list = await testFetch(KEY_LIST_URL, init);
+  if (!list.ok) return list;
+  const payload = (await list.json()) as { items?: { id?: string }[] };
+  const item = (payload.items ?? []).find((key) => key.id === decodeURIComponent(match[1]));
+  return item ? Response.json(item) : Response.json({ error: "not found" }, { status: 404 });
+}
+Object.defineProperty(globalThis, "fetch", {
+  configurable: true,
+  get: () => keyByIdAdapter,
+  set: (value: typeof fetch) => { testFetch = value; }
+});
 const originalEnv = {
   ACTIVATION_TOKEN_SECRET: process.env.ACTIVATION_TOKEN_SECRET,
   POLAR_ADMIN_KEY: process.env.POLAR_ADMIN_KEY,
@@ -656,4 +676,14 @@ test("resolveCheckoutSuccessState ignores grants from other orders even if Polar
     cookieIssuedAt: Date.now()
   });
   assert.equal(none?.licenseKey, null);
+});
+
+test("resolveCheckoutSuccessState finds this checkout's key however many older keys the customer holds", async () => {
+  const olderKeys = Array.from({ length: 120 }, (_, index) => ({ key: `MEOW-PRO-OLD-${index}`, created_at: secondsAgo(86_400 + index) }));
+  globalThis.fetch = confirmedCheckoutFetch("chk_many", [...olderKeys, { key: "MEOW-PRO-NEW", created_at: secondsAgo(5) }], ["MEOW-PRO-NEW"]);
+  const state = await resolveCheckoutSuccessState("chk_many", {
+    activationTokenStore: createInMemoryActivationTokenStore(),
+    cookieIssuedAt: Date.now()
+  });
+  assert.equal(state?.licenseKey, "MEOW-PRO-NEW");
 });

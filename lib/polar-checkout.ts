@@ -219,13 +219,17 @@ async function lookupGrantedLicenseKey(
   );
   if (grantedKeyIds.size === 0) return null;
 
-  const keys = await listCustomerPortal<PolarLicenseKey>(
-    `/v1/customer-portal/license-keys?limit=${LICENSE_KEY_PAGE_SIZE}`,
-    customerSessionToken,
-    apiBase
-  );
-  const activeKey = (keys ?? [])
-    .filter((item) => item.status === "granted" && item.key && grantedKeyIds.has(item.id ?? ""))
+  // Fetch each granted key by id: the customer's key list is oldest-first and
+  // paginated, so this purchase's key may not be on its first page.
+  const keys = await Promise.all([...grantedKeyIds].map(async (keyId) => {
+    const response = await fetch(
+      `${apiBase}/v1/customer-portal/license-keys/${encodeURIComponent(keyId)}`,
+      { headers: { Authorization: `Bearer ${customerSessionToken}` }, cache: "no-store" }
+    );
+    return response.ok ? (await response.json()) as PolarLicenseKey : null;
+  }));
+  const activeKey = keys
+    .filter((item): item is PolarLicenseKey => Boolean(item && item.status === "granted" && item.key && grantedKeyIds.has(item.id ?? "")))
     .sort((left, right) => {
       const leftCreatedAt = Date.parse(left.created_at ?? "");
       const rightCreatedAt = Date.parse(right.created_at ?? "");

@@ -75,11 +75,13 @@ export function SuccessActivationCard({
   // lib/license-activation.ts). Once the token is claimed or expired there is
   // no link; the key panel stays available for copy-paste.
   const canUseLicenseKey = Boolean(licenseKey && !revealBlockedReason);
+  // /activate?t= arrives with a token and no key, so the link depends only on
+  // a pending token.
   const activationLink = useMemo(
-    () => (canUseLicenseKey && activationToken && tokenStatus === "pending"
+    () => (!revealBlockedReason && activationToken && tokenStatus === "pending"
       ? activationLinkForToken(activationToken)
       : null),
-    [canUseLicenseKey, activationToken, tokenStatus]
+    [revealBlockedReason, activationToken, tokenStatus]
   );
   const statusTone =
     tokenStatus === "claimed"

@@ -117,11 +117,13 @@ export function getPolarAdminKey() {
   return optionalValue(process.env.POLAR_ADMIN_KEY);
 }
 
+/**
+ * Keys the activation-token cipher and the reveal-cookie HMAC. There is no
+ * fallback to POLAR_ADMIN_KEY: one leak would otherwise cover both the Polar
+ * org and every token. Unset means tokens and cookies are unavailable.
+ */
 export function getActivationTokenSecret() {
-  return (
-    optionalValue(process.env.ACTIVATION_TOKEN_SECRET) ??
-    getPolarAdminKey()
-  );
+  return optionalValue(process.env.ACTIVATION_TOKEN_SECRET);
 }
 
 export function getActivationTokenRedisConfig() {

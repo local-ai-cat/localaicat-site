@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { activationLinkForLicenseKey } from "../../lib/license-activation";
+import { activationLinkForToken } from "../../lib/license-activation";
 
 type SuccessActivationCardProps = {
   checkoutId?: string | null;
@@ -71,13 +71,17 @@ export function SuccessActivationCard({
   const [revealRemainingSeconds, setRevealRemainingSeconds] = useState<number | null>(null);
   const didAttemptOpenRef = useRef(false);
 
-  // The deeplink now embeds the license key directly. Token-based
-  // activation is still supported by the API but no longer used here —
-  // see lib/license-activation.ts for the deprecation note.
+  // The deeplink carries the single-use activation token, not the key (see
+  // lib/license-activation.ts). Once the token is claimed or expired there is
+  // no link; the key panel stays available for copy-paste.
   const canUseLicenseKey = Boolean(licenseKey && !revealBlockedReason);
+  // /activate?t= arrives with a token and no key, so the link depends only on
+  // a pending token.
   const activationLink = useMemo(
-    () => (canUseLicenseKey && licenseKey ? activationLinkForLicenseKey(licenseKey) : null),
-    [canUseLicenseKey, licenseKey]
+    () => (!revealBlockedReason && activationToken && tokenStatus === "pending"
+      ? activationLinkForToken(activationToken)
+      : null),
+    [revealBlockedReason, activationToken, tokenStatus]
   );
   const statusTone =
     tokenStatus === "claimed"
@@ -163,12 +167,13 @@ export function SuccessActivationCard({
     // activation-token chain takes a few seconds to land. The API returns:
     //   404 — license not yet issued
     //   422 — checkout/customer not yet confirmed
+    //   429 — rate limited; the next poll falls in a fresh window
     //   503 — license exists but activation token not yet minted (or config)
     //   5xx — transient infra
     // Treat all of those as "keep waiting" until maxAttempts. Only give up on
     // a 4xx that indicates a permanent client-side problem (bad checkout id).
     const isTransient = (status: number) =>
-      status === 404 || status === 422 || status === 503 || status >= 500;
+      status === 404 || status === 422 || status === 429 || status === 503 || status >= 500;
 
     const lookup = async () => {
       attempts += 1;

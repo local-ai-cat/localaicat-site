@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { activationTokenExpiresAt } from "../../../../lib/activation-tokens";
 import {
-  issueRevealCookieValue,
-  parseRevealCookieValue,
+  isPlausiblePolarId,
   REVEAL_WINDOW_MS,
   resolveCheckoutSuccessState
 } from "../../../../lib/polar-checkout";
+import { callerAddress, isRateLimited } from "../../../../lib/rate-limit";
 import {
   mintRevealCookieValue,
   revealCookieName,
@@ -17,6 +17,9 @@ export const runtime = "nodejs";
 const noStoreHeaders = {
   "Cache-Control": "private, no-store, max-age=0"
 };
+
+/** The success page polls every 2 s (30 a minute); twice that leaves headroom for reloads. */
+const LOOKUPS_PER_MINUTE = 60;
 
 function setRevealCookie(
   response: NextResponse,
@@ -44,6 +47,18 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
+  if (!isPlausiblePolarId(id)) {
+    return NextResponse.json(
+      { error: "Unknown checkout." },
+      { status: 400, headers: noStoreHeaders }
+    );
+  }
+  if (await isRateLimited("checkout", callerAddress(request.headers), LOOKUPS_PER_MINUTE, 60)) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again in a minute." },
+      { status: 429, headers: { ...noStoreHeaders, "Retry-After": "60" } }
+    );
+  }
   const cookieName = revealCookieName(id);
   const cookieValue = request.cookies.get(cookieName)?.value;
   const verified = verifyRevealCookieValue(id, cookieValue);

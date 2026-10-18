@@ -1,6 +1,6 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { getActivationTokenSecret, getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
+import { getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
 import {
+  getActivationTokenStore,
   issuePersistentActivationToken,
   type ActivationTokenStore
 } from "./activation-token-store.ts";
@@ -27,6 +27,59 @@ type PolarCheckout = {
   product_id?: string | null;
 };
 
+type PolarBenefitGrant = {
+  is_granted?: boolean;
+  order_id?: string | null;
+  subscription_id?: string | null;
+  properties?: { license_key_id?: string | null } | null;
+};
+
+type PolarOrder = {
+  id?: string;
+  checkout_id?: string | null;
+  subscription_id?: string | null;
+};
+
+type CheckoutOrders = { orderIds: Set<string>; subscriptionIds: Set<string> };
+
+/**
+ * Orders Polar created for this checkout. Each item's own checkout_id is
+ * compared, so the result is right even if the query filter were ignored.
+ */
+async function fetchCheckoutOrders(
+  checkoutId: string,
+  adminKey: string,
+  apiBase: string
+): Promise<CheckoutOrders> {
+  const orders: CheckoutOrders = { orderIds: new Set(), subscriptionIds: new Set() };
+  const response = await fetch(
+    `${apiBase}/v1/orders/?checkout_id=${encodeURIComponent(checkoutId)}&limit=10`,
+    { headers: { Authorization: `Bearer ${adminKey}` }, cache: "no-store" }
+  );
+  if (!response.ok) return orders;
+  const payload = (await response.json()) as { items?: PolarOrder[]; result?: PolarOrder[] };
+  for (const order of payload.items ?? payload.result ?? []) {
+    if (order.checkout_id !== checkoutId || !order.id) continue;
+    orders.orderIds.add(order.id);
+    if (order.subscription_id) orders.subscriptionIds.add(order.subscription_id);
+  }
+  return orders;
+}
+
+/**
+ * Polar ids are UUIDs. Anything outside this alphabet (slashes, dots, `?`,
+ * `#`, `%`) could re-route an admin-key request to another API path, so it is
+ * rejected before any upstream call.
+ */
+const POLAR_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+export function isPlausiblePolarId(value: string) {
+  return POLAR_ID_PATTERN.test(value);
+}
+
+/** Polar's page-size maximum; one page covers any realistic customer. */
+const LICENSE_KEY_PAGE_SIZE = 100;
+
 type PolarSubscription = {
   id?: string;
   current_period_end?: string | null;
@@ -34,6 +87,7 @@ type PolarSubscription = {
   cancel_at_period_end?: boolean | null;
   status?: string;
   product_id?: string | null;
+  created_at?: string;
 };
 
 /**
@@ -75,54 +129,8 @@ export const FIRST_VISIT_GRACE_MS = 5 * 60 * 1000;
  */
 export const ABSOLUTE_REVEAL_CEILING_MS = 24 * 60 * 60 * 1000;
 
-const REVEAL_COOKIE_VERSION = "v1";
-
-function revealCookieSignature(checkoutId: string, issuedAt: number) {
-  const secret = getActivationTokenSecret();
-  if (!secret) return null;
-  return createHmac("sha256", secret)
-    .update(`${checkoutId}.${issuedAt}`)
-    .digest("base64url");
-}
-
-export function revealCookieNameForCheckout(checkoutId: string) {
-  const digest = createHash("sha256")
-    .update(checkoutId)
-    .digest("base64url")
-    .slice(0, 24);
-  return `lac_reveal_${digest}`;
-}
-
-export function issueRevealCookieValue(checkoutId: string, issuedAt = Date.now()) {
-  const signature = revealCookieSignature(checkoutId, issuedAt);
-  if (!signature) return null;
-  return `${REVEAL_COOKIE_VERSION}.${issuedAt}.${signature}`;
-}
-
-export function parseRevealCookieValue(checkoutId: string, value: string | undefined) {
-  if (!value) return null;
-  const [version, issuedAtString, signature] = value.split(".");
-  if (version !== REVEAL_COOKIE_VERSION || !issuedAtString || !signature) return null;
-
-  const issuedAt = Number(issuedAtString);
-  if (!Number.isFinite(issuedAt) || issuedAt <= 0 || issuedAt > Date.now() + 60_000) {
-    return null;
-  }
-
-  const expected = revealCookieSignature(checkoutId, issuedAt);
-  if (!expected) return null;
-
-  const actualBuffer = Buffer.from(signature);
-  const expectedBuffer = Buffer.from(expected);
-  if (
-    actualBuffer.length !== expectedBuffer.length ||
-    !timingSafeEqual(actualBuffer, expectedBuffer)
-  ) {
-    return null;
-  }
-
-  return issuedAt;
-}
+/** A grace claim outlives the ceiling, so it can never be claimed twice. */
+const REVEAL_GRACE_CLAIM_SECONDS = Math.ceil(ABSOLUTE_REVEAL_CEILING_MS / 1000);
 
 type PolarCustomerSession = {
   token?: string;
@@ -130,6 +138,7 @@ type PolarCustomerSession = {
 };
 
 type PolarLicenseKey = {
+  id?: string;
   key?: string;
   status?: string;
   created_at?: string;
@@ -161,7 +170,7 @@ async function fetchCheckout(
   adminKey: string,
   apiBase: string
 ): Promise<PolarCheckout | null> {
-  const response = await fetch(`${apiBase}/v1/checkouts/${checkoutId}`, {
+  const response = await fetch(`${apiBase}/v1/checkouts/${encodeURIComponent(checkoutId)}`, {
     headers: { Authorization: `Bearer ${adminKey}` },
     cache: "no-store"
   });
@@ -173,29 +182,54 @@ async function fetchCheckout(
   return (await response.json()) as PolarCheckout;
 }
 
+async function listCustomerPortal<T>(path: string, customerSessionToken: string, apiBase: string) {
+  const response = await fetch(`${apiBase}${path}`, {
+    headers: { Authorization: `Bearer ${customerSessionToken}` },
+    cache: "no-store"
+  });
+  if (!response.ok) return null;
+  const payload = (await response.json()) as { items?: T[]; result?: T[] };
+  return payload.items ?? payload.result ?? [];
+}
+
+/**
+ * The license key this checkout produced. Polar attaches a checkout to a
+ * customer by the email typed at checkout, so the customer record can hold
+ * keys from other people's purchases; only keys whose grant belongs to this
+ * checkout are eligible.
+ */
 async function lookupGrantedLicenseKey(
   customerSessionToken: string,
+  checkoutId: string,
+  orders: CheckoutOrders,
   apiBase: string
 ): Promise<string | null> {
-  const response = await fetch(
-    `${apiBase}/v1/customer-portal/license-keys?limit=20`,
-    {
-      headers: { Authorization: `Bearer ${customerSessionToken}` },
-      cache: "no-store"
-    }
+  if (orders.orderIds.size === 0) return null;
+  const grants = await listCustomerPortal<PolarBenefitGrant>(
+    `/v1/customer-portal/benefit-grants/?checkout_id=${encodeURIComponent(checkoutId)}&type=license_keys&limit=${LICENSE_KEY_PAGE_SIZE}`,
+    customerSessionToken,
+    apiBase
   );
+  const grantedKeyIds = new Set(
+    (grants ?? [])
+      .filter((grant) => grant.is_granted
+        && grant.properties?.license_key_id
+        && (orders.orderIds.has(grant.order_id ?? "") || orders.subscriptionIds.has(grant.subscription_id ?? "")))
+      .map((grant) => grant.properties?.license_key_id as string)
+  );
+  if (grantedKeyIds.size === 0) return null;
 
-  if (!response.ok) {
-    return null;
-  }
-
-  const payload = (await response.json()) as {
-    items?: PolarLicenseKey[];
-    result?: PolarLicenseKey[];
-  };
-  const items = payload.items ?? payload.result ?? [];
-  const activeKey = items
-    .filter((item) => item.status === "granted" && item.key)
+  // Fetch each granted key by id: the customer's key list is oldest-first and
+  // paginated, so this purchase's key may not be on its first page.
+  const keys = await Promise.all([...grantedKeyIds].map(async (keyId) => {
+    const response = await fetch(
+      `${apiBase}/v1/customer-portal/license-keys/${encodeURIComponent(keyId)}`,
+      { headers: { Authorization: `Bearer ${customerSessionToken}` }, cache: "no-store" }
+    );
+    return response.ok ? (await response.json()) as PolarLicenseKey : null;
+  }));
+  const activeKey = keys
+    .filter((item): item is PolarLicenseKey => Boolean(item && item.status === "granted" && item.key && grantedKeyIds.has(item.id ?? "")))
     .sort((left, right) => {
       const leftCreatedAt = Date.parse(left.created_at ?? "");
       const rightCreatedAt = Date.parse(right.created_at ?? "");
@@ -210,7 +244,8 @@ async function fetchSubscription(
   adminKey: string,
   apiBase: string
 ): Promise<PolarSubscription | null> {
-  const response = await fetch(`${apiBase}/v1/subscriptions/${subscriptionId}`, {
+  if (!isPlausiblePolarId(subscriptionId)) return null;
+  const response = await fetch(`${apiBase}/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, {
     headers: { Authorization: `Bearer ${adminKey}` },
     cache: "no-store"
   });
@@ -226,13 +261,18 @@ async function fetchSubscription(
  * Fallback for the case where a confirmed checkout doesn't yet expose its
  * `subscription_id` (Polar can return the checkout as confirmed before the
  * subscription_id field propagates). Lists the customer's active
- * subscriptions and picks the most recently updated one.
+ * subscriptions and picks the most recently updated one for this checkout's
+ * product that started after the checkout did, so another purchase on the
+ * same customer record never supplies the plan or renewal date.
  */
 async function fetchLatestSubscriptionForCustomer(
   customerId: string,
+  productId: string | null | undefined,
+  checkoutCreatedAt: number,
   adminKey: string,
   apiBase: string
 ): Promise<PolarSubscription | null> {
+  if (!productId || !Number.isFinite(checkoutCreatedAt)) return null;
   const url = `${apiBase}/v1/subscriptions/?customer_id=${encodeURIComponent(customerId)}&active=true&limit=5`;
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${adminKey}` },
@@ -243,7 +283,9 @@ async function fetchLatestSubscriptionForCustomer(
     items?: PolarSubscription[];
     result?: PolarSubscription[];
   };
-  const items = payload.items ?? payload.result ?? [];
+  const items = (payload.items ?? payload.result ?? []).filter((item) =>
+    item.product_id === productId && Date.parse(item.created_at ?? "") >= checkoutCreatedAt
+  );
   if (items.length === 0) return null;
   // Most recent first by current_period_end (renewals get pushed forward).
   return items
@@ -285,11 +327,14 @@ export async function resolveCheckoutSuccessState(
 ): Promise<CheckoutSuccessState | null> {
   try {
     const adminKey = getPolarAdminKey();
-    if (!adminKey) {
+    if (!adminKey || !isPlausiblePolarId(checkoutId)) {
       return null;
     }
 
     const apiBase = getPolarApiBaseUrl();
+    const store = options.activationTokenStore === undefined
+      ? getActivationTokenStore()
+      : options.activationTokenStore;
     const checkout = await fetchCheckout(checkoutId, adminKey, apiBase);
     if (!checkout) {
       return null;
@@ -360,27 +405,35 @@ export async function resolveCheckoutSuccessState(
     //     with a verified cookie continue to see the key. Within the grace
     //     the Polar success redirect is treated as a short-lived bearer URL
     //     and the route handler will mint a signed cookie.
+    //     The grace is single-use per checkout (claimed below, once this
+    //     response is certain to bind a browser), so a later Polar update to
+    //     `modified_at` or a second holder of the URL cannot reopen it.
     const insideGrace = Number.isFinite(checkoutModifiedAt)
       ? Date.now() - checkoutModifiedAt <= FIRST_VISIT_GRACE_MS
       : false;
-    if (options.cookieIssuedAt == null && !insideGrace) {
-      return {
-        checkoutStatus,
-        customerId,
-        customerPortalUrl: null,
-        licenseKey: null,
-        activationToken: null,
-        activationTokenExpiresAt: null,
-        revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
-        revealBlockedReason: "cookie_required",
-        plan: null,
-        renewsAt: null
-      };
+    const cookieless = options.cookieIssuedAt == null;
+    const cookieRequired: CheckoutSuccessState = {
+      checkoutStatus,
+      customerId,
+      customerPortalUrl: null,
+      licenseKey: null,
+      activationToken: null,
+      activationTokenExpiresAt: null,
+      revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
+      revealBlockedReason: "cookie_required",
+      plan: null,
+      renewsAt: null
+    };
+    if (cookieless && (!insideGrace || !store)) {
+      return cookieRequired;
     }
 
-    const customerSession = await createCustomerSession(customerId, adminKey, apiBase);
+    const orders = await fetchCheckoutOrders(checkoutId, adminKey, apiBase);
+    const customerSession = orders.orderIds.size > 0
+      ? await createCustomerSession(customerId, adminKey, apiBase)
+      : null;
     const licenseKey = customerSession?.token
-      ? await lookupGrantedLicenseKey(customerSession.token, apiBase)
+      ? await lookupGrantedLicenseKey(customerSession.token, checkoutId, orders, apiBase)
       : null;
 
     // Resolve plan + renewal date from the underlying subscription, when one
@@ -395,8 +448,8 @@ export async function resolveCheckoutSuccessState(
     if (licenseKey) {
       const subscription = checkout.subscription_id
         ? await fetchSubscription(checkout.subscription_id, adminKey, apiBase)
-          ?? await fetchLatestSubscriptionForCustomer(customerId, adminKey, apiBase)
-        : await fetchLatestSubscriptionForCustomer(customerId, adminKey, apiBase);
+          ?? await fetchLatestSubscriptionForCustomer(customerId, checkout.product_id, checkoutCreatedAt, adminKey, apiBase)
+        : await fetchLatestSubscriptionForCustomer(customerId, checkout.product_id, checkoutCreatedAt, adminKey, apiBase);
       plan = planSlugForInterval(subscription?.recurring_interval);
       renewsAt = subscription?.current_period_end ?? null;
     }
@@ -408,11 +461,18 @@ export async function resolveCheckoutSuccessState(
           licenseKey,
           plan,
           renewsAt
-        }, options.activationTokenStore)
+        }, store)
       : null;
     const customerPortalUrl = options.includeCustomerPortalUrl === false
       ? null
       : customerSession?.customer_portal_url ?? null;
+
+    // This response is the one the route binds to the browser with a reveal
+    // cookie, so only now is the single-use grace spent. A failure earlier
+    // leaves it for the buyer's retry.
+    if (cookieless && !(await store?.claimRevealGrace(checkoutId, REVEAL_GRACE_CLAIM_SECONDS))) {
+      return cookieRequired;
+    }
 
     return {
       checkoutStatus,

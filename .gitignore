@@ -16,3 +16,7 @@ pnpm-debug.log*
 # this repo is public, so committing it would defeat the password gate.
 # See .vercelignore, which deliberately does NOT exclude it.
 /app/shh/
+
+# Internal feature manifest behind the /internal password gate. This repo is public, so it is
+# never committed; /internal/matrix reads a local or CLI-deployed copy at request time.
+/app/internal/data/features.json

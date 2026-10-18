@@ -61,6 +61,10 @@
         g.defer = true;
         g.async = true;
         g.onload = function() {
+            // The page may have moved to a bearer page while the SDK loaded.
+            if (isBearerPage()) {
+                return;
+            }
             if (window.chatwootSDK) {
                 window.chatwootSDK.run({ websiteToken: CHATWOOT_CONFIG.websiteToken, baseUrl: BASE_URL });
                 if (autoOpen) {
@@ -253,7 +257,29 @@
         }
     }
 
+    // /success?checkout_id= and /activate?t= carry bearers for a license key, so the
+    // third-party chat SDK never loads there (mirrors lib/bearer-urls.ts).
+    const BEARER_PATHS = ['/success', '/activate'];
+
+    function isBearerPage() {
+        const path = window.location.pathname.replace(/\/+$/, '') || '/';
+        return BEARER_PATHS.includes(path);
+    }
+
     async function init() {
+        if (isBearerPage()) {
+            return;
+        }
+
+        // Back/Forward onto a bearer page is a client-side navigation that would keep a loaded
+        // SDK alive and let it read the URL once the page re-renders. Reloading synchronously in
+        // popstate swaps the document before that render.
+        window.addEventListener('popstate', function() {
+            if (isBearerPage() && window.$chatwoot) {
+                window.location.reload();
+            }
+        });
+
         const urlParams = new URLSearchParams(window.location.search);
         const hasConsentParam = urlParams.get('consent') === 'chat';
         const isAppUserAgent = navigator.userAgent.includes('LocalAICat/') || navigator.userAgent.includes('AtlasLogged/');

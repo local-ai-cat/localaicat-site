@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { getSiteUrl } from "../lib/env";
 import { GoatCounter } from "./goat-counter";
+import { SiteSpeedInsights } from "./_components/site-speed-insights";
+import { BearerPageGuard } from "./_components/bearer-page-guard";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -69,9 +70,10 @@ export default function RootLayout({
       </head>
       <body>
         {children}
-        <SpeedInsights />
+        <SiteSpeedInsights />
         <Script src="/js/cookie-consent.js" strategy="afterInteractive" />
       <GoatCounter />
+      <BearerPageGuard />
       </body>
     </html>
   );

@@ -9,6 +9,7 @@ import { getActivationTokenRedisConfig } from "./env.ts";
 
 const KEY_PREFIX = "activation-token:";
 const USED_KEY_PREFIX = "activation-token-used:";
+const REVEAL_GRACE_KEY_PREFIX = "reveal-grace:";
 const USED_TOMBSTONE_SECONDS = 15 * 60;
 
 export type PersistedActivationTokenRecord = {
@@ -48,6 +49,8 @@ export interface ActivationTokenStore {
   save(record: Omit<PersistedActivationTokenRecord, "createdAt" | "usedAt">): Promise<void>;
   consume(tokenHash: string, now?: Date): Promise<ActivationTokenConsumeResult>;
   status(tokenHash: string, now?: Date): Promise<ActivationTokenStatusResult>;
+  /** Atomically claims a checkout's cookieless first-visit grace; true only for the first caller. */
+  claimRevealGrace(checkoutId: string, ttlSeconds: number): Promise<boolean>;
 }
 
 type ActivationTokenIssueResult = {
@@ -164,10 +167,25 @@ class UpstashActivationTokenStore implements ActivationTokenStore {
       record: deserialized
     };
   }
+
+  async claimRevealGrace(checkoutId: string, ttlSeconds: number) {
+    const result = await this.redis.set(`${REVEAL_GRACE_KEY_PREFIX}${checkoutId}`, "1", {
+      ex: ttlSeconds,
+      nx: true
+    });
+    return result === "OK";
+  }
 }
 
 class MemoryActivationTokenStore implements ActivationTokenStore {
   private readonly records = new Map<string, PersistedActivationTokenRecord>();
+  private readonly claimedGraces = new Set<string>();
+
+  async claimRevealGrace(checkoutId: string) {
+    if (this.claimedGraces.has(checkoutId)) return false;
+    this.claimedGraces.add(checkoutId);
+    return true;
+  }
 
   async save(record: Omit<PersistedActivationTokenRecord, "createdAt" | "usedAt">) {
     if (this.records.has(record.tokenHash)) {

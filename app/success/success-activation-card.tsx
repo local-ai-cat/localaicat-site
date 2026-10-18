@@ -405,8 +405,9 @@ export function SuccessActivationCard({
             <h2>Assign your {teamSeats} seats</h2>
             <p>
               Your team plan is active. Open the customer portal and assign
-              each seat by email, including one for yourself if you need it.
-              Every person gets an invite and their own license key, which
+              each seat by email, including one for yourself if you use Local
+              AI Cat too: your seat is your Pro, there&rsquo;s nothing else to
+              buy. Every person gets an invite and their own license key, which
               they paste into Settings → Activate License.
             </p>
           </div>

@@ -177,7 +177,8 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
             <p className="teamCheckoutNote">
               Billed annually via Polar. After checkout, assign each seat in the{" "}
               <Link href="/manage">customer portal</Link>: each person gets an
-              email invite and their own license key.
+              email invite and their own license key. Using it yourself?
+              Assign yourself a seat; there&rsquo;s no separate Pro to buy.
             </p>
           ) : (
             <p className="teamCheckoutNote">

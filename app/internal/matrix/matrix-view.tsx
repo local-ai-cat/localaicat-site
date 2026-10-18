@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import features from "../data/features.json";
 import styles from "./matrix.module.css";
 
 type Tri = "yes" | "no" | "partial" | "planned";
@@ -18,7 +17,7 @@ interface BuildCaveat {
   scope: Channel;
   note: string;
 }
-interface Feature {
+export interface Feature {
   id: string;
   name: string;
   status: string;
@@ -37,7 +36,6 @@ interface Feature {
   isInternal?: boolean;
 }
 
-const ALL: Feature[] = (features as { features: Feature[] }).features;
 
 const CHANNELS: { key: Channel; label: string; sub: string }[] = [
   { key: "alpha", label: "Alpha", sub: "internal overlay" },
@@ -163,7 +161,7 @@ function Row({ f }: { f: Feature }) {
   );
 }
 
-export function MatrixView() {
+export function MatrixView({ features }: { features: Feature[] }) {
   const [q, setQ] = useState("");
   const [lanes, setLanes] = useState<Set<Lane>>(new Set(LANES.map((l) => l.key)));
   const [platform, setPlatform] = useState<"all" | "macOS" | "iOS">("all");
@@ -182,7 +180,7 @@ export function MatrixView() {
 
   const filtered = useMemo(
     () =>
-      ALL.filter((f) => {
+      features.filter((f) => {
         if (!showInternal && f.isInternal) return false;
         if (utilOnly && f.group !== "utilities") return false;
         if (!lanes.has(f.lane)) return false;
@@ -196,7 +194,7 @@ export function MatrixView() {
         }
         return true;
       }).sort((a, b) => LANES.findIndex((l) => l.key === a.lane) - LANES.findIndex((l) => l.key === b.lane)),
-    [q, lanes, platform, channel, utilOnly, showInternal],
+    [features, q, lanes, platform, channel, utilOnly, showInternal],
   );
 
   return (
@@ -210,7 +208,7 @@ export function MatrixView() {
             onChange={(e) => setQ(e.target.value)}
           />
           <span className={styles.count}>
-            {filtered.length} <span>/ {ALL.length}</span>
+            {filtered.length} <span>/ {features.length}</span>
           </span>
         </div>
         <div className={styles.segRow}>
@@ -222,7 +220,7 @@ export function MatrixView() {
                 onClick={() => toggleLane(l.key)}
               >
                 {l.label}
-                <em>{ALL.filter((f) => f.lane === l.key).length}</em>
+                <em>{features.filter((f) => f.lane === l.key).length}</em>
               </button>
             ))}
           </div>

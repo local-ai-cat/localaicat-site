@@ -193,8 +193,25 @@ test("a configured link Polar does not list, or a URL naming no link, fails", as
   assert.equal(report.checks["success_url_pro-monthly"].ok, false);
   assert.match(report.checks["success_url_pro-monthly"].detail, /no such checkout link/);
   assert.equal(report.checks["success_url_pro-annual"].ok, false);
-  assert.match(report.checks["success_url_pro-annual"].detail, /names no Polar checkout link/);
+  assert.match(report.checks["success_url_pro-annual"].detail, /not a Polar checkout link/);
   assert.ok(!calls.some((call) => !call.url.startsWith(API)), "only the Polar API is called");
+});
+
+test("a link secret outside a Polar URL's path does not count", async () => {
+  process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY = "https://wrong.example/path?next=polar_cl_monthly";
+  process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL = `${API}/v1/elsewhere?link=polar_cl_annual`;
+  const report = await runBillingHealth(SITE, polar(HEALTHY, []), pong);
+
+  assert.equal(report.checks["success_url_pro-monthly"].ok, false);
+  assert.equal(report.checks["success_url_pro-annual"].ok, false);
+});
+
+test("a link list longer than the page cap fails instead of calling a link deleted", async () => {
+  const many = Object.fromEntries(Array.from({ length: 600 }, (_, index) => [`filler${index}`, HEALTHY.monthly]));
+  const report = await runBillingHealth(SITE, polar({ ...many, ...HEALTHY }, [], { linksPerPage: 100 }), pong);
+
+  assert.equal(report.checks["success_url_pro-monthly"].ok, false);
+  assert.match(report.checks["success_url_pro-monthly"].detail, /not read to the end/);
 });
 
 test("a link's {CHECKOUT_ID} placeholder counts as carrying the checkout id", async () => {

@@ -3,7 +3,7 @@ export const directPlans = [
     name: "Pro Monthly",
     price: "£4",
     cadence: "/month",
-    note: "All Pro features, billed monthly.",
+    note: "Extra model choice, with monthly billing.",
     bullets: ["Full Pro access", "Web billing", "Best for trying Outdoor Cat"],
     ctaHref: "/buy/pro-monthly",
     ctaLabel: "Buy Pro Monthly"
@@ -12,7 +12,7 @@ export const directPlans = [
     name: "Pro Annual",
     price: "£40",
     cadence: "/year",
-    note: "All Pro features, billed once a year.",
+    note: "The same Pro access, for less over a year.",
     bullets: ["Same Pro access", "Lower yearly cost", "Best for regular Mac use"],
     ctaHref: "/buy/pro-annual",
     ctaLabel: "Buy Pro Annual"
@@ -20,8 +20,8 @@ export const directPlans = [
   {
     name: "Developer Mode",
     price: "£10",
-    cadence: "one-time",
-    note: "Load your own models. Yours with one payment.",
+    cadence: "one-time unlock",
+    note: "Keep Developer Mode without a subscription. Pay once, no renewals.",
     bullets: ["Custom model loading", "Works with or without Pro", "Power-user features"],
     ctaHref: "/buy/developer-mode",
     ctaLabel: "Buy Developer Mode"

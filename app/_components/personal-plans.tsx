@@ -9,29 +9,43 @@ import { useSiteMode } from "./site-mode";
 /** The same offers and purchase destinations on the homepage and pricing pages. */
 export function PersonalPlans() {
   const [mode] = useSiteMode();
+  const developerPlan = directPlans.find(plan => plan.name === "Developer Mode")!;
   return (
     <>
-      <div className="homePlanGrid purchasePlans">
+      <div className="homePlanGrid purchasePlans subscriptionPlans">
         <article className="homePlanCard">
           <h3 className="purchasePlanName">Free</h3>
           <p className="homePlanPrice">£0<span className="homePlanCadence">forever</span></p>
           <p className="dualCardBody">Chat, transcription and local models. No account, no trial clock.</p>
           <a className="secondaryButton purchasePlanButton" href={getDirectDownloadUrl()} onClick={() => trackSiteAction("download_clicked", "mac")}>Download free</a>
         </article>
-        {directPlans.map(plan => {
+        {directPlans.filter(plan => plan.name !== "Developer Mode").map(plan => {
           const annual = plan.name === "Pro Annual";
           return (
             <article className={`homePlanCard${annual ? " homePlanCardBest" : ""}`} key={plan.name}>
               <h3 className="purchasePlanName">{plan.name}</h3>
               <p className="homePlanPrice">{plan.price}<span className="homePlanCadence">{plan.cadence}</span></p>
               <p className="dualCardBody">{plan.note}</p>
+              <ul className="planBenefits"><li>Curated Pro models</li><li>Developer Mode while subscribed</li></ul>
               {annual && <span className="planSaving">Save £8 a year</span>}
-              {plan.name === "Developer Mode" && <span className="planSaving planSavingQuiet">Works with Free or Pro</span>}
               <a className={`planButton purchasePlanButton${annual ? " planButtonAccent" : ""}`} href={plan.ctaHref}>{plan.ctaLabel}</a>
             </article>
           );
         })}
       </div>
+      <article className="developerUnlock">
+        <div>
+          <p className="unlockEyebrow">Optional · one-time unlock</p>
+          <h3 className="purchasePlanName">Developer Mode</h3>
+          <p>Explore compatible community models from Hugging Face. Pay once to keep Developer Mode without a Pro subscription.</p>
+          <p className="unlockClarification">Already on Pro? Developer Mode is included while your subscription is active.</p>
+        </div>
+        <div className="unlockAction">
+          <p className="homePlanPrice">£10<span className="homePlanCadence">once</span></p>
+          <a className="secondaryButton" href={developerPlan.ctaHref}>Unlock Developer Mode</a>
+          <span>No subscription. No renewals.</span>
+        </div>
+      </article>
       <p className="purchaseNote">Paid plans use Polar checkout. Activate your license key in the app. Monthly and annual plans renew until cancelled.</p>
       <div className="crewInvite">
         <div>

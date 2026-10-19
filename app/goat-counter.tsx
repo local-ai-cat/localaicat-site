@@ -1,60 +1,41 @@
 "use client";
 
-import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { isBearerPath, withoutQuery } from "../lib/bearer-urls";
+import { useEffect, useRef } from "react";
+import { analyticsEnabled, analyticsPreferenceEvent } from "../lib/site-analytics";
+import { goatCounterPixelUrl } from "../lib/site-telemetry-privacy";
 
 /**
- * GoatCounter pageviews: cookieless, so no consent banner. The script's own
- * onload count is off because client-side navigation would never trigger it;
- * this component counts every path change instead. Only production hosts
- * count (not meow staging or previews). Only the path is sent, the referrer
- * loses its query string, and the bearer pages (/success, /activate) are not
- * counted at all because the remote count.js reads the page URL itself.
+ * A first-party pixel request counts public page views without loading count.js
+ * into the purchase document. No URL query, referrer, title or screen data is sent.
  */
-const COUNT_URL = "https://localaicat.goatcounter.com/count";
-const SCRIPT_URL = "https://gc.zgo.at/count.js";
-const COUNTED_HOSTS = ["localaicat.com", "www.localaicat.com"];
-
-function isCountedHost(hostname: string): boolean {
-  return COUNTED_HOSTS.includes(hostname);
-}
-
-type GoatCounterClient = { count: (vars: { path: string; referrer: string }) => void };
-
-declare global {
-  interface Window {
-    goatcounter?: Partial<GoatCounterClient>;
-  }
-}
-
-function countPageview(): void {
-  const { hostname, pathname } = window.location;
-  if (!isCountedHost(hostname) || isBearerPath(pathname)) {
-    return;
-  }
-  window.goatcounter?.count?.({ path: pathname, referrer: withoutQuery(document.referrer) });
-}
-
-export function GoatCounter(): React.JSX.Element | null {
+export function GoatCounter(): null {
   const pathname = usePathname();
+  const lastCountedPath = useRef<string | null>(null);
 
   useEffect(() => {
+    function countPageview(): void {
+      const enabled = analyticsEnabled();
+      const pixelUrl = goatCounterPixelUrl(window.location.href, enabled, Date.now());
+      if (!pixelUrl) {
+        lastCountedPath.current = null;
+        return;
+      }
+      const path = window.location.pathname;
+      if (lastCountedPath.current === path) return;
+      lastCountedPath.current = path;
+      const pixel = new Image(1, 1);
+      pixel.referrerPolicy = "no-referrer";
+      pixel.src = pixelUrl;
+    }
     countPageview();
+    window.addEventListener("storage", countPageview);
+    window.addEventListener(analyticsPreferenceEvent, countPageview);
+    return () => {
+      window.removeEventListener("storage", countPageview);
+      window.removeEventListener(analyticsPreferenceEvent, countPageview);
+    };
   }, [pathname]);
 
-  if (isBearerPath(pathname)) {
-    return null;
-  }
-
-  return (
-    <Script
-      data-goatcounter={COUNT_URL}
-      data-goatcounter-settings='{"no_onload": true}'
-      src={SCRIPT_URL}
-      strategy="afterInteractive"
-      onLoad={countPageview}
-    />
-  );
+  return null;
 }

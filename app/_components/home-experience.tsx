@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { businessPlans, directPlans } from "../../lib/catalog";
 import { EarthPersonalitySelector, ModeSelector, useSiteMode } from "./site-mode";
 import { CliInstall, DownloadPair } from "./home-downloads";
@@ -102,9 +102,6 @@ export function HomeExperience() {
   // when entering Earth, including direct links and keyboard navigation.
   if (mode !== "space" && mode !== earthMode) setEarthMode(mode);
   const inSpace = mode === "space";
-  const [heroSwitchVisible, setHeroSwitchVisible] = useState(true);
-  const [chipLift, setChipLift] = useState(0);
-  const switchRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     [
@@ -121,51 +118,9 @@ export function HomeExperience() {
     });
   }, []);
 
-  useEffect(() => {
-    const node = switchRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => setHeroSwitchVisible(entry.isIntersecting));
-      },
-      { threshold: 0.2 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  // Space keeps its header in view, so the header switch stands in for the
-  // hero switch once that scrolls away, instead of a floating chip.
-  useEffect(() => {
-    document.body.dataset.heroSwitch = heroSwitchVisible ? "visible" : "hidden";
-    return () => { delete document.body.dataset.heroSwitch; };
-  }, [heroSwitchVisible]);
-
-  useEffect(() => {
-    if (heroSwitchVisible || inSpace) return;
-
-    // The cookie-consent banner is a fixed full-width dialog at the bottom;
-    // float the chip above it while it's on screen.
-    const update = () => {
-      const banner = document.getElementById("cookie-consent-banner");
-      setChipLift(banner ? banner.getBoundingClientRect().height + 12 : 0);
-    };
-    update();
-
-    const observer = new MutationObserver(update);
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener("resize", update);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, [heroSwitchVisible, inSpace]);
-
   return (
     <div className={`homeMode homeMode-${mode} homeMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`}>
-      {/* ── Hero: headline → world switch → downloads → cat ── */}
+      {/* ── Hero: headline → world switch → cat → installation options ── */}
       <section className="heroTight">
         <SpaceAtmosphere active={inSpace} />
         <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
@@ -189,8 +144,7 @@ export function HomeExperience() {
             </p>
           </div>
 
-          <div className="heroPersonalityControl" ref={switchRef}><ModeSelector compact /></div>
-          <DownloadPair id="download" />
+          <div className="heroPersonalityControl"><ModeSelector compact /></div>
           <div className="heroWorldStage">
             <div className="heroWorldPanel" data-active={inSpace} aria-hidden={!inSpace} inert={!inSpace}>
               <HomeVoyage active={inSpace} />
@@ -204,11 +158,10 @@ export function HomeExperience() {
         </div>
       </section>
 
-      {!inSpace && <section className="downloadBand heroEnter heroEnter4">
+      <section className="downloadBand" id="download" aria-label="Install Local AI Cat">
+        <DownloadPair />
         <CliInstall />
-      </section>}
-
-      {!inSpace && !heroSwitchVisible && <div className="floatingPersonality" style={chipLift ? { bottom: 22 + chipLift } : undefined}><ModeSelector compact/></div>}
+      </section>
 
       {/* ── Pricing (mode-dependent) ── */}
       <section className="detailBand" id="pricing">

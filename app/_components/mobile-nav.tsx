@@ -6,9 +6,10 @@ import { ModeSelector } from "./site-mode";
 
 type MobileNavProps = {
   links: ReadonlyArray<{ href: string; label: string }>;
+  showWorldSelector?: boolean;
 };
 
-export function MobileNav({ links }: MobileNavProps) {
+export function MobileNav({ links, showWorldSelector = true }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   const toggle = useCallback(() => setOpen((v) => !v), []);
@@ -42,7 +43,7 @@ export function MobileNav({ links }: MobileNavProps) {
 
       {open && (
         <nav aria-label="Mobile" className="mobileNavDropdown">
-          <ModeSelector compact />
+          {showWorldSelector && <ModeSelector compact />}
           {links.map((link) => (
             <Link href={link.href} key={link.href} onClick={close}>
               {link.label}

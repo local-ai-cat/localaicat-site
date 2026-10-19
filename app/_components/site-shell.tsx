@@ -15,6 +15,8 @@ type SiteShellProps = {
   siteMode?: "personal" | "business";
   /** Widen the content frame for dense data views (e.g. the modules grid) */
   wide?: boolean;
+  /** The homepage has its world selector beside the hero. */
+  showWorldSelector?: boolean;
 };
 
 const navLinks =
@@ -36,7 +38,8 @@ export function SiteShell({
   children,
   navMode = "default",
   siteMode,
-  wide = false
+  wide = false,
+  showWorldSelector = true
 }: SiteShellProps) {
   const links = navMode === "legal" ? legalLinks : navLinks;
 
@@ -72,7 +75,7 @@ export function SiteShell({
             </span>
           </Link>
 
-          <div className="headerPersonality"><ModeSelector compact /></div>
+          <div className="headerPersonality">{showWorldSelector && <ModeSelector compact />}</div>
           <nav aria-label="Primary" className="siteNav siteNavDesktop">
             {links.map((link) => (
               <Link
@@ -85,7 +88,7 @@ export function SiteShell({
             ))}
           </nav>
 
-          <MobileNav links={links} />
+          <MobileNav links={links} showWorldSelector={showWorldSelector} />
         </div>
       </ScrollHeader>
 

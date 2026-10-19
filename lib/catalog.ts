@@ -3,28 +3,28 @@ export const directPlans = [
     name: "Pro Monthly",
     price: "£4",
     cadence: "/month",
-    note: "Outdoor Cat monthly plan for the full Mac feature set.",
+    note: "All Pro features, billed monthly.",
     bullets: ["Full Pro access", "Web billing", "Best for trying Outdoor Cat"],
     ctaHref: "/buy/pro-monthly",
-    ctaLabel: "Buy monthly"
+    ctaLabel: "Buy Pro Monthly"
   },
   {
     name: "Pro Annual",
     price: "£40",
     cadence: "/year",
-    note: "The main Outdoor Cat direct-download plan.",
+    note: "All Pro features, billed once a year.",
     bullets: ["Same Pro access", "Lower yearly cost", "Best for regular Mac use"],
     ctaHref: "/buy/pro-annual",
-    ctaLabel: "Buy annual"
+    ctaLabel: "Buy Pro Annual"
   },
   {
     name: "Developer Mode",
     price: "£10",
     cadence: "one-time",
-    note: "Optional and stackable.",
+    note: "Load your own models. Yours with one payment.",
     bullets: ["Custom model loading", "Works with or without Pro", "Power-user features"],
     ctaHref: "/buy/developer-mode",
-    ctaLabel: "Unlock Developer Mode"
+    ctaLabel: "Buy Developer Mode"
   }
 ] as const;
 

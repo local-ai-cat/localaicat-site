@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server.js";
 import {
   isPlausiblePolarId,
   REVEAL_WINDOW_MS,
   resolveCheckoutSuccessState
-} from "../../../../lib/polar-checkout";
-import { buyerSessionCookieName, CUSTOMER_SESSION_HEADER } from "../../../../lib/polar-buyer-session";
-import { getActivationTokenSecret } from "../../../../lib/env";
-import { callerAddress, checkRateLimit } from "../../../../lib/rate-limit";
+} from "../../../../lib/polar-checkout.ts";
+import { buyerSessionCookieName, CUSTOMER_SESSION_HEADER } from "../../../../lib/polar-buyer-session.ts";
+import { getActivationTokenSecret } from "../../../../lib/env.ts";
+import { callerAddress, checkRateLimit } from "../../../../lib/rate-limit.ts";
 import {
   mintRevealCookieValue,
   revealCookieName,
   verifyRevealCookieValue
-} from "../../../../lib/reveal-cookie";
+} from "../../../../lib/reveal-cookie.ts";
 
 export const runtime = "nodejs";
 
@@ -24,15 +24,7 @@ const noStoreHeaders = {
 const LOOKUPS_PER_MINUTE = 60;
 const GLOBAL_LOOKUPS_PER_MINUTE = 600;
 
-function setRevealCookie(
-  response: NextResponse,
-  checkoutId: string,
-  cookieName: string,
-  hadValidCookie: boolean
-) {
-  // Bind every confirmed-checkout response to this browser, including the
-  // transient "license not yet issued" path so a polling client gets the
-  // cookie before the first-visit grace expires.
+function clearBuyerSessionCookie(response: NextResponse, checkoutId: string): void {
   response.cookies.set({
     name: buyerSessionCookieName(checkoutId),
     value: "",
@@ -42,6 +34,17 @@ function setRevealCookie(
     path: "/",
     maxAge: 0
   });
+}
+
+function setRevealCookie(
+  response: NextResponse,
+  checkoutId: string,
+  cookieName: string,
+  hadValidCookie: boolean
+) {
+  // A buyer-confirmed response is bound before the first-visit grace expires,
+  // including while Polar is still issuing the purchased license.
+  clearBuyerSessionCookie(response, checkoutId);
   if (hadValidCookie) return;
   response.cookies.set({
     name: cookieName,
@@ -132,7 +135,7 @@ export async function GET(
   }
 
   if (state.revealBlockedReason === "cookie_required") {
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         error: "Reveal cookie missing — recover the key via the customer portal.",
         reveal_blocked_reason: "cookie_required",
@@ -140,6 +143,10 @@ export async function GET(
       },
       { status: 403, headers: noStoreHeaders }
     );
+    // A planted/expired provider proof must not block a genuine redirect retry
+    // for its full TTL. Never clear an already verified reveal cookie.
+    if (!verified) clearBuyerSessionCookie(response, id);
+    return response;
   }
 
   if (!state.licenseKey) {

@@ -8,14 +8,21 @@ import {
 } from "../../lib/support-chat";
 import styles from "./support-chat.module.css";
 
+// Opening chat after a reload that the trigger asked for.
+const reopenAfterLoadKey = "support-chat-reopen";
+
 /** Route changes unmount the frame, including on client navigation to private pages. */
 export function SupportChat(): React.JSX.Element | null {
   const pathname = usePathname();
+  // A document keeps the CSP of the page it was loaded as. One that started on a private
+  // page forbids the chat frame even after a client navigation to a public page.
+  const [documentPath] = useState(() => (typeof window === "undefined" ? null : window.location.pathname));
   if (!isSupportChatPath(pathname)) return null;
-  return <SupportChatDialog key={pathname} />;
+  const needsFreshDocument = documentPath !== null && !isSupportChatPath(documentPath);
+  return <SupportChatDialog key={pathname} needsFreshDocument={needsFreshDocument} />;
 }
 
-function SupportChatDialog(): React.JSX.Element {
+function SupportChatDialog({ needsFreshDocument }: { needsFreshDocument: boolean }): React.JSX.Element {
   const dialog = useRef<HTMLDialogElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -45,7 +52,18 @@ function SupportChatDialog(): React.JSX.Element {
     };
   }, [started]);
 
+  useEffect(() => {
+    if (window.sessionStorage.getItem(reopenAfterLoadKey) === null) return;
+    window.sessionStorage.removeItem(reopenAfterLoadKey);
+    openSupport();
+  }, []);
+
   function openSupport(): void {
+    if (needsFreshDocument) {
+      window.sessionStorage.setItem(reopenAfterLoadKey, "1");
+      window.location.reload();
+      return;
+    }
     setStarted(true);
     dialog.current?.showModal();
     frame.current?.contentWindow?.postMessage(supportChatVisibilityMessage(true), supportChatOrigin);

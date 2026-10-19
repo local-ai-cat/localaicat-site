@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 type ContentPageProps = {
   kicker: string;
   title: string;
-  intro: string;
+  intro: ReactNode;
   meta?: string;
   callout?: ReactNode;
   children: ReactNode;

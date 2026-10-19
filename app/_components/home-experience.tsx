@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { businessPlans, directPlans } from "../../lib/catalog";
 import { EarthPersonalitySelector, ModeSelector, useSiteMode } from "./site-mode";
 import { CliInstall, DownloadPair } from "./home-downloads";
-import { SpaceLaunchPad, SpaceMissions } from "./space-experience";
+import { SpaceLaunchPad } from "./space-experience";
 import { HeroCat } from "./hero-cat";
 import { SpaceAtmosphere } from "./space-atmosphere";
 import { HomeVoyage } from "./home-voyage";
@@ -165,7 +165,7 @@ export function HomeExperience() {
 
   return (
     <div className={`homeMode homeMode-${mode} homeMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`}>
-      {/* ── Hero: headline → downloads → switch → cat ── */}
+      {/* ── Hero: headline → world switch → downloads → cat ── */}
       <section className="heroTight">
         <SpaceAtmosphere active={inSpace} />
         <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
@@ -189,6 +189,7 @@ export function HomeExperience() {
             </p>
           </div>
 
+          <div className="heroPersonalityControl" ref={switchRef}><ModeSelector compact /></div>
           <DownloadPair id="download" />
           <div className="heroWorldStage">
             <div className="heroWorldPanel" data-active={inSpace} aria-hidden={!inSpace} inert={!inSpace}>
@@ -199,30 +200,15 @@ export function HomeExperience() {
               <EarthPersonalitySelector persistent />
             </div>
           </div>
-          <div className="heroPersonalityControl" ref={switchRef}><ModeSelector compact /></div>
 
         </div>
       </section>
 
       {!inSpace && <section className="downloadBand heroEnter heroEnter4">
-        {mode === "business" && (
-          <div className="bizBand bizBandCompact heroModeFade" key="biz-note">
-            <p className="bizBandText">
-              <strong>For teams &amp; enterprise</strong> — seat-based pricing,
-              granular security controls, and compile-time feature stripping for
-              custom builds.
-            </p>
-            <div className="bizBandActions">
-              <Link className="secondaryButton" href="/team">Team pricing</Link>
-              <Link className="secondaryButton" href="/contact">Talk to us</Link>
-            </div>
-          </div>
-        )}
         <CliInstall />
       </section>}
 
       {!inSpace && !heroSwitchVisible && <div className="floatingPersonality" style={chipLift ? { bottom: 22 + chipLift } : undefined}><ModeSelector compact/></div>}
-      {inSpace && <SpaceMissions/>}
 
       {/* ── Pricing (mode-dependent) ── */}
       <section className="detailBand" id="pricing">

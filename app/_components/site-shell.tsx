@@ -89,7 +89,7 @@ export function SiteShell({
         </div>
       </ScrollHeader>
 
-      <div className="previewRibbon"><span>A little universe, all yours</span><div className="previewRibbonRight"><a href="/space-demo/direction.html">Explore the app designs</a><ExplorerCount /></div></div>
+      <div className="explorerSign"><ExplorerCount /></div>
       <div className={wide ? "pageFrame pageFrameWide" : "pageFrame"}>
         <main>{children}</main>
       </div>
@@ -106,6 +106,7 @@ export function SiteShell({
             <Link href="/terms">Terms</Link>
             <Link href="/manage">Manage</Link>
             <Link href="/support">Support</Link>
+            <Link href="/space?mode=space">Explore the app designs</Link>
           </nav>
         </div>
       </footer>

@@ -1,17 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import pixels from "./cadet-pixels.json";
 import { CatPortrait } from "./cat-builder";
 import { CliInstall, DownloadPair } from "./home-downloads";
 import { loadCatRuntime, readSavedCat } from "../../lib/cadet-runtime";
 import type { CatDesign } from "../../lib/cadet-runtime";
 import type { MouseEvent } from "react";
-
-function openHomepageBuilder(event: MouseEvent<HTMLAnchorElement>): void {
-  event.preventDefault(); window.dispatchEvent(new Event("open-cat-builder"));
-}
 
 type Palette = keyof typeof pixels;
 const SHIP = ['.....##.....','....####....','...######...','...#AAAA#...','...#AAAA#...','...#AHHA#...','...#AHHA#...','...#AAAA#...','..##AAAA##..','.###AAAA###.','.##########.','....#..#....'];
@@ -47,30 +42,6 @@ function useSavedCat(): CatDesign | null {
     return () => { disposed = true; window.removeEventListener("space-cadet-saved", receive); };
   }, []);
   return cat;
-}
-
-export function SpaceMissions() {
-  return <section className="spaceMissions" aria-labelledby="space-missions-title">
-    <div className="sectionHeading sectionHeadingCentered">
-      <p className="sectionEyebrow">While you&apos;re out here</p>
-      <h2 id="space-missions-title">Three little missions.</h2>
-    </div>
-    <div className="spaceDestinations">
-      <Link className="spaceDestination destinationCockpit" href="/space/cockpit">
-        <div className="miniMenu" aria-hidden="true"><div className="miniMenuBar"><span>● &nbsp; Finder</span><span>✦ &nbsp; 9:41</span></div><div className="miniMenuPopover"><PixelCat/><PixelShip/><div className="miniThrottle"/></div></div>
-        <div className="spaceDestinationText"><span className="missionNumber">Mission 01</span><h3>Your everyday co-pilot</h3><p>A tiny spacewalk in your menu bar.</p><span className="missionGo">Explore the cockpit <span aria-hidden="true">→</span></span></div>
-      </Link>
-      <Link className="spaceDestination destinationStudio" href="/space/studio" onClick={openHomepageBuilder}>
-        <div className="miniWardrobe" aria-hidden="true"><PixelCat palette="peach"/><PixelCat palette="classic"/><PixelCat palette="mint"/></div>
-        <div className="spaceDestinationText"><span className="missionNumber">Mission 02</span><h3>A cat that feels like you</h3><p>A little cat. Endless personality.</p><span className="missionGo">Open the Cat studio <span aria-hidden="true">→</span></span></div>
-      </Link>
-      <Link className="spaceDestination destinationVoyage" href="/space/voyage">
-        <div className="miniVoyage" aria-hidden="true"><div className="miniMoon"/><PixelCat/><span>✦</span></div>
-        <div className="spaceDestinationText"><span className="missionNumber">Mission 03</span><h3>Gone exploring</h3><p>A small adventure while you step away.</p><span className="missionGo">Watch the night voyage <span aria-hidden="true">→</span></span></div>
-      </Link>
-    </div>
-    <p className="spaceConceptNote"><a href="/space-demo/direction.html">See the new app, menu bar and icon proposals</a><span>Interactive concepts · App availability varies by version and platform.</span></p>
-  </section>;
 }
 
 /** Closing call to action: the visitor's cat waits on the pad and lifts off on download. */

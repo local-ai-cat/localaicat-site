@@ -57,19 +57,16 @@ export function ExplorerProvider({ children }: { children: ReactNode }) {
 
 export function ExplorerCount() {
   const { snapshot, connected, loading } = useExplorers();
-  let label = "Explorer radio";
-  if (loading) label = "Listening…";
-  else if (connected && snapshot?.visitsToday !== null && snapshot?.visitsToday !== undefined) {
-    label = `${snapshot.visitsToday.toLocaleString()} ${snapshot.visitsToday === 1 ? "explorer" : "explorers"} today`;
-  }
-  return <details className="explorerPresence" data-connected={connected}>
+  if (loading || !connected || !snapshot?.available || snapshot.visitsToday === null) return null;
+
+  const count = snapshot.visitsToday;
+  const label = `${count.toLocaleString()} ${count === 1 ? "explorer" : "explorers"} today`;
+  return <details className="explorerPresence" data-connected="true">
     <summary><i aria-hidden="true" /><span>{label}</span><span className="explorerChevron" aria-hidden="true">⌄</span></summary>
     <div className="explorerReport">
       <strong>A little company out here.</strong>
-      {connected && snapshot ? <>
-        <div className="explorerTotal"><b>{snapshot.visitsToday?.toLocaleString()}</b><span>explorers today</span></div>
-        <p>Visitors to this website since midnight UTC. A daily estimate, not a live headcount.</p>
-      </> : <p>The visitor count is taking a little nap. Your cat can keep exploring.</p>}
+      <div className="explorerTotal"><b>{count.toLocaleString()}</b><span>{count === 1 ? "explorer today" : "explorers today"}</span></div>
+      <p>Visitors to this website since midnight UTC. A daily estimate, not the number here right now.</p>
       <p className="explorerFinePrint">Cookie-free website statistics from Vercel. Reporting can take a little time to catch up.</p>
       <a href="/privacy#website-analytics">How we count visits</a>
     </div>

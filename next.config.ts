@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { supportChatOrigin, supportChatPaths } from "./lib/support-chat.ts";
 
 // Turbopack/React dev mode needs eval() for HMR + callstack reconstruction;
 // production never does (and must not allow it). Gate 'unsafe-eval' on env,
@@ -99,6 +100,15 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders
       },
+      // Only the explicitly public support pages can embed Chatwoot. Scripts
+      // remain excluded from the host document; buyer/private routes stay self-only.
+      ...supportChatPaths.map((source) => ({
+        source,
+        headers: securityHeaders.map((header) => {
+          if (header.key !== "Content-Security-Policy") return header;
+          return { ...header, value: header.value.replace("frame-src 'self'", `frame-src 'self' ${supportChatOrigin}`) };
+        })
+      })),
       {
         source: "/space-demo/:path*",
         headers: securityHeaders.map((header) => {

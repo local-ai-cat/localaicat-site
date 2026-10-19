@@ -30,6 +30,7 @@ $('#menu-toggle').onclick=()=>{showMenus('tools');react('wave','Welcome back.','
 $('#menu-toggle').oncontextmenu=e=>{e.preventDefault();showMenus('compute');};
 $('#menu-toggle').onkeydown=e=>{if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();showMenus('compute');$('#throttle').focus();}};
 $('#show-both').onclick=()=>showMenus('both');
+if(new URLSearchParams(location.search).has('embedded')) showMenus('tools');
 $('#close-compute').onclick=()=>showMenus('tools');$('#open-tools').onclick=()=>showMenus('tools');
 for(const id of ['battery-button'])$('#'+id).onclick=()=>{showMenus('compute');$('#throttle').focus();};
 $('#open-compute').onclick=()=>showMenus('tools');$('#compute-button').onclick=()=>{document.querySelector('[data-destination="This Mac"]').focus();};

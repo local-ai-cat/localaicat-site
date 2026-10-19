@@ -1,6 +1,13 @@
 const DEFAULT_APP_STORE_URL =
   "https://apps.apple.com/app/local-ai-chat/id6741502386";
 const DEFAULT_CUSTOMER_PORTAL_URL = "https://polar.sh/local-ai-cat/portal";
+const POLAR_CHECKOUT_HOSTS = new Set([
+  "polar.sh",
+  "buy.polar.sh",
+  "api.polar.sh",
+  "sandbox.polar.sh",
+  "sandbox-api.polar.sh"
+]);
 
 export type BuySlug =
   | "pro-monthly"
@@ -23,7 +30,22 @@ export function getCheckoutUrl(slug: BuySlug) {
     "team-annual": process.env.POLAR_CHECKOUT_URL_TEAM_ANNUAL
   };
 
-  return optionalValue(checkoutUrls[slug]);
+  const configured = optionalValue(checkoutUrls[slug]);
+  if (!configured) return null;
+
+  try {
+    const url = new URL(configured);
+    if (
+      url.protocol !== "https:" ||
+      !POLAR_CHECKOUT_HOSTS.has(url.hostname) ||
+      url.username || url.password || url.port
+    ) {
+      return null;
+    }
+    return configured;
+  } catch {
+    return null;
+  }
 }
 
 export function getSiteUrl() {

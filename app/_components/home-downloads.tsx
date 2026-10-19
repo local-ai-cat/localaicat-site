@@ -107,7 +107,7 @@ export function CliInstall() {
             <span aria-hidden="true" className="termDot termDotRed" />
             <span aria-hidden="true" className="termDot termDotYellow" />
             <span aria-hidden="true" className="termDot termDotGreen" />
-            <span className="termTitle">for the cutes — one line installs it</span>
+            <span className="termTitle">Let the cat help you install it</span>
           </div>
           <video
             aria-label="Terminal recording of the one-line Local AI Cat install"

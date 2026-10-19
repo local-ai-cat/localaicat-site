@@ -1,12 +1,11 @@
 "use client";
 
 import { SpaceMotionControl } from "./space-atmosphere";
-import { CatBuilder, CatPortrait } from "./cat-builder";
-import { catStorageKey, loadCatRuntime, readSavedCat, saveCat } from "../../lib/cadet-runtime";
-import type { CatDesign, CatRuntime } from "../../lib/cadet-runtime";
+import { CatPortrait } from "./cat-builder";
 import { getDirectDownloadUrl } from "../../lib/env";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSpaceMotion } from "./use-space-motion";
+import { useCatStudio } from "./use-cat-studio";
 import { trackSiteAction } from "../../lib/site-analytics";
 
 type RocketPixel = { x: number; y: number; w: number; h: number; colour: string };
@@ -23,11 +22,7 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useState(false);
   const [caption, setCaption] = useState("A little expedition, already underway.");
-  const [runtime, setRuntime] = useState<CatRuntime | null>(null);
-  const [cat, setCat] = useState<CatDesign | null>(null);
-  const [builderOpen, setBuilderOpen] = useState(false);
-  const [builderError, setBuilderError] = useState("");
-  const [receipt, setReceipt] = useState<{code:string; copied:boolean; persisted:boolean} | null>(null);
+  const { runtime, cat, openBuilder, builderOpen, studioUI } = useCatStudio();
   const [throttle, setThrottle] = useState(1);
   const [instruments, setInstruments] = useState<Instruments | null>(null);
   const { enabled, reducedMotion } = useSpaceMotion();
@@ -42,8 +37,8 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
   }, []);
 
   useEffect(() => {
-    if (!active) setSettingsOpen(false);
-  }, [active]);
+    if (!active || builderOpen) setSettingsOpen(false);
+  }, [active, builderOpen]);
 
   // A cached scene can finish loading before hydration attaches onLoad.
   useEffect(() => {
@@ -75,62 +70,10 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
   }
 
   useEffect(() => {
-    let disposed = false;
-    loadCatRuntime().then(api => {
-      if (disposed) return;
-      setRuntime(api); setCat(readSavedCat(api));
-      if (new URLSearchParams(location.search).get("studio") === "1") setBuilderOpen(true);
-    }).catch(() => {});
-    return () => { disposed = true; };
-  }, []);
-
-  useEffect(() => {
-    function openFromPage(): void { void openBuilder(); }
-    window.addEventListener("open-cat-builder", openFromPage);
-    return () => window.removeEventListener("open-cat-builder", openFromPage);
-  });
-
-  useEffect(() => {
-    if (!runtime) return;
-    function syncSaved(event: StorageEvent): void {
-      if (event.key === catStorageKey && runtime) setCat(readSavedCat(runtime));
-    }
-    window.addEventListener("storage", syncSaved);
-    return () => window.removeEventListener("storage", syncSaved);
-  }, [runtime]);
-
-  useEffect(() => {
     if (!ready || !runtime || !cat) return;
     const design = runtime.model.serializeDesign(cat);
     frameRef.current?.contentWindow?.postMessage({type:"voyage-cat", pixels:design.pixels, name:design.appearance.name},location.origin);
   }, [cat, ready, runtime]);
-
-  async function openBuilder(): Promise<void> {
-    setBuilderError("");
-    setSettingsOpen(false);
-    try {
-      const api = runtime ?? await loadCatRuntime();
-      setRuntime(api); setBuilderOpen(true);
-    } catch (failure) { setBuilderError(failure instanceof Error ? failure.message : "Please try opening the wardrobe again."); }
-  }
-  function closeBuilder(): void {
-    setBuilderOpen(false);
-    const url = new URL(location.href);
-    if (url.searchParams.has("studio")) {url.searchParams.delete("studio"); history.replaceState(history.state,"",url);}
-  }
-  async function finishCat(design: CatDesign): Promise<void> {
-    if (!runtime) return;
-    const saved = saveCat(runtime, design);
-    // Clipboard writes begin inside the Done gesture. A denied write keeps a manual code fallback.
-    let copied = false;
-    try { await navigator.clipboard.writeText(saved.code); copied = true; trackSiteAction("cat_code_copied"); } catch {}
-    setCat(saved.design); window.dispatchEvent(new CustomEvent("space-cadet-saved", {detail:saved.design})); setReceipt({code:saved.code,copied,persisted:saved.persisted}); closeBuilder();
-  }
-  async function copyAgain(): Promise<void> {
-    if (!receipt) return;
-    try { await navigator.clipboard.writeText(receipt.code); setReceipt({...receipt,copied:true}); trackSiteAction("cat_code_copied"); }
-    catch { setReceipt({...receipt,copied:false}); }
-  }
 
   useEffect(() => {
     const node = sceneRef.current;
@@ -225,14 +168,6 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
         </div>
       </div>
     </div>
-    {builderError && <p className="catBuilderError" role="alert">{builderError}</p>}
-    {receipt && <div className="catHomeReceipt">
-      <div role="status"><strong>{cat?.appearance.name} is home.</strong><span>{receipt.copied ? "Cat code copied. Paste it into Customise / Import cat code in the app." : "Your cat is ready. Copy the code below to bring it into the app."}</span>
-      {!receipt.persisted && <span>This browser could not save it. Keep your cat code before leaving.</span>}</div>
-      <div className="catHomeReceiptActions"><a onClick={() => trackSiteAction("download_clicked", "mac")} href={getDirectDownloadUrl()}>Download Local AI Cat</a><button onClick={copyAgain}>{receipt.copied ? "Copy code again" : "Copy cat code"}</button></div>
-      <details open={!receipt.copied}><summary>Your cat code</summary><textarea aria-label="Your saved cat code" readOnly value={receipt.code} onFocus={event=>event.currentTarget.select()}/></details>
-      <button className="catReceiptDismiss" aria-label="Dismiss cat confirmation" onClick={()=>setReceipt(null)}>×</button>
-    </div>}
-    {builderOpen && runtime && <CatBuilder runtime={runtime} initial={cat} onClose={closeBuilder} onDone={finishCat}/>}
+    {studioUI}
   </div>;
 }

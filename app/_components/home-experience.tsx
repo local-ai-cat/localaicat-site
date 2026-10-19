@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { businessPlans, directPlans } from "../../lib/catalog";
+import { useEffect, useState } from "react";
 import { EarthPersonalitySelector, ModeSelector, useSiteMode } from "./site-mode";
 import { CliInstall, DownloadPair } from "./home-downloads";
-import { SpaceLaunchPad, SpaceMissions } from "./space-experience";
+import { SpaceLaunchPad } from "./space-experience";
 import { HeroCat } from "./hero-cat";
 import { SpaceAtmosphere } from "./space-atmosphere";
 import { HomeVoyage } from "./home-voyage";
+import { PersonalPlans } from "./personal-plans";
+import { TeamPlans } from "./team-plans";
+import { ScrollArrival } from "./scroll-arrival";
+import { AppDemo, type AppDemoSource } from "./app-demo";
 import { MODES, type Mode } from "../../lib/site-personality";
 
 const heroHeadlines: Record<Mode, string> = {
@@ -37,9 +39,9 @@ const marqueeFeatures = [
     outdoorOnly: false
   },
   {
-    name: "Menu-bar transcription",
+    name: "Menu-bar tools",
     icon: "menubar",
-    blurb: "A global hotkey that transcribes into any app, from the menu bar.",
+    blurb: "Transcription and handy everyday controls. Many work in the App Store app; some require Outdoor.",
     outdoorOnly: true
   },
   {
@@ -95,16 +97,13 @@ function FeatureIcon({ kind }: { kind: string }) {
   );
 }
 
-export function HomeExperience() {
+export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
   const [mode] = useSiteMode();
   const [earthMode, setEarthMode] = useState<"personal" | "business">("personal");
   // Retain the outgoing portrait while its world fades out. Update before paint
   // when entering Earth, including direct links and keyboard navigation.
   if (mode !== "space" && mode !== earthMode) setEarthMode(mode);
   const inSpace = mode === "space";
-  const [heroSwitchVisible, setHeroSwitchVisible] = useState(true);
-  const [chipLift, setChipLift] = useState(0);
-  const switchRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     [
@@ -121,51 +120,9 @@ export function HomeExperience() {
     });
   }, []);
 
-  useEffect(() => {
-    const node = switchRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => setHeroSwitchVisible(entry.isIntersecting));
-      },
-      { threshold: 0.2 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  // Space keeps its header in view, so the header switch stands in for the
-  // hero switch once that scrolls away, instead of a floating chip.
-  useEffect(() => {
-    document.body.dataset.heroSwitch = heroSwitchVisible ? "visible" : "hidden";
-    return () => { delete document.body.dataset.heroSwitch; };
-  }, [heroSwitchVisible]);
-
-  useEffect(() => {
-    if (heroSwitchVisible || inSpace) return;
-
-    // The cookie-consent banner is a fixed full-width dialog at the bottom;
-    // float the chip above it while it's on screen.
-    const update = () => {
-      const banner = document.getElementById("cookie-consent-banner");
-      setChipLift(banner ? banner.getBoundingClientRect().height + 12 : 0);
-    };
-    update();
-
-    const observer = new MutationObserver(update);
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener("resize", update);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, [heroSwitchVisible, inSpace]);
-
   return (
     <div className={`homeMode homeMode-${mode} homeMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`}>
-      {/* ── Hero: headline → downloads → switch → cat ── */}
+      {/* ── Hero: headline → world switch → cat → installation options ── */}
       <section className="heroTight">
         <SpaceAtmosphere active={inSpace} />
         <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
@@ -189,7 +146,7 @@ export function HomeExperience() {
             </p>
           </div>
 
-          <DownloadPair id="download" />
+          <div className="heroPersonalityControl"><ModeSelector compact /></div>
           <div className="heroWorldStage">
             <div className="heroWorldPanel" data-active={inSpace} aria-hidden={!inSpace} inert={!inSpace}>
               <HomeVoyage active={inSpace} />
@@ -199,33 +156,20 @@ export function HomeExperience() {
               <EarthPersonalitySelector persistent />
             </div>
           </div>
-          <div className="heroPersonalityControl" ref={switchRef}><ModeSelector compact /></div>
 
         </div>
       </section>
 
-      {!inSpace && <section className="downloadBand heroEnter heroEnter4">
-        {mode === "business" && (
-          <div className="bizBand bizBandCompact heroModeFade" key="biz-note">
-            <p className="bizBandText">
-              <strong>For teams &amp; enterprise</strong> — seat-based pricing,
-              granular security controls, and compile-time feature stripping for
-              custom builds.
-            </p>
-            <div className="bizBandActions">
-              <Link className="secondaryButton" href="/team">Team pricing</Link>
-              <Link className="secondaryButton" href="/contact">Talk to us</Link>
-            </div>
-          </div>
-        )}
+      <section className="downloadBand" id="download" aria-label="Install Local AI Cat">
+        <DownloadPair />
         <CliInstall />
-      </section>}
+      </section>
 
-      {!inSpace && !heroSwitchVisible && <div className="floatingPersonality" style={chipLift ? { bottom: 22 + chipLift } : undefined}><ModeSelector compact/></div>}
-      {inSpace && <SpaceMissions/>}
+      <AppDemo source={demo} />
 
       {/* ── Pricing (mode-dependent) ── */}
-      <section className="detailBand" id="pricing">
+      <ScrollArrival>
+        <section className="detailBand" id="pricing">
         {mode !== "business" ? (
           <div className="heroModeFade" key="pricing-personal">
             <div className="sectionHeading sectionHeadingCentered">
@@ -237,46 +181,7 @@ export function HomeExperience() {
               </p>
             </div>
 
-            <div className="homePlanGrid">
-              <article className="homePlanCard">
-                <p className="dualCardEyebrow">Free</p>
-                <p className="homePlanPrice">£0</p>
-                <p className="dualCardBody">The full local core, forever. No account, no trial clock.</p>
-              </article>
-              {directPlans.map((plan) => {
-                const best = plan.name === "Pro Annual";
-                return (
-                  <article className={best ? "homePlanCard homePlanCardBest" : "homePlanCard"} key={plan.name}>
-                    <p className="dualCardEyebrow">
-                      {plan.name}
-                      {best && <span className="dualCardBadge">Best value</span>}
-                    </p>
-                    <p className="homePlanPrice">
-                      {plan.price}
-                      <span className="homePlanCadence">{plan.cadence}</span>
-                    </p>
-                    <p className="dualCardBody">{plan.note}</p>
-                  </article>
-                );
-              })}
-            </div>
-
-            <div className="pricingActions">
-              <Link className="planButton" href="/pricing/direct">Full pricing</Link>
-              <Link className="secondaryButton" href="/pricing/app-store">App Store pricing</Link>
-            </div>
-
-            <div className="bizBand">
-              <p className="bizBandText">
-                <strong>Teams &amp; enterprise</strong> — seat-based rollout from
-                £40/seat/year, or a sales-led path with invoicing and managed
-                rollout.
-              </p>
-              <div className="bizBandActions">
-                <Link className="secondaryButton" href="/team">Team checkout</Link>
-                <Link className="secondaryButton" href="/contact">Contact sales</Link>
-              </div>
-            </div>
+            <PersonalPlans />
           </div>
         ) : (
           <div className="heroModeFade" key="pricing-business">
@@ -289,57 +194,20 @@ export function HomeExperience() {
               </p>
             </div>
 
-            <div className="bizPlanGrid">
-              {businessPlans.map((plan) => (
-                <article
-                  className={plan.name === "Team" ? "homePlanCard homePlanCardBest bizPlanCard" : "homePlanCard bizPlanCard"}
-                  key={plan.name}
-                >
-                  <p className="dualCardEyebrow">{plan.name}</p>
-                  <p className="homePlanPrice">
-                    {plan.price}
-                    <span className="homePlanCadence">{plan.cadence}</span>
-                  </p>
-                  <p className="dualCardBody">{plan.note}</p>
-                  <ul className="dualCardList">
-                    {plan.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
-                  <Link className="planButton bizPlanButton" href={plan.ctaHref}>
-                    {plan.ctaLabel}
-                  </Link>
-                </article>
-              ))}
-            </div>
-
-            <div className="enterpriseBand">
-              <div className="enterpriseBandText">
-                <p className="sectionEyebrow">Compile-time builds</p>
-                <h3>Know your exact attack surface.</h3>
-                <p>
-                  For enterprise clients we include or exclude features at build
-                  time. The binary you roll out contains exactly the
-                  capabilities you&apos;ve approved — and none of the threat
-                  vectors you haven&apos;t. Every build maps to a published
-                  feature manifest, so security review covers what actually
-                  ships.
-                </p>
-              </div>
-              <Link className="planButton" href="/contact">Talk to us</Link>
-            </div>
+            <TeamPlans />
           </div>
         )}
-      </section>
+        </section>
+      </ScrollArrival>
 
       {/* ── Feature set ── */}
-      <section className="detailBand" id="features">
+      <ScrollArrival>
+        <section className="detailBand" id="features">
         <div className="sectionHeading sectionHeadingCentered">
           <p className="sectionEyebrow">What&apos;s inside</p>
           <h2>One cat, many tricks.</h2>
           <p className="detailIntro">
-            Everything runs on your device. Features marked Outdoor need the
-            direct-download build.
+            Features marked Outdoor are for macOS and require the direct download from this site.
           </p>
         </div>
 
@@ -356,10 +224,8 @@ export function HomeExperience() {
           ))}
         </div>
 
-        <div className="pricingActions">
-          <Link className="secondaryButton" href="/docs">See every feature and which edition has it</Link>
-        </div>
       </section>
+      </ScrollArrival>
       {inSpace && <SpaceLaunchPad/>}
     </div>
   );

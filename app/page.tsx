@@ -21,7 +21,7 @@ const jsonLd = {
 
 export default function HomePage() {
   return (
-    <SiteShell>
+    <SiteShell showWorldSelector={false}>
       <script
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         type="application/ld+json"

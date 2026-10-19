@@ -13,11 +13,16 @@ export default function ContactPage() {
   return (
     <SiteShell siteMode="business">
       <ContentPage
-        intro="For Team seat-based checkout, use the self-serve Team page. For everything else, reach out below."
+        intro={
+          <>
+            For seats for your team, start on the <Link className="textLink" href="/team">Team page</Link>.
+            For everything else, reach out below.
+          </>
+        }
         kicker="Contact"
         title="Get in touch"
       >
-        <div className="dualCards" style={{ maxWidth: 720 }}>
+        <div className="dualCards" style={{ maxWidth: 720, marginLeft: 0 }}>
           <article className="dualCard dualCardStrong">
             <p className="dualCardEyebrow">Enterprise</p>
             <h3>Sales-led path.</h3>

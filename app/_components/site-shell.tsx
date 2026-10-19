@@ -15,10 +15,13 @@ type SiteShellProps = {
   siteMode?: "personal" | "business";
   /** Widen the content frame for dense data views (e.g. the modules grid) */
   wide?: boolean;
+  /** The homepage has its world selector beside the hero. */
+  showWorldSelector?: boolean;
 };
 
 const navLinks =
   [
+    { href: "/space", label: "Explore" },
     { href: "/pricing", label: "Pricing" },
     { href: "/support", label: "FAQ" },
     { href: "/#download", label: "Download", cta: true }
@@ -36,7 +39,8 @@ export function SiteShell({
   children,
   navMode = "default",
   siteMode,
-  wide = false
+  wide = false,
+  showWorldSelector = true
 }: SiteShellProps) {
   const links = navMode === "legal" ? legalLinks : navLinks;
 
@@ -72,7 +76,7 @@ export function SiteShell({
             </span>
           </Link>
 
-          <div className="headerPersonality"><ModeSelector compact /></div>
+          <div className="headerPersonality">{showWorldSelector && <ModeSelector compact />}</div>
           <nav aria-label="Primary" className="siteNav siteNavDesktop">
             {links.map((link) => (
               <Link
@@ -85,11 +89,11 @@ export function SiteShell({
             ))}
           </nav>
 
-          <MobileNav links={links} />
+          <MobileNav links={links} showWorldSelector={showWorldSelector} />
         </div>
       </ScrollHeader>
 
-      <div className="previewRibbon"><span>A little universe, all yours</span><div className="previewRibbonRight"><a href="/space-demo/direction.html">Explore the app designs</a><ExplorerCount /></div></div>
+      <div className="explorerSign"><ExplorerCount /></div>
       <div className={wide ? "pageFrame pageFrameWide" : "pageFrame"}>
         <main>{children}</main>
       </div>
@@ -98,7 +102,7 @@ export function SiteShell({
         <div className="siteFooterInner">
           <div>
             <p className="footerTitle"><span className="footerCadet"><PixelCat decorative/></span>Local AI Cat</p>
-            <p className="footerText">AI that stays at home.</p>
+            <p className="footerText"><span className="footerTextSpace">Your own personal space.</span><span className="footerTextEarth">AI that stays at home.</span></p>
           </div>
 
           <nav aria-label="Footer" className="footerLinks">

@@ -1,0 +1,61 @@
+.trigger {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border: 1px solid var(--line, #40394e);
+  border-radius: 999px;
+  background: var(--surface, #211b2d);
+  color: var(--text, #eee8fb);
+  font: 500 13px var(--font-body), sans-serif;
+  box-shadow: 0 3px 18px #0002;
+  cursor: pointer;
+}
+
+.dialog {
+  position: fixed;
+  inset: auto auto 18px 18px;
+  margin: 0;
+  padding: 0;
+  width: min(400px, calc(100vw - 36px));
+  max-width: none;
+  height: min(650px, calc(100dvh - 36px));
+  max-height: none;
+  overflow: hidden;
+  border: 1px solid var(--line, #40394e);
+  border-radius: 22px;
+  background: var(--surface, #211b2d);
+  color: var(--text, #eee8fb);
+  font-family: var(--font-body), sans-serif;
+  box-shadow: 0 18px 72px #0005;
+}
+
+.dialog::backdrop { background: #09071155; }
+.panel { display: flex; flex-direction: column; height: 100%; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.header h2 { margin: 0; font: 600 16px var(--font-body), sans-serif; }
+.close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line, #40394e);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 23px;
+  cursor: pointer;
+}
+.chat { position: relative; flex: 1; min-height: 0; background: #fff; }
+.frame { display: block; width: 100%; height: 100%; border: 0; }
+.loading { position: absolute; inset: 16px; color: #4b4357; font-size: 14px; pointer-events: none; }
+.footer { display: flex; justify-content: space-between; gap: 12px; padding: 13px 16px; font-size: 11px; }
+.footer a { color: inherit; text-underline-offset: 3px; }
+.trigger:focus-visible, .close:focus-visible, .footer a:focus-visible { outline: 2px solid var(--accent, #c5a8ee); outline-offset: 3px; }
+
+@media (max-width: 480px) {
+  .dialog { inset: auto 10px 10px; width: calc(100vw - 20px); height: min(650px, calc(100dvh - 20px)); }
+  .trigger { bottom: 12px; left: 12px; }
+}

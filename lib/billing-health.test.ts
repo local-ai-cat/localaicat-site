@@ -186,7 +186,7 @@ test("an unconfigured Redis fails rather than passing silently", async () => {
 
 test("a configured link Polar does not list, or a URL naming no link, fails", async () => {
   process.env.POLAR_CHECKOUT_URL_PRO_MONTHLY = "https://buy.polar.sh/polar_cl_deleted";
-  process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL = "https://buy.example.com/pro";
+  process.env.POLAR_CHECKOUT_URL_PRO_ANNUAL = "https://buy.polar.sh/no-checkout-link";
   const calls: Calls = [];
   const report = await runBillingHealth(SITE, polar(HEALTHY, calls), pong);
 

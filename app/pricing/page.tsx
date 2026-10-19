@@ -5,7 +5,7 @@ import { PricingExperience } from "./pricing-experience";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Local AI Cat pricing for Indoor Cat (App Store) and Outdoor Cat (direct download). Compare plans and choose your path."
+    "Start free with Local AI Cat. Buy Pro Monthly, Pro Annual or the one-time Developer Mode upgrade for Mac."
 };
 
 export default function PricingPage() {

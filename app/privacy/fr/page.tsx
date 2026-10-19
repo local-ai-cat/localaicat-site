@@ -118,9 +118,10 @@ export default function PrivacyPageFr() {
             envoyé, sans paramètres, titre ni URL de provenance. Les totaux sont publics sur{" "}
             <a href="https://localaicat.goatcounter.com">localaicat.goatcounter.com</a>.
             Vercel Speed Insights mesure les performances avec les mêmes préférences.</p>
-          <p>L’assistance Chatwoot s’ouvre dans un onglet séparé uniquement à votre demande.
+          <p>L’assistance Chatwoot se charge dans un panneau isolé uniquement à votre demande.
+            Elle n’est pas chargée sur les pages de paiement, d’activation ou de compte.
             Le site ne lui transmet ni les détails de votre paiement ni l’URL de la page.
-            Les informations que vous y envoyez sont traitées par Chatwoot.</p>
+            Les informations que vous envoyez dans le chat sont traitées par Chatwoot.</p>
           <AnalyticsPreference french />
         </section>
 

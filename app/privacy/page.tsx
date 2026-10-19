@@ -109,9 +109,10 @@ export default function PrivacyPage() {
             path, without query strings, page titles or referring URLs. Public totals are at{" "}
             <a href="https://localaicat.goatcounter.com">localaicat.goatcounter.com</a>.
             Vercel Speed Insights measures page performance with the same privacy preferences.</p>
-          <p>Chat support opens Chatwoot in a separate tab only when you select it.
-            The website does not send your checkout details or current page URL to that tab.
-            Information you choose to send there is handled by Chatwoot.</p>
+          <p>Chat support loads Chatwoot in an isolated panel only when you select it.
+            We do not load it on checkout, activation or account pages, or send it your
+            checkout details or current page URL. Information you choose to send in chat
+            is handled by Chatwoot.</p>
           <AnalyticsPreference />
         </section>
 

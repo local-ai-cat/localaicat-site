@@ -1,10 +1,5 @@
 import { sanitizeAnalyticsEvent } from "./site-analytics.ts";
 
-// This is Chatwoot's public inbox identifier, not a buyer or administrator token.
-// The URL deliberately includes no current-page URL, user data or conversation cookie.
-export const supportChatUrl =
-  "https://app.chatwoot.com/widget?website_token=xiyWsj719fc5BZUsg8i4n88i&locale=en";
-
 /** Apply the same public-route allowlist to performance and page-view collectors. */
 export function publicTelemetryUrl(url: string, enabled: boolean): string | null {
   return sanitizeAnalyticsEvent({ type: "pageview", url }, enabled)?.url ?? null;

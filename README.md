@@ -70,29 +70,30 @@ outside GitHub Releases.
 4. Copy the customer portal URL into `POLAR_CUSTOMER_PORTAL_URL`.
 
 Polar handles license issuance, entitlements, and customer portal natively.
-This site uses a small Upstash Redis store for the browser-to-app activation
-handoff so tokens stay short-lived, single-use, and safe on Vercel's stateless
-runtime model.
+The direct-download app remains free to install; Polar is used for upgrades,
+billing management, and license keys validated by the app.
 
-The direct-download app remains free to install. Polar is only used for
-upgrades, billing management, and license keys that the app validates locally.
+A checkout ID alone never reveals a license. A new buyer's Polar redirect proof
+is captured in a five-minute HttpOnly cookie and removed from the URL before
+rendering. The server verifies that proof against Polar and matches the buyer to
+the checkout before revealing its exact order's key. Returning buyers whose
+checkout does not include proof sign in through Polar's customer portal.
 
-The success page now prefers short-lived activation tokens rather than putting
-raw license keys in the browser. The site resolves `checkout_id`, mints an
-activation token, and deep-links into the app with `localaichat://activate?...`.
-The app redeems that token back against the site before validating the issued
-Polar license key locally.
+Buyers copy the verified key into **Settings → Activate License** in the app.
+Custom-scheme activation tokens are no longer issued or redeemed: another app
+can register the same URL scheme and intercept them. The old token endpoints
+return HTTP 410. Sensitive pages disable analytics and caching.
 
 For production, configure:
 
-- `ACTIVATION_TOKEN_SECRET` as a dedicated signing/encryption secret for the
-  browser-to-app handoff tokens
+- `ACTIVATION_TOKEN_SECRET` as a dedicated secret for checkout-bound reveal cookies.
 - `KV_REST_API_URL` and `KV_REST_API_TOKEN` from the Vercel Marketplace
-  `upstash/upstash-kv` integration for one-time-use enforcement
+  `upstash/upstash-kv` integration for one-time buyer claims and shared quotas.
 
-`ACTIVATION_TOKEN_SECRET` is required for activation tokens and reveal cookies;
-there is no fallback to `POLAR_ADMIN_KEY`. For local development set any long
-random value.
+Both are required. Checkout creation and first-time license reveal fail closed
+when shared quota storage is unavailable. There is no fallback to
+`POLAR_ADMIN_KEY` for cookie signing. For local development use a separate long
+random secret and a development Redis database.
 
 ## Local development
 

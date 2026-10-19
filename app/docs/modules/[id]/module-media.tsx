@@ -17,7 +17,7 @@ type MediaAsset = {
 function publicAsset(id: string, extension: string) {
   const relativePath = `/feature-media/${id}.${extension}`;
   return {
-    path: path.join(process.cwd(), "public", relativePath),
+    exists: existsSync(path.join(process.cwd(), "public", "feature-media", `${id}.${extension}`)),
     url: relativePath
   };
 }
@@ -26,10 +26,10 @@ function resolveMedia(id: string): MediaAsset | undefined {
   const mp4 = publicAsset(id, "mp4");
   const gif = publicAsset(id, "gif");
   const posters = ["webp", "jpg", "png"].map((extension) => publicAsset(id, extension));
-  const poster = posters.find((candidate) => existsSync(candidate.path));
+  const poster = posters.find((candidate) => candidate.exists);
 
-  if (existsSync(mp4.path)) return { kind: "video", src: mp4.url, poster: poster?.url };
-  if (existsSync(gif.path)) return { kind: "image", src: gif.url };
+  if (mp4.exists) return { kind: "video", src: mp4.url, poster: poster?.url };
+  if (gif.exists) return { kind: "image", src: gif.url };
   if (poster) return { kind: "poster", src: poster.url };
   return undefined;
 }

@@ -410,7 +410,7 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
   .launchGantry i,.spaceLaunchPad .launchCraft,.spaceLaunchPad[data-launched="true"] .launchCraft{animation:none!important;}
 }
 
-/* The homepage stays quiet; the sketchbook has its own place in the footer. */
+/* Explorer presence stays separate from the main navigation. */
 .explorerSign {position:relative;z-index:12;display:flex;justify-content:flex-end;max-width:1200px;margin:auto;padding:12px 20px 0;}
 .explorerSign:has(.explorerPresence) {min-height:44px;}
 .explorerSign:not(:has(.explorerPresence)) {display:none;}
@@ -460,4 +460,51 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
   .experienceOverlay{width:calc(100vw - 16px);height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);border-radius:18px;}
   .experienceOverlayHeader{padding:18px;gap:12px;}
   .experienceOverlayHeader h2{font-size:26px;}
+}
+
+/* Purchase choices: the price and its action stay together. */
+.purchasePlans { max-width:1120px; align-items:stretch; }
+.purchasePlans .homePlanCard { gap:18px; padding:28px 22px 22px; }
+.purchasePlanName { margin:0; font-family:var(--font-body),sans-serif; font-size:16px; font-weight:700; letter-spacing:0; line-height:1.35; }
+.purchasePlans .homePlanPrice { font-size:44px; }
+.purchasePlans .dualCardBody { margin:0; min-height:4.5em; }
+.purchasePlans .purchasePlanButton { width:100%; min-height:44px; margin-top:auto; padding:12px 10px; text-align:center; font-size:12px; }
+.planSaving { color:#a0d9cf; font-size:12px; font-weight:600; }
+.planSavingQuiet { color:var(--text-dim); font-weight:400; }
+.purchaseNote { max-width:800px; margin:20px auto 0; color:var(--text-faint); font-size:12px; line-height:1.65; text-align:center; }
+.crewInvite { display:flex; justify-content:space-between; align-items:center; gap:24px; max-width:1000px; margin:44px auto 0; padding:28px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); text-align:left; }
+.crewInvite h3 { margin:0 0 6px; font-family:var(--font-display),serif; font-size:30px; font-weight:500; }
+.crewInvite p { margin:0; color:var(--text-dim); font-size:14px; line-height:1.6; }
+.crewInvite>a { flex-shrink:0; font-size:13px; }
+.purchasePage .contentHero,.crewPage .contentHero { text-align:center; max-width:800px; margin:0 auto 48px; }
+.purchasePage .contentTitle,.crewPage .contentTitle { font-size:clamp(42px,6vw,72px); line-height:1.05; }
+.purchasePage .contentIntro,.crewPage .contentIntro { max-width:650px; margin:20px auto 0; }
+.pricingHelp { max-width:680px; margin:48px auto 0; text-align:center; }
+.pricingHelp h2 { font-size:30px; font-weight:500; }
+.pricingHelp p { color:var(--text-dim); font-size:14px; line-height:1.75; }
+.pricingHelp a { color:var(--text-dim); font-size:13px; text-decoration:underline; text-underline-offset:4px; }
+.checkoutUnavailable { max-width:800px; padding:18px; margin:0 auto 24px; border:1px solid var(--accent); border-radius:12px; color:var(--text); line-height:1.6; }
+.crewPortraits { display:flex; justify-content:center; align-items:flex-end; gap:16px; margin:0 auto 30px; }
+.crewPortraits .pixelCat { width:48px; height:48px; }
+.crewPortraits .pixelCat:nth-child(2) { width:64px; height:64px; }
+.crewPortraits .pixelCat:first-child { filter:hue-rotate(70deg); }
+.crewPortraits .pixelCat:last-child { filter:hue-rotate(300deg); }
+.crewPage .enterpriseBand { margin-top:36px; }
+.footerTextSpace { display:none; }
+body[data-home-mode="space"] .footerTextSpace { display:inline; }
+body[data-home-mode="space"] .footerTextEarth { display:none; }
+.appDemo { max-width:1000px; margin:88px auto 0; }
+.appDemo video { display:block; width:100%; aspect-ratio:16/9; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
+@media(prefers-reduced-motion:no-preference) {
+  .scrollArrivalVisible { animation:sectionArrival 520ms cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes sectionArrival { from {opacity:.75;transform:translateY(14px)} to {opacity:1;transform:none} }
+}
+@media(max-width:1000px) { .purchasePlans {grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media(max-width:600px) {
+  .purchasePlans {grid-template-columns:1fr;max-width:400px;}
+  .purchasePlans .dualCardBody {min-height:0;}
+  .purchasePlans .purchasePlanButton {font-size:14px;}
+  .crewInvite {align-items:flex-start;flex-direction:column;gap:18px;}
+  .crewInvite>a {width:100%;text-align:center;}
+  .crewInvite h3 {font-size:28px;}
 }

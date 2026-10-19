@@ -6,7 +6,7 @@ export type SiteAction = "download_clicked" | "creator_opened" | "cat_code_copie
 export type DownloadChannel = "mac" | "app_store";
 const publicPaths = new Set([
   "/", "/download", "/download/app-store", "/outdoor", "/pricing", "/pricing/direct",
-  "/pricing/app-store", "/personal", "/business", "/team", "/enterprise", "/faq",
+  "/pricing/app-store", "/personal", "/business", "/team", "/teams", "/enterprise", "/faq",
   "/support", "/contact", "/help/ssh", "/docs", "/docs/packages", "/screenshots",
   "/window-management", "/privacy", "/privacy/fr", "/terms", "/terms/fr", "/licenses",
   "/space/studio", "/space/cockpit", "/space/voyage"

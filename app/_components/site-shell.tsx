@@ -101,7 +101,7 @@ export function SiteShell({
         <div className="siteFooterInner">
           <div>
             <p className="footerTitle"><span className="footerCadet"><PixelCat decorative/></span>Local AI Cat</p>
-            <p className="footerText">AI that stays at home.</p>
+            <p className="footerText"><span className="footerTextSpace">Your own personal space.</span><span className="footerTextEarth">AI that stays at home.</span></p>
           </div>
 
           <nav aria-label="Footer" className="footerLinks">
@@ -109,7 +109,6 @@ export function SiteShell({
             <Link href="/terms">Terms</Link>
             <Link href="/manage">Manage</Link>
             <Link href="/support">Support</Link>
-            <Link href="/space?mode=space">Explore the app designs</Link>
           </nav>
         </div>
       </footer>

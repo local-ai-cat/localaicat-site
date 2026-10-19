@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createInMemoryActivationTokenStore } from "./activation-token-store.ts";
-import { redeemActivationToken } from "./activation-redeem.ts";
 import { resolveCheckoutSuccessState } from "./polar-checkout.ts";
 
 const GRANTS_PREFIX = "https://sandbox-api.polar.sh/v1/customer-portal/benefit-grants/?checkout_id=";
@@ -46,8 +45,14 @@ const KEY_BY_ID = /^https:\/\/sandbox-api\.polar\.sh\/v1\/customer-portal\/licen
 
 // Each test mocks the customer's key list; the code fetches keys one id at a
 // time, so this adapter answers those lookups from the test's list.
+const BUYER_TOKEN = "polar_cst_buyer_session_fixture_1234";
+let buyerSessionCustomerId: string | null = null;
 let testFetch: typeof fetch = originalFetch;
 async function keyByIdAdapter(input: string | URL | Request, init?: RequestInit) {
+  if (input.toString() === "https://sandbox-api.polar.sh/v1/customer-portal/customers/me" && buyerSessionCustomerId) {
+    assert.equal(new Headers(init?.headers).get("Authorization"), `Bearer ${BUYER_TOKEN}`);
+    return Response.json({ id: buyerSessionCustomerId });
+  }
   const match = KEY_BY_ID.exec(input.toString());
   if (!match) return testFetch(input, init);
   const list = await testFetch(KEY_LIST_URL, init);
@@ -68,6 +73,7 @@ const originalEnv = {
 };
 
 test.beforeEach(() => {
+  buyerSessionCustomerId = null;
   process.env.ACTIVATION_TOKEN_SECRET = "test-activation-secret";
   process.env.POLAR_ADMIN_KEY = "polar_oat_test";
   process.env.POLAR_API_BASE_URL = "https://sandbox-api.polar.sh";
@@ -144,25 +150,17 @@ test("resolveCheckoutSuccessState scopes license lookup through a customer sessi
   };
 
   const state = await resolveCheckoutSuccessState("chk_123", {
-    activationTokenStore: store
+    activationTokenStore: store,
+    cookieIssuedAt: Date.now()
   });
 
   assert.equal(state?.checkoutStatus, "confirmed");
   assert.equal(state?.customerId, "cust_123");
   assert.equal(state?.customerPortalUrl, "https://polar.sh/portal/session");
   assert.equal(state?.licenseKey, "LOCALAI-PRO-CURRENT");
-  assert.ok(state?.activationToken);
+  assert.equal(state?.activationToken, null, "website never issues a custom-scheme bearer");
   assert.ok(!requestedUrls.some((url) => url.includes("/v1/license-keys?customer_id=")));
 
-  const redeemed = await redeemActivationToken(state.activationToken, { store });
-  assert.equal(redeemed.status, 200);
-  assert.deepEqual(redeemed.body, {
-    checkout_id: "chk_123",
-    customer_id: "cust_123",
-    license_key: "LOCALAI-PRO-CURRENT",
-    plan: null,
-    renews_at: null
-  });
 });
 
 test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subscriptions", async () => {
@@ -223,22 +221,14 @@ test("resolveCheckoutSuccessState includes plan and renewsAt for recurring subsc
   };
 
   const state = await resolveCheckoutSuccessState("chk_recurring", {
-    activationTokenStore: store
+    activationTokenStore: store,
+    cookieIssuedAt: Date.now()
   });
 
   assert.equal(state?.plan, "pro-monthly");
   assert.equal(state?.renewsAt, renewsAt);
-  assert.ok(state?.activationToken);
+  assert.equal(state?.activationToken, null, "website never issues a custom-scheme bearer");
 
-  const redeemed = await redeemActivationToken(state.activationToken, { store });
-  assert.equal(redeemed.status, 200);
-  assert.deepEqual(redeemed.body, {
-    checkout_id: "chk_recurring",
-    customer_id: "cust_recurring",
-    license_key: "LOCALAI-PRO-MONTHLY",
-    plan: "pro-monthly",
-    renews_at: renewsAt
-  });
 });
 
 test("resolveCheckoutSuccessState falls back to customer subscription list when checkout.subscription_id is null", async () => {
@@ -304,7 +294,8 @@ test("resolveCheckoutSuccessState falls back to customer subscription list when 
   };
 
   const state = await resolveCheckoutSuccessState("chk_no_subid", {
-    activationTokenStore: store
+    activationTokenStore: store,
+    cookieIssuedAt: Date.now()
   });
 
   assert.equal(state?.plan, "pro-annual");
@@ -418,7 +409,8 @@ test("resolveCheckoutSuccessState refuses to reveal the key without the per-brow
   assert.ok(stateForOuterViewer?.revealExpiresAt, "client should still see a countdown so it can prompt the legit viewer");
 });
 
-test("resolveCheckoutSuccessState reveals the key during the first-visit grace even without a cookie", async () => {
+test("a first visit with the buyer provider session reveals the key", async () => {
+  buyerSessionCustomerId = "cust_just_now";
   // Right after Polar redirects the customer to /success, our reveal
   // cookie hasn't been set yet. During the short first-visit grace the
   // legitimate visitor must still see the key — the route handler will
@@ -462,6 +454,7 @@ test("resolveCheckoutSuccessState reveals the key during the first-visit grace e
 
   const state = await resolveCheckoutSuccessState("chk_just_now", {
     activationTokenStore: store,
+    customerSessionToken: BUYER_TOKEN,
     cookieIssuedAt: null
   });
 
@@ -572,14 +565,15 @@ test("resolveCheckoutSuccessState rejects ids outside the Polar id alphabet with
   assert.deepEqual(requestedUrls, []);
 });
 
-test("resolveCheckoutSuccessState grants the cookieless first-visit grace only once per checkout", async () => {
+test("buyer-verified first-visit grace is still single use", async () => {
+  buyerSessionCustomerId = "cust_shared";
   const store = createInMemoryActivationTokenStore();
   globalThis.fetch = confirmedCheckoutFetch("chk_once", [
     { key: "MEOW-PRO-ONCE", created_at: secondsAgo(10) }
   ], ["MEOW-PRO-ONCE"]);
 
-  const first = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null });
-  const second = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null });
+  const first = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null, customerSessionToken: BUYER_TOKEN });
+  const second = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: null, customerSessionToken: BUYER_TOKEN });
   const cookieHolder = await resolveCheckoutSuccessState("chk_once", { activationTokenStore: store, cookieIssuedAt: Date.now() });
 
   assert.equal(first?.licenseKey, "MEOW-PRO-ONCE");
@@ -814,11 +808,12 @@ test("invariant 1: the owner lookup runs only after the checkout passes every ga
 });
 
 test("invariant 1: a second cookieless viewer of a team customer's checkout gets nothing once the grace is claimed", async () => {
+  buyerSessionCustomerId = "cust_team_buyer";
   const store = createInMemoryActivationTokenStore();
   globalThis.fetch = teamCustomerFetch(OWNER_FOUND, []);
 
-  const first = await resolveCheckoutSuccessState("chk_team_then_dev", { activationTokenStore: store, cookieIssuedAt: null });
-  const second = await resolveCheckoutSuccessState("chk_team_then_dev", { activationTokenStore: store, cookieIssuedAt: null });
+  const first = await resolveCheckoutSuccessState("chk_team_then_dev", { activationTokenStore: store, cookieIssuedAt: null, customerSessionToken: BUYER_TOKEN });
+  const second = await resolveCheckoutSuccessState("chk_team_then_dev", { activationTokenStore: store, cookieIssuedAt: null, customerSessionToken: BUYER_TOKEN });
 
   assert.equal(first?.licenseKey, "MEOW-DEV-OWNER");
   assert.equal(second?.licenseKey, null);
@@ -929,4 +924,44 @@ test("a seat-based (Team) checkout reports its seats and looks up no key", async
   assert.equal(state?.revealBlockedReason, null);
   assert.deepEqual(requestedUrls, ["https://sandbox-api.polar.sh/v1/checkouts/chk_team"],
     "no customer session, order or key lookup for a purchase whose keys belong to its members");
+});
+
+test("a leaked checkout id cannot win the first reveal or create a portal session", async () => {
+  const store = createInMemoryActivationTokenStore();
+  const base = confirmedCheckoutFetch("chk_proof", [{ key: "BUYER-KEY", created_at: secondsAgo(10) }], ["BUYER-KEY"]);
+  const calls: string[] = [];
+  globalThis.fetch = async (input, init) => { calls.push(input.toString()); return base(input); };
+  const stranger = await resolveCheckoutSuccessState("chk_proof", { activationTokenStore: store });
+  assert.equal(stranger?.revealBlockedReason, "cookie_required");
+  assert.equal(stranger?.licenseKey, null);
+  assert.equal(stranger?.activationToken, null);
+  assert.equal(stranger?.customerPortalUrl, null);
+  assert.ok(!calls.some((url) => url.includes("customer-sessions") || url.includes("benefit-grants")));
+  buyerSessionCustomerId = "cust_shared";
+  const buyer = await resolveCheckoutSuccessState("chk_proof", { activationTokenStore: store, customerSessionToken: BUYER_TOKEN, includeCustomerPortalUrl: false });
+  assert.equal(buyer?.licenseKey, "BUYER-KEY", "stranger must not consume buyer's grace");
+  assert.equal(buyer?.activationToken, null);
+  assert.equal(buyer?.customerPortalUrl, null);
+});
+
+test("wrong, expired, malformed and unavailable provider proof never reveals or spends the buyer grace", async () => {
+  const base = confirmedCheckoutFetch("chk_wrong", [{ key: "BUYER-KEY", created_at: secondsAgo(10) }], ["BUYER-KEY"]);
+  for (const proof of ["wrong", "expired", "offline", "malformed"]) {
+    const store = createInMemoryActivationTokenStore();
+    const calls: string[] = [];
+    globalThis.fetch = async (input) => {
+      const url = input.toString(); calls.push(url);
+      if (url.endsWith("/customers/me")) {
+        if (proof === "offline") throw new Error("provider unavailable");
+        if (proof === "expired") return Response.json({}, { status: 401 });
+        return Response.json({ id: "someone_else" });
+      }
+      return base(input);
+    };
+    const state = await resolveCheckoutSuccessState("chk_wrong", { activationTokenStore: store, customerSessionToken: proof === "malformed" ? "bad" : BUYER_TOKEN });
+    assert.equal(state?.licenseKey ?? null, null, proof);
+    assert.equal(state?.customerPortalUrl ?? null, null, proof);
+    assert.ok(!calls.some((url) => url.includes("customer-sessions")), proof);
+    assert.equal(await store.claimRevealGrace("chk_wrong", 60), true, proof);
+  }
 });

@@ -9,7 +9,7 @@ import { getActivationTokenRedisConfig } from "./env.ts";
 
 const KEY_PREFIX = "activation-token:";
 const USED_KEY_PREFIX = "activation-token-used:";
-const REVEAL_GRACE_KEY_PREFIX = "reveal-grace:";
+const REVEAL_GRACE_KEY_PREFIX = "reveal-grace-buyer-v2:";
 const USED_TOMBSTONE_SECONDS = 15 * 60;
 
 export type PersistedActivationTokenRecord = {

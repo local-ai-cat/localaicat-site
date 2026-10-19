@@ -1,9 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server.js";
+import { buyerRedirect, buyerSessionCookieName, BUYER_SESSION_TTL_SECONDS } from "./lib/polar-buyer-session.ts";
 
 // Gate the private /internal area with HTTP Basic Auth. The username is ignored; the password
 // must equal INTERNAL_PASSWORD. Fail-closed everywhere except local development when the env var
 // isn't set, so a preview or staging build with an unexpected NODE_ENV never opens the area.
-export const config = { matcher: ["/internal/:path*"] };
+export const config = { matcher: ["/internal/:path*", "/success", "/activate"] };
 
 async function sha256(value: string) {
   return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
@@ -21,6 +22,25 @@ async function passwordMatches(candidate: string, expected: string) {
 }
 
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname === "/success" || req.nextUrl.pathname === "/activate") {
+    const incoming = buyerRedirect(new URL(req.url));
+    const response = incoming
+      ? NextResponse.redirect(incoming.cleanUrl, 303)
+      : NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    if (incoming?.checkoutId && incoming.token) {
+      // The cookie is only transport. The API authenticates it with Polar and
+      // checks the returned customer against this checkout before any reveal.
+      const name = buyerSessionCookieName(incoming.checkoutId);
+      if (!req.cookies.has(name)) {
+        response.cookies.set({ name, value: incoming.token, httpOnly: true, secure: true,
+          sameSite: "lax", path: "/", maxAge: BUYER_SESSION_TTL_SECONDS });
+      }
+    }
+    return response;
+  }
   const expected = process.env.INTERNAL_PASSWORD;
 
   if (!expected) {

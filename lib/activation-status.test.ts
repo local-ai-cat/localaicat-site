@@ -4,7 +4,7 @@ import {
   createInMemoryActivationTokenStore,
   issuePersistentActivationToken
 } from "./activation-token-store.ts";
-import { redeemActivationToken } from "./activation-redeem.ts";
+import { hashActivationToken } from "./activation-tokens.ts";
 import { getActivationTokenStatus } from "./activation-status.ts";
 
 function configureSecret(value = "test-activation-secret") {
@@ -55,8 +55,8 @@ test("getActivationTokenStatus returns claimed after redemption", async () => {
     }, store);
 
     assert.ok(issued);
-    const redeemed = await redeemActivationToken(issued.token, { store });
-    assert.equal(redeemed.status, 200);
+    const consumed = await store.consume(hashActivationToken(issued.token));
+    assert.equal(consumed.status, "consumed");
 
     const status = await getActivationTokenStatus(issued.token, { store });
     assert.equal(status.status, 200);

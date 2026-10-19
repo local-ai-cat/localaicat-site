@@ -58,3 +58,11 @@ test("tampered timestamp invalidates the signature", () => {
   const tampered = `${Number(value.slice(0, dot)) - 1000}.${value.slice(dot + 1)}`;
   assert.equal(verifyRevealCookieValue("chk_abc", tampered), null);
 });
+
+test("pre-buyer-verification cookies cannot authorize a reveal after upgrade", async () => {
+  const { createHmac } = await import("node:crypto");
+  const issuedAt = Date.now();
+  const oldSignature = createHmac("sha256", "test-reveal-secret-A").update(`chk_abc.${issuedAt}`).digest("hex");
+  assert.equal(verifyRevealCookieValue("chk_abc", `${issuedAt}.${oldSignature}`), null);
+  assert.ok(revealCookieName("chk_abc").startsWith("lacat_v2_"));
+});

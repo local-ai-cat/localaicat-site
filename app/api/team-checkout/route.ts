@@ -4,18 +4,20 @@ import {
   getSiteUrl,
   getTeamCheckoutConfig
 } from "../../../lib/env";
-import { callerAddress, isRateLimited } from "../../../lib/rate-limit";
+import { callerAddress, checkRateLimit } from "../../../lib/rate-limit";
 import { teamCheckoutBody, teamCheckoutMode } from "../../../lib/team-checkout";
 import { seatCount } from "../../../lib/team-seats";
 
 /** Each call creates a Polar checkout session with the admin key. */
 const CHECKOUTS_PER_MINUTE = 10;
+const GLOBAL_CHECKOUTS_PER_MINUTE = 60;
 
 export async function POST(request: Request) {
-  if (await isRateLimited("team-checkout", callerAddress(request.headers), CHECKOUTS_PER_MINUTE, 60)) {
+  const quota = await checkRateLimit("team-checkout", callerAddress(request.headers), CHECKOUTS_PER_MINUTE, 60, GLOBAL_CHECKOUTS_PER_MINUTE);
+  if (quota !== "allowed") {
     return NextResponse.json(
-      { error: "Too many requests. Try again in a minute." },
-      { status: 429, headers: { "Retry-After": "60" } }
+      { error: quota === "limited" ? "Too many requests. Try again in a minute." : "Checkout is temporarily unavailable. Try again in a minute." },
+      { status: quota === "limited" ? 429 : 503, headers: { "Retry-After": "60", "Cache-Control": "no-store" } }
     );
   }
   const body = await request.json().catch(() => null);
@@ -47,11 +49,10 @@ export async function POST(request: Request) {
         const url = checkout.url || checkout.checkout_url;
         if (url) return NextResponse.json({ url, mode });
       } else {
-        const err = await res.text().catch(() => "");
-        console.error("Polar team checkout error:", mode, res.status, err);
+        console.error("Polar team checkout error:", mode, res.status);
       }
-    } catch (e) {
-      console.error("Polar team checkout exception:", mode, e);
+    } catch {
+      console.error("Polar team checkout unavailable:", mode);
     }
   }
 

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { activationTokenExpiresAt } from "../../../../lib/activation-tokens";
 import {
   isPlausiblePolarId,
   REVEAL_WINDOW_MS,
   resolveCheckoutSuccessState
 } from "../../../../lib/polar-checkout";
-import { callerAddress, isRateLimited } from "../../../../lib/rate-limit";
+import { buyerSessionCookieName, CUSTOMER_SESSION_HEADER } from "../../../../lib/polar-buyer-session";
+import { getActivationTokenSecret } from "../../../../lib/env";
+import { callerAddress, checkRateLimit } from "../../../../lib/rate-limit";
 import {
   mintRevealCookieValue,
   revealCookieName,
@@ -15,11 +16,13 @@ import {
 export const runtime = "nodejs";
 
 const noStoreHeaders = {
-  "Cache-Control": "private, no-store, max-age=0"
+  "Cache-Control": "private, no-store, max-age=0",
+  "Referrer-Policy": "no-referrer"
 };
 
 /** The success page polls every 2 s (30 a minute); twice that leaves headroom for reloads. */
 const LOOKUPS_PER_MINUTE = 60;
+const GLOBAL_LOOKUPS_PER_MINUTE = 600;
 
 function setRevealCookie(
   response: NextResponse,
@@ -30,6 +33,15 @@ function setRevealCookie(
   // Bind every confirmed-checkout response to this browser, including the
   // transient "license not yet issued" path so a polling client gets the
   // cookie before the first-visit grace expires.
+  response.cookies.set({
+    name: buyerSessionCookieName(checkoutId),
+    value: "",
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0
+  });
   if (hadValidCookie) return;
   response.cookies.set({
     name: cookieName,
@@ -53,10 +65,18 @@ export async function GET(
       { status: 400, headers: noStoreHeaders }
     );
   }
-  if (await isRateLimited("checkout", callerAddress(request.headers), LOOKUPS_PER_MINUTE, 60)) {
+  // Never spend the buyer's one-time claim if this deployment cannot bind it.
+  if (!getActivationTokenSecret()) {
     return NextResponse.json(
-      { error: "Too many requests. Try again in a minute." },
-      { status: 429, headers: { ...noStoreHeaders, "Retry-After": "60" } }
+      { error: "License lookup is temporarily unavailable. Use the customer portal." },
+      { status: 503, headers: noStoreHeaders }
+    );
+  }
+  const quota = await checkRateLimit("checkout", callerAddress(request.headers), LOOKUPS_PER_MINUTE, 60, GLOBAL_LOOKUPS_PER_MINUTE);
+  if (quota !== "allowed") {
+    return NextResponse.json(
+      { error: quota === "limited" ? "Too many requests. Try again in a minute." : "License lookup is temporarily unavailable. Use the customer portal or try again shortly." },
+      { status: quota === "limited" ? 429 : 503, headers: { ...noStoreHeaders, "Retry-After": "60" } }
     );
   }
   const cookieName = revealCookieName(id);
@@ -64,9 +84,16 @@ export async function GET(
   const verified = verifyRevealCookieValue(id, cookieValue);
   const cookieIssuedAt = verified?.issuedAt ?? null;
 
+  // Middleware moves Polar's success-redirect proof into an HttpOnly cookie
+  // before the page renders. A direct API client may send the same proof in
+  // a header. Only a cookieless first reveal needs it.
+  const customerSessionToken = cookieIssuedAt === null
+    ? request.cookies.get(buyerSessionCookieName(id))?.value ?? request.headers.get(CUSTOMER_SESSION_HEADER)
+    : null;
   const state = await resolveCheckoutSuccessState(id, {
     includeCustomerPortalUrl: false,
-    cookieIssuedAt
+    cookieIssuedAt,
+    customerSessionToken
   });
 
   if (!state) {
@@ -130,10 +157,8 @@ export async function GET(
   const response = NextResponse.json(
     {
       license_key: state.licenseKey,
-      activation_token: state.activationToken ?? null,
-      expires_at: state.activationToken
-        ? activationTokenExpiresAt(state.activationToken)?.toISOString() ?? null
-        : null,
+      activation_token: null,
+      expires_at: null,
       reveal_expires_at: state.revealExpiresAt
     },
     { headers: noStoreHeaders }

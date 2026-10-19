@@ -2,43 +2,47 @@ import { Redis } from "@upstash/redis";
 import { getActivationTokenRedisConfig } from "./env.ts";
 
 const KEY_PREFIX = "rate-limit:";
-
 export type RateLimitCounter = (key: string, windowSeconds: number) => Promise<number>;
+export type RateLimitDecision = "allowed" | "limited" | "unavailable";
 
 function upstashCounter(): RateLimitCounter | null {
   const config = getActivationTokenRedisConfig();
   if (!config) return null;
   const redis = new Redis(config);
   return async (key, windowSeconds) => {
-    const count = await redis.incr(key);
-    if (count === 1) await redis.expire(key, windowSeconds);
-    return count;
+    // Increment and expiry are atomic; a failed expiry must not leave an immortal key.
+    return redis.eval<[number], number>(
+      "local n = redis.call('INCR', KEYS[1]); if n == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; return n",
+      [key], [windowSeconds]
+    );
   };
 }
 
-/**
- * Fixed-window limit per caller for anonymous routes that spend the Polar
- * admin key. It guards spend rather than access, so it lets the request
- * through when no store is configured or the store errors.
- */
-export async function isRateLimited(
+/** Anonymous Polar spend fails closed if its shared quota cannot be enforced. */
+export async function checkRateLimit(
   route: string,
   caller: string,
   limit: number,
   windowSeconds: number,
+  globalLimit: number,
   counter: RateLimitCounter | null = upstashCounter()
-) {
-  if (!counter) return false;
+): Promise<RateLimitDecision> {
+  if (!counter) return "unavailable";
   const window = Math.floor(Date.now() / (windowSeconds * 1000));
   try {
-    return (await counter(`${KEY_PREFIX}${route}:${caller}:${window}`, windowSeconds)) > limit;
+    const count = await counter(`${KEY_PREFIX}${route}:caller:${caller}:${window}`, windowSeconds);
+    if (!Number.isSafeInteger(count) || count < 1) return "unavailable";
+    if (count > limit) return "limited";
+    const total = await counter(`${KEY_PREFIX}${route}:global:${window}`, windowSeconds);
+    if (!Number.isSafeInteger(total) || total < 1) return "unavailable";
+    return total > globalLimit ? "limited" : "allowed";
   } catch {
-    return false;
+    return "unavailable";
   }
 }
 
-/** Vercel sets x-real-ip and the first x-forwarded-for hop from the connecting client. */
-export function callerAddress(headers: Headers) {
+/** Vercel overwrites x-real-ip; the fallback supports a trusted local reverse proxy. */
+export function callerAddress(headers: Headers): string {
   return headers.get("x-real-ip")
     ?? headers.get("x-forwarded-for")?.split(",")[0]?.trim()
     ?? "unknown";

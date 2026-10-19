@@ -42,7 +42,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const checkoutId = firstValue(resolvedSearchParams?.checkout_id);
   // The license key is fetched client-side from /api/checkout/[id] so the
-  // reveal cookie can be bound to the original visitor's browser. Rendering
+  // reveal cookie can be bound to the verified buyer's browser. Rendering
   // the key into the server HTML would also bake it into proxy/browser
   // caches, which we want to avoid.
   const customerPortalUrl = getCustomerPortalUrl();
@@ -50,15 +50,12 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   return (
     <SiteShell>
       <ContentPage
-        intro="Your purchase completed. Download the app if needed, then hand the activation token into Outdoor Cat to claim the issued license."
+        intro="Your purchase completed. Download the app if needed, then copy your license key into Settings → Activate License."
         kicker="Success"
         title="You're all set"
       >
         <SuccessActivationCard
           checkoutId={checkoutId}
-          initialActivationToken={undefined}
-          initialTokenExpiresAt={null}
-          initialLicenseKey={null}
           customerPortalUrl={customerPortalUrl}
         />
 

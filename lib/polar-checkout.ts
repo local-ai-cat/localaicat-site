@@ -1,9 +1,11 @@
 import { getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
 import {
   getActivationTokenStore,
-  issuePersistentActivationToken,
   type ActivationTokenStore
 } from "./activation-token-store.ts";
+
+import { isPlausibleCustomerSession, isPlausiblePolarId } from "./polar-buyer-session.ts";
+export { isPlausiblePolarId } from "./polar-buyer-session.ts";
 
 type CheckoutLookupOptions = {
   includeCustomerPortalUrl?: boolean;
@@ -16,6 +18,12 @@ type CheckoutLookupOptions = {
    * grace and the route mints a fresh cookie on the response.
    */
   cookieIssuedAt?: number | null;
+  /**
+   * The `customer_session_token` Polar appends to the success URL when it
+   * redirects the buyer. A cookieless viewer must present it: it proves the
+   * caller came from the buyer's own redirect, not from a leaked checkout id.
+   */
+  customerSessionToken?: string | null;
 };
 
 type PolarCheckout = {
@@ -68,17 +76,6 @@ async function fetchCheckoutOrders(
   return orders;
 }
 
-/**
- * Polar ids are UUIDs. Anything outside this alphabet (slashes, dots, `?`,
- * `#`, `%`) could re-route an admin-key request to another API path, so it is
- * rejected before any upstream call.
- */
-const POLAR_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
-
-export function isPlausiblePolarId(value: string) {
-  return POLAR_ID_PATTERN.test(value);
-}
-
 /** Polar's page-size maximum; one page covers any realistic customer. */
 const LICENSE_KEY_PAGE_SIZE = 100;
 
@@ -108,17 +105,13 @@ function planSlugForInterval(
 }
 
 /**
- * Window during which the license key is exposed from the short-lived
- * /success?checkout_id=... bearer URL.
+ * Window during which a verified buyer can reveal the license key.
  *
- * Three layers stacked:
  *  - Time gate (REVEAL_WINDOW_MS): anything older is hidden for everyone.
- *  - First-visit grace (FIRST_VISIT_GRACE_MS): Polar's success redirect lands
- *    without our reveal cookie. During this short grace the success URL can
- *    receive the key and gets the cookie set for subsequent polling/reloads.
- *  - Cookie bind: after the grace expires, only the browser that received
- *    a valid signed cookie can keep seeing the key. A URL shared elsewhere
- *    later gets no reveal.
+ *  - First-visit grace (FIRST_VISIT_GRACE_MS): a live Polar session matching
+ *    the checkout's customer can claim one browser-bound reveal cookie.
+ *  - Cookie bind: subsequent polling/reloads need that signed cookie.
+ *    Sharing the checkout URL alone never grants access to a license key.
  */
 export const REVEAL_WINDOW_MS = 30 * 60 * 1000;
 export const FIRST_VISIT_GRACE_MS = 5 * 60 * 1000;
@@ -126,8 +119,8 @@ export const FIRST_VISIT_GRACE_MS = 5 * 60 * 1000;
 /**
  * Hard ceiling measured from the checkout's immutable `created_at`. Even a
  * holder of a freshly minted, valid cookie cannot extend the reveal past
- * this — protects against a long-tail leak where someone shares the URL
- * during the first-visit grace and then slowly drains keys over many days.
+ * this. Updates to the provider checkout cannot extend a buyer's reveal
+ * indefinitely.
  */
 export const ABSOLUTE_REVEAL_CEILING_MS = 24 * 60 * 60 * 1000;
 
@@ -153,7 +146,7 @@ export type CheckoutSuccessState = {
   licenseKey: string | null;
   activationToken: string | null;
   activationTokenExpiresAt: string | null;
-  /** Wall-clock time at which the unauthenticated reveal expires (null = no key). */
+  /** Wall-clock time at which the browser-bound reveal expires (null = no key). */
   revealExpiresAt: string | null;
   /** Why a key is hidden, when applicable, for client-side messaging. */
   revealBlockedReason: "expired" | "cookie_required" | null;
@@ -375,6 +368,27 @@ async function createCustomerSession(
   return payload;
 }
 
+/**
+ * True when `token` is a live Polar customer session for `customerId`. The
+ * token authenticates as the customer, so Polar's own answer about who it is
+ * decides; a team customer's session reports the team customer.
+ */
+async function isCheckoutCustomerSession(
+  token: string | null | undefined,
+  customerId: string,
+  apiBase: string
+): Promise<boolean> {
+  if (!token || !isPlausibleCustomerSession(token)) return false;
+  const response = await fetch(`${apiBase}/v1/customer-portal/customers/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000)
+  });
+  if (!response.ok) return false;
+  const customer = (await response.json()) as { id?: string };
+  return customer.id === customerId;
+}
+
 export async function resolveCheckoutSuccessState(
   checkoutId: string,
   options: CheckoutLookupOptions = {}
@@ -474,13 +488,9 @@ export async function resolveCheckoutSuccessState(
       };
     }
 
-    // (2) Cookie gate: after the first-visit grace expires, only viewers
-    //     with a verified cookie continue to see the key. Within the grace
-    //     the Polar success redirect is treated as a short-lived bearer URL
-    //     and the route handler will mint a signed cookie.
-    //     The grace is single-use per checkout (claimed below, once this
-    //     response is certain to bind a browser), so a later Polar update to
-    //     `modified_at` or a second holder of the URL cannot reopen it.
+    // (2) Cookie gate: a first reveal must be recent, and its buyer proof is
+    //     checked below before issuing a signed cookie. The grace is single-use
+    //     per checkout, so a later Polar update cannot reopen first reveal.
     const insideGrace = Number.isFinite(checkoutModifiedAt)
       ? Date.now() - checkoutModifiedAt <= FIRST_VISIT_GRACE_MS
       : false;
@@ -498,6 +508,11 @@ export async function resolveCheckoutSuccessState(
       renewsAt: null
     };
     if (cookieless && (!insideGrace || !store)) {
+      return cookieRequired;
+    }
+    // (3) Buyer proof: a checkout id is only an identifier. First reveal needs
+    //     a live Polar session belonging to this checkout's customer.
+    if (cookieless && !(await isCheckoutCustomerSession(options.customerSessionToken, customerId, apiBase))) {
       return cookieRequired;
     }
 
@@ -527,15 +542,8 @@ export async function resolveCheckoutSuccessState(
       renewsAt = subscription?.current_period_end ?? null;
     }
 
-    const activationTokenRecord = licenseKey
-      ? await issuePersistentActivationToken({
-          checkoutId,
-          customerId,
-          licenseKey,
-          plan,
-          renewsAt
-        }, store)
-      : null;
+    // Do not mint custom-scheme bearer handoffs. Any local application can
+    // register that scheme and redeem it for the permanent key.
     const customerPortalUrl = options.includeCustomerPortalUrl === false
       ? null
       : customerSession?.customer_portal_url ?? null;
@@ -552,8 +560,8 @@ export async function resolveCheckoutSuccessState(
       customerId,
       customerPortalUrl,
       licenseKey,
-      activationToken: activationTokenRecord?.token ?? null,
-      activationTokenExpiresAt: activationTokenRecord?.expiresAt.toISOString() ?? null,
+      activationToken: null,
+      activationTokenExpiresAt: null,
       revealExpiresAt: revealExpiry ? new Date(revealExpiry).toISOString() : null,
       revealBlockedReason: null,
       plan,

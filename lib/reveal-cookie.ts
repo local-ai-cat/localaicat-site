@@ -25,12 +25,12 @@ export function revealCookieName(checkoutId: string): string {
     hash ^= checkoutId.charCodeAt(i);
     hash = (hash + ((hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24))) >>> 0;
   }
-  return `lacat_v1_${hash.toString(16)}`;
+  return `lacat_v2_${hash.toString(16)}`;
 }
 
 function signature(checkoutId: string, issuedAt: number, secret: string): string {
   return createHmac("sha256", secret)
-    .update(`${checkoutId}.${issuedAt}`)
+    .update(`buyer-verified-v2.${checkoutId}.${issuedAt}`)
     .digest("hex");
 }
 

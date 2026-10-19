@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
+import { DownloadLink } from "../_components/download-link";
 import {
   getDirectDownloadUrl,
   getDirectDownloadVersion,
@@ -90,9 +91,9 @@ export default function OutdoorPage() {
             ) : null}
             <div className="dualCardActions">
               {downloadUrl ? (
-                <a className="planButton" href={downloadUrl}>
+                <DownloadLink channel="mac" className="planButton" href={downloadUrl}>
                   Download .dmg
-                </a>
+                </DownloadLink>
               ) : null}
               <Link className="secondaryButton" href="/download">
                 All install options

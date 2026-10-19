@@ -1,27 +1,27 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  getAppStoreUrl,
-  getDirectDownloadUrl,
-  getDirectDownloadVersion,
-  getDirectInstallScriptCommand,
-  getHomebrewInstallCommand
-} from "../../lib/env";
+import { useEffect, useRef, useState } from "react";
 import { businessPlans, directPlans } from "../../lib/catalog";
-import { persistSiteMode } from "./site-mode";
+import { EarthPersonalitySelector, ModeSelector, useSiteMode } from "./site-mode";
+import { CliInstall, DownloadPair } from "./home-downloads";
+import { SpaceLaunchPad, SpaceMissions } from "./space-experience";
+import { HeroCat } from "./hero-cat";
+import { SpaceAtmosphere } from "./space-atmosphere";
+import { HomeVoyage } from "./home-voyage";
+import { MODES, type Mode } from "../../lib/site-personality";
 
-type Mode = "personal" | "business";
+const heroHeadlines: Record<Mode, string> = {
+  space: "A little universe.\nRight on your Mac.",
+  personal: "Private AI.\nYour device.",
+  business: "Serious local AI\nfor teams."
+};
 
-function getInitialMode(): Mode {
-  if (typeof window !== "undefined") {
-    const stored = localStorage.getItem("site-mode");
-    if (stored === "personal" || stored === "business") return stored;
-  }
-  return "personal";
-}
+const heroTaglines: Record<Mode, string> = {
+  space: "On-device chat, transcription, and models. Local on device by default.\nNo cloud. No tracking. Just you and your cat.",
+  personal: "On-device chat, transcription, and models. Local on device by default.\nNo cloud. No tracking. Just you and your cat.",
+  business: "Secure AI, transcription, window management and wellness — rolled out on your terms."
+};
 
 const marqueeFeatures = [
   {
@@ -95,177 +95,16 @@ function FeatureIcon({ kind }: { kind: string }) {
   );
 }
 
-function CopyCommand({ command, label }: { command: string; label: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const copy = useCallback(() => {
-    navigator.clipboard
-      .writeText(command)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1800);
-      })
-      .catch(() => {
-        /* clipboard unavailable — leave the text selectable */
-      });
-  }, [command]);
-
-  return (
-    <div className="termCommandRow">
-      <span className="termCommandLabel">{label}</span>
-      <code className="termCommandCode">{command}</code>
-      <button className="termCopyButton" onClick={copy} type="button">
-        {copied ? "Copied" : "Copy"}
-      </button>
-    </div>
-  );
-}
-
-function AppStoreBadge({ accent = false, href }: { accent?: boolean; href: string }) {
-  return (
-    <a
-      aria-label="Download on the App Store"
-      className={accent ? "appStoreBadge appStoreBadgeAccent" : "appStoreBadge"}
-      href={href}
-    >
-      <svg aria-hidden="true" fill="currentColor" height="26" viewBox="0 0 384 512" width="20">
-        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-      </svg>
-      <span className="appStoreBadgeText">
-        <small>Download on the</small>
-        App Store
-      </span>
-    </a>
-  );
-}
-
 export function HomeExperience() {
-  const [mode, setMode] = useState<Mode>(getInitialMode);
+  const [mode] = useSiteMode();
+  const [earthMode, setEarthMode] = useState<"personal" | "business">("personal");
+  // Retain the outgoing portrait while its world fades out. Update before paint
+  // when entering Earth, including direct links and keyboard navigation.
+  if (mode !== "space" && mode !== earthMode) setEarthMode(mode);
+  const inSpace = mode === "space";
   const [heroSwitchVisible, setHeroSwitchVisible] = useState(true);
   const [chipLift, setChipLift] = useState(0);
-  const [cliOpen, setCliOpen] = useState(false);
-  // Which install path gets the accent treatment. Detected from the visitor's
-  // device after hydration (iOS/iPadOS → Indoor); Mac and everyone else see
-  // Outdoor highlighted, matching the server-rendered default.
-  const [highlight, setHighlight] = useState<"outdoor" | "indoor">("outdoor");
   const switchRef = useRef<HTMLDivElement | null>(null);
-  const sliderRef = useRef<HTMLSpanElement | null>(null);
-  const personalImgRef = useRef<HTMLImageElement | null>(null);
-  const businessImgRef = useRef<HTMLImageElement | null>(null);
-  const dragState = useRef<{ startX: number; startMode: Mode; dragging: boolean } | null>(null);
-
-  const downloadUrl = getDirectDownloadUrl();
-  const version = getDirectDownloadVersion();
-  const appStoreUrl = getAppStoreUrl();
-  const scriptCmd = getDirectInstallScriptCommand();
-  const homebrewCmd = getHomebrewInstallCommand();
-
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      dragState.current = { startX: e.clientX, startMode: mode, dragging: false };
-    },
-    [mode]
-  );
-
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragState.current || !sliderRef.current || !switchRef.current) return;
-      const dx = e.clientX - dragState.current.startX;
-      if (!dragState.current.dragging && Math.abs(dx) > 6) {
-        dragState.current.dragging = true;
-        switchRef.current.setPointerCapture(e.pointerId);
-      }
-      if (!dragState.current.dragging) return;
-
-      const trackWidth = switchRef.current.offsetWidth / 2 - 4;
-      const baseOffset = dragState.current.startMode === "business" ? trackWidth : 0;
-      const clamped = Math.max(0, Math.min(trackWidth, baseOffset + dx));
-
-      sliderRef.current.style.transition = "none";
-      sliderRef.current.style.transform = `translateX(${clamped}px)`;
-
-      const bizFactor = clamped / trackWidth;
-
-      if (personalImgRef.current && businessImgRef.current) {
-        personalImgRef.current.style.transition = "none";
-        businessImgRef.current.style.transition = "none";
-        personalImgRef.current.style.opacity = `${1 - bizFactor}`;
-        personalImgRef.current.style.transform = `scale(${0.98 + 0.02 * (1 - bizFactor)})`;
-        businessImgRef.current.style.opacity = `${bizFactor}`;
-        businessImgRef.current.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
-      }
-
-      const floatingCats = document.querySelector<HTMLElement>(".floatingCats");
-      if (floatingCats) {
-        floatingCats.style.transition = "none";
-        floatingCats.style.opacity = `${1 - bizFactor}`;
-      }
-
-      const brandPersonal = document.querySelector<HTMLElement>(".brandIconImagePersonal");
-      const brandBusiness = document.querySelector<HTMLElement>(".brandIconImageBusiness");
-      if (brandPersonal && brandBusiness) {
-        brandPersonal.style.transition = "none";
-        brandBusiness.style.transition = "none";
-        brandPersonal.style.opacity = `${1 - bizFactor}`;
-        brandPersonal.style.transform = `scale(${0.98 + 0.02 * (1 - bizFactor)})`;
-        brandBusiness.style.opacity = `${bizFactor}`;
-        brandBusiness.style.transform = `scale(${0.98 + 0.02 * bizFactor})`;
-      }
-    },
-    []
-  );
-
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragState.current || !sliderRef.current) {
-        dragState.current = null;
-        return;
-      }
-
-      sliderRef.current.style.transition = "";
-      sliderRef.current.style.transform = "";
-
-      [personalImgRef.current, businessImgRef.current].forEach((el) => {
-        if (el) {
-          el.style.transition = "";
-          el.style.opacity = "";
-          el.style.transform = "";
-        }
-      });
-      const floatingCats = document.querySelector<HTMLElement>(".floatingCats");
-      if (floatingCats) {
-        floatingCats.style.transition = "";
-        floatingCats.style.opacity = "";
-      }
-      document.querySelectorAll<HTMLElement>(".brandIconImagePersonal, .brandIconImageBusiness")
-        .forEach((el) => {
-          el.style.transition = "";
-          el.style.opacity = "";
-          el.style.transform = "";
-        });
-
-      if (dragState.current.dragging) {
-        const dx = e.clientX - dragState.current.startX;
-        const threshold = 30;
-        if (dx > threshold && dragState.current.startMode === "personal") {
-          setMode("business");
-        } else if (dx < -threshold && dragState.current.startMode === "business") {
-          setMode("personal");
-        }
-      }
-      dragState.current = null;
-    },
-    []
-  );
-
-  useEffect(() => {
-    const ua = navigator.userAgent;
-    // iPadOS reports as "MacIntel" with touch; catch it via maxTouchPoints.
-    const isIOS =
-      /iPhone|iPad|iPod/.test(ua) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    if (isIOS) setHighlight("indoor");
-  }, []);
 
   useEffect(() => {
     [
@@ -297,8 +136,15 @@ export function HomeExperience() {
     return () => observer.disconnect();
   }, []);
 
+  // Space keeps its header in view, so the header switch stands in for the
+  // hero switch once that scrolls away, instead of a floating chip.
   useEffect(() => {
-    if (heroSwitchVisible) return;
+    document.body.dataset.heroSwitch = heroSwitchVisible ? "visible" : "hidden";
+    return () => { delete document.body.dataset.heroSwitch; };
+  }, [heroSwitchVisible]);
+
+  useEffect(() => {
+    if (heroSwitchVisible || inSpace) return;
 
     // The cookie-consent banner is a fixed full-width dialog at the bottom;
     // float the chip above it while it's on screen.
@@ -315,27 +161,13 @@ export function HomeExperience() {
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
-  }, [heroSwitchVisible]);
-
-  useEffect(() => {
-    persistSiteMode(mode);
-    const stem = mode === "business" ? "cat-business-favicon" : "cat-personal-favicon";
-    const targets: Array<[string, string]> = [
-      ["link[rel='icon']", `/assets/${stem}-32.png`],
-      ["link[rel='shortcut icon']", `/assets/${stem}-32.png`],
-      ["link[rel='apple-touch-icon']", `/assets/${stem}-180.png`]
-    ];
-    targets.forEach(([selector, href]) => {
-      document.querySelectorAll<HTMLLinkElement>(selector).forEach((link) => {
-        link.href = href;
-      });
-    });
-  }, [mode]);
+  }, [heroSwitchVisible, inSpace]);
 
   return (
-    <div className={`homeMode homeMode${mode === "personal" ? "Personal" : "Business"}`}>
-      {/* ── Hero: headline → switch → cat ── */}
+    <div className={`homeMode homeMode-${mode} homeMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`}>
+      {/* ── Hero: headline → downloads → switch → cat ── */}
       <section className="heroTight">
+        <SpaceAtmosphere active={inSpace} />
         <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="" className="floatingCat floatingCatOne" src="/assets/cat.webp" width={56} height={56} />
@@ -349,83 +181,30 @@ export function HomeExperience() {
 
         <div className="heroTightInner">
           <div className="heroHeadline heroEnter heroEnter1">
-            <h1 className="heroModeFade" key={`h1-${mode}`}>
-              {mode === "personal" ? "Private AI.\nYour device." : "Serious local AI\nfor teams."}
+            <h1 className="heroCopyStack">
+              {MODES.map(item => <span key={item} className="heroCopyLayer" data-active={mode === item} aria-hidden={mode !== item} inert={mode !== item}>{heroHeadlines[item]}</span>)}
             </h1>
-            <p className="heroTagline heroModeFade" key={`tag-${mode}`}>
-              {mode === "personal"
-                ? "On-device chat, transcription, and models. No cloud. No tracking. Just you and your cat."
-                : "Secure AI, transcription, window management and wellness — rolled out on your terms."}
+            <p className="heroTagline heroCopyStack">
+              {MODES.map(item => <span key={item} className="heroCopyLayer" data-active={mode === item} aria-hidden={mode !== item} inert={mode !== item}>{heroTaglines[item]}</span>)}
             </p>
           </div>
 
-          <div
-            aria-label="Audience mode"
-            className="modeSwitch heroEnter heroEnter2"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            ref={switchRef}
-            role="tablist"
-            style={{ touchAction: "pan-y" }}
-          >
-            <span
-              aria-hidden="true"
-              className={`modeSwitchSlider ${mode === "business" ? "modeSwitchSliderRight" : ""}`}
-              ref={sliderRef}
-            />
-            <button
-              aria-selected={mode === "personal"}
-              className={mode === "personal" ? "isActive" : undefined}
-              onClick={() => setMode("personal")}
-              role="tab"
-              type="button"
-            >
-              Personal
-            </button>
-            <button
-              aria-selected={mode === "business"}
-              className={mode === "business" ? "isActive" : undefined}
-              onClick={() => setMode("business")}
-              role="tab"
-              type="button"
-            >
-              Business
-            </button>
+          <DownloadPair id="download" />
+          <div className="heroWorldStage">
+            <div className="heroWorldPanel" data-active={inSpace} aria-hidden={!inSpace} inert={!inSpace}>
+              <HomeVoyage active={inSpace} />
+            </div>
+            <div className="heroWorldPanel heroEarthCompanion" data-active={!inSpace} aria-hidden={inSpace} inert={inSpace}>
+              <HeroCat mode={earthMode} />
+              <EarthPersonalitySelector persistent />
+            </div>
           </div>
+          <div className="heroPersonalityControl" ref={switchRef}><ModeSelector compact /></div>
 
-          <div className="heroFigure heroEnter heroEnter3">
-            <span aria-hidden="true" className="heroGlow" />
-            <span
-              className={`heroCatImage ${mode === "personal" ? "isVisible" : ""}`}
-              ref={personalImgRef}
-            >
-              <Image
-                alt="Local AI Cat personal mark"
-                src="/assets/cat-personal.png"
-                fill
-                sizes="(max-width: 760px) 90vw, 460px"
-                priority
-              />
-            </span>
-            <span
-              className={`heroCatImage ${mode === "business" ? "isVisible" : ""}`}
-              ref={businessImgRef}
-            >
-              <Image
-                alt="Local AI Cat business mark"
-                src="/assets/cat-business.png"
-                fill
-                sizes="(max-width: 760px) 90vw, 460px"
-                priority
-              />
-            </span>
-          </div>
         </div>
       </section>
 
-      {/* ── Download: both cats, immediately ── */}
-      <section className="downloadBand heroEnter heroEnter4" id="download">
+      {!inSpace && <section className="downloadBand heroEnter heroEnter4">
         {mode === "business" && (
           <div className="bizBand bizBandCompact heroModeFade" key="biz-note">
             <p className="bizBandText">
@@ -439,141 +218,15 @@ export function HomeExperience() {
             </div>
           </div>
         )}
-        <div className="pathCards pathCardsSlim">
-          <article
-            className={`pathCard pathCardSlim ${highlight === "indoor" ? "pathCardHighlight" : ""}`}
-          >
-            <p className="pathCardEyebrow">
-              Indoor Cat
-              {highlight === "indoor" && (
-                <span className="dualCardBadge">For your device</span>
-              )}
-            </p>
-            <h2>App Store for iPhone, iPad &amp; Mac*.</h2>
-            <p className="pathCardBody">
-              The simplest install — and the only cat on iOS.
-            </p>
-            <div className="pathCardActions">
-              <AppStoreBadge
-                accent={highlight === "indoor"}
-                href={appStoreUrl}
-              />
-              <p className="pathCardMeta">Free · Apple billing</p>
-              <p className="pathCardMeta pathCardFootnote">
-                *for Mac we highly recommend Outdoor Cat
-              </p>
-            </div>
-          </article>
+        <CliInstall />
+      </section>}
 
-          <article
-            className={`pathCard pathCardSlim ${highlight === "outdoor" ? "pathCardHighlight" : ""}`}
-          >
-            <p className="pathCardEyebrow">
-              Outdoor Cat
-              {highlight === "outdoor" && (
-                <span className="dualCardBadge">Recommended</span>
-              )}
-            </p>
-            <h2>Direct download for Mac.</h2>
-            <p className="pathCardBody">
-              No sandbox — the complete desktop feature set.
-            </p>
-            <div className="pathCardActions">
-              <a
-                className={`planButton ${highlight === "outdoor" ? "planButtonAccent" : "planButtonQuiet"}`}
-                href={downloadUrl}
-              >
-                Download for Mac
-              </a>
-              <p className="pathCardMeta">
-                {version ? `Version ${version} · ` : ""}Free · Signed &amp;
-                notarized by Apple
-              </p>
-            </div>
-          </article>
-        </div>
-
-        <button
-          aria-expanded={cliOpen}
-          className="orCliToggle"
-          onClick={() => setCliOpen(!cliOpen)}
-          type="button"
-        >
-          …or install with the CLI or brew
-          <svg
-            aria-hidden="true"
-            className={`orCliChevron ${cliOpen ? "isOpen" : ""}`}
-            fill="none"
-            height="14"
-            viewBox="0 0 24 24"
-            width="14"
-          >
-            <path
-              d="M6 9l6 6 6-6"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-            />
-          </svg>
-        </button>
-
-        {cliOpen && (
-        <div className="termWindow termWindowReveal">
-          <div className="termBar">
-            <span aria-hidden="true" className="termDot termDotRed" />
-            <span aria-hidden="true" className="termDot termDotYellow" />
-            <span aria-hidden="true" className="termDot termDotGreen" />
-            <span className="termTitle">for the cutes — one line installs it</span>
-          </div>
-          <video
-            aria-label="Terminal recording of the one-line Local AI Cat install"
-            autoPlay
-            className="termVideo"
-            loop
-            muted
-            playsInline
-            src="/assets/install-demo.mp4"
-          />
-          <div className="termBody">
-            {scriptCmd && <CopyCommand command={scriptCmd} label="script" />}
-            {homebrewCmd && <CopyCommand command={homebrewCmd} label="brew" />}
-          </div>
-        </div>
-        )}
-      </section>
-
-      {!heroSwitchVisible && (
-        <div
-          aria-label="Audience mode"
-          className="modeChip"
-          role="tablist"
-          style={chipLift ? { bottom: 22 + chipLift } : undefined}
-        >
-          <button
-            aria-selected={mode === "personal"}
-            className={mode === "personal" ? "isActive" : undefined}
-            onClick={() => setMode("personal")}
-            role="tab"
-            type="button"
-          >
-            Personal
-          </button>
-          <button
-            aria-selected={mode === "business"}
-            className={mode === "business" ? "isActive" : undefined}
-            onClick={() => setMode("business")}
-            role="tab"
-            type="button"
-          >
-            Business
-          </button>
-        </div>
-      )}
+      {!inSpace && !heroSwitchVisible && <div className="floatingPersonality" style={chipLift ? { bottom: 22 + chipLift } : undefined}><ModeSelector compact/></div>}
+      {inSpace && <SpaceMissions/>}
 
       {/* ── Pricing (mode-dependent) ── */}
       <section className="detailBand" id="pricing">
-        {mode === "personal" ? (
+        {mode !== "business" ? (
           <div className="heroModeFade" key="pricing-personal">
             <div className="sectionHeading sectionHeadingCentered">
               <p className="sectionEyebrow">Pricing</p>
@@ -707,6 +360,7 @@ export function HomeExperience() {
           <Link className="secondaryButton" href="/docs">See every feature and which edition has it</Link>
         </div>
       </section>
+      {inSpace && <SpaceLaunchPad/>}
     </div>
   );
 }

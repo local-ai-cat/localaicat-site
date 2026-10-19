@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { ModeSelector } from "./site-mode";
 
 type MobileNavProps = {
   links: ReadonlyArray<{ href: string; label: string }>;
@@ -40,9 +41,10 @@ export function MobileNav({ links }: MobileNavProps) {
       </button>
 
       {open && (
-        <nav aria-label="Mobile" className="mobileNavDropdown" onClick={close}>
+        <nav aria-label="Mobile" className="mobileNavDropdown">
+          <ModeSelector compact />
           {links.map((link) => (
-            <Link href={link.href} key={link.href}>
+            <Link href={link.href} key={link.href} onClick={close}>
               {link.label}
             </Link>
           ))}

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { getSiteUrl } from "../lib/env";
+import { spaceSharingMetadata } from "../lib/space-sharing";
+import { SiteAnalytics } from "./_components/site-analytics";
+import { ExplorerProvider } from "./_components/explorer-presence";
 import { GoatCounter } from "./goat-counter";
 import { SiteSpeedInsights } from "./_components/site-speed-insights";
-import { BearerPageGuard } from "./_components/bearer-page-guard";
+import { SupportChat } from "./_components/support-chat";
 import "./globals.css";
+import "./space-theme.css";
 
 const displayFont = Cormorant_Garamond({
   subsets: ["latin"],
@@ -20,7 +23,11 @@ const bodyFont = Manrope({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
+  ...spaceSharingMetadata(getSiteUrl(), process.env.VERCEL_ENV === "preview" ? process.env.VERCEL_URL : undefined),
+  robots: {
+    index: process.env.VERCEL_ENV !== "preview" && ["localaicat.com", "www.localaicat.com"].includes(new URL(getSiteUrl()).hostname),
+    follow: true
+  },
   title: {
     default: "Local AI Cat - Private On-Device AI",
     template: "%s | Local AI Cat"
@@ -29,30 +36,14 @@ export const metadata: Metadata = {
     "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
   icons: {
     icon: [
-      { url: "/assets/cat-personal-favicon-32.png", type: "image/png", sizes: "32x32" },
-      { url: "/assets/cat-personal-favicon-192.png", type: "image/png", sizes: "192x192" }
+      { url: "/space-demo/cadet-icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/space-demo/cadet-icon.svg", type: "image/svg+xml", sizes: "any" }
     ],
-    shortcut: [{ url: "/assets/cat-personal-favicon-32.png", type: "image/png" }],
-    apple: [{ url: "/assets/cat-personal-favicon-180.png", sizes: "180x180", type: "image/png" }]
+    shortcut: [{ url: "/space-demo/cadet-icon-32.png", type: "image/png" }],
+    apple: [{ url: "/space-demo/cadet-touch-180.png", sizes: "180x180", type: "image/png" }]
   },
   other: {
-    "theme-color": "#090909"
-  },
-  openGraph: {
-    title: "Local AI Cat - Private On-Device AI",
-    description:
-      "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
-    url: getSiteUrl(),
-    siteName: "Local AI Cat",
-    images: [{ url: "/assets/og-share.png", width: 1200, height: 630 }],
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Local AI Cat - Private On-Device AI",
-    description:
-      "Private, on-device AI chat and transcription for iPhone, iPad, and Mac. No cloud required.",
-    images: [{ url: "/assets/og-share.png", width: 1200, height: 630 }]
+    "theme-color": "#17131f"
   }
 };
 
@@ -62,18 +53,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={`${displayFont.variable} ${bodyFont.variable}`} lang="en">
+    <html data-personality="space" data-scroll-behavior="smooth" className={`${displayFont.variable} ${bodyFont.variable}`} lang="en">
       <head>
         <meta name="apple-itunes-app" content="app-id=6741502386" />
-        <link rel="preconnect" href="https://app.chatwoot.com" />
-        <link rel="dns-prefetch" href="https://app.chatwoot.com" />
       </head>
-      <body>
-        {children}
+      <body data-home-mode="space">
+        <ExplorerProvider>{children}</ExplorerProvider>
+        <SiteAnalytics />
         <SiteSpeedInsights />
-        <Script src="/js/cookie-consent.js" strategy="afterInteractive" />
-      <GoatCounter />
-      <BearerPageGuard />
+        <GoatCounter />
+        <SupportChat />
       </body>
     </html>
   );

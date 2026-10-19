@@ -1,0 +1,91 @@
+{
+  "id": "space-cadet-v1",
+  "version": 1,
+  "artboard": {
+    "width": 768,
+    "height": 768
+  },
+  "body": {
+    "x": 128,
+    "y": 256,
+    "width": 512,
+    "height": 512
+  },
+  "anchors": {
+    "crown": {
+      "x": 384,
+      "y": 256
+    },
+    "eyes": {
+      "x": 384,
+      "y": 480
+    },
+    "collar": {
+      "x": 384,
+      "y": 608
+    },
+    "feet": {
+      "x": 384,
+      "y": 768
+    },
+    "tether": {
+      "x": 608,
+      "y": 512
+    }
+  },
+  "slots": {
+    "headwear": {
+      "anchor": "crown",
+      "bounds": {
+        "x": 128,
+        "y": 0,
+        "width": 512,
+        "height": 256
+      },
+      "order": 1
+    },
+    "eyewear": {
+      "anchor": "eyes",
+      "bounds": {
+        "x": 256,
+        "y": 448,
+        "width": 256,
+        "height": 160
+      },
+      "order": 2
+    },
+    "neckwear": {
+      "anchor": "collar",
+      "bounds": {
+        "x": 256,
+        "y": 608,
+        "width": 256,
+        "height": 64
+      },
+      "order": 3
+    }
+  },
+  "profiles": {
+    "pixel": {
+      "columns": 24,
+      "rows": 24,
+      "unit": 32,
+      "sampling": "nearest"
+    },
+    "image": {
+      "sampling": "smooth",
+      "sourceResolution": "independent",
+      "allowedSampling": [
+        "smooth",
+        "nearest"
+      ]
+    },
+    "g2": {
+      "width": 48,
+      "height": 48,
+      "tones": 2,
+      "minimumFilledBlock": 2,
+      "separateExport": true
+    }
+  }
+}

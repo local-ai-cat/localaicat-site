@@ -1,5 +1,7 @@
 "use client";
 
+import { trackSiteAction } from "../../lib/site-analytics";
+
 import { useState } from "react";
 
 function CopyBlock({ command }: { command: string }) {
@@ -87,6 +89,7 @@ export function DownloadExperience({
               <a
                 className="planButton"
                 href={downloadUrl || "#"}
+                onClick={() => { if (downloadUrl) trackSiteAction("download_clicked", "mac"); }}
                 {...(downloadUrl ? {} : { "aria-disabled": true })}
               >
                 Download .dmg
@@ -124,14 +127,14 @@ export function DownloadExperience({
           limits some desktop features such as controlling other app windows.
         </p>
         <div className="downloadPathActions">
-          <a href={appStoreUrl} aria-label="Download on the App Store for iPhone and iPad">
+          <a onClick={() => trackSiteAction("download_clicked", "app_store")} href={appStoreUrl} aria-label="Download on the App Store for iPhone and iPad">
             <img
               src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
               alt="Download on the App Store (iPhone & iPad)"
               style={{ height: 48 }}
             />
           </a>
-          <a href={appStoreUrl} aria-label="Download on the Mac App Store">
+          <a onClick={() => trackSiteAction("download_clicked", "app_store")} href={appStoreUrl} aria-label="Download on the Mac App Store">
             <img
               src="https://tools.applemediaservices.com/api/badges/download-on-the-mac-app-store/black/en-us?size=250x83"
               alt="Download on the Mac App Store"

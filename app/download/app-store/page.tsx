@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPage } from "../../_components/content-page";
 import { SiteShell } from "../../_components/site-shell";
+import { DownloadLink } from "../../_components/download-link";
 import { getAppStoreUrl } from "../../../lib/env";
 
 export const metadata: Metadata = {
@@ -26,9 +27,9 @@ export default function AppStoreDownloadPage() {
             an existing website license key from Settings.
           </p>
           <div className="routeActions">
-            <a className="planButton" href={getAppStoreUrl()}>
+            <DownloadLink channel="app_store" className="planButton" href={getAppStoreUrl()}>
               Open App Store
-            </a>
+            </DownloadLink>
             <Link className="secondaryButton" href="/pricing/app-store">
               See pricing
             </Link>

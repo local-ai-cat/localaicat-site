@@ -3,7 +3,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { MobileNav } from "./mobile-nav";
 import { ScrollHeader } from "./scroll-header";
-import { SiteMode } from "./site-mode";
+import { ModeSelector, SiteMode } from "./site-mode";
+
+import { PixelCat } from "./space-experience";
+import { ExplorerCount } from "./explorer-presence";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -42,8 +45,9 @@ export function SiteShell({
       <SiteMode force={siteMode} />
       <ScrollHeader>
         <div className="siteHeaderInner">
-          <Link className="brandMark" href="/">
+          <Link className="brandMark" href="/" aria-label="Local AI Cat home">
             <span className="brandIcon">
+              <PixelCat decorative className="brandIconImageSpace"/>
               <Image
                 alt="Local AI Cat personal mark"
                 className="brandIconImage brandIconImagePersonal"
@@ -61,13 +65,14 @@ export function SiteShell({
             </span>
             <span className="brandText">
               <strong>Local AI Cat</strong>
-              <span className="brandTaglines">
+              <span className="brandTaglines"><span className="brandTagline brandTaglineSpace">a little universe, all yours</span>
                 <span className="brandTagline brandTaglinePersonal">keep your paws off my data</span>
                 <span className="brandTagline brandTaglineBusiness">for very serious cat business</span>
               </span>
             </span>
           </Link>
 
+          <div className="headerPersonality"><ModeSelector compact /></div>
           <nav aria-label="Primary" className="siteNav siteNavDesktop">
             {links.map((link) => (
               <Link
@@ -84,6 +89,7 @@ export function SiteShell({
         </div>
       </ScrollHeader>
 
+      <div className="previewRibbon"><span>A little universe, all yours</span><div className="previewRibbonRight"><a href="/space-demo/direction.html">Explore the app designs</a><ExplorerCount /></div></div>
       <div className={wide ? "pageFrame pageFrameWide" : "pageFrame"}>
         <main>{children}</main>
       </div>
@@ -91,7 +97,7 @@ export function SiteShell({
       <footer className="siteFooter">
         <div className="siteFooterInner">
           <div>
-            <p className="footerTitle">Local AI Cat</p>
+            <p className="footerTitle"><span className="footerCadet"><PixelCat decorative/></span>Local AI Cat</p>
             <p className="footerText">AI that stays at home.</p>
           </div>
 

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cat Studio v2 · Space Cadet</title>
+  <meta name="description" content="A pixel cat. A real little wardrobe. Make your own Space Cadet with image accessories.">
+  <link rel="icon" href="cadet-icon-32.png" type="image/png">
+  <link rel="stylesheet" href="site-shell.css">
+  <link rel="stylesheet" href="cadet-v2.css">
+</head>
+<body>
+<!--site-nav--><a class="sc-skip" href="#main-content">Skip to content</a><header class="sc-nav"><a class="sc-brand" href="index.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="#c7b1ec" d="M4 0h8v1H4zM2 1h2v1H2zm10 0h2v1h-2zM1 2h1v2H1zm13 0h1v2h-1zM0 4h1v8H0zm15 0h1v8h-1zM1 8h1v4H1zm13 0h1v4h-1zM2 12h2v1H2zm10 0h2v1h-2zM4 13h8v1H4zM5 14h6v1H5zM4 4h2v1H4zm6 0h2v1h-2zM4 5h3v1H4zm5 0h3v1H9zM4 6h8v1H4zM4 7h1v2H4zm3 0h2v2H7zm4 0h1v2h-1zM4 9h8v2H4z"/></svg>Space Cadet</a><nav class="sc-links" aria-label="Explore Space Cadet"><a href="index.html">Home</a><a href="direction.html">New direction</a><a href="missions.html">Little missions</a><a href="cockpit.html">Menu bar</a><a href="lockscreen.html">Night voyage</a><a href="thermal.html">Paper press</a><a href="cadet.html">Pixel studio</a><a href="cadet-v2.html" aria-current="page">Studio v2</a></nav></header><!--/site-nav-->
+<main id="main-content" class="studio">
+  <div class="studio-heading"><div><p class="eyebrow">Cat Studio <span>v2</span></p><h1>A little more you.</h1><p class="intro">Your pixel co-pilot. A proper little wardrobe.</p></div><a class="original-link" href="cadet.html">Original pixel studio ↗</a></div>
+  <div class="workspace-v2">
+    <section class="preview-column" aria-label="Your cat preview">
+      <div class="preview-stage" id="preview-stage">
+        <div class="stage-top"><span><i class="live-dot"></i>Local orbit</span><label class="motion-switch"><input id="motion" type="checkbox" checked><span>Float</span></label></div>
+        <div class="portrait"><canvas id="portrait" width="1024" height="1024" aria-label="Space Cadet with its full astronaut helmet and image accessories"></canvas></div>
+        <div class="cat-caption"><h2 id="preview-name">Cadet</h2><span id="preview-outfit">Cosmic cosy</span></div>
+        <svg class="orbit-line" viewBox="0 0 600 120" aria-hidden="true"><ellipse cx="300" cy="100" rx="255" ry="56"/></svg>
+      </div>
+      <div class="context-preview">
+        <div class="context-heading"><span>Small, but still yours.</span><span class="size-note">Actual menu-bar size</span></div>
+        <div class="mac-bar"><span class="mac-menu">● <b>Finder</b> File <span>Edit</span></span><div><canvas id="menu-cat" width="44" height="44" aria-label="Cat at 22 point menu-bar size"></canvas><span class="menu-battery">▰</span><span>9:41</span></div></div>
+        <div class="size-row"><div><canvas data-size="24" width="48" height="48"></canvas><span>24 pt</span></div><div><canvas data-size="48" width="96" height="96"></canvas><span>48 pt</span></div><div><canvas data-size="80" width="160" height="160"></canvas><span>80 pt</span></div><p>The helmet stays.<br>The whole outfit scales with it.</p></div>
+      </div>
+    </section>
+    <section class="wardrobe-panel" aria-label="Customise your cat">
+      <div class="panel-heading"><h2>Meet your co-pilot.</h2><button class="text-button" id="surprise">✧ Surprise me</button></div>
+      <div class="identity-fields"><label>Name<input id="cat-name" type="text" maxlength="24" value="Cadet" autocomplete="off"></label><label>Birthday <span class="optional">optional</span><input id="birthday" type="date" aria-label="Birthday or adoption day"></label></div>
+      <div class="colour-heading"><span>A familiar face</span><label class="custom-colour"><input id="custom-colour" type="color" value="#b798ed" aria-label="Choose your own cat colour"><span>Your colour</span></label></div>
+      <div id="palettes" class="palettes" role="group" aria-label="Base cat colours"></div>
+      <div class="wardrobe-heading"><h2>A little personality.</h2><button id="undress" class="text-button">Take it all off</button></div>
+      <div id="shelves" class="shelves"></div>
+      <div class="studio-actions"><button id="save-cat" class="button-primary">Keep this cat <span>♡</span></button><button id="export-png" class="button-secondary">Save PNG ↓</button></div>
+      <p id="studio-status" class="studio-status" role="status" aria-live="polite">Loading the wardrobe…</p>
+      <details class="design-files"><summary>Take your design with you</summary><p>Save a Studio v2 file to reopen here. App import for this new wardrobe comes later.</p><div><button id="export-design">Save design</button><button id="import-design">Open design</button><input id="design-file" type="file" accept=".json,application/json" hidden></div></details>
+    </section>
+  </div>
+  <div class="studio-footnote"><span>Pixel soul. Real-world accessories.</span><span>Preview · saved on this browser</span></div>
+</main>
+<script src="cadet-model.js"></script>
+<script src="cadet-v2-model.js"></script>
+<script src="cadet-v2.js"></script>
+<!--site-footer--><footer class="sc-footer"><span>A little universe by Local AI Cat. An interactive theme playground.</span><nav aria-label="About Space Cadet"><a href="missions.html#our-story">Our story</a><a href="https://localaicat.com" target="_blank" rel="noopener">Get Local AI Cat</a></nav></footer><!--/site-footer-->
+</body>
+</html>

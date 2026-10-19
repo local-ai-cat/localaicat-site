@@ -1,3 +1,4 @@
+import { AnalyticsPreference } from "../_components/site-analytics";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
@@ -15,7 +16,7 @@ export default function PrivacyPage() {
       <ContentPage
         intro="Local AI Cat is designed around on-device AI. The default experience keeps your chats, models, and voice inputs on your own hardware instead of routing them through our servers."
         kicker="Privacy"
-        meta="Last updated: March 2026"
+        meta="Last updated: October 2026"
         title="Privacy Policy"
         callout={
           <>
@@ -87,15 +88,31 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section className="contentCard">
+        <section className="contentCard" id="website-analytics">
           <h2>This website</h2>
-          <p>
-            This website counts page views with GoatCounter. It sets no cookies,
-            does not store IP addresses, and builds no visitor profiles. This
-            applies to the website only, not the app. The totals are public
-            at{" "}
+          <p>We use Vercel Web Analytics to understand page visits, download clicks,
+            creator opens and successful cat-code copies. It uses no analytics cookies.
+            Vercel derives a daily visitor identifier from the request and discards
+            that identifier after 24 hours; aggregate reports are retained.</p>
+          <p>Reports include pages, referring sites, country, device and browser type.
+            We strip query strings and fragments from the page URLs we send and
+            exclude account, checkout and private pages. We never send cat names,
+            birthdays, cat codes, drawings or chat content as analytics events.</p>
+          <p>The explorer sign shows estimated visitors since midnight UTC. It is not
+            a live headcount. Do Not Track and Global Privacy Control are respected;
+            you can also turn website statistics off below. Your preference and your
+            custom cat are saved only in this browser.</p>
+          <p>This applies to the website, not the native app. Read more about{" "}
+            <a href="https://vercel.com/docs/analytics/privacy-policy">Vercel’s analytics privacy</a>.</p>
+          <p>We also count public page views with cookie-free GoatCounter, using a small
+            image request rather than a third-party script. We send only the public page
+            path, without query strings, page titles or referring URLs. Public totals are at{" "}
             <a href="https://localaicat.goatcounter.com">localaicat.goatcounter.com</a>.
-          </p>
+            Vercel Speed Insights measures page performance with the same privacy preferences.</p>
+          <p>Chat support opens Chatwoot in a separate tab only when you select it.
+            The website does not send your checkout details or current page URL to that tab.
+            Information you choose to send there is handled by Chatwoot.</p>
+          <AnalyticsPreference />
         </section>
 
         <section className="contentCard">

@@ -21,6 +21,7 @@ type SiteShellProps = {
 
 const navLinks =
   [
+    { href: "/space", label: "Explore" },
     { href: "/pricing", label: "Pricing" },
     { href: "/support", label: "FAQ" },
     { href: "/#download", label: "Download", cta: true }

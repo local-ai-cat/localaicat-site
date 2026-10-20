@@ -65,7 +65,7 @@ const nextConfig: NextConfig = {
       // One address for the site. Apple fetches its app-site-association files without following redirects, so they stay put.
       {
         source: "/:path((?!\\.well-known/|apple-app-site-association).*)",
-        has: [{ type: "host", value: "www.localaicat.com" }],
+        has: [{ type: "host", value: "www\\.localaicat\\.com" }],
         destination: "https://localaicat.com/:path",
         permanent: true
       },

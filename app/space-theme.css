@@ -489,7 +489,6 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 .crewPortraits .pixelCat:nth-child(2) { width:64px; height:64px; }
 .crewPortraits .pixelCat:first-child { filter:hue-rotate(70deg); }
 .crewPortraits .pixelCat:last-child { filter:hue-rotate(300deg); }
-.crewPage .enterpriseBand { margin-top:36px; }
 .footerTextSpace { display:none; }
 body[data-home-mode="space"] .footerTextSpace { display:inline; }
 body[data-home-mode="space"] .footerTextEarth { display:none; }

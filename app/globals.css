@@ -5221,46 +5221,6 @@ body:has(> .siteFooter) > .pageFrame {
   align-self: stretch;
 }
 
-.enterpriseBand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 24px;
-  max-width: 820px;
-  margin: 40px auto 0;
-  padding: 30px 32px;
-  border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
-  background: linear-gradient(
-    172deg,
-    color-mix(in srgb, var(--accent) 6%, var(--surface)) 0%,
-    var(--surface) 65%
-  );
-  text-align: left;
-}
-
-.enterpriseBandText {
-  max-width: 560px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.enterpriseBandText h3 {
-  font-family: var(--font-display), serif;
-  font-size: clamp(22px, 2.6vw, 30px);
-  letter-spacing: -0.03em;
-  margin: 0;
-}
-
-.enterpriseBandText p:not(.sectionEyebrow) {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 14px;
-  line-height: 1.65;
-}
-
 .appStoreBadgeAccent {
   background: var(--accent);
   border-color: var(--accent);
@@ -5280,10 +5240,5 @@ body:has(> .siteFooter) > .pageFrame {
 @media (max-width: 720px) {
   .bizPlanGrid {
     grid-template-columns: 1fr;
-  }
-
-  .enterpriseBand {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }

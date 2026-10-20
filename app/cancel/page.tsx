@@ -6,7 +6,8 @@ import { SiteShell } from "../_components/site-shell";
 export const metadata: Metadata = {
   title: "Purchase Cancelled",
   description:
-    "Your purchase was not completed. Return to pricing or choose a different path."
+    "Your purchase was not completed. Return to pricing or choose a different path.",
+  robots: { index: false, follow: true }
 };
 
 export default function CancelPage() {

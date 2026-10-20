@@ -1,7 +1,7 @@
 .trigger {
   position: fixed;
   bottom: 18px;
-  left: 18px;
+  right: 18px;
   z-index: 40;
   display: inline-flex;
   align-items: center;
@@ -19,7 +19,7 @@
 
 .dialog {
   position: fixed;
-  inset: auto auto 18px 18px;
+  inset: auto 18px 18px auto;
   margin: 0;
   padding: 0;
   width: min(400px, calc(100vw - 36px));
@@ -37,22 +37,24 @@
 
 .dialog::backdrop { background: #09071155; }
 .panel { display: flex; flex-direction: column; height: 100%; }
-.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
-.header h2 { margin: 0; font: 600 16px var(--font-body), sans-serif; }
 .close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
   width: 36px;
   height: 36px;
   border: 1px solid var(--line, #40394e);
   border-radius: 50%;
-  background: transparent;
-  color: inherit;
+  background: var(--surface, #211b2d);
+  color: var(--text, #eee8fb);
   font-size: 23px;
   cursor: pointer;
 }
 .chat { position: relative; flex: 1; min-height: 0; background: #fff; }
 .frame { display: block; width: 100%; height: 100%; border: 0; }
 .loading { position: absolute; inset: 16px; color: #4b4357; font-size: 14px; pointer-events: none; }
-.footer { display: flex; justify-content: space-between; gap: 12px; padding: 13px 16px; font-size: 11px; }
+.footer { padding: 13px 16px; font-size: 11px; text-align: center; }
 .footer a { color: inherit; text-underline-offset: 3px; }
 .trigger:focus-visible, .close:focus-visible, .footer a:focus-visible { outline: 2px solid var(--accent, #c5a8ee); outline-offset: 3px; }
 
@@ -64,7 +66,6 @@
 @media (max-width: 720px) {
   .trigger {
     bottom: max(14px, env(safe-area-inset-bottom));
-    left: auto;
     right: 14px;
     justify-content: center;
     width: 46px;

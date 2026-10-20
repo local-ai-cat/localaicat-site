@@ -35,7 +35,7 @@ test("support message bridge authenticates origin AND frame; ignores unrelated o
 test("support handshake contains only fixed presentation settings, no page or identity data", () => {
   const messages = supportChatInitialMessages.map((message) => JSON.parse(message.replace("chatwoot-widget:", "")));
   assert.deepEqual(messages, [
-    { event: "config-set", locale: "en", position: "left", hideMessageBubble: true,
+    { event: "config-set", locale: "en", position: "right", hideMessageBubble: true,
       showPopoutButton: false, showUnreadMessagesDialog: false, darkMode: "auto" },
     { event: "toggle-open", isOpen: true }
   ]);

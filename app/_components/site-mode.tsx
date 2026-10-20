@@ -22,9 +22,12 @@ export function persistSiteMode(mode: Mode): void {
   } catch { /* The current page still changes when storage is unavailable. */ }
   document.body.dataset.homeMode = mode;
   document.documentElement.dataset.personality = mode;
+  // A ?mode= link picks the world once; the saved choice carries it from then on, so the address stays clean.
   const url = new URL(window.location.href);
-  url.searchParams.set("mode", mode);
-  window.history.replaceState(null, "", url);
+  if (url.searchParams.has("mode")) {
+    url.searchParams.delete("mode");
+    window.history.replaceState(window.history.state, "", url);
+  }
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", mode === "space" ? "#17131f" : "#090909");
   window.dispatchEvent(new CustomEvent<Mode>(EVENT_NAME, { detail: mode }));
 }

@@ -1,11 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { PersonalPlans } from "../_components/personal-plans";
-import { useSiteMode } from "../_components/site-mode";
 
 export function PricingExperience({ checkoutUnavailable = false }: { checkoutUnavailable?: boolean }) {
-  const [mode] = useSiteMode();
   return (
     <section className="contentPage purchasePage">
       <div className="contentHero">
@@ -17,7 +13,7 @@ export function PricingExperience({ checkoutUnavailable = false }: { checkoutUna
       <div className="pricingHelp">
         <h2>One app. Two ways to get it.</h2>
         <p>Buying here gives you a license key to enter in the app. If you prefer Apple billing, you can buy upgrades inside the App Store app.</p>
-        <Link href={`/pricing/app-store?mode=${mode}`}>About App Store purchases</Link>
+        <Link href="/pricing/app-store">About App Store purchases</Link>
       </div>
     </section>
   );

@@ -52,7 +52,7 @@ export function PersonalPlans() {
           <h3>{mode === "space" ? "Want to bring your crew?" : "Bringing your team?"}</h3>
           <p>A seat for everyone, or a rollout made for your organisation.</p>
         </div>
-        <Link className="secondaryButton" href={`/teams?mode=${mode}`}>Teams &amp; enterprise</Link>
+        <Link className="secondaryButton" href="/teams">Teams &amp; enterprise</Link>
       </div>
     </>
   );

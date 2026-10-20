@@ -69,7 +69,7 @@ export function TeamCheckout({ mode }: { mode: TeamCheckoutMode }) {
   }, [seats, mode]);
 
   return (
-    <div className="contentPage">
+    <div className="contentPage crewPage">
       <div className="contentHero">
         <p className="contentKicker">Team plan</p>
         <h1 className="contentTitle">Seats for your team.</h1>

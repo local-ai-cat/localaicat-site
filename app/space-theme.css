@@ -514,6 +514,9 @@ body[data-home-mode="space"] .footerTextEarth { display:none; }
 .subscriptionPlans .homePlanCard { gap:14px; }
 .subscriptionPlans .dualCardBody { min-height:0; }
 .planBenefits { margin:0 0 4px; padding-left:18px; color:var(--text-dim); font-size:13px; line-height:1.8; }
+/* Free gets both installs in the slot the other cards give one button, so the buttons still line up. */
+.planButtonPair { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:auto; }
+.purchasePlans .planButtonPair .purchasePlanButton { margin-top:0; }
 .developerUnlock { max-width:1120px; margin:20px auto 0; padding:24px; display:grid; grid-template-columns:1fr auto; gap:32px; align-items:center; border:1px solid var(--line); border-radius:18px; text-align:left; }
 .unlockEyebrow { margin:0 0 8px!important; color:var(--accent)!important; font-size:11px!important; letter-spacing:.06em; text-transform:uppercase; }
 .developerUnlock p { max-width:650px; margin:10px 0 0; color:var(--text-dim); font-size:14px; line-height:1.6; }
@@ -524,7 +527,12 @@ body[data-home-mode="space"] .footerTextEarth { display:none; }
 .unlockAction>span { font-size:11px; color:var(--text-dim); }
 @media(max-width:600px) {
   .homeMode #pricing.detailBand { padding-top:36px; }
-  .subscriptionPlans { grid-template-columns:1fr; }
+  /* On phones the plans swipe sideways, leading with Pro Annual, so they don't take three screens to scroll past. */
+  .subscriptionPlans { display:flex; gap:12px; max-width:none; margin-inline:calc(-1 * var(--plan-bleed)); padding:6px var(--plan-bleed) 22px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-inline:var(--plan-bleed); overscroll-behavior-x:contain; scrollbar-width:none; --plan-bleed:16px; }
+  .subscriptionPlans::-webkit-scrollbar { display:none; }
+  .subscriptionPlans .homePlanCard { flex:0 0 84%; scroll-snap-align:start; }
+  .subscriptionPlans .homePlanCardBest { order:-1; }
+  .subscriptionPlans .homePlanCardFree { order:1; }
   .developerUnlock { max-width:400px; grid-template-columns:1fr; gap:20px; padding:22px; }
   .unlockAction { align-items:stretch; }
   .unlockAction .homePlanPrice,.unlockAction>span { text-align:center; }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { directPlans } from "../../lib/catalog";
-import { getDirectDownloadUrl } from "../../lib/env";
+import { getAppStoreUrl, getDirectDownloadUrl } from "../../lib/env";
 import { trackSiteAction } from "../../lib/site-analytics";
 import { useSiteMode } from "./site-mode";
 
@@ -13,11 +13,14 @@ export function PersonalPlans() {
   return (
     <>
       <div className="homePlanGrid purchasePlans subscriptionPlans">
-        <article className="homePlanCard">
+        <article className="homePlanCard homePlanCardFree">
           <h3 className="purchasePlanName">Free</h3>
           <p className="homePlanPrice">£0<span className="homePlanCadence">forever</span></p>
           <p className="dualCardBody">Chat, transcription and local models. No account, no trial clock.</p>
-          <a className="secondaryButton purchasePlanButton" href={getDirectDownloadUrl()} onClick={() => trackSiteAction("download_clicked", "mac")}>Download free</a>
+          <div className="planButtonPair">
+            <a className="secondaryButton purchasePlanButton" href={getDirectDownloadUrl()} onClick={() => trackSiteAction("download_clicked", "mac")}>Mac download</a>
+            <a className="secondaryButton purchasePlanButton" href={getAppStoreUrl()} onClick={() => trackSiteAction("download_clicked", "app_store")}>App Store</a>
+          </div>
         </article>
         {directPlans.filter(plan => plan.name !== "Developer Mode").map(plan => {
           const annual = plan.name === "Pro Annual";

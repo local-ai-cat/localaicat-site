@@ -1,10 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "./_components/site-shell";
+import { PixelCat } from "./_components/space-experience";
+
+export const metadata: Metadata = {
+  title: "Page not found"
+};
 
 export default function NotFound() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <section className="notFound">
+        <PixelCat decorative className="notFoundCat" />
         <p className="sectionEyebrow">404</p>
         <h1>This cat wandered off.</h1>
         <p>

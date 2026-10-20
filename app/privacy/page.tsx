@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
         intro="Local AI Cat is designed around on-device AI. The default experience keeps your chats, models, and voice inputs on your own hardware instead of routing them through our servers."
         kicker="Privacy"

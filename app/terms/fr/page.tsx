@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function TermsPageFr() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
         intro="Les présentes conditions décrivent comment Local AI Cat peut être utilisé et ce à quoi vous pouvez vous attendre concernant les fonctionnalités d'IA sur l'appareil, les achats en téléchargement direct et les déploiements professionnels de l'application."
         kicker="Conditions"

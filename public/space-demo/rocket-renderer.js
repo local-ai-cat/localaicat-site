@@ -77,10 +77,30 @@ function bounds(input,angle,scale,time=0){
  }
  return result;
 }
+// The rocket as a QR code's centre badge: the body without its cable, turned clockwise by
+// `angle` (30° reads as a launch) and sampled onto a side-by-side pixel grid centred on the
+// code. Returns the hull and tank pixels, plus every module within `margin` pixels of them,
+// which the caller leaves out so the rocket sits on the code's own background. A code at
+// error correction H carries the gap: the plaque's rocket clears 14% of its modules.
+function qrBadge(side,module,{scale=1.5,angle=Math.PI/6,margin=2}={}){
+ const cos=Math.cos(angle),sin=Math.sin(angle),pixels=[],cleared=new Set();
+ // The body spans art columns 0-11 and rows 1-14, so its centre is (6, 8).
+ for(let py=0;py<side;py++)for(let px=0;px<side;px++){
+  const dx=(px+.5-side/2)/scale,dy=(py+.5-side/2)/scale;
+  const ax=Math.floor(6+cos*dx+sin*dy),ay=Math.floor(8-sin*dx+cos*dy);
+  if(ax<0||ax>11||ay<1||ay>14)continue;
+  const cell=art[ay][ax];
+  if(cell==='#'||cell==='u')pixels.push({x:px,y:py,role:cell});
+ }
+ for(const pixel of pixels)for(let oy=-margin;oy<=margin;oy++)for(let ox=-margin;ox<=margin;ox++){
+  cleared.add(`${Math.floor((pixel.x+ox)/module)},${Math.floor((pixel.y+oy)/module)}`);
+ }
+ return {pixels,cleared};
+}
 function svg(input,time=0,{monochrome=false}={}){
  const pixels=frame(input,time).pixels;
  const markup=pixels.map(p=>`<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" fill="${monochrome?'currentColor':p.colour}"/>`).join('');
  return `<svg viewBox="-1 -1 18 22" shape-rendering="crispEdges" aria-hidden="true">${markup}</svg>`;
 }
-root.SpaceRocket={art,colours,normalize,frame,draw,bounds,voyageState,svg};
+root.SpaceRocket={art,colours,normalize,frame,draw,bounds,voyageState,qrBadge,svg};
 })(globalThis);

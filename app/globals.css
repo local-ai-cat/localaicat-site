@@ -22,7 +22,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -279,8 +279,8 @@ body[data-home-mode="personal"] .brandTaglinePersonal {
   min-width: 160px;
   padding: 6px;
   border-radius: 14px;
-  background: rgba(14, 14, 14, 0.96);
-  backdrop-filter: blur(20px);
+  /* Solid, not blurred: a blur nested inside the header's own blur lets the page show through. */
+  background: rgb(14, 14, 14);
   border: 1px solid var(--line);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   animation: dropdownIn 120ms ease;
@@ -3161,6 +3161,11 @@ body:has(> .siteFooter) > .pageFrame {
     padding: 8px 12px 0;
   }
 
+  /* On phones the menu bar stays with you; hiding it on the way down leaves the menu and world switch out of reach. */
+  .siteHeaderHidden {
+    transform: none;
+  }
+
   .siteHeaderInner {
     padding: 8px 12px;
     gap: 8px;
@@ -4938,8 +4943,29 @@ body:has(> .siteFooter) > .pageFrame {
 }
 
 @media (max-width: 640px) {
+  /* Two compact columns on phones, so eight features read at a glance instead of as one long list. */
   .featureGridHome {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .featureCellHome {
+    padding: 16px 14px;
+  }
+
+  .featureCellHome .featureIcon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 10px;
+  }
+
+  .featureCellHome h3 {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .featureCellHome p {
+    font-size: 12px;
   }
 
   .homePlanGrid {

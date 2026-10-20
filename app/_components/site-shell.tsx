@@ -14,7 +14,7 @@ type SiteShellProps = {
   siteMode?: "personal" | "business";
   /** Widen the content frame for dense data views (e.g. the modules grid) */
   wide?: boolean;
-  /** The homepage has its world selector beside the hero. */
+  /** The homepage has its world selector beside the hero, so the desktop header leaves it out. */
   showWorldSelector?: boolean;
 };
 
@@ -107,7 +107,8 @@ export function SiteShell({
             ))}
           </nav>
 
-          <MobileNav links={navLinks} showWorldSelector={showWorldSelector} />
+          {/* On phones the menu always carries the world switch, even on the homepage once its hero switch has scrolled away. */}
+          <MobileNav links={navLinks} />
         </div>
       </ScrollHeader>
 

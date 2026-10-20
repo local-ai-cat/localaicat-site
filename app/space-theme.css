@@ -401,7 +401,9 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 @media(max-width:650px){
   .spaceMissions{padding-top:72px;}
   body[data-home-mode="space"] .detailBand{padding-top:72px;}
-  body[data-home-mode="space"] .featureGridHome{gap:0 18px;}
+  body[data-home-mode="space"] .featureGridHome{gap:0 16px;}
+  body[data-home-mode="space"] .featureCellHome{padding:20px 0 18px;}
+  body[data-home-mode="space"] .featureCellHome:before{top:22px;right:0;}
   .spaceLaunchPad{margin-top:84px;gap:16px;}
   .launchScene{height:180px;}
   .launchCat{width:52px;height:52px;}.launchShip{width:58px;height:78px;}
@@ -496,6 +498,12 @@ body[data-home-mode="space"] .footerTextEarth { display:none; }
 .appDemo video { display:block; width:100%; aspect-ratio:16/9; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
 @media(prefers-reduced-motion:no-preference) {
   .scrollArrivalVisible { animation:sectionArrival 520ms cubic-bezier(.2,.7,.2,1) both; }
+  /* Cards rise in as they scroll into view and settle back on the way up. Browsers without scroll timelines show them still. */
+  @supports (animation-timeline:view()) {
+    .featureCellHome,.spaceDestination,.developerUnlock,.crewInvite { animation:cardRise linear backwards; animation-timeline:view(); animation-range:entry 0% entry 70%; }
+    @media(min-width:601px) { .homePlanCard { animation:cardRise linear backwards; animation-timeline:view(); animation-range:entry 0% entry 70%; } }
+    @keyframes cardRise { from {opacity:0;transform:translateY(28px) scale(.98)} }
+  }
   @keyframes sectionArrival { from {opacity:.75;transform:translateY(14px)} to {opacity:1;transform:none} }
 }
 @media(max-width:1000px) { .purchasePlans {grid-template-columns:repeat(2,minmax(0,1fr));} }

@@ -6,10 +6,10 @@ import { CatPortrait } from "./cat-builder";
 import { CliInstall, DownloadPair } from "./home-downloads";
 import { loadCatRuntime, readSavedCat } from "../../lib/cadet-runtime";
 import type { CatDesign } from "../../lib/cadet-runtime";
+import { rocketArt, rocketColours, rocketFlameFrames } from "../../lib/rocket-art";
 import type { MouseEvent } from "react";
 
 type Palette = keyof typeof pixels;
-const SHIP = ['.....##.....','....####....','...######...','...#AAAA#...','...#AAAA#...','...#AHHA#...','...#AHHA#...','...#AAAA#...','..##AAAA##..','.###AAAA###.','.##########.','....#..#....'];
 const LAUNCH_STAR_COUNT = 44;
 const LIFTOFF_MS = 2600;
 
@@ -19,15 +19,17 @@ export function PixelCat({ palette = "classic", className = "", decorative = fal
   </svg>;
 }
 
+/** The app's rocket, with its tank in lilac and the medium-thrust flame cycling underneath. */
 export function PixelShip({className = ""}: {className?: string}) {
-  return <svg className={className} viewBox="0 0 12 16" shapeRendering="crispEdges" aria-hidden="true">
-    {SHIP.flatMap((row,y) => [...row].map((role,x) => {
-      if (role === '.') return null;
-      let ink = '#e9e3ff';
-      if (role === 'A') ink = '#a68be4';
-      if (role === 'H') ink = '#7bd8c2';
-      return <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={ink}/>;
-    }))}<g className="shipFlame"><rect x="5" y="12" width="2" height="3" fill="#ffc398"/><rect x="5" y="12" width="2" height="1" fill="#fff0c7"/></g>
+  return <svg className={className} viewBox="0 1 12 17" shapeRendering="crispEdges" aria-hidden="true">
+    {rocketArt.flatMap((row, y) => [...row].map((role, x) => {
+      if (role !== "#" && role !== "u") return null;
+      return <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={role === "#" ? rocketColours.hull : rocketColours.tank}/>;
+    }))}
+    <g className="shipFlame">{rocketFlameFrames.map((frame, index) => <g key={index} className="shipFlameFrame">
+      {frame.flame.map(rect => <rect key={`${rect.x}-${rect.y}`} {...{x: rect.x, y: rect.y, width: rect.w, height: rect.h}} fill={rocketColours.flame}/>)}
+      <rect x={frame.core.x} y={frame.core.y} width={frame.core.w} height={frame.core.h} fill={rocketColours.core}/>
+    </g>)}</g>
   </svg>;
 }
 

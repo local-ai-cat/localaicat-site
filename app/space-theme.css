@@ -39,8 +39,11 @@ body[data-home-mode="space"] .personalitySwitch button[aria-pressed="true"] {bac
 .heroTight .heroTagline {max-width:640px;min-height:55px;margin:24px auto 0;font-size:16px;line-height:1.7;}
 .heroTight .heroEnter {animation:none;opacity:1;}
 
-.shipFlame {transform-origin:6px 12px;animation:flamePulse 1s steps(2) infinite;}
-@keyframes flamePulse {50%{transform:scaleY(.7)}}
+/* The flame steps through the app's three frames, one at a time. */
+.shipFlameFrame {opacity:0;animation:flameFrame .9s steps(1) infinite;}
+.shipFlameFrame:nth-child(2) {animation-delay:-.3s;}
+.shipFlameFrame:nth-child(3) {animation-delay:-.6s;}
+@keyframes flameFrame {0%{opacity:1}33.333%{opacity:0}}
 .homeMode .downloadBand {padding-top:24px;gap:16px;}
 body[data-home-mode="space"] .pathCard {background:#252330;border-color:#bda4eb21;box-shadow:none;}
 body[data-home-mode="space"] .pathCardHighlight {border-color:#bda4eb65;background:#2a2438;}
@@ -88,7 +91,7 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
   .miniWardrobe{gap:4px;}.miniWardrobe .pixelCat{width:28px;height:28px;}.miniWardrobe .pixelCat:nth-child(2){width:38px;height:38px;}.miniVoyage .miniMoon{width:130px;height:100px;top:77px;right:-16px;}.miniVoyage .pixelCat{left:36px;top:36px;width:40px;height:40px;}
   .spaceDemoHeading h1{font-size:42px;}.spaceDemoHeading p{font-size:13px;line-height:1.65;}.spaceDemoTabs a{padding:9px 12px;font-size:10px;}.spaceDemoFrame{height:1750px;}.spaceDemoFrame-cockpit{height:2350px;}.spaceDemoFrame-voyage{height:1700px;}
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.shipFlame{animation:none!important}.heroEnter{animation:none!important;opacity:1}.heroModeFade{animation:none!important}body,.spaceDestination,.missionGo>span{transition:none!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.shipFlameFrame{animation:none!important}.shipFlameFrame:first-child{opacity:1}.heroEnter{animation:none!important;opacity:1}.heroModeFade{animation:none!important}body,.spaceDestination,.missionGo>span{transition:none!important}}
 @media(prefers-reduced-motion:reduce){.heroCatLayer{transition:none;}}
 
 /* Both installation choices remain visible together in narrow browser panes. */
@@ -390,7 +393,9 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 .launchGantry i {position:absolute;top:15px;width:6px;height:6px;background:#7bd8c2;animation:gantryBlink 2.4s steps(1) infinite;}
 .launchGantry i:nth-child(1) {left:16%;}.launchGantry i:nth-child(2) {left:49%;animation-delay:.8s;}.launchGantry i:nth-child(3) {left:82%;animation-delay:1.6s;}
 .spaceLaunchPad:has(.heroDownloads a:hover,.heroDownloads a:focus-visible):not([data-launched="true"]) .launchCraft {animation:launchRumble 120ms steps(2) infinite;}
-.spaceLaunchPad:has(.heroDownloads a:hover,.heroDownloads a:focus-visible) .shipFlame {animation-duration:.2s;}
+.spaceLaunchPad:has(.heroDownloads a:hover,.heroDownloads a:focus-visible) .shipFlameFrame {animation-duration:.3s;}
+.spaceLaunchPad:has(.heroDownloads a:hover,.heroDownloads a:focus-visible) .shipFlameFrame:nth-child(2) {animation-delay:-.1s;}
+.spaceLaunchPad:has(.heroDownloads a:hover,.heroDownloads a:focus-visible) .shipFlameFrame:nth-child(3) {animation-delay:-.2s;}
 .spaceLaunchPad[data-launched="true"] .launchCraft {animation:liftoff 2.6s cubic-bezier(.5,0,.25,1) forwards;}
 .launchLead {max-width:420px;margin:0;color:var(--text-dim);font-size:15px;line-height:1.6;}
 .launchMeta {margin:-4px 0 0;color:var(--text-faint);font-size:11px;letter-spacing:.04em;}

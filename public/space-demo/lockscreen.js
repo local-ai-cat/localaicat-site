@@ -3,6 +3,8 @@ let nativeCatPixels=null,catName='Space Cadet';
 const CAT=['....########....','..##........##..','.#............#.','.#............#.','#...##....##...#','#...###..###...#','#...########...#','#...#..##..#...#','#...#..##..#...#','#...########...#','#...########...#','#..............#','.##..........##.','...##########...','....#......#....','....########....'];
 // Generated locally with qrcode 8.2, error correction H and a four-module quiet zone.
 const PROMO_QR=["0000000000000000000000000000000000000", "0000000000000000000000000000000000000", "0000000000000000000000000000000000000", "0000000000000000000000000000000000000", "0000111111100000100010101011111110000", "0000100000100011101110011010000010000", "0000101110100000101100101010111010000", "0000101110100100111111010010111010000", "0000101110101101101001010010111010000", "0000100000100010101110011010000010000", "0000111111101010101010101011111110000", "0000000000001001110001110000000000000", "0000001100111010011100000110100000000", "0000001111001101101001000110100010000", "0000010100110100111010100011011100000", "0000110000010111000100011001000010000", "0000010011101101111100010101001110000", "0000100111000001001010010011011010000", "0000101100101001110010010101110110000", "0000101111001110010111101110110100000", "0000101010101101111111111100110110000", "0000011011010001111110101001011000000", "0000101111100000010111101011110000000", "0000000110000101000001010111011010000", "0000011100111010000110001111111110000", "0000000000001000111110101000110110000", "0000111111101100100100111010101100000", "0000100000100111011100101000100110000", "0000101110100001110110101111111100000", "0000101110101001111111010000101100000", "0000101110101100101101001001001010000", "0000100000100010100100001100110100000", "0000111111100100000001011111000100000", "0000000000000000000000000000000000000", "0000000000000000000000000000000000000", "0000000000000000000000000000000000000", "0000000000000000000000000000000000000"];
+// The Cadet's rocket launches from the middle of the plaque's code (two pixels per module).
+const PROMO_ROCKET=SpaceRocket.qrBadge(PROMO_QR.length*2,2);
 const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d'),engine=SpaceStory;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let motionReduced=reduced.matches;
@@ -289,12 +291,14 @@ function clock(){const d=new Date();$('time').textContent=d.toLocaleTimeString([
 
 function drawBeacon(){
  if(!$('promo').checked)return;
- // A single stationary mission plaque. QR quiet zone is preserved, with no overlaid logo.
+ // A single stationary mission plaque. The QR quiet zone is preserved; the rocket sits on a
+ // clear pad of modules at the code's centre, tilted 30° like a launch.
  const x=661,y=497,size=2;
  ctx.fillStyle='#242031';ctx.strokeStyle='#675679';ctx.lineWidth=1;
  ctx.beginPath();ctx.roundRect(x,y,275,86,12);ctx.fill();ctx.stroke();
  ctx.fillStyle='#c8b7e1';ctx.fillRect(x+6,y+6,74,74);
- PROMO_QR.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')rect(x+6+i*size,y+6+j*size,size,size,'#211a2d');});
+ PROMO_QR.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1'&&!PROMO_ROCKET.cleared.has(`${i},${j}`))rect(x+6+i*size,y+6+j*size,size,size,'#211a2d');});
+ for(const pixel of PROMO_ROCKET.pixels)rect(x+6+pixel.x,y+6+pixel.y,1,1,pixel.role==='#'?'#211a2d':'#9a80b2');
  ctx.textAlign='left';ctx.fillStyle='#eee7fb';ctx.font='600 16px -apple-system, sans-serif';ctx.fillText('Take a little',x+93,y+29);
  ctx.fillText('space cat home.',x+93,y+49);
  ctx.fillStyle='#9a8aa8';ctx.font='11px -apple-system, sans-serif';ctx.fillText('localaicat.com',x+93,y+67);

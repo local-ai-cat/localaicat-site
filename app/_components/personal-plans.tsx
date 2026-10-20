@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { MouseEvent } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import { directPlans } from "../../lib/catalog";
 import { useSiteMode } from "./site-mode";
 
@@ -14,13 +14,40 @@ function scrollToDownloads(event: MouseEvent<HTMLAnchorElement>): void {
   downloads.querySelector("a")?.focus({ preventScroll: true });
 }
 
+/** Each card's distance from the start of the scrolling row, in the order they appear on screen (phones reorder them with CSS). */
+function cardOffsets(row: HTMLElement): number[] {
+  const start = row.getBoundingClientRect().left - row.scrollLeft;
+  return [...row.children].map(child => child.getBoundingClientRect().left - start).sort((a, b) => a - b);
+}
+
 /** The same offers and purchase destinations on the homepage and pricing pages. */
 export function PersonalPlans() {
   const [mode] = useSiteMode();
   const developerPlan = directPlans.find(plan => plan.name === "Developer Mode")!;
+  const row = useRef<HTMLDivElement>(null);
+  const [shownCard, setShownCard] = useState(0);
+  const cardCount = directPlans.filter(plan => plan.name !== "Developer Mode").length + 1;
+
+  // On phones the plans swipe sideways; the dots say where you are and that Free is one swipe away.
+  function followScroll(): void {
+    const node = row.current;
+    if (!node) return;
+    const padding = parseFloat(getComputedStyle(node).scrollPaddingLeft) || 0;
+    const offsets = cardOffsets(node);
+    const distance = (offset: number): number => Math.abs(offset - padding - node.scrollLeft);
+    setShownCard(offsets.reduce((best, offset, index) => (distance(offset) < distance(offsets[best]) ? index : best), 0));
+  }
+
+  function showCard(index: number): void {
+    const node = row.current;
+    const offset = node ? cardOffsets(node)[index] : undefined;
+    if (!node || offset === undefined) return;
+    node.scrollTo({ left: offset - (parseFloat(getComputedStyle(node).scrollPaddingLeft) || 0), behavior: "smooth" });
+  }
+
   return (
     <>
-      <div className="homePlanGrid purchasePlans subscriptionPlans">
+      <div className="homePlanGrid purchasePlans subscriptionPlans" ref={row} onScroll={followScroll}>
         <article className="homePlanCard homePlanCardFree">
           <h3 className="purchasePlanName">Free</h3>
           <p className="homePlanPrice">£0<span className="homePlanCadence">forever</span></p>
@@ -40,6 +67,11 @@ export function PersonalPlans() {
             </article>
           );
         })}
+      </div>
+      <div className="planDots" aria-hidden="true">
+        {Array.from({ length: cardCount }, (_, index) => (
+          <button type="button" key={index} tabIndex={-1} data-active={index === shownCard} onClick={() => showCard(index)} />
+        ))}
       </div>
       <article className="developerUnlock">
         <div>

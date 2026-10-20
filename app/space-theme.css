@@ -235,6 +235,7 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
 .heroCopyLayer {grid-area:1/1;opacity:0;visibility:hidden;pointer-events:none;user-select:none;transition:opacity var(--world-fade) var(--world-ease),visibility 0s var(--world-fade);}
 .heroCopyLayer[data-active="true"] {opacity:1;visibility:visible;pointer-events:auto;user-select:text;transition-delay:0s;}
 .heroTagline .heroCopyLayer{white-space:pre-line;}
+.heroCopyLayer[data-text]::before{content:attr(data-text);}
 .heroWorldStage {display:grid;align-items:center;width:100%;isolation:isolate;}
 .heroWorldPanel {grid-area:1/1;min-width:0;width:100%;opacity:0;visibility:hidden;pointer-events:none;transition:opacity var(--world-fade) var(--world-ease),visibility 0s var(--world-fade);}
 .heroWorldPanel[data-active="true"] {opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s;}
@@ -521,6 +522,7 @@ body[data-home-mode="space"] .footerTextEarth { display:none; }
 .subscriptionPlans { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .subscriptionPlans .homePlanCard { gap:14px; }
 .subscriptionPlans .dualCardBody { min-height:0; }
+.planDots { display:none; }
 .planBenefits { margin:0 0 4px; padding-left:18px; color:var(--text-dim); font-size:13px; line-height:1.8; }
 .developerUnlock { max-width:1120px; margin:20px auto 0; padding:24px; display:grid; grid-template-columns:1fr auto; gap:32px; align-items:center; border:1px solid var(--line); border-radius:18px; text-align:left; }
 .unlockEyebrow { margin:0 0 8px!important; color:var(--accent)!important; font-size:11px!important; letter-spacing:.06em; text-transform:uppercase; }
@@ -538,6 +540,9 @@ body[data-home-mode="space"] .footerTextEarth { display:none; }
   .subscriptionPlans .homePlanCard { flex:0 0 84%; scroll-snap-align:start; }
   .subscriptionPlans .homePlanCardBest { order:-1; }
   .subscriptionPlans .homePlanCardFree { order:1; }
+  .planDots { display:flex; justify-content:center; gap:8px; margin:-8px 0 4px; }
+  .planDots button { width:7px; height:7px; padding:0; border:0; border-radius:50%; background:var(--line,#40394e); cursor:pointer; transition:background-color 160ms, width 160ms; }
+  .planDots button[data-active="true"] { width:18px; border-radius:4px; background:var(--accent,#c5a8ee); }
   .developerUnlock { max-width:400px; grid-template-columns:1fr; gap:20px; padding:22px; }
   .unlockAction { align-items:stretch; }
   .unlockAction .homePlanPrice,.unlockAction>span { text-align:center; }

@@ -12,6 +12,25 @@ type RocketPixel = { x: number; y: number; w: number; h: number; colour: string 
 type Instruments = { fuel: number; colour: string; pixels: RocketPixel[] };
 const powerNames = ["Low", "Medium", "High"];
 const throttleStorageKey = "space-voyage-throttle";
+const settleTimeoutMs = 2000;
+const settleFallbackMs = 600;
+
+/** Runs `start` after the page has loaded and gone idle; returns a cancel. */
+function whenPageSettles(start: () => void): () => void {
+  let idleHandle: number | undefined;
+  let timerHandle: number | undefined;
+  function schedule(): void {
+    if (typeof window.requestIdleCallback === "function") idleHandle = window.requestIdleCallback(start, { timeout: settleTimeoutMs });
+    else timerHandle = window.setTimeout(start, settleFallbackMs);
+  }
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule, { once: true });
+  return () => {
+    window.removeEventListener("load", schedule);
+    if (idleHandle !== undefined) window.cancelIdleCallback(idleHandle);
+    if (timerHandle !== undefined) window.clearTimeout(timerHandle);
+  };
+}
 
 export function HomeVoyage({ active = true }: { active?: boolean }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -21,6 +40,8 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useState(false);
+  // The voyage is a whole game: it waits until the headline and downloads have painted, and never loads in Earth.
+  const [sceneMounted, setSceneMounted] = useState(false);
   const [caption, setCaption] = useState("A little expedition, already underway.");
   const { runtime, cat, openBuilder, builderOpen, studioUI } = useCatStudio();
   const [throttle, setThrottle] = useState(1);
@@ -40,11 +61,10 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
     if (!active || builderOpen) setSettingsOpen(false);
   }, [active, builderOpen]);
 
-  // A cached scene can finish loading before hydration attaches onLoad.
   useEffect(() => {
-    const doc = frameRef.current?.contentDocument;
-    if (doc && doc.readyState === "complete" && doc.URL !== "about:blank") setReady(true);
-  }, []);
+    if (!active || sceneMounted) return;
+    return whenPageSettles(() => setSceneMounted(true));
+  }, [active, sceneMounted]);
 
   useEffect(() => {
     if (!settingsOpen) return;
@@ -124,8 +144,8 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
 
   return <div className="homeVoyage" ref={sceneRef} data-running={running} data-power={powerNames[throttle]}>
     <div className="homeVoyageWindow" data-ready={ready}>
-      <iframe ref={frameRef} src="/space-demo/lockscreen.html?homepage&v=20261017-controls" title="Space Cadet visiting planets"
-        sandbox="allow-scripts allow-same-origin" onLoad={() => setReady(true)} />
+      {sceneMounted && <iframe ref={frameRef} src="/space-demo/lockscreen.html?homepage&v=20261017-controls" title="Space Cadet visiting planets"
+        sandbox="allow-scripts allow-same-origin" onLoad={() => setReady(true)} />}
     </div>
     <div className="homeVoyageFooter">
       <div className="homeVoyageStory"><span className="voyageStatusDot" aria-hidden="true" /><span>{caption}</span></div>

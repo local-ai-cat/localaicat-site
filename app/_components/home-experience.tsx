@@ -8,6 +8,7 @@ import { HeroCat } from "./hero-cat";
 import { SpaceAtmosphere } from "./space-atmosphere";
 import { HomeVoyage } from "./home-voyage";
 import { PersonalPlans } from "./personal-plans";
+import { productSummary } from "../../lib/product-facts";
 import { TeamPlans } from "./team-plans";
 import { ScrollArrival } from "./scroll-arrival";
 import { AppDemo, type AppDemoSource } from "./app-demo";
@@ -97,6 +98,18 @@ function FeatureIcon({ kind }: { kind: string }) {
   );
 }
 
+/**
+ * The three worlds crossfade in place. Only the active world's words are text: the others are drawn from
+ * `data-text`, so crawlers and screen readers read one headline, not all three run together.
+ */
+function CopyLayers({ copy, mode }: { copy: Record<Mode, string>; mode: Mode }): React.JSX.Element {
+  return <>{MODES.map(item => {
+    const active = mode === item;
+    return <span key={item} className="heroCopyLayer" data-active={active} aria-hidden={!active} inert={!active}
+      data-text={active ? undefined : copy[item]}>{active ? copy[item] : null}</span>;
+  })}</>;
+}
+
 export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
   const [mode] = useSiteMode();
   const [earthMode, setEarthMode] = useState<"personal" | "business">("personal");
@@ -126,12 +139,8 @@ export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
         <SpaceAtmosphere active={inSpace} />
         <div className="heroTightInner">
           <div className="heroHeadline heroEnter heroEnter1">
-            <h1 className="heroCopyStack">
-              {MODES.map(item => <span key={item} className="heroCopyLayer" data-active={mode === item} aria-hidden={mode !== item} inert={mode !== item}>{heroHeadlines[item]}</span>)}
-            </h1>
-            <p className="heroTagline heroCopyStack">
-              {MODES.map(item => <span key={item} className="heroCopyLayer" data-active={mode === item} aria-hidden={mode !== item} inert={mode !== item}>{heroTaglines[item]}</span>)}
-            </p>
+            <h1 className="heroCopyStack"><CopyLayers copy={heroHeadlines} mode={mode} /></h1>
+            <p className="heroTagline heroCopyStack"><CopyLayers copy={heroTaglines} mode={mode} /></p>
           </div>
 
           <div className="heroPersonalityControl"><ModeSelector compact /></div>
@@ -195,7 +204,7 @@ export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
           <p className="sectionEyebrow">What&apos;s inside</p>
           <h2>One cat, many tricks.</h2>
           <p className="detailIntro">
-            Features marked Outdoor are for macOS and require the direct download from this site.
+            {productSummary} Features marked Outdoor are for macOS and require the direct download from this site.
           </p>
         </div>
 

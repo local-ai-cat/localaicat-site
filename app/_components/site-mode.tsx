@@ -7,8 +7,11 @@ import { EARTH_MODES, modeForWorld, nextEarthMode, resolveSiteMode, siteWorld, t
 const STORAGE_KEY = "space-preview-site-mode";
 const EVENT_NAME = "cat-site-mode";
 
+// Holds the choice for this visit when the browser refuses storage, since the address no longer carries it.
+let rememberedMode: Mode | null = null;
+
 function readSaved(key: string): string | null {
-  try { return localStorage.getItem(key); } catch { return null; }
+  try { return localStorage.getItem(key) ?? rememberedMode; } catch { return rememberedMode; }
 }
 
 export function getInitialMode(): Mode {
@@ -17,16 +20,17 @@ export function getInitialMode(): Mode {
 }
 
 export function persistSiteMode(mode: Mode): void {
+  rememberedMode = mode;
   try {
     localStorage.setItem(STORAGE_KEY, mode);
-  } catch { /* The current page still changes when storage is unavailable. */ }
+  } catch { /* rememberedMode carries the choice for this visit. */ }
   document.body.dataset.homeMode = mode;
   document.documentElement.dataset.personality = mode;
   // A ?mode= link picks the world once; the saved choice carries it from then on, so the address stays clean.
   const url = new URL(window.location.href);
   if (url.searchParams.has("mode")) {
     url.searchParams.delete("mode");
-    window.history.replaceState(window.history.state, "", url);
+    window.history.replaceState(null, "", url);
   }
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", mode === "space" ? "#17131f" : "#090909");
   window.dispatchEvent(new CustomEvent<Mode>(EVENT_NAME, { detail: mode }));

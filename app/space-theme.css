@@ -175,7 +175,8 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
 .heroDownloads .appStoreBadgeText small {font-size:9px;}
 .heroDownloads :focus-visible {outline:2px solid var(--accent);outline-offset:5px;}
 .homeVoyage{position:relative;width:min(1100px,100%);margin:-12px auto 0;}
-.homeVoyageWindow{position:relative;height:230px;overflow:hidden;mask-image:linear-gradient(transparent,#000 15%,#000 84%,transparent);}
+/* Long fades at the bottom and sides, so a passing planet dissolves instead of meeting a hard edge. */
+.homeVoyageWindow{position:relative;height:230px;overflow:hidden;mask-image:linear-gradient(transparent,#000 15%,#000 60%,transparent),linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-composite:intersect;}
 .homeVoyageWindow iframe{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;visibility:hidden;transition:opacity 200ms ease-out;}
 .homeVoyageWindow[data-ready="true"] iframe{opacity:1;visibility:visible;}
 @media(prefers-reduced-motion:reduce){.homeVoyageWindow iframe{transition:none;}}

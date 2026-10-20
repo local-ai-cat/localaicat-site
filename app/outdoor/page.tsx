@@ -29,7 +29,7 @@ export default function OutdoorPage() {
         kicker="Outdoor Cat"
         title="The full-freedom edition"
       >
-        <div className="dualCards" style={{ maxWidth: 720 }}>
+        <div className="dualCards" style={{ maxWidth: 720, marginLeft: 0 }}>
           <article className="dualCard dualCardStrong">
             <p className="dualCardEyebrow">Only in Outdoor</p>
             <h3>What the extra freedom buys.</h3>
@@ -77,7 +77,7 @@ export default function OutdoorPage() {
           </article>
         </div>
 
-        <div className="dualCards" style={{ maxWidth: 720 }}>
+        <div className="dualCards" style={{ maxWidth: 720, marginLeft: 0 }}>
           <article className="dualCard dualCardStrong">
             <p className="dualCardEyebrow">Download</p>
             <h3>{version ? `Latest: ${version}` : "Get Outdoor Cat"}</h3>

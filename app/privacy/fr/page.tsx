@@ -115,8 +115,7 @@ export default function PrivacyPageFr() {
             <a href="https://vercel.com/docs/analytics/privacy-policy">la confidentialité de Vercel Analytics</a>.</p>
           <p>Nous comptons aussi les pages publiques avec GoatCounter, sans cookie,
             via une petite image plutôt qu’un script tiers. Seul le chemin public est
-            envoyé, sans paramètres, titre ni URL de provenance. Les totaux sont publics sur{" "}
-            <a href="https://localaicat.goatcounter.com">localaicat.goatcounter.com</a>.
+            envoyé, sans paramètres, titre ni URL de provenance.
             Vercel Speed Insights mesure les performances avec les mêmes préférences.</p>
           <p>L’assistance Chatwoot se charge dans un panneau isolé uniquement à votre demande.
             Elle n’est pas chargée sur les pages de paiement, d’activation ou de compte.

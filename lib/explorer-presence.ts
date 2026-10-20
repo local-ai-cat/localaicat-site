@@ -157,6 +157,14 @@ export class GoatCounterExplorerAnalytics implements ExplorerAnalyticsReader {
   }
 }
 
+/** Counts only, so a stored value that isn't a key can be diagnosed without logging any of it. */
+function tokenShape(token: string): string {
+  const count = (pattern: RegExp): number => token.match(pattern)?.length ?? 0;
+  const longestKeyRun = Math.max(0, ...(token.match(/[A-Za-z0-9_-]+/g) ?? []).map(run => run.length));
+  return `length ${token.length}, whitespace ${count(/\s/g)}, control ${count(/[\u0000-\u001f\u007f]/g)}, ` +
+    `non-ASCII ${count(/[^\u0000-\u007f]/g)}, longest key-like run ${longestKeyRun}`;
+}
+
 let warnedUnconfigured = false;
 /** Says why the counter is off, once per instance; only the key's length is logged, never the key. */
 function warnUnconfigured(env: Readonly<Record<string, string | undefined>> = process.env): void {
@@ -166,7 +174,7 @@ function warnUnconfigured(env: Readonly<Record<string, string | undefined>> = pr
   const site = env.GOATCOUNTER_SITE?.trim() || DEFAULT_GOATCOUNTER_SITE;
   let reason = "GOATCOUNTER_SITE is not a valid site code";
   if (!token) reason = "GOATCOUNTER_READ_TOKEN is not set";
-  else if (!/^[A-Za-z0-9_-]+$/.test(token)) reason = `GOATCOUNTER_READ_TOKEN has unexpected characters (length ${token.length})`;
+  else if (!/^[A-Za-z0-9_-]+$/.test(token)) reason = `GOATCOUNTER_READ_TOKEN has unexpected characters (${tokenShape(token)})`;
   console.warn(`Explorer counter off: ${reason} (site ${JSON.stringify(site.slice(0, 64))})`);
 }
 

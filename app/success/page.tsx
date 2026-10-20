@@ -46,18 +46,24 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   // the key into the server HTML would also bake it into proxy/browser
   // caches, which we want to avoid.
   const customerPortalUrl = getCustomerPortalUrl();
+  // Polar always returns buyers here with a checkout id; without one this is a bookmark or a typed address.
+  const fromCheckout = Boolean(checkoutId);
 
   return (
     <SiteShell>
       <ContentPage
-        intro="Your purchase completed. Download the app if needed, then copy your license key into Settings → Activate License."
-        kicker="Success"
-        title="You're all set"
+        intro={fromCheckout
+          ? "Your purchase completed. Download the app if needed, then copy your license key into Settings → Activate License."
+          : "Your license key is always in the customer portal. Copy it into Settings → Activate License in the app."}
+        kicker={fromCheckout ? "Success" : "License"}
+        title={fromCheckout ? "You're all set" : "Find your license key"}
       >
-        <SuccessActivationCard
-          checkoutId={checkoutId}
-          customerPortalUrl={customerPortalUrl}
-        />
+        {fromCheckout && (
+          <SuccessActivationCard
+            checkoutId={checkoutId}
+            customerPortalUrl={customerPortalUrl}
+          />
+        )}
 
         <DownloadExperience
           appStoreUrl={getAppStoreUrl()}

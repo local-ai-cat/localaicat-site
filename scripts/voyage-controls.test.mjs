@@ -96,3 +96,20 @@ test('native handset and paw ease into the cat’s hand and away without lingeri
  assert.ok(phone.pose(.08).y>phone.pose(.5).y);
  assert.ok(phone.pose(.01).opacity<.02&&phone.pose(.99).opacity<.02);
 });
+
+test('the timeline counts on past the hour and rolls its slider into the next hour, so the voyage never ends',()=>{
+ assert.equal(controls.clockLabel(5),'00:05 / ∞');
+ assert.equal(controls.clockLabel(3599.9),'59:59 / ∞');
+ assert.equal(controls.clockLabel(3735),'1:02:15 / ∞');
+ assert.equal(controls.clockLabel(-4),'00:00 / ∞');
+ assert.deepEqual(controls.timelineWindow(120),{min:0,max:3599});
+ assert.deepEqual(controls.timelineWindow(3600),{min:3600,max:7199});
+ assert.deepEqual(controls.timelineWindow(90061),{min:90000,max:93599});
+});
+
+test('scrolling travels forward or back through the voyage but never before the start',()=>{
+ assert.equal(controls.scrub(100,400),300);
+ assert.equal(controls.scrub(100,-400),0);
+ assert.equal(controls.scrub(100,3,true),124);
+ assert.equal(controls.scrub(1e7,2000),1e7+1000);
+});

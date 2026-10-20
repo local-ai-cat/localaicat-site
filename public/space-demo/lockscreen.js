@@ -157,7 +157,7 @@ function draw(){
  if(homepage){const point=ctx.getTransform().transformPoint({x:catX,y:catY});catTarget={x:point.x,y:point.y};placeCatTarget();}
  ctx.restore();
  rect(0,0,960,600,`rgba(0,0,0,${Number($('dim').value)/100})`);drawBeacon(s,moving);
- $('position').textContent=`${String(Math.floor(s.seconds/60)).padStart(2,'0')}:${String(Math.floor(s.seconds%60)).padStart(2,'0')} / ∞`;$('seek').value=Math.floor(s.seconds);
+ $('position').textContent=SpaceVoyageControls.clockLabel(frameTime);const hour=SpaceVoyageControls.timelineWindow(frameTime);$('seek').min=hour.min;$('seek').max=hour.max;$('seek').value=Math.floor(frameTime);
  $('render-status').textContent=motionReduced?'Reduced motion · still frame':!live?'Still wallpaper':!playing?'Paused':moving?`${activeAction?engine.actionNames[activeAction.type]:phase} · ${$('gentle').checked?6:12} fps ceiling`:'Landed · gentle 6 fps';
  $('chapter-number').textContent=`EXPEDITION ${seed.toString(16).toUpperCase()} · STOP ${s.leg+1}`;
  $('chapter-title').textContent=world.name;
@@ -269,6 +269,15 @@ routeButtons();
 if(!playing){$('play').textContent='▶';$('play').setAttribute('aria-label','Play story');}
 $('play').onclick=()=>{capture();playing=!playing;$('play').textContent=playing?'Ⅱ':'▶';$('play').setAttribute('aria-label',playing?'Pause story':'Play story');schedule();};
 $('seek').oninput=()=>{elapsed=Number($('seek').value);anchor=performance.now();schedule();};
+// In the site's overlay, scrolling over the scene travels through the voyage, as far as you like.
+if(embedded&&!homepage){
+ const travel=pixels=>{elapsed=SpaceVoyageControls.scrub(now(),pixels);anchor=performance.now();schedule();};
+ $('screen').addEventListener('wheel',event=>{event.preventDefault();travel((event.deltaY+event.deltaX)*(event.deltaMode===1?16:1));},{passive:false});
+ let touchY=null;
+ $('screen').addEventListener('touchstart',event=>{touchY=event.touches[0].clientY;},{passive:true});
+ $('screen').addEventListener('touchmove',event=>{if(touchY===null)return;event.preventDefault();const y=event.touches[0].clientY;travel(touchY-y);touchY=y;},{passive:false});
+ $('screen').addEventListener('touchend',()=>{touchY=null;});
+}
 $('speed').onchange=()=>{capture();speed=Number($('speed').value);schedule();};
 $('mode').onchange=()=>{capture();live=$('mode').value==='live';schedule();};
 $('gentle').onchange=schedule;$('dim').oninput=schedule;$('clock').onchange=()=>{$('guides').hidden=!$('clock').checked;};

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 const title = "Local AI Cat · A little universe, all yours.";
-const description = "Your own Space Cadet. On-device chat, transcription, and models. Local on device by default.";
+const description = "Your own Space Cadet. On-device chat, transcription, and models.";
 export const spaceShareImage = "/assets/space-cadet-share-20261017.png";
 export const spaceShareVideo = "/share-study/space-share-motion-v3.mp4";
 

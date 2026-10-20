@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import type { MouseEvent } from "react";
 import { directPlans } from "../../lib/catalog";
-import { getAppStoreUrl, getDirectDownloadUrl } from "../../lib/env";
-import { trackSiteAction } from "../../lib/site-analytics";
 import { useSiteMode } from "./site-mode";
+
+/** On the homepage the install buttons are already above the plans: scroll back to them rather than load a page. */
+function scrollToDownloads(event: MouseEvent<HTMLAnchorElement>): void {
+  const downloads = document.getElementById("download");
+  if (!downloads) return;
+  event.preventDefault();
+  downloads.scrollIntoView({ block: "center" });
+  downloads.querySelector("a")?.focus({ preventScroll: true });
+}
 
 /** The same offers and purchase destinations on the homepage and pricing pages. */
 export function PersonalPlans() {
@@ -17,10 +25,7 @@ export function PersonalPlans() {
           <h3 className="purchasePlanName">Free</h3>
           <p className="homePlanPrice">£0<span className="homePlanCadence">forever</span></p>
           <p className="dualCardBody">Chat, transcription and local models. No account, no trial clock.</p>
-          <div className="planButtonPair">
-            <a className="secondaryButton purchasePlanButton" href={getDirectDownloadUrl()} onClick={() => trackSiteAction("download_clicked", "mac")}>Mac download</a>
-            <a className="secondaryButton purchasePlanButton" href={getAppStoreUrl()} onClick={() => trackSiteAction("download_clicked", "app_store")}>App Store</a>
-          </div>
+          <Link className="secondaryButton purchasePlanButton" href="/#download" onClick={scrollToDownloads}>Download free</Link>
         </article>
         {directPlans.filter(plan => plan.name !== "Developer Mode").map(plan => {
           const annual = plan.name === "Pro Annual";

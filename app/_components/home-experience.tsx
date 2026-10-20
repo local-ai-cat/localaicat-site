@@ -20,8 +20,8 @@ const heroHeadlines: Record<Mode, string> = {
 };
 
 const heroTaglines: Record<Mode, string> = {
-  space: "On-device chat, transcription, and models. Local on device by default.\nNo cloud. No tracking. Just you and your cat.",
-  personal: "On-device chat, transcription, and models. Local on device by default.\nNo cloud. No tracking. Just you and your cat.",
+  space: "On-device chat, transcription, and models.\nNo cloud. No tracking. Just you and your cat.",
+  personal: "On-device chat, transcription, and models.\nNo cloud. No tracking. Just you and your cat.",
   business: "Secure AI, transcription, window management and wellness — rolled out on your terms."
 };
 

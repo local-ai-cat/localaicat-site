@@ -7,19 +7,19 @@ interface SitemapPage {
   readonly changeFrequency: "weekly" | "monthly" | "yearly";
 }
 
-// Public pages only: purchase results (/success, /cancel), redirects (/download) and internal tools stay out.
+// Public pages only: purchase results (/success, /cancel), redirects (/download), internal tools, the /docs ledger,
+// /pricing/direct (canonical to /pricing) and /team (the checkout step behind /teams) stay out.
 const PAGES: readonly SitemapPage[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
   { path: "/pricing", priority: 0.9, changeFrequency: "monthly" },
   { path: "/space", priority: 0.8, changeFrequency: "monthly" },
   { path: "/outdoor", priority: 0.8, changeFrequency: "monthly" },
   { path: "/download/app-store", priority: 0.8, changeFrequency: "monthly" },
-  { path: "/pricing/direct", priority: 0.7, changeFrequency: "monthly" },
   { path: "/pricing/app-store", priority: 0.7, changeFrequency: "monthly" },
   { path: "/teams", priority: 0.7, changeFrequency: "monthly" },
-  { path: "/team", priority: 0.7, changeFrequency: "monthly" },
   { path: "/support", priority: 0.7, changeFrequency: "monthly" },
   { path: "/window-management", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/help/ssh", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
   { path: "/manage", priority: 0.5, changeFrequency: "yearly" },
   { path: "/privacy", priority: 0.4, changeFrequency: "yearly" },

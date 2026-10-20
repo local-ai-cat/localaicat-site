@@ -7,7 +7,11 @@ import { SiteShell } from "../_components/site-shell";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Local AI Cat keeps your chats, models, and voice inputs on your device. Read our privacy policy to learn what we do and do not collect."
+    "Local AI Cat keeps your chats, models, and voice inputs on your device. Read our privacy policy to learn what we do and do not collect.",
+  alternates: {
+    canonical: "/privacy",
+    languages: { en: "/privacy", fr: "/privacy/fr", "x-default": "/privacy" }
+  }
 };
 
 export default function PrivacyPage() {

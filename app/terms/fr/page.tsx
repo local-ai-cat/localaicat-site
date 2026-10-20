@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getSiteUrl } from "../../../lib/env";
+import { spaceSharingMetadata } from "../../../lib/space-sharing";
 import Link from "next/link";
 import { ContentPage } from "../../_components/content-page";
 import { SiteShell } from "../../_components/site-shell";
@@ -6,12 +8,19 @@ import { SiteShell } from "../../_components/site-shell";
 export const metadata: Metadata = {
   title: "Conditions d'utilisation",
   description:
-    "Conditions d'utilisation de Local AI Cat : usage de l'IA sur l'appareil, forfaits payants et différences entre les versions App Store et téléchargement direct."
+    "Conditions d'utilisation de Local AI Cat : usage de l'IA sur l'appareil, forfaits payants et différences entre les versions App Store et téléchargement direct.",
+  alternates: {
+    canonical: "/terms/fr",
+    languages: { en: "/terms", fr: "/terms/fr", "x-default": "/terms" }
+  },
+  // Next replaces openGraph as a whole, so the French card restates the shared artwork with its own locale.
+  openGraph: { ...spaceSharingMetadata(getSiteUrl()).openGraph, locale: "fr_FR" }
 };
 
 export default function TermsPageFr() {
   return (
     <SiteShell>
+      <div lang="fr">
       <ContentPage
         intro="Les présentes conditions décrivent comment Local AI Cat peut être utilisé et ce à quoi vous pouvez vous attendre concernant les fonctionnalités d'IA sur l'appareil, les achats en téléchargement direct et les déploiements professionnels de l'application."
         kicker="Conditions"
@@ -119,6 +128,7 @@ export default function TermsPageFr() {
           </p>
         </section>
       </ContentPage>
+      </div>
     </SiteShell>
   );
 }

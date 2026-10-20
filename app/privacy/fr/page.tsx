@@ -1,5 +1,7 @@
 import { AnalyticsPreference } from "../../_components/site-analytics";
 import type { Metadata } from "next";
+import { getSiteUrl } from "../../../lib/env";
+import { spaceSharingMetadata } from "../../../lib/space-sharing";
 import Link from "next/link";
 import { ContentPage } from "../../_components/content-page";
 import { SiteShell } from "../../_components/site-shell";
@@ -7,12 +9,19 @@ import { SiteShell } from "../../_components/site-shell";
 export const metadata: Metadata = {
   title: "Politique de confidentialité",
   description:
-    "Local AI Cat conserve vos conversations, vos modèles et vos entrées vocales sur votre appareil. Découvrez ce que nous collectons et ne collectons pas."
+    "Local AI Cat conserve vos conversations, vos modèles et vos entrées vocales sur votre appareil. Découvrez ce que nous collectons et ne collectons pas.",
+  alternates: {
+    canonical: "/privacy/fr",
+    languages: { en: "/privacy", fr: "/privacy/fr", "x-default": "/privacy" }
+  },
+  // Next replaces openGraph as a whole, so the French card restates the shared artwork with its own locale.
+  openGraph: { ...spaceSharingMetadata(getSiteUrl()).openGraph, locale: "fr_FR" }
 };
 
 export default function PrivacyPageFr() {
   return (
     <SiteShell>
+      <div lang="fr">
       <ContentPage
         intro="Local AI Cat est conçu autour d'une IA exécutée sur l'appareil. Par défaut, vos conversations, vos modèles et vos entrées vocales restent sur votre propre matériel au lieu de transiter par nos serveurs."
         kicker="Confidentialité"
@@ -135,6 +144,7 @@ export default function PrivacyPageFr() {
           </p>
         </section>
       </ContentPage>
+      </div>
     </SiteShell>
   );
 }

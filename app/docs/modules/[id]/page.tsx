@@ -24,13 +24,23 @@ export function generateStaticParams() {
   return getModules().map((module) => ({ id: module.id }));
 }
 
+const metaDescriptionLength = 160;
+
+/** Ledger descriptions run to paragraphs; a meta description stops at the first sentence that fits. */
+function shortDescription(description: string | null | undefined): string | undefined {
+  if (!description) return undefined;
+  if (description.length <= metaDescriptionLength) return description;
+  const cut = description.slice(0, metaDescriptionLength - 1);
+  return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
+}
+
 export async function generateMetadata({ params }: ModulePageProps): Promise<Metadata> {
   const { id } = await params;
   const module = getModule(id);
   if (!module) return { title: "Module not found" };
   return {
     title: module.name,
-    description: module.description ?? `Shipping and testing details for ${module.name}.`
+    description: shortDescription(module.description) ?? `Shipping and testing details for ${module.name}.`
   };
 }
 

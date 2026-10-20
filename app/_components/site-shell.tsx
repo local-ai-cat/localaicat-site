@@ -67,7 +67,7 @@ export function SiteShell({
       <SiteMode force={siteMode} />
       <ScrollHeader>
         <div className="siteHeaderInner">
-          <Link className="brandMark" href="/" aria-label="Local AI Cat home">
+          <Link className="brandMark" href="/">
             <span className="brandIcon">
               <PixelCat decorative className="brandIconImageSpace"/>
               <Image

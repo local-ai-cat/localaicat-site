@@ -4,6 +4,8 @@ import { PricingExperience } from "../pricing-experience";
 
 export const metadata: Metadata = {
   title: "Mac pricing",
+  // The same plans as /pricing; this address only adds the checkout-unavailable notice.
+  alternates: { canonical: "/pricing" },
   description: "Free core. Pro from £4 a month or £40 a year. Developer Mode is a £10 one-time purchase."
 };
 

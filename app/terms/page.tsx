@@ -6,7 +6,11 @@ import { SiteShell } from "../_components/site-shell";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
-    "Terms of service for Local AI Cat, covering on-device AI usage, paid plans, and the difference between App Store and direct-download builds."
+    "Terms of service for Local AI Cat, covering on-device AI usage, paid plans, and the difference between App Store and direct-download builds.",
+  alternates: {
+    canonical: "/terms",
+    languages: { en: "/terms", fr: "/terms/fr", "x-default": "/terms" }
+  }
 };
 
 export default function TermsPage() {

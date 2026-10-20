@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { SiteShell } from "../../_components/site-shell";
@@ -7,6 +8,13 @@ const experiences = {
   cockpit: {label:"Menu bar",title:"Welcome to your cockpit.", description:"Explore the menu-bar concept. These controls are a simulation.", file:"cockpit.html"},
   voyage: {label:"Night voyage",title:"Let your cat wander.", description:"A procedural journey through little worlds. An interactive preview of Night Voyage.", file:"lockscreen.html"},
 } as const;
+
+export async function generateMetadata({params}: {params: Promise<{experience:string}>}): Promise<Metadata> {
+  const {experience} = await params;
+  if (!Object.hasOwn(experiences, experience)) return {};
+  const item = experiences[experience as keyof typeof experiences];
+  return { title: `${item.label}: ${item.title}`, description: item.description };
+}
 
 export default async function SpaceExperiencePage({params}: {params: Promise<{experience:string}>}) {
   const {experience} = await params;

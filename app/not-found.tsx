@@ -4,7 +4,8 @@ import { SiteShell } from "./_components/site-shell";
 import { PixelCat } from "./_components/space-experience";
 
 export const metadata: Metadata = {
-  title: "Page not found"
+  title: "Page not found",
+  robots: { index: false, follow: true }
 };
 
 export default function NotFound() {

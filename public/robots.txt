@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /screenshots
+# Design studies behind the /space pages. The icons and images in /space-demo/ stay crawlable.
+Disallow: /space-demo/*.html
 
 Sitemap: https://localaicat.com/sitemap.xml

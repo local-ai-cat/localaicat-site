@@ -144,19 +144,39 @@ export class GoatCounterExplorerAnalytics implements ExplorerAnalyticsReader {
         redirect: "error",
         cache: "no-store"
       });
-      if (!result.ok) return null;
+      if (!result.ok) {
+        console.warn(`Explorer counter: GoatCounter answered ${result.status}`);
+        return null;
+      }
       return { visitors: dailyVisitors(await boundedJson(result)), updatedAt: now };
-    } catch {
+    } catch (error) {
       // A missing entitlement, expired token, timeout or provider outage is not zero traffic.
+      console.warn(`Explorer counter: GoatCounter request failed (${error instanceof Error ? error.name : "unknown"})`);
       return null;
     }
   }
 }
 
+let warnedUnconfigured = false;
+/** Says why the counter is off, once per instance; only the key's length is logged, never the key. */
+function warnUnconfigured(env: Readonly<Record<string, string | undefined>> = process.env): void {
+  if (warnedUnconfigured) return;
+  warnedUnconfigured = true;
+  const token = env.GOATCOUNTER_READ_TOKEN?.trim() ?? "";
+  const site = env.GOATCOUNTER_SITE?.trim() || DEFAULT_GOATCOUNTER_SITE;
+  let reason = "GOATCOUNTER_SITE is not a valid site code";
+  if (!token) reason = "GOATCOUNTER_READ_TOKEN is not set";
+  else if (!/^[A-Za-z0-9_-]+$/.test(token)) reason = `GOATCOUNTER_READ_TOKEN has unexpected characters (length ${token.length})`;
+  console.warn(`Explorer counter off: ${reason} (site ${JSON.stringify(site.slice(0, 64))})`);
+}
+
 let configured: { config: ExplorerAnalyticsConfig; reader: GoatCounterExplorerAnalytics } | undefined;
 export function configuredExplorerAnalytics(): ExplorerAnalyticsReader | null {
   const config = explorerAnalyticsConfig();
-  if (!config) return null;
+  if (!config) {
+    warnUnconfigured();
+    return null;
+  }
   if (!configured || Object.keys(config).some(key =>
     config[key as keyof ExplorerAnalyticsConfig] !== configured?.config[key as keyof ExplorerAnalyticsConfig])) {
     configured = { config, reader: new GoatCounterExplorerAnalytics(config) };

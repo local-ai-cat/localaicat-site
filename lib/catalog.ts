@@ -42,8 +42,8 @@ export const businessPlans = [
     name: "Enterprise",
     price: "custom",
     cadence: "",
-    note: "Deployment, invoicing, and support.",
-    bullets: [".pkg and managed rollout", "Procurement and invoicing", "Support for serious cat business"],
+    note: "Your build, your rollout.",
+    bullets: ["Choose the capabilities in your build", ".pkg and managed rollout, procurement and invoicing", "Support for serious cat business"],
     ctaHref: "/contact",
     ctaLabel: "Contact sales"
   }

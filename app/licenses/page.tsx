@@ -169,7 +169,7 @@ const codeContributions: ReadonlyArray<{
 
 export default function LicensesPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
         intro="Local AI Cat depends on open source software. This page mirrors the current Swift package graph used by the app so attribution is easy to inspect without digging through the project file."
         kicker="Licenses"

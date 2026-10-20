@@ -38,7 +38,7 @@ body[data-home-mode="space"] .personalitySwitch button[aria-pressed="true"] {bac
 .heroTight .heroHeadline h1 {font-size:clamp(48px,6vw,80px);line-height:.99;font-weight:600;white-space:pre-line;letter-spacing:-.048em;}
 .heroTight .heroTagline {max-width:640px;min-height:55px;margin:24px auto 0;font-size:16px;line-height:1.7;}
 .heroTight .heroEnter {animation:none;opacity:1;}
-body[data-home-mode="space"] .floatingCats {display:none;}
+
 .shipFlame {transform-origin:6px 12px;animation:flamePulse 1s steps(2) infinite;}
 @keyframes flamePulse {50%{transform:scaleY(.7)}}
 .homeMode .downloadBand {padding-top:24px;gap:16px;}
@@ -175,7 +175,8 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
 .heroDownloads .appStoreBadgeText small {font-size:9px;}
 .heroDownloads :focus-visible {outline:2px solid var(--accent);outline-offset:5px;}
 .homeVoyage{position:relative;width:min(1100px,100%);margin:-12px auto 0;}
-.homeVoyageWindow{position:relative;height:230px;overflow:hidden;mask-image:linear-gradient(transparent,#000 15%,#000 84%,transparent);}
+/* Long fades at the bottom and sides, so a passing planet dissolves instead of meeting a hard edge. */
+.homeVoyageWindow{position:relative;height:230px;overflow:hidden;mask-image:linear-gradient(transparent,#000 15%,#000 60%,transparent),linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-composite:intersect;}
 .homeVoyageWindow iframe{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;visibility:hidden;transition:opacity 200ms ease-out;}
 .homeVoyageWindow[data-ready="true"] iframe{opacity:1;visibility:visible;}
 @media(prefers-reduced-motion:reduce){.homeVoyageWindow iframe{transition:none;}}
@@ -414,7 +415,6 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 .explorerSign {position:relative;z-index:12;display:flex;justify-content:flex-end;max-width:1200px;margin:auto;padding:12px 20px 0;}
 .explorerSign:has(.explorerPresence) {min-height:44px;}
 .explorerSign:not(:has(.explorerPresence)) {display:none;}
-.siteFooter .footerLinks {flex-wrap:wrap;}
 .spaceDesigns {padding:32px 0 60px;}
 .designsIntro {text-align:center;margin:28px auto 64px;}
 .designsIntro h1 {font-size:clamp(48px,6.8vw,86px);line-height:1.02;letter-spacing:-.045em;font-weight:500;margin:24px 0;}
@@ -489,7 +489,6 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 .crewPortraits .pixelCat:nth-child(2) { width:64px; height:64px; }
 .crewPortraits .pixelCat:first-child { filter:hue-rotate(70deg); }
 .crewPortraits .pixelCat:last-child { filter:hue-rotate(300deg); }
-.crewPage .enterpriseBand { margin-top:36px; }
 .footerTextSpace { display:none; }
 body[data-home-mode="space"] .footerTextSpace { display:inline; }
 body[data-home-mode="space"] .footerTextEarth { display:none; }

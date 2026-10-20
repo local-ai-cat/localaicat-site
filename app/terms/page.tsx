@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <SiteShell navMode="legal">
+    <SiteShell>
       <ContentPage
         intro="These terms describe how Local AI Cat may be used and what to expect from the app's on-device AI features, direct-download purchases, and business rollout paths."
         kicker="Terms"

@@ -10,7 +10,6 @@ import { ExplorerCount } from "./explorer-presence";
 
 type SiteShellProps = {
   children: ReactNode;
-  navMode?: "default" | "legal";
   /** Force brand icon/tagline to a specific mode on deterministic pages */
   siteMode?: "personal" | "business";
   /** Widen the content frame for dense data views (e.g. the modules grid) */
@@ -27,23 +26,42 @@ const navLinks =
     { href: "/#download", label: "Download", cta: true }
   ] as const;
 
-const legalLinks =
+const footerGroups =
   [
-    { href: "/privacy", label: "Privacy" },
-    { href: "/terms", label: "Terms" },
-    { href: "/licenses", label: "Licenses" },
-    { href: "/support", label: "Support" }
+    {
+      title: "Product",
+      links: [
+        { href: "/space", label: "Explore" },
+        { href: "/pricing", label: "Pricing" },
+        { href: "/outdoor", label: "Outdoor Cat" },
+        { href: "/download/app-store", label: "App Store" },
+        { href: "/teams", label: "Teams" }
+      ]
+    },
+    {
+      title: "Help",
+      links: [
+        { href: "/support", label: "FAQ" },
+        { href: "/contact", label: "Contact" },
+        { href: "/manage", label: "Manage billing" }
+      ]
+    },
+    {
+      title: "Legal",
+      links: [
+        { href: "/privacy", label: "Privacy" },
+        { href: "/terms", label: "Terms" },
+        { href: "/licenses", label: "Licenses" }
+      ]
+    }
   ] as const;
 
 export function SiteShell({
   children,
-  navMode = "default",
   siteMode,
   wide = false,
   showWorldSelector = true
 }: SiteShellProps) {
-  const links = navMode === "legal" ? legalLinks : navLinks;
-
   return (
     <>
       <SiteMode force={siteMode} />
@@ -78,7 +96,7 @@ export function SiteShell({
 
           <div className="headerPersonality">{showWorldSelector && <ModeSelector compact />}</div>
           <nav aria-label="Primary" className="siteNav siteNavDesktop">
-            {links.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 className={"cta" in link && link.cta ? "navCta" : undefined}
                 href={link.href}
@@ -89,7 +107,7 @@ export function SiteShell({
             ))}
           </nav>
 
-          <MobileNav links={links} showWorldSelector={showWorldSelector} />
+          <MobileNav links={navLinks} showWorldSelector={showWorldSelector} />
         </div>
       </ScrollHeader>
 
@@ -105,13 +123,18 @@ export function SiteShell({
             <p className="footerText"><span className="footerTextSpace">Your own personal space.</span><span className="footerTextEarth">AI that stays at home.</span></p>
           </div>
 
-          <nav aria-label="Footer" className="footerLinks">
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/manage">Manage</Link>
-            <Link href="/support">Support</Link>
+          <nav aria-label="Footer" className="footerColumns">
+            {footerGroups.map((group) => (
+              <div className="footerColumn" key={group.title}>
+                <p className="footerColumnTitle">{group.title}</p>
+                <ul className="footerLinks">
+                  {group.links.map((link) => <li key={link.href}><Link href={link.href}>{link.label}</Link></li>)}
+                </ul>
+              </div>
+            ))}
           </nav>
         </div>
+        <p className="footerFine">© {new Date().getFullYear()} Local AI Cat. Made with care, and a cat.</p>
       </footer>
     </>
   );

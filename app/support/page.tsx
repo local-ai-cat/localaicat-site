@@ -85,12 +85,12 @@ const faqSections: readonly FAQSection[] = [
       {
         question: "How do I activate a license key for Outdoor Cat?",
         answer:
-          "Buy on the pricing page. The success page opens the app to claim the license, or shows your key to paste into Settings → Activate License. The key also stays in the customer portal."
+          "Buy on the pricing page. The success page shows your license key: copy it, then paste it into Settings → Activate License in the app. The key also stays in the customer portal."
       },
       {
         question: "Can I use my license on more than one Mac?",
         answer:
-          "Activation limits depend on the plan you purchased. Your key's details, including its activations, are in the customer portal. On Team, every person has their own seat and key. Questions: support@localaicat.com."
+          "Yes, up to 5 Macs per license key. Removing the license from a Mac frees its slot, and the customer portal lists every activation. On Team, every person has their own seat and key. Questions: support@localaicat.com."
       },
       {
         question: "I bought Team. Do I need Pro for myself too?",
@@ -110,7 +110,7 @@ const faqSections: readonly FAQSection[] = [
       {
         question: "The app won't open on my Mac. What should I try?",
         answer:
-          "Make sure you're running macOS 15.2+ on Apple Silicon. If you downloaded Outdoor Cat, right-click the app and choose Open the first time to bypass Gatekeeper. If the issue persists, email support@localaicat.com with your macOS version."
+          "Make sure you're running macOS 15.2+ on Apple Silicon. If you downloaded Outdoor Cat, move it from the disk image into Applications before opening it. If the issue persists, email support@localaicat.com with your macOS version."
       },
       {
         question: "A model download failed or is stuck. How do I fix it?",

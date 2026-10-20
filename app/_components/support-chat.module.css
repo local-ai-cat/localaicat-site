@@ -15,6 +15,7 @@
   box-shadow: 0 3px 18px #0002;
   cursor: pointer;
 }
+.triggerIcon { flex: none; }
 
 .dialog {
   position: fixed;
@@ -57,5 +58,20 @@
 
 @media (max-width: 480px) {
   .dialog { inset: auto 10px 10px; width: calc(100vw - 20px); height: min(650px, calc(100dvh - 20px)); }
-  .trigger { bottom: 12px; left: 12px; }
+}
+
+/* On phones the launcher is a small round icon in the corner, so it never sits over a heading. */
+@media (max-width: 720px) {
+  .trigger {
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: auto;
+    right: 14px;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    box-shadow: 0 4px 20px #0004;
+  }
+  .triggerIcon { width: 19px; height: 19px; }
+  .triggerLabel { display: none; }
 }

@@ -9,6 +9,8 @@ body.immersive{overflow:hidden}.actions{flex-wrap:wrap}.promo-link{font-size:11p
 .homepage .transport,.homepage .scene-shortcuts,.homepage #guides,.homepage #caption,.homepage #exit,.homepage .sc-skip{display:none!important;}
 .homepage #screen{background:#17131f;height:100vh;aspect-ratio:auto;border:0;border-radius:0;}
 .homepage canvas{position:absolute;left:50%;top:50%;width:max(100%,1000px);height:auto;transform:translate(-37.5%,-50%);}
+/* The canvas is narrower than the homepage window on wide screens: fade its sides so planets never meet a hard edge. */
+.homepage canvas{mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);}
 
 @media(max-width:650px){.homepage canvas{width:800px;}}
 .power-preview{border-top:1px solid #54445f;margin-top:20px;padding-top:16px}.power-preview summary{cursor:pointer;color:#d9c8ef}.power-preview p,.power-preview small{font-size:12px;line-height:1.5;color:#bbaacb}

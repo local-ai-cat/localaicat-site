@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { supportedDevicesAnswer } from "../../lib/product-facts";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 
 export const metadata: Metadata = {
-  title: "Support",
+  title: "FAQ: offline use, devices, pricing and licenses",
   description:
-    "Frequently asked questions about Local AI Cat, including offline use, supported devices, billing paths, and how to get help."
+    "Answers about Local AI Cat: offline use, supported devices, how it compares with ChatGPT and Ollama, pricing, licenses and getting help."
 };
 
 interface FAQItem {
@@ -24,8 +25,7 @@ const faqSections: readonly FAQSection[] = [
     items: [
       {
         question: "What devices are supported?",
-        answer:
-          "iPhone with iOS 18.2+, iPad with iPadOS 18.2+, and Mac with macOS 15.2+ on Apple Silicon (M1 or newer). Intel Macs are not supported."
+        answer: supportedDevicesAnswer
       },
       {
         question: "Does it really work offline?",
@@ -41,6 +41,26 @@ const faqSections: readonly FAQSection[] = [
         question: "Is my data sent anywhere?",
         answer:
           "No. Everything runs on-device. Your conversations, transcriptions, and model downloads stay on your Mac, iPhone, or iPad. There is no cloud processing."
+      }
+    ]
+  },
+  {
+    title: "How it compares",
+    items: [
+      {
+        question: "How is Local AI Cat different from ChatGPT?",
+        answer:
+          "ChatGPT runs in the cloud, so your messages go to OpenAI's servers. Local AI Cat runs open models on your own Mac, iPhone or iPad: chats and recordings never leave the device, it works offline, and there's no account. Cloud models are bigger; local ones are private and always there."
+      },
+      {
+        question: "How is it different from Ollama or LM Studio?",
+        answer:
+          "Ollama and LM Studio are model runners for desktop computers, mostly used by developers and enthusiasts. Local AI Cat is an everyday app: chat, transcription, translation and Mac tools in one native app, on iPhone and iPad too. On the Mac, Outdoor Cat also offers a local OpenAI-compatible API, and Developer Mode loads compatible models from Hugging Face."
+      },
+      {
+        question: "Is Local AI Cat free?",
+        answer:
+          "Yes. Chat, transcription and local models are free, with no account and no trial clock. Pro (£4/month or £40/year) adds curated Pro models and early access to new features; Developer Mode is a £10 one-time unlock."
       }
     ]
   },
@@ -75,7 +95,7 @@ const faqSections: readonly FAQSection[] = [
       {
         question: "What does Pro include?",
         answer:
-          "Pro unlocks premium features across the app. It's available as £4/month or £40/year on both Indoor Cat (App Store) and Outdoor Cat (direct download). The free tier includes basic chat and transcription."
+          "Pro adds curated Pro models, Developer Mode while you're subscribed, and early access to new features. It's £4/month or £40/year on both Indoor Cat (App Store) and Outdoor Cat (direct download). The free app already includes chat, transcription and local models."
       },
       {
         question: "What is Developer Mode?",

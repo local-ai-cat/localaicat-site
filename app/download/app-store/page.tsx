@@ -4,6 +4,7 @@ import { ContentPage } from "../../_components/content-page";
 import { SiteShell } from "../../_components/site-shell";
 import { DownloadLink } from "../../_components/download-link";
 import { getAppStoreUrl } from "../../../lib/env";
+import { appStoreName } from "../../../lib/product-facts";
 
 export const metadata: Metadata = {
   title: "App Store Download",
@@ -22,9 +23,10 @@ export default function AppStoreDownloadPage() {
         <section className="contentCard contentCardTight">
           <h2>Get the app</h2>
           <p>
-            Indoor Cat is available for iPhone, iPad, and Mac. Upgrade to Pro
-            or Developer Mode inside the app through Apple billing, or redeem
-            an existing website license key from Settings.
+            Indoor Cat is available for iPhone, iPad, and Mac. On the App Store
+            it is listed as {appStoreName}. Upgrade to Pro or Developer Mode
+            inside the app through Apple billing, or redeem an existing website
+            license key from Settings.
           </p>
           <div className="routeActions">
             <DownloadLink channel="app_store" className="planButton" href={getAppStoreUrl()}>

@@ -49,7 +49,7 @@ test("public projection is daily visitors, never pageviews or fabricated live pr
   });
 });
 
-test("only the fixed site's total is queried, from UTC midnight to the end of the current hour", async () => {
+test("only the fixed site's total is queried, from UTC midnight to the current hour", async () => {
   const fetcher: ExplorerAnalyticsFetch = async (input, init) => {
     const url = new URL(input);
     assert.equal(url.origin, "https://localaicat-test.goatcounter.com");
@@ -68,7 +68,7 @@ test("only the fixed site's total is queried, from UTC midnight to the end of th
   assert.equal((await result.json()).visitsToday, 12);
 });
 
-test("the range stays inside the UTC day: at least an hour from midnight, never past the next midnight", async () => {
+test("the range ends on the current hour's bucket, so it never reaches into the next UTC day (GoatCounter ends are inclusive)", async () => {
   const ranges: Record<string, string>[] = [];
   const analytics = (now: number): Promise<unknown> => new GoatCounterExplorerAnalytics(CONFIG, async input => {
     ranges.push(Object.fromEntries(new URL(input).searchParams));
@@ -78,9 +78,9 @@ test("the range stays inside the UTC day: at least an hour from midnight, never 
   await analytics(Date.parse("2026-10-17T09:15:30Z"));
   await analytics(Date.parse("2026-10-17T23:59:59.999Z"));
   assert.deepEqual(ranges, [
-    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T01:00:00Z" },
-    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T10:00:00Z" },
-    { start: "2026-10-17T00:00:00Z", end: "2026-10-18T00:00:00Z" }
+    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T00:00:00Z" },
+    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T09:00:00Z" },
+    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T23:00:00Z" }
   ]);
 });
 

@@ -89,7 +89,7 @@ function dailyVisitors(value: unknown): number {
   return payload.total_utc;
 }
 
-/** GoatCounter ranges are whole hours: from UTC midnight to the end of the current hour, never past the day. */
+/** GoatCounter ranges are whole hours, and both ends are inclusive hour buckets (`hour <= end`). */
 function hourAlignedIso(time: number): string {
   return new Date(time).toISOString().replace(/\.\d{3}Z$/, "Z");
 }
@@ -131,7 +131,8 @@ export class GoatCounterExplorerAnalytics implements ExplorerAnalyticsReader {
 
   private async query(now: number): Promise<ExplorerDailyVisitors | null> {
     const start = Math.floor(now / DAY_MS) * DAY_MS;
-    const end = Math.min(start + DAY_MS, Math.max(start + HOUR_MS, Math.ceil(now / HOUR_MS) * HOUR_MS));
+    // The current hour's bucket is the last one: asking for the next hour (or midnight) would count tomorrow's first hour.
+    const end = Math.floor(now / HOUR_MS) * HOUR_MS;
     const url = new URL(`https://${this.config.site}.goatcounter.com/api/v0/stats/total`);
     url.searchParams.set("start", hourAlignedIso(start));
     url.searchParams.set("end", hourAlignedIso(end));

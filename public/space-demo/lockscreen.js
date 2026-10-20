@@ -6,6 +6,19 @@ const PROMO_QR=["0000000000000000000000000000000000000", "0000000000000000000000
 // The Cadet's rocket launches from the middle of the plaque's code (two pixels per module).
 const PROMO_ROCKET=SpaceRocket.qrBadge(PROMO_QR.length*2,2);
 const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d'),engine=SpaceStory;
+// The scene is drawn in 960x600 units. The canvas itself holds as many pixels as it covers on screen, so the
+// tilted rocket and the cat keep crisp edges instead of a small canvas being stretched into soft blocks.
+const sceneWidth=960,sceneHeight=600,maxBackingScale=3;
+let backingScale=1;
+function fitBacking(){
+ const box=canvas.getBoundingClientRect();
+ if(!box.width||!box.height)return false;
+ const wanted=Math.max(box.width/sceneWidth,box.height/sceneHeight)*devicePixelRatio;
+ const next=Math.min(maxBackingScale,Math.max(1,Math.ceil(wanted*2)/2));
+ if(next===backingScale)return false;
+ backingScale=next;canvas.width=sceneWidth*next;canvas.height=sceneHeight*next;
+ return true;
+}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let motionReduced=reduced.matches;
 const parameters=new URLSearchParams(location.search);
@@ -29,7 +42,7 @@ if(homepage){
  editCat.addEventListener('click',()=>parent.postMessage({type:'voyage-edit-cat'},location.origin));
  const observer=new ResizeObserver(()=>{
   const frame=canvas.getBoundingClientRect(),screen=$('screen').getBoundingClientRect();
-  sceneViewport={left:frame.left-screen.left,top:frame.top-screen.top,scale:frame.width/canvas.width};
+  sceneViewport={left:frame.left-screen.left,top:frame.top-screen.top,scale:frame.width/sceneWidth};
   placeCatTarget();
  });
  observer.observe(canvas);observer.observe($('screen'));
@@ -46,7 +59,21 @@ function setThrottle(index){
  elapsed=next.elapsed;anchor=next.anchor;speed=next.rate;powerState.energyMode=next.energyMode;
  $('energy-mode').value=next.energyMode;lastInstruments='';schedule();
 }
-function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h);}
+// Pixel-art cells meet exactly on screen pixels, so neighbours never leave a faint seam between them.
+const opaqueColour=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i,seamOverlap=.5;
+function rect(x,y,w,h,color){
+ ctx.fillStyle=color;x=Math.round(x);y=Math.round(y);
+ const m=ctx.getTransform();
+ if(m.b===0&&m.c===0){
+  const left=Math.round(m.e+x*m.a),right=Math.round(m.e+(x+w)*m.a),top=Math.round(m.f+y*m.d),bottom=Math.round(m.f+(y+h)*m.d);
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillRect(Math.min(left,right),Math.min(top,bottom),Math.abs(right-left),Math.abs(bottom-top));
+  ctx.restore();return;
+ }
+ // Tilted: a solid cell reaches half a screen pixel into its neighbours; translucent ones stay exact.
+ const pad=opaqueColour.test(color)?seamOverlap/Math.hypot(m.a,m.b):0;
+ ctx.fillRect(x-pad,y-pad,w+pad*2,h+pad*2);
+}
 function sprite(rows,x,y,scale,color){
  rows.forEach((row,j)=>[...row].forEach((cell,i)=>{if(cell!=='#')return;let ink=color;if(homepage&&i>=4&&i<=11&&j>=4&&j<=10)ink='#b798ed';rect(x+i*scale,y+j*scale,scale,scale,ink);}));
 }
@@ -91,6 +118,7 @@ function makePlanet(w){
  return c;
 }
 function draw(){
+ ctx.setTransform(backingScale,0,0,backingScale,0,0);
  const frameTime=now(),s=engine.state(frameTime);
  if(cachedLeg!==s.leg){cachedLeg=s.leg;world=routeWorld(s.leg);previous=routeWorld(s.leg-1);planetArt=makePlanet(world);previousArt=makePlanet(previous);starField=engine.destination(seed,0).stars;updateAntics();}
  const activeAction=engine.actionAt(world,s.local);
@@ -156,7 +184,7 @@ function draw(){
  drawTether(crew,{x:catX,y:catY},{x:shipX,y:shipY},layout.angle);
  if(!grounded){catSprite(catX,catY,3,'#e9e3ff');}
  else {drawSurfaceActivity(ground,catX,catY,catPose,s.local);drawCat(catX,catY,catPose);if(crew.reach>0){rect(catX+43,catY+25,5+crew.reach*5,3,'#e9e3ff');}}
- if(homepage){const point=ctx.getTransform().transformPoint({x:catX,y:catY});catTarget={x:point.x,y:point.y};placeCatTarget();}
+ if(homepage){const point=ctx.getTransform().transformPoint({x:catX,y:catY});catTarget={x:point.x/backingScale,y:point.y/backingScale};placeCatTarget();}
  ctx.restore();
  rect(0,0,960,600,`rgba(0,0,0,${Number($('dim').value)/100})`);drawBeacon(s,moving);
  $('position').textContent=SpaceVoyageControls.clockLabel(frameTime);const hour=SpaceVoyageControls.timelineWindow(frameTime);$('seek').min=hour.min;$('seek').max=hour.max;$('seek').value=Math.floor(frameTime);
@@ -270,6 +298,7 @@ function schedule(){clearTimeout(timer);draw();const wait=engine.delay(now(),{pl
 routeButtons();
 if(!playing){$('play').textContent='▶';$('play').setAttribute('aria-label','Play story');}
 $('play').onclick=()=>{capture();playing=!playing;$('play').textContent=playing?'Ⅱ':'▶';$('play').setAttribute('aria-label',playing?'Pause story':'Play story');schedule();};
+new ResizeObserver(()=>{if(fitBacking())schedule();}).observe(canvas);
 $('seek').oninput=()=>{elapsed=Number($('seek').value);anchor=performance.now();schedule();};
 // In the site's overlay, scrolling over the scene travels through the voyage, as far as you like.
 if(embedded&&!homepage){

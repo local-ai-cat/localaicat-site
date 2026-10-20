@@ -77,8 +77,12 @@ function SupportChatDialog({ needsFreshDocument }: { needsFreshDocument: boolean
   return (
     <>
       <button ref={trigger} type="button" className={styles.trigger} onClick={openSupport}
-        aria-haspopup="dialog" aria-controls="support-chat-dialog">
-        <span aria-hidden="true">☏</span> Chat support
+        aria-haspopup="dialog" aria-controls="support-chat-dialog" aria-label="Chat support">
+        <svg className={styles.triggerIcon} aria-hidden="true" viewBox="0 0 20 20" width="16" height="16">
+          <path d="M4 3.5h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"
+            fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+        </svg>
+        <span className={styles.triggerLabel}>Chat support</span>
       </button>
       <dialog ref={dialog} id="support-chat-dialog" className={styles.dialog}
         aria-labelledby="support-chat-title" onClose={didCloseSupport}

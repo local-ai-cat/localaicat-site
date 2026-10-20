@@ -62,6 +62,13 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Downloads live on the landing page now; the old pages are gone.
     return [
+      // One address for the site. Apple fetches its app-site-association files without following redirects, so they stay put.
+      {
+        source: "/:path((?!\\.well-known/|apple-app-site-association).*)",
+        has: [{ type: "host", value: "www.localaicat.com" }],
+        destination: "https://localaicat.com/:path",
+        permanent: true
+      },
       { source: "/download", destination: "/#download", permanent: true },
       { source: "/download/direct", destination: "/#download", permanent: true }
     ];
@@ -99,6 +106,11 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: securityHeaders
+      },
+      // Site artwork changes rarely and new versions get new names; a day fresh, a week served while revalidating.
+      {
+        source: "/assets/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }]
       },
       // Only the explicitly public support pages can embed Chatwoot. Scripts
       // remain excluded from the host document; buyer/private routes stay self-only.

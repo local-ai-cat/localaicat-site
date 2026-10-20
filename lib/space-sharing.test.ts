@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { spaceShareImage, spaceShareVideo, spaceSharingMetadata } from "./space-sharing.ts";
+import { homeShareCopy, spaceShareImage, spaceShareVideo, spaceSharingMetadata } from "./space-sharing.ts";
 
 test("preview sharing uses its own host even when the site URL is production", () => {
-  const metadata = spaceSharingMetadata("https://localaicat.com", "space-review.vercel.app");
+  const metadata = spaceSharingMetadata("https://localaicat.com", "space-review.vercel.app", homeShareCopy);
   const graph = metadata.openGraph as { url: string; images: {url: string}[] };
   const twitter = metadata.twitter as {images: {url: string}[]};
   assert.equal(graph.url, "https://space-review.vercel.app/");
@@ -44,4 +44,17 @@ test("production sharing uses the configured site and a real 1200 by 630 PNG", (
   assert.equal(image.subarray(1,4).toString(), "PNG");
   assert.equal(image.readUInt32BE(16), 1200);
   assert.equal(image.readUInt32BE(20), 630);
+});
+
+test("only the homepage fixes its card copy; every other page shares its own title, description and address", () => {
+  const shared = spaceSharingMetadata("https://localaicat.com");
+  const graph = shared.openGraph as Record<string, unknown>;
+  const twitter = shared.twitter as Record<string, unknown>;
+  for (const key of ["title", "description", "url"]) assert.equal(key in graph, false, key);
+  for (const key of ["title", "description"]) assert.equal(key in twitter, false, key);
+  const home = spaceSharingMetadata("https://localaicat.com", undefined, homeShareCopy);
+  const homeGraph = home.openGraph as { title: string; url: string; images: unknown[] };
+  assert.equal(homeGraph.title, homeShareCopy.title);
+  assert.equal(homeGraph.url, "https://localaicat.com/");
+  assert.equal(homeGraph.images.length, 1);
 });

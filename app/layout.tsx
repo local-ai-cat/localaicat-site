@@ -28,8 +28,10 @@ export const metadata: Metadata = {
     index: process.env.VERCEL_ENV !== "preview" && ["localaicat.com", "www.localaicat.com"].includes(new URL(getSiteUrl()).hostname),
     follow: true
   },
+  // Each page names its one address, so apex, www and ?mode= links count as the same page.
+  alternates: { canonical: "./" },
   title: {
-    default: "Local AI Cat - Private On-Device AI",
+    default: "Local AI Cat: Private On-Device AI for Mac, iPhone & iPad",
     template: "%s | Local AI Cat"
   },
   description:

@@ -7,14 +7,14 @@ export type ExplorerSnapshot = {
   serverTime: number;
   updatedAt: number | null;
   visitsWindow: "utc-day";
-  source: "vercel-web-analytics";
+  source: "goatcounter";
 };
 
 export function parseExplorerSnapshot(value: unknown): ExplorerSnapshot | null {
   if (!value || typeof value !== "object") return null;
   const data = value as Record<string, unknown>;
   if (typeof data.available !== "boolean" || data.active !== null ||
-      data.visitsWindow !== "utc-day" || data.source !== "vercel-web-analytics" ||
+      data.visitsWindow !== "utc-day" || data.source !== "goatcounter" ||
       typeof data.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(data.day) ||
       typeof data.serverTime !== "number" || !Number.isFinite(data.serverTime) ||
       data.serverTime < 0 || data.serverTime > 8.64e15) return null;

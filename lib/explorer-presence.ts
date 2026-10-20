@@ -1,10 +1,12 @@
-/** Server-side, read-only projection of Vercel Web Analytics. Never import into a client component. */
+/** Server-side, read-only projection of GoatCounter's daily visitors. Never import into a client component. */
 export const EXPLORER_ANALYTICS_CACHE_MS = 60_000;
 export const EXPLORER_ANALYTICS_RETRY_MS = 30_000;
 export const EXPLORER_ANALYTICS_TIMEOUT_MS = 4_000;
 const DAY_MS = 86_400_000;
-const MAX_RESPONSE_BYTES = 16_384;
-const ANALYTICS_ENDPOINT = "https://api.vercel.com/v1/query/web-analytics/visits/aggregate";
+const HOUR_MS = 3_600_000;
+// stats/total also lists hourly rows for the day: a little over 2 KB in practice, so this leaves ample room.
+const MAX_RESPONSE_BYTES = 65_536;
+const DEFAULT_GOATCOUNTER_SITE = "localaicat";
 
 export type ExplorerSnapshot = {
   available: boolean;
@@ -14,17 +16,17 @@ export type ExplorerSnapshot = {
   serverTime: number;
   updatedAt: number | null;
   visitsWindow: "utc-day";
-  source: "vercel-web-analytics";
+  source: "goatcounter";
 };
 export type ExplorerDailyVisitors = { visitors: number; updatedAt: number };
 export interface ExplorerAnalyticsReader {
   sample(now: number): Promise<ExplorerDailyVisitors | null>;
 }
 export type ExplorerAnalyticsConfig = {
+  /** A GoatCounter API key with only "Read statistics": it can read counts and nothing else. */
   token: string;
-  projectId: string;
-  teamId?: string;
-  environment: "production" | "preview";
+  /** The GoatCounter site code, as in https://<site>.goatcounter.com. */
+  site: string;
 };
 export type ExplorerAnalyticsFetch = (url: string, init: RequestInit) => Promise<Response>;
 
@@ -35,15 +37,12 @@ export function explorerUtcDay(now: number): string {
 export function explorerAnalyticsConfig(
   env: Readonly<Record<string, string | undefined>> = process.env
 ): ExplorerAnalyticsConfig | null {
-  const token = env.VERCEL_ANALYTICS_READ_TOKEN?.trim();
-  const projectId = env.VERCEL_ANALYTICS_PROJECT_ID?.trim();
-  const teamId = env.VERCEL_ANALYTICS_TEAM_ID?.trim();
-  const environment = env.VERCEL_ANALYTICS_ENVIRONMENT?.trim() ||
-    (env.VERCEL_ENV === "production" ? "production" : "preview");
-  if (!token || /[\r\n]/.test(token) || !projectId || !/^prj_[a-zA-Z0-9]+$/.test(projectId)) return null;
-  if (teamId && !/^team_[a-zA-Z0-9]+$/.test(teamId)) return null;
-  if (environment !== "production" && environment !== "preview") return null;
-  return { token, projectId, teamId, environment };
+  const token = env.GOATCOUNTER_READ_TOKEN?.trim();
+  const site = env.GOATCOUNTER_SITE?.trim() || DEFAULT_GOATCOUNTER_SITE;
+  if (!token || !/^[A-Za-z0-9_-]+$/.test(token)) return null;
+  // The site code becomes a hostname: letters, digits and inner hyphens only, so no other host can be named.
+  if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(site)) return null;
+  return { token, site };
 }
 
 async function boundedJson(response: Response): Promise<unknown> {
@@ -82,29 +81,25 @@ function isCount(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
-function dailyVisitors(value: unknown, day: string): number {
-  if (!value || typeof value !== "object") throw new Error("Invalid analytics response");
+/** GoatCounter's `total_utc` is the visitor count for the UTC range asked for; anything else is not a count. */
+function dailyVisitors(value: unknown): number {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid analytics response");
   const payload = value as Record<string, unknown>;
-  if (payload.version !== 1 || !Array.isArray(payload.data)) throw new Error("Invalid analytics response");
-  // Empty, successful aggregate data means no recorded visits; unavailable data never means zero.
-  if (payload.data.length === 0) return 0;
-  if (payload.data.length !== 1) throw new Error("Unexpected analytics groups");
-  const row = payload.data[0];
-  if (!row || typeof row !== "object" || typeof row.timestamp !== "string" ||
-      Date.parse(row.timestamp) !== Date.parse(`${day}T00:00:00.000Z`) ||
-      !isCount(row.visitors) || !isCount(row.pageviews) || row.visitors > row.pageviews) {
-    throw new Error("Invalid daily visit aggregate");
-  }
-  return row.visitors;
+  if (!isCount(payload.total_utc) || !isCount(payload.total)) throw new Error("Invalid daily visit total");
+  return payload.total_utc;
+}
+
+/** GoatCounter ranges are whole hours: from UTC midnight to the end of the current hour, never past the day. */
+function hourAlignedIso(time: number): string {
+  return new Date(time).toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
 /**
- * Official API: https://vercel.com/docs/rest-api/web-analytics/aggregates-page-views
- * The smallest time bucket is an hour, and ranges are rounded to that granularity.
- * Therefore this endpoint deliberately publishes daily visitors, never a live presence count.
- * The cache contains aggregates only; Vercel remains the sole source of visitor counts.
+ * Official API: https://www.goatcounter.com/help/api (GET /api/v0/stats/total, OpenAPI at /api.json).
+ * Ranges are rounded to the hour, so this endpoint deliberately publishes daily visitors, never a live presence
+ * count. The cache holds the total only; GoatCounter remains the sole source of visitor counts.
  */
-export class VercelExplorerAnalytics implements ExplorerAnalyticsReader {
+export class GoatCounterExplorerAnalytics implements ExplorerAnalyticsReader {
   private readonly config: ExplorerAnalyticsConfig;
   private readonly fetcher: ExplorerAnalyticsFetch;
   private cached?: { day: string; expiresAt: number; value: ExplorerDailyVisitors | null };
@@ -119,7 +114,7 @@ export class VercelExplorerAnalytics implements ExplorerAnalyticsReader {
     const day = explorerUtcDay(now);
     if (this.cached?.day === day && now < this.cached.expiresAt) return this.cached.value;
     if (this.pending?.day === day) return this.pending.result;
-    const result = this.query(now, day);
+    const result = this.query(now);
     this.pending = { day, result };
     const value = await result;
     // An old request finishing after midnight must not replace the new day's cache.
@@ -134,15 +129,12 @@ export class VercelExplorerAnalytics implements ExplorerAnalyticsReader {
     return value;
   }
 
-  private async query(now: number, day: string): Promise<ExplorerDailyVisitors | null> {
+  private async query(now: number): Promise<ExplorerDailyVisitors | null> {
     const start = Math.floor(now / DAY_MS) * DAY_MS;
-    const url = new URL(ANALYTICS_ENDPOINT);
-    url.searchParams.set("projectId", this.config.projectId);
-    if (this.config.teamId) url.searchParams.set("teamId", this.config.teamId);
-    url.searchParams.set("since", new Date(start).toISOString());
-    url.searchParams.set("until", new Date(start + DAY_MS - 1).toISOString());
-    url.searchParams.set("by", "day");
-    url.searchParams.set("filter", `environment eq '${this.config.environment}'`);
+    const end = Math.min(start + DAY_MS, Math.max(start + HOUR_MS, Math.ceil(now / HOUR_MS) * HOUR_MS));
+    const url = new URL(`https://${this.config.site}.goatcounter.com/api/v0/stats/total`);
+    url.searchParams.set("start", hourAlignedIso(start));
+    url.searchParams.set("end", hourAlignedIso(end));
     try {
       const result = await this.fetcher(url.toString(), {
         method: "GET",
@@ -152,7 +144,7 @@ export class VercelExplorerAnalytics implements ExplorerAnalyticsReader {
         cache: "no-store"
       });
       if (!result.ok) return null;
-      return { visitors: dailyVisitors(await boundedJson(result), day), updatedAt: now };
+      return { visitors: dailyVisitors(await boundedJson(result)), updatedAt: now };
     } catch {
       // A missing entitlement, expired token, timeout or provider outage is not zero traffic.
       return null;
@@ -160,13 +152,13 @@ export class VercelExplorerAnalytics implements ExplorerAnalyticsReader {
   }
 }
 
-let configured: { config: ExplorerAnalyticsConfig; reader: VercelExplorerAnalytics } | undefined;
+let configured: { config: ExplorerAnalyticsConfig; reader: GoatCounterExplorerAnalytics } | undefined;
 export function configuredExplorerAnalytics(): ExplorerAnalyticsReader | null {
   const config = explorerAnalyticsConfig();
   if (!config) return null;
   if (!configured || Object.keys(config).some(key =>
     config[key as keyof ExplorerAnalyticsConfig] !== configured?.config[key as keyof ExplorerAnalyticsConfig])) {
-    configured = { config, reader: new VercelExplorerAnalytics(config) };
+    configured = { config, reader: new GoatCounterExplorerAnalytics(config) };
   }
   return configured.reader;
 }
@@ -189,7 +181,7 @@ export async function handleExplorerRequest(
     serverTime: now,
     updatedAt: count?.updatedAt ?? null,
     visitsWindow: "utc-day",
-    source: "vercel-web-analytics"
+    source: "goatcounter"
   };
   const headers: Record<string, string> = {
     "Cache-Control": "private, no-store, max-age=0",

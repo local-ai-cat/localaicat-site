@@ -66,7 +66,7 @@ test("action events send only fixed names and channel, and stop immediately afte
 const snapshot = {
   available: true, active: null, visitsToday: 12, day: "2026-10-17",
   serverTime: Date.parse("2026-10-17T12:00:00Z"), updatedAt: Date.parse("2026-10-17T11:59:30Z"),
-  visitsWindow: "utc-day", source: "vercel-web-analytics"
+  visitsWindow: "utc-day", source: "goatcounter"
 };
 
 test("daily visitor counts accept genuine zero but never invent live presence", () => {

@@ -5,7 +5,7 @@ import {
   EXPLORER_ANALYTICS_RETRY_MS,
   explorerAnalyticsConfig,
   handleExplorerRequest,
-  VercelExplorerAnalytics,
+  GoatCounterExplorerAnalytics,
   type ExplorerAnalyticsConfig,
   type ExplorerAnalyticsFetch
 } from "./explorer-presence.ts";
@@ -14,28 +14,27 @@ const NOW = Date.parse("2026-10-17T12:00:00Z");
 const ORIGIN = "https://space-review.vercel.app";
 const CONFIG: ExplorerAnalyticsConfig = {
   token: "test-secret-never-public",
-  projectId: "prj_fixture",
-  teamId: "team_fixture",
-  environment: "preview"
+  site: "localaicat-test"
 };
 function request(suffix = ""): Request {
   return new Request(`${ORIGIN}/api/explorers${suffix}`);
 }
 function fixture(visitors = 12, day = "2026-10-17"): unknown {
   return {
-    version: 1,
-    query: { groupBy: ["day"], since: day, until: day },
-    data: [{ timestamp: `${day}T00:00:00.000Z`, visitors, pageviews: visitors * 2 }]
+    total: visitors,
+    total_events: 0,
+    total_utc: visitors,
+    stats: [{ day, hourly: Array.from({ length: 24 }, () => 0), daily: visitors }]
   };
 }
-function reader(payload: unknown = fixture()): VercelExplorerAnalytics {
-  return new VercelExplorerAnalytics(CONFIG, async () => Response.json(payload));
+function reader(payload: unknown = fixture()): GoatCounterExplorerAnalytics {
+  return new GoatCounterExplorerAnalytics(CONFIG, async () => Response.json(payload));
 }
 function unavailable(now = NOW): unknown {
   return {
     available: false, active: null, visitsToday: null,
     day: new Date(now).toISOString().slice(0, 10), serverTime: now,
-    updatedAt: null, visitsWindow: "utc-day", source: "vercel-web-analytics"
+    updatedAt: null, visitsWindow: "utc-day", source: "goatcounter"
   };
 }
 
@@ -46,19 +45,17 @@ test("public projection is daily visitors, never pageviews or fabricated live pr
   assert.deepEqual(await result.json(), {
     available: true, active: null, visitsToday: 12,
     day: "2026-10-17", serverTime: NOW, updatedAt: NOW,
-    visitsWindow: "utc-day", source: "vercel-web-analytics"
+    visitsWindow: "utc-day", source: "goatcounter"
   });
 });
 
-test("only fixed project/team visits aggregates are queried, in a single UTC day", async () => {
+test("only the fixed site's total is queried, from UTC midnight to the end of the current hour", async () => {
   const fetcher: ExplorerAnalyticsFetch = async (input, init) => {
     const url = new URL(input);
-    assert.equal(url.origin, "https://api.vercel.com");
-    assert.equal(url.pathname, "/v1/query/web-analytics/visits/aggregate");
+    assert.equal(url.origin, "https://localaicat-test.goatcounter.com");
+    assert.equal(url.pathname, "/api/v0/stats/total");
     assert.deepEqual(Object.fromEntries(url.searchParams), {
-      projectId: CONFIG.projectId, teamId: CONFIG.teamId,
-      since: "2026-10-17T00:00:00.000Z", until: "2026-10-17T23:59:59.999Z",
-      by: "day", filter: "environment eq 'preview'"
+      start: "2026-10-17T00:00:00Z", end: "2026-10-17T12:00:00Z"
     });
     assert.equal(init.method, "GET");
     assert.equal(new Headers(init.headers).get("authorization"), `Bearer ${CONFIG.token}`);
@@ -67,24 +64,39 @@ test("only fixed project/team visits aggregates are queried, in a single UTC day
     assert.ok(init.signal instanceof AbortSignal);
     return Response.json(fixture());
   };
-  const result = await handleExplorerRequest(request("?projectId=prj_other&teamId=team_other&url=https://evil.example&by=visitorId&filter=eventName"), new VercelExplorerAnalytics(CONFIG, fetcher), NOW);
+  const result = await handleExplorerRequest(request("?site=other&start=2000-01-01&url=https://evil.example&include_paths=1"), new GoatCounterExplorerAnalytics(CONFIG, fetcher), NOW);
   assert.equal((await result.json()).visitsToday, 12);
+});
+
+test("the range stays inside the UTC day: at least an hour from midnight, never past the next midnight", async () => {
+  const ranges: Record<string, string>[] = [];
+  const analytics = (now: number): Promise<unknown> => new GoatCounterExplorerAnalytics(CONFIG, async input => {
+    ranges.push(Object.fromEntries(new URL(input).searchParams));
+    return Response.json(fixture());
+  }).sample(now);
+  await analytics(Date.parse("2026-10-17T00:00:00Z"));
+  await analytics(Date.parse("2026-10-17T09:15:30Z"));
+  await analytics(Date.parse("2026-10-17T23:59:59.999Z"));
+  assert.deepEqual(ranges, [
+    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T01:00:00Z" },
+    { start: "2026-10-17T00:00:00Z", end: "2026-10-17T10:00:00Z" },
+    { start: "2026-10-17T00:00:00Z", end: "2026-10-18T00:00:00Z" }
+  ]);
 });
 
 test("upstream metadata and credentials never enter the public response", async () => {
   const payload = {
-    version: 1,
-    data: [{timestamp:"2026-10-17T00:00:00.000Z", visitors:3, pageviews:8, visitorId:"private-id", referrerHostname:"private-referrer", token:CONFIG.token}],
-    query: { projectId: CONFIG.projectId, teamId: CONFIG.teamId }
+    total: 3, total_events: 1, total_utc: 3,
+    stats: [{day:"2026-10-17", hourly:[3], daily:3, path:"/private-path", ref:"private-referrer", token:CONFIG.token}]
   };
   const body = await (await handleExplorerRequest(request(), reader(payload), NOW)).text();
-  for (const forbidden of ["private-id", "private-referrer", CONFIG.token, CONFIG.projectId, CONFIG.teamId!, "pageviews"]) {
+  for (const forbidden of ["private-path", "private-referrer", CONFIG.token, CONFIG.site, "total_events", "hourly"]) {
     assert.ok(!body.includes(forbidden));
   }
 });
 
 test("a successful empty visit aggregate is zero; an unconfigured service is unavailable", async () => {
-  const empty = await handleExplorerRequest(request(), reader({version:1, data:[]}), NOW);
+  const empty = await handleExplorerRequest(request(), reader({total:0, total_events:0, total_utc:0, stats:[]}), NOW);
   assert.equal((await empty.json()).visitsToday, 0);
   const missing = await handleExplorerRequest(request(), null, NOW);
   assert.deepEqual(await missing.json(), unavailable());
@@ -104,22 +116,24 @@ test("writes are rejected and never read upstream or create visitors", async () 
   assert.equal(calls, 0);
 });
 
-test("dedicated server environment is required and legacy Redis/local fixture flags have no effect", () => {
-  const base = {VERCEL_ANALYTICS_READ_TOKEN:CONFIG.token, VERCEL_ANALYTICS_PROJECT_ID:CONFIG.projectId};
+test("dedicated server environment is required and legacy Vercel/Redis/local flags have no effect", () => {
+  const base = {GOATCOUNTER_READ_TOKEN:CONFIG.token, GOATCOUNTER_SITE:CONFIG.site};
   assert.equal(explorerAnalyticsConfig({}), null);
   assert.equal(explorerAnalyticsConfig({EXPLORER_PRESENCE_LOCAL:"1", EXPLORER_REDIS_REST_URL:"https://redis.example",EXPLORER_REDIS_REST_TOKEN:"old"}), null);
-  assert.deepEqual(explorerAnalyticsConfig(base), {...CONFIG, teamId:undefined});
-  assert.deepEqual(explorerAnalyticsConfig({...base, VERCEL_ENV:"production"}), {...CONFIG, teamId:undefined, environment:"production"});
-  assert.equal(explorerAnalyticsConfig({...base, VERCEL_ANALYTICS_TEAM_ID:"unknown/../../"}), null);
-  assert.equal(explorerAnalyticsConfig({...base, VERCEL_ANALYTICS_PROJECT_ID:"arbitrary-project"}), null);
-  assert.equal(explorerAnalyticsConfig({...base, VERCEL_ANALYTICS_ENVIRONMENT:"all' or true"}), null);
-  assert.equal(explorerAnalyticsConfig({...base, VERCEL_ANALYTICS_READ_TOKEN:"token\nwith-header"}), null);
-  assert.deepEqual(explorerAnalyticsConfig({...base, VERCEL_ANALYTICS_TEAM_ID:CONFIG.teamId, VERCEL_ANALYTICS_ENVIRONMENT:"production"}), {...CONFIG,environment:"production"});
+  assert.equal(explorerAnalyticsConfig({VERCEL_ANALYTICS_READ_TOKEN:"old", VERCEL_ANALYTICS_PROJECT_ID:"prj_old"}), null);
+  assert.deepEqual(explorerAnalyticsConfig(base), CONFIG);
+  assert.deepEqual(explorerAnalyticsConfig({GOATCOUNTER_READ_TOKEN:CONFIG.token}), {token:CONFIG.token, site:"localaicat"});
+  for (const site of ["evil.example/x", "a.b", "-lead", "trail-", "UPPER", "x".repeat(64), "localaicat.goatcounter.com#"]) {
+    assert.equal(explorerAnalyticsConfig({...base, GOATCOUNTER_SITE:site}), null, site);
+  }
+  for (const token of ["token\nwith-header", "token with-space", "tok\ren"]) {
+    assert.equal(explorerAnalyticsConfig({...base, GOATCOUNTER_READ_TOKEN:token}), null, JSON.stringify(token));
+  }
 });
 
 test("authorization, entitlement, rate limit, redirect and service failures stay unavailable", async () => {
   for (const code of [301,400,401,402,403,404,410,429,500,503]) {
-    const analytics = new VercelExplorerAnalytics(CONFIG, async () => new Response("secret provider details", {status:code}));
+    const analytics = new GoatCounterExplorerAnalytics(CONFIG, async () => new Response("secret provider details", {status:code}));
     const response = await handleExplorerRequest(request(), analytics, NOW);
     assert.deepEqual(await response.json(), unavailable());
   }
@@ -127,27 +141,23 @@ test("authorization, entitlement, rate limit, redirect and service failures stay
   assert.deepEqual(await (await handleExplorerRequest(request(), rejecting, NOW)).json(), unavailable());
 });
 
-test("custom events, changed schemas, wrong days and malformed metrics cannot become visitors", async () => {
-  const row = {timestamp:"2026-10-17T00:00:00.000Z",visitors:1,pageviews:2};
+test("changed schemas and malformed totals cannot become visitors", async () => {
+  const total = {total:1, total_events:0, total_utc:1};
   for (const data of [
-    null, {}, {version:2,data:[]}, {version:1,data:{}},
-    {version:1,data:[{timestamp:row.timestamp,visitors:100,count:1000}]},
-    {version:1,data:[{...row,timestamp:"2026-10-16T00:00:00.000Z"}]},
-    {version:1,data:[row,row]}, {version:1,data:[{...row,visitors:-1}]},
-    {version:1,data:[{...row,visitors:"1"}]}, {version:1,data:[{...row,visitors:1.5}]},
-    {version:1,data:[{...row,visitors:Number.MAX_SAFE_INTEGER+1}]},
-    {version:1,data:[{...row,visitors:3}]}
+    null, {}, [], [total], {error:"denied"}, {total:5}, {total_utc:5},
+    {...total, total_utc:-1}, {...total, total_utc:"1"}, {...total, total_utc:1.5},
+    {...total, total_utc:Number.MAX_SAFE_INTEGER+1}, {...total, total:null}, {...total, total_utc:null}
   ]) {
     assert.deepEqual(await (await handleExplorerRequest(request(), reader(data), NOW)).json(), unavailable());
   }
-  const brokenJson = new VercelExplorerAnalytics(CONFIG, async () => new Response("not JSON"));
+  const brokenJson = new GoatCounterExplorerAnalytics(CONFIG, async () => new Response("not JSON"));
   assert.equal(await brokenJson.sample(NOW), null);
 });
 
 test("oversized upstream bodies are bounded with and without content-length", async () => {
-  const headerCases: Record<string, string>[] = [{"content-length":"20000"}, {}];
+  const headerCases: Record<string, string>[] = [{"content-length":"70000"}, {}];
   for (const headers of headerCases) {
-    const analytics = new VercelExplorerAnalytics(CONFIG, async () => new Response(" ".repeat(20_000), {headers}));
+    const analytics = new GoatCounterExplorerAnalytics(CONFIG, async () => new Response(" ".repeat(70_000), {headers}));
     assert.equal(await analytics.sample(NOW), null);
   }
 });
@@ -156,7 +166,7 @@ test("concurrent public reads share one upstream request and a sixty-second aggr
   let calls = 0;
   let finish: (() => void) | undefined;
   const gate = new Promise<void>(resolve => { finish = resolve; });
-  const analytics = new VercelExplorerAnalytics(CONFIG, async () => {
+  const analytics = new GoatCounterExplorerAnalytics(CONFIG, async () => {
     calls++;
     await gate;
     return Response.json(fixture(calls));
@@ -173,7 +183,7 @@ test("concurrent public reads share one upstream request and a sixty-second aggr
 
 test("provider failures back off without serving stale or fabricated traffic", async () => {
   let calls = 0;
-  const analytics = new VercelExplorerAnalytics(CONFIG, async () => {
+  const analytics = new GoatCounterExplorerAnalytics(CONFIG, async () => {
     calls++;
     if (calls === 1 || calls === 3) return Response.json(fixture(calls));
     throw new Error("provider unavailable");
@@ -189,9 +199,9 @@ test("provider failures back off without serving stale or fabricated traffic", a
 test("UTC midnight invalidates cache immediately and does not sum hourly visitors", async () => {
   let calls = 0;
   const midnight = Date.parse("2026-10-18T00:00:00Z");
-  const analytics = new VercelExplorerAnalytics(CONFIG, async input => {
+  const analytics = new GoatCounterExplorerAnalytics(CONFIG, async input => {
     calls++;
-    const day = new URL(input).searchParams.get("since")!.slice(0,10);
+    const day = new URL(input).searchParams.get("start")!.slice(0,10);
     return Response.json(fixture(calls,day));
   });
   await analytics.sample(midnight-1);
@@ -207,9 +217,9 @@ test("a previous-day request finishing late cannot replace the next day's cache"
   let releasePreviousDay: (() => void) | undefined;
   const gate = new Promise<void>(resolve => {releasePreviousDay=resolve;});
   const midnight = Date.parse("2026-10-18T00:00:00Z");
-  const analytics = new VercelExplorerAnalytics(CONFIG, async input => {
+  const analytics = new GoatCounterExplorerAnalytics(CONFIG, async input => {
     calls++;
-    const day = new URL(input).searchParams.get("since")!.slice(0,10);
+    const day = new URL(input).searchParams.get("start")!.slice(0,10);
     if (day === "2026-10-17") await gate;
     return Response.json(fixture(day === "2026-10-17" ? 99 : 1,day));
   });
@@ -222,7 +232,7 @@ test("a previous-day request finishing late cannot replace the next day's cache"
 });
 
 test("outbound timeout aborts a hanging provider request", async () => {
-  const analytics = new VercelExplorerAnalytics(CONFIG, async (_input, init) => {
+  const analytics = new GoatCounterExplorerAnalytics(CONFIG, async (_input, init) => {
     return new Promise<Response>((_resolve, reject) => {
       const keepAlive = setTimeout(() => reject(new Error("timeout did not abort")), 5_000);
       init.signal?.addEventListener("abort", () => {

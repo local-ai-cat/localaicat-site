@@ -609,80 +609,6 @@ body:has(> .siteFooter) > .pageFrame {
   50% { transform: translateY(6px); }
 }
 
-/* ─── Floating cats ─── */
-
-.floatingCats {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  overflow: hidden;
-  z-index: 0;
-  contain: layout style paint;
-}
-
-.floatingCatsVisible {
-  opacity: 1;
-}
-
-.floatingCat {
-  position: absolute;
-  left: 0;
-  opacity: 0.18;
-  height: auto;
-  will-change: transform;
-}
-
-.floatingCatOne {
-  width: 56px;
-  top: 12%;
-  animation: flyRight 14s linear infinite;
-}
-
-.floatingCatTwo {
-  width: 60px;
-  top: 42%;
-  animation: flyLeft 16s linear infinite;
-  animation-delay: -5s;
-}
-
-.floatingCatThree {
-  width: 48px;
-  top: 74%;
-  animation: flyRight 18s linear infinite;
-  animation-delay: -9s;
-}
-
-.floatingCatFour {
-  width: 54px;
-  top: 82%;
-  animation: flyDiagonal 15s linear infinite;
-  animation-delay: -3s;
-}
-
-@keyframes flyRight {
-  0% { transform: translateX(-100px) translateY(0) rotate(0deg); }
-  25% { transform: translateX(calc(25vw - 25px)) translateY(-20px) rotate(-3deg); }
-  50% { transform: translateX(calc(50vw - 25px)) translateY(16px) rotate(2deg); }
-  75% { transform: translateX(calc(75vw - 25px)) translateY(-10px) rotate(-2deg); }
-  100% { transform: translateX(calc(100vw + 100px)) translateY(0) rotate(0deg); }
-}
-
-@keyframes flyLeft {
-  0% { transform: translateX(calc(100vw + 100px)) scaleX(-1) translateY(0) rotate(0deg); }
-  25% { transform: translateX(75vw) scaleX(-1) translateY(18px) rotate(3deg); }
-  50% { transform: translateX(50vw) scaleX(-1) translateY(-16px) rotate(-2deg); }
-  75% { transform: translateX(25vw) scaleX(-1) translateY(10px) rotate(2deg); }
-  100% { transform: translateX(-100px) scaleX(-1) translateY(0) rotate(0deg); }
-}
-
-@keyframes flyDiagonal {
-  0% { transform: translateX(-100px) translateY(0) rotate(-5deg); }
-  50% { transform: translateX(50vw) translateY(-34vh) rotate(5deg); }
-  100% { transform: translateX(calc(100vw + 100px)) translateY(-68vh) rotate(-5deg); }
-}
-
 /* ─── Detail / paths section ─── */
 
 .detailBand {
@@ -3330,19 +3256,6 @@ body:has(> .siteFooter) > .pageFrame {
     gap: 12px;
     margin-top: 4px;
   }
-
-  .floatingCats {
-    display: block;
-  }
-
-  .floatingCat {
-    opacity: 0.12;
-  }
-
-  .floatingCatOne { width: 36px; }
-  .floatingCatTwo { width: 40px; }
-  .floatingCatThree { width: 32px; }
-  .floatingCatFour { width: 34px; }
 
   .detailBand {
     padding: 36px 0 0;

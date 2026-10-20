@@ -38,7 +38,7 @@ body[data-home-mode="space"] .personalitySwitch button[aria-pressed="true"] {bac
 .heroTight .heroHeadline h1 {font-size:clamp(48px,6vw,80px);line-height:.99;font-weight:600;white-space:pre-line;letter-spacing:-.048em;}
 .heroTight .heroTagline {max-width:640px;min-height:55px;margin:24px auto 0;font-size:16px;line-height:1.7;}
 .heroTight .heroEnter {animation:none;opacity:1;}
-body[data-home-mode="space"] .floatingCats {display:none;}
+
 .shipFlame {transform-origin:6px 12px;animation:flamePulse 1s steps(2) infinite;}
 @keyframes flamePulse {50%{transform:scaleY(.7)}}
 .homeMode .downloadBand {padding-top:24px;gap:16px;}

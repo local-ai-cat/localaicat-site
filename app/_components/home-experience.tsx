@@ -112,8 +112,7 @@ export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
       "/assets/cat-personal-favicon-192.png",
       "/assets/cat-business-favicon-32.png",
       "/assets/cat-business-favicon-180.png",
-      "/assets/cat-business-favicon-192.png",
-      "/assets/cat.webp"
+      "/assets/cat-business-favicon-192.png"
     ].forEach((src) => {
       const img = new window.Image();
       img.src = src;
@@ -125,17 +124,6 @@ export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
       {/* ── Hero: headline → world switch → cat → installation options ── */}
       <section className="heroTight">
         <SpaceAtmosphere active={inSpace} />
-        <div aria-hidden="true" className={`floatingCats ${mode === "personal" ? "floatingCatsVisible" : ""}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="floatingCat floatingCatOne" src="/assets/cat.webp" width={56} height={56} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="floatingCat floatingCatTwo" src="/assets/cat.webp" width={60} height={60} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="floatingCat floatingCatThree" src="/assets/cat.webp" width={48} height={48} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" className="floatingCat floatingCatFour" src="/assets/cat.webp" width={54} height={54} />
-        </div>
-
         <div className="heroTightInner">
           <div className="heroHeadline heroEnter heroEnter1">
             <h1 className="heroCopyStack">

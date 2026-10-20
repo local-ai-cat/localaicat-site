@@ -34,7 +34,7 @@ export function supportChatEvent(origin: string, fromWidget: boolean, data: unkn
 
 /** Fixed configuration only. Do not add page URLs, cookies, identities or purchase data. */
 export const supportChatInitialMessages = [
-  { event: "config-set", locale: "en", position: "left", hideMessageBubble: true,
+  { event: "config-set", locale: "en", position: "right", hideMessageBubble: true,
     showPopoutButton: false, showUnreadMessagesDialog: false, darkMode: "auto" },
   { event: "toggle-open", isOpen: true }
 ].map((message) => `${widgetMessagePrefix}${JSON.stringify(message)}`);

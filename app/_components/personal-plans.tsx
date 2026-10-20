@@ -26,7 +26,7 @@ export function PersonalPlans() {
               <h3 className="purchasePlanName">{plan.name}</h3>
               <p className="homePlanPrice">{plan.price}<span className="homePlanCadence">{plan.cadence}</span></p>
               <p className="dualCardBody">{plan.note}</p>
-              <ul className="planBenefits"><li>Curated Pro models</li><li>Developer Mode while subscribed</li></ul>
+              <ul className="planBenefits"><li>Curated Pro models</li><li>Developer Mode while subscribed</li><li>Early access to new features</li></ul>
               {annual && <span className="planSaving">Save £8 a year</span>}
               <a className={`planButton purchasePlanButton${annual ? " planButtonAccent" : ""}`} href={plan.ctaHref}>{plan.ctaLabel}</a>
             </article>

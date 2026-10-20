@@ -77,23 +77,21 @@ function SupportChatDialog({ needsFreshDocument }: { needsFreshDocument: boolean
   return (
     <>
       <button ref={trigger} type="button" className={styles.trigger} onClick={openSupport}
-        aria-haspopup="dialog" aria-controls="support-chat-dialog" aria-label="Chat support">
+        aria-haspopup="dialog" aria-controls="support-chat-dialog" aria-label="Cat support">
         <svg className={styles.triggerIcon} aria-hidden="true" viewBox="0 0 20 20" width="16" height="16">
           <path d="M4 3.5h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"
             fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
         </svg>
-        <span className={styles.triggerLabel}>Chat support</span>
+        <span className={styles.triggerLabel}>Cat support</span>
       </button>
       <dialog ref={dialog} id="support-chat-dialog" className={styles.dialog}
-        aria-labelledby="support-chat-title" onClose={didCloseSupport}
+        aria-label="Cat support" onClose={didCloseSupport}
         onClick={(event) => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
         <div className={styles.panel}>
-          <header className={styles.header}>
-            <h2 id="support-chat-title">Chat with us</h2>
-            <button type="button" className={styles.close} aria-label="Close chat support"
-              onClick={() => dialog.current?.close()} autoFocus>×</button>
-          </header>
           <div className={styles.chat}>
+            {/* The widget draws its own close button once it loads, so ours only covers the wait. */}
+            {loadState !== "ready" && <button type="button" className={styles.close} aria-label="Close cat support"
+              onClick={() => dialog.current?.close()} autoFocus>×</button>}
             {loadState !== "ready" && <p className={styles.loading} role="status">
               {loadState === "slow" ? "Chat is taking a little longer. You can email us below." : "Opening chat…"}
             </p>}
@@ -103,8 +101,7 @@ function SupportChatDialog({ needsFreshDocument }: { needsFreshDocument: boolean
               allow="camera 'none'; microphone 'none'; geolocation 'none'; payment 'none'" />}
           </div>
           <footer className={styles.footer}>
-            <span>Prefer email?</span>
-            <a href="mailto:support@localaicat.com">Email instead</a>
+            <a href="mailto:support@localaicat.com">Or email support@localaicat.com</a>
           </footer>
         </div>
       </dialog>

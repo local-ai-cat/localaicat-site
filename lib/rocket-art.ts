@@ -39,4 +39,5 @@ export const rocketFlameFrames: readonly { readonly flame: readonly RocketRect[]
   { flame: [{ x: 4, y: 15, w: 4, h: 1 }, { x: 5, y: 16, w: 3, h: 2 }], core: { x: 6, y: 15, w: 1, h: 1 } }
 ];
 
-export const rocketColours = { hull: "#e9e3ff", tank: "#a68be4", flame: "#f28c28", core: "#ffd36a" } as const;
+/** The app's high-power look (purple tank, blue flame): the site's rockets are always about to take off. */
+export const rocketColours = { hull: "#e9e3ff", tank: "#bf5af2", flame: "#279cff", core: "#99edff" } as const;

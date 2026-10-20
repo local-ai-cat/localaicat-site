@@ -19,7 +19,7 @@ export function PixelCat({ palette = "classic", className = "", decorative = fal
   </svg>;
 }
 
-/** The app's rocket, with its tank in lilac and the medium-thrust flame cycling underneath. */
+/** The app's rocket in high-power mode: purple tank, blue flame cycling underneath. */
 export function PixelShip({className = ""}: {className?: string}) {
   return <svg className={className} viewBox="0 1 12 17" shapeRendering="crispEdges" aria-hidden="true">
     {rocketArt.flatMap((row, y) => [...row].map((role, x) => {

@@ -15,7 +15,7 @@ test("the site's React rocket is the same art as the canvas voyages and the app"
   assert.deepEqual([...rocketArt], renderer.art);
 });
 
-test("its flame frames and colours match the renderer's medium-thrust flame", () => {
+test("its flame frames match the renderer's medium-thrust flame, in the app's high-power colours", () => {
   // cpuFraction 0.5 is medium thrust; its frame interval is about 0.26 s, so these times land on frames 0, 1 and 2.
   rocketFlameFrames.forEach((expected, index) => {
     const pixels = renderer.frame({ cpuFraction: 0.5 }, index * 0.3).pixels;
@@ -25,6 +25,7 @@ test("its flame frames and colours match the renderer's medium-thrust flame", ()
     assert.deepEqual({ x: core.x, y: core.y, w: core.w, h: core.h }, expected.core, `core ${index}`);
   });
   assert.equal(rocketColours.hull, renderer.colours.neutral);
-  assert.equal(rocketColours.flame, renderer.colours.flame);
-  assert.equal(rocketColours.core, renderer.colours.core);
+  assert.equal(rocketColours.tank, renderer.colours.highPower);
+  assert.equal(rocketColours.flame, renderer.colours.highFlame);
+  assert.equal(rocketColours.core, renderer.colours.highCore);
 });

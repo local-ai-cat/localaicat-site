@@ -182,7 +182,15 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
 .homeVoyageWindow{position:relative;height:230px;overflow:hidden;mask-image:linear-gradient(transparent,#000 15%,#000 60%,transparent),linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-composite:intersect;}
 .homeVoyageWindow iframe{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;visibility:hidden;transition:opacity 200ms ease-out;}
 .homeVoyageWindow[data-ready="true"] iframe{opacity:1;visibility:visible;}
-@media(prefers-reduced-motion:reduce){.homeVoyageWindow iframe{transition:none;}}
+/* The poster is the middle band of the voyage canvas, placed exactly as lockscreen.css places the canvas inside the
+   frame. The opaque scene fades in over it, then the poster steps out. */
+.homeVoyageWindow{container-type:inline-size;}
+.homeVoyagePoster{position:absolute;left:50%;top:50%;width:max(100%,1000px);max-width:none;height:auto;transform:translate(-37.5%,-50%);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);user-select:none;}
+@container (max-width:650px){.homeVoyagePoster{width:800px;}}
+.homeVoyageWindow[data-ready="true"] .homeVoyagePoster{visibility:hidden;transition:visibility 0s 200ms;}
+.homeVoyage[data-ready="false"] .voyageStatusDot{animation:voyageLoadingDot 1.2s ease-in-out infinite;}
+@keyframes voyageLoadingDot{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.homeVoyageWindow iframe{transition:none;}.homeVoyage[data-ready="false"] .voyageStatusDot{animation:none;}}
 .homeVoyageFooter{position:relative;padding:0 12px 4px;display:flex;flex-direction:column;align-items:center;gap:10px;}
 .homeVoyageStory{display:flex;align-items:center;justify-content:center;gap:8px;color:#b4a4c5;font-size:11px;letter-spacing:.02em;}
 .voyageStatusDot{width:5px;height:5px;border-radius:50%;background:#8ccfb7;flex-shrink:0;}

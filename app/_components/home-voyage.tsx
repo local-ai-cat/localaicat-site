@@ -12,8 +12,10 @@ type RocketPixel = { x: number; y: number; w: number; h: number; colour: string 
 type Instruments = { fuel: number; colour: string; pixels: RocketPixel[] };
 const powerNames = ["Low", "Medium", "High"];
 const throttleStorageKey = "space-voyage-throttle";
-const settleTimeoutMs = 2000;
-const settleFallbackMs = 600;
+// The poster holds the window meanwhile, so a busy page waits at most half a second for an idle moment.
+const settleTimeoutMs = 500;
+const settleFallbackMs = 300;
+const loadingCaption = "Getting ready for liftoff…";
 
 /** Runs `start` after the page has loaded and gone idle; returns a cancel. */
 function whenPageSettles(start: () => void): () => void {
@@ -142,13 +144,16 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
 
 
 
-  return <div className="homeVoyage" ref={sceneRef} data-running={running} data-power={powerNames[throttle]}>
+  return <div className="homeVoyage" ref={sceneRef} data-running={running} data-ready={ready} data-power={powerNames[throttle]}>
     <div className="homeVoyageWindow" data-ready={ready}>
-      {sceneMounted && <iframe ref={frameRef} src="/space-demo/lockscreen.html?homepage&v=20261017-controls" title="Space Cadet visiting planets"
+      {/* The voyage's own first frame, Cat HQ before liftoff: the window is never empty while the scene loads.
+          Regenerate with scripts/capture-voyage-poster.py when the opening scene changes. */}
+      <img className="homeVoyagePoster" src="/assets/home-voyage-poster.webp" alt="" width={1920} height={540} decoding="async" draggable={false} />
+      {sceneMounted && <iframe ref={frameRef} src="/space-demo/lockscreen.html?homepage&v=20261021-planet-pixels" title="Space Cadet visiting planets"
         sandbox="allow-scripts allow-same-origin" onLoad={() => setReady(true)} />}
     </div>
     <div className="homeVoyageFooter">
-      <div className="homeVoyageStory"><span className="voyageStatusDot" aria-hidden="true" /><span>{caption}</span></div>
+      <div className="homeVoyageStory"><span className="voyageStatusDot" aria-hidden="true" /><span>{ready ? caption : loadingCaption}</span></div>
       <div className="voyageActions">
         <button type="button" className="voyageCustomise" onClick={openBuilder} aria-haspopup="dialog" aria-label="Customise cat — make it a little you">
           <span className="voyageCrewPortrait" aria-hidden="true">{portrait && <CatPortrait pixels={portrait.pixels} name={portrait.appearance.name}/>}</span>

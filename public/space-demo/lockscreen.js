@@ -92,7 +92,11 @@ window.SpaceVoyagePower={setNativeSnapshot(snapshot){setPower(snapshot,'native')
 let seed=crypto.getRandomValues(new Uint32Array(1))[0],cachedLeg=-1,world,previous;
 // Reproducible review links; normal visits keep a fresh random seed.
 if(/^\d{1,10}$/.test(parameters.get('seed')||''))seed=Number(parameters.get('seed'))>>>0;
-let fuelRoute=SpaceVoyageFuel.createRoute(seed);
+// The homepage always leaves the same Cat HQ under the same stars: the frame its loading poster shows
+// (scripts/capture-voyage-poster.py). Every stop after it still follows the visit's random seed.
+const homepageHomeSeed=7,skySeed=()=>homepage?homepageHomeSeed:seed;
+function newRoute(routeSeed){return SpaceVoyageFuel.createRoute(routeSeed,{homeSeed:homepage?homepageHomeSeed:routeSeed});}
+let fuelRoute=newRoute(seed);
 function routeWorld(leg){return powerProvider==='expedition'?fuelRoute.world(leg):engine.destination(seed,leg);}
 let lastHomeStatus='',lastInstruments='';
 function circle(x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
@@ -116,7 +120,7 @@ function draw(){
   const nextStop=cachedLeg>=0&&s.leg===cachedLeg+1;
   cachedLeg=s.leg;world=routeWorld(s.leg);previous=routeWorld(s.leg-1);
   previousArt=nextStop?planetArt:makePlanet(previous);planetArt=makePlanet(world);
-  starField=engine.destination(seed,0).stars;updateAntics();
+  starField=engine.destination(skySeed(),0).stars;updateAntics();
  }
  const activeAction=engine.actionAt(world,s.local);
  const grounded=['explore','rest','boarding'].includes(s.phase);
@@ -331,13 +335,13 @@ function drawBeacon(){
 }
 $('promo').onchange=schedule;
 
-$('new-route').onclick=()=>{seed=crypto.getRandomValues(new Uint32Array(1))[0];fuelRoute=SpaceVoyageFuel.createRoute(seed);cachedLeg=-1;elapsed=0;anchor=performance.now();routeButtons();schedule();};
+$('new-route').onclick=()=>{seed=crypto.getRandomValues(new Uint32Array(1))[0];fuelRoute=newRoute(seed);cachedLeg=-1;elapsed=0;anchor=performance.now();routeButtons();schedule();};
 
 // Find a real seeded encounter instead of manufacturing a separate demo-only world.
 $('meet-encounter').onclick=()=>{
  const kind=$('encounter-preview').value,start=crypto.getRandomValues(new Uint32Array(1))[0];
  for(let offset=0;offset<4096;offset++){
-  const candidateSeed=(start+offset)>>>0,candidateRoute=SpaceVoyageFuel.createRoute(candidateSeed);
+  const candidateSeed=(start+offset)>>>0,candidateRoute=newRoute(candidateSeed);
   let leg=0;
   if(powerProvider==='expedition'&&['home','fuel'].includes(kind))while(!candidateRoute.plan(leg).refuel)leg++;
   const candidate=powerProvider==='expedition'?candidateRoute.world(leg):engine.destination(candidateSeed,leg);

@@ -24,7 +24,9 @@ OUTPUT = Path(__file__).resolve().parent.parent / "public/assets/home-voyage-pos
 
 def capture(base_url: str) -> bytes:
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch()
+        # Installed Chrome, not the headless shell: the shell lacks the system fonts, so the CAT HQ sign changed font
+        # when the live scene took over.
+        browser = playwright.chromium.launch(channel="chrome")
         page = browser.new_page(viewport={"width": 1100, "height": 230})
         page.goto(f"{base_url}/space-demo/lockscreen.html?homepage&seed={SEED}")
         page.wait_for_function("document.getElementById('scene').dataset.phase !== undefined")

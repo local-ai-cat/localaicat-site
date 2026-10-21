@@ -149,7 +149,7 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
       {/* The voyage's own first frame, Cat HQ before liftoff: the window is never empty while the scene loads.
           Regenerate with scripts/capture-voyage-poster.py when the opening scene changes. */}
       <img className="homeVoyagePoster" src="/assets/home-voyage-poster.webp" alt="" width={1920} height={540} decoding="async" draggable={false} />
-      {sceneMounted && <iframe ref={frameRef} src="/space-demo/lockscreen.html?homepage&v=20261021-planet-pixels" title="Space Cadet visiting planets"
+      {sceneMounted && <iframe ref={frameRef} src="/space-demo/lockscreen.html?homepage&v=20261021-home-seed" title="Space Cadet visiting planets"
         sandbox="allow-scripts allow-same-origin" onLoad={() => setReady(true)} />}
     </div>
     <div className="homeVoyageFooter">

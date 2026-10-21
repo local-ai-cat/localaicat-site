@@ -114,7 +114,8 @@ function drawFuelDepot(ctx,world,ground){
  // A stored hose and sign remain part of the planet even after the ship leaves.
  ctx.strokeStyle='#877297';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x+20,y-17,8,-Math.PI/2,Math.PI);ctx.stroke();
  box(ctx,x-1,y-65,2,18,'#bca6cf');box(ctx,x-31,y-78,62,15,'#292337');
- ctx.fillStyle='#d9c9ed';ctx.textAlign='center';ctx.font='8px monospace';ctx.fillText(depot.label,x,y-67);
+ // Named faces: bare monospace follows each browser's font setting, so the sign looked different per visitor.
+ ctx.fillStyle='#d9c9ed';ctx.textAlign='center';ctx.font="8px Menlo, Consolas, 'DejaVu Sans Mono', monospace";ctx.fillText(depot.label,x,y-67);
 }
 function fuelFlowPoint(port,shipEnd,time){
  // One continuous packet: pump -> hose -> hull cable -> tank inlet.

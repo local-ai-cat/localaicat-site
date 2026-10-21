@@ -7,7 +7,8 @@ function roll(seed,leg,salt){
  n=Math.imul(n^(n>>>16),0x21f0aaad);n=Math.imul(n^(n>>>15),0x735a2d97);
  return ((n^(n>>>15))>>>0)/4294967296;
 }
-function createRoute(seed){
+// homeSeed pins only the Cat HQ the voyage leaves from; every stop after it still follows seed.
+function createRoute(seed,{homeSeed=seed}={}){
  const cache=new Map();
  let latest=-1,departure=settings.full;
  function plan(leg){
@@ -27,7 +28,7 @@ function createRoute(seed){
   return cache.get(leg);
  }
  function world(leg){
-  if(leg<0)return root.SpaceStory.destination(seed,leg,{kind:'home'});
+  if(leg<0)return root.SpaceStory.destination(homeSeed,leg,{kind:'home'});
   const visit=plan(leg);
   if(visit.world)return visit.world;
   const candidate=root.SpaceStory.destination(seed,leg);

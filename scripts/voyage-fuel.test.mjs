@@ -91,3 +91,12 @@ test('fuel packet goes pump to ship and up the cable into its tank',()=>{
  assert.ok(pixels.some(p=>p.role==='c'));
  assert.equal(pixels.some(p=>p.role==='pulse'),false,'no second packet competing with the hose animation');
 });
+
+test('a pinned home seed fixes only the Cat HQ the voyage leaves from',()=>{
+ const first=createRoute(11,{homeSeed:7}),second=createRoute(4242,{homeSeed:7});
+ assert.deepEqual(first.world(-1),second.world(-1));
+ assert.deepEqual(first.world(-1),createRoute(7).world(-1));
+ assert.equal(first.world(-1).kind,'home');
+ assert.notDeepEqual(first.world(0),second.world(0));
+ assert.deepEqual(first.world(0),createRoute(11).world(0),'the stops themselves still follow the route seed');
+});

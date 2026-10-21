@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { EarthPersonalitySelector, ModeSelector, useSiteMode } from "./site-mode";
 import { CliInstall, DownloadPair } from "./home-downloads";
 import { SpaceLaunchPad } from "./space-experience";
@@ -117,20 +117,6 @@ export function HomeExperience({ demo }: { demo?: AppDemoSource }) {
   // when entering Earth, including direct links and keyboard navigation.
   if (mode !== "space" && mode !== earthMode) setEarthMode(mode);
   const inSpace = mode === "space";
-
-  useEffect(() => {
-    [
-      "/assets/cat-personal-favicon-32.png",
-      "/assets/cat-personal-favicon-180.png",
-      "/assets/cat-personal-favicon-192.png",
-      "/assets/cat-business-favicon-32.png",
-      "/assets/cat-business-favicon-180.png",
-      "/assets/cat-business-favicon-192.png"
-    ].forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
-  }, []);
 
   return (
     <div className={`homeMode homeMode-${mode} homeMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`}>

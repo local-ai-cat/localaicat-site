@@ -2149,6 +2149,11 @@ body:has(> .siteFooter) > .pageFrame {
   font-size: 15px;
 }
 
+/* Upstream repository URLs are one long word; let them break rather than run off a phone screen. */
+.licenseItem p {
+  overflow-wrap: anywhere;
+}
+
 /* ─── Plan grid (pricing pages) ─── */
 
 .planGrid {
@@ -3266,8 +3271,10 @@ body:has(> .siteFooter) > .pageFrame {
     padding: 36px 0 0;
   }
 
+  /* minmax(0, 1fr), not 1fr: a plain 1fr track grows to its widest unbreakable line (the one-line install command,
+     a long URL) and pushed cards past the screen edge; now the command scrolls inside its card instead. */
   .dualCards {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     border-radius: 16px;
   }
 
@@ -3284,10 +3291,11 @@ body:has(> .siteFooter) > .pageFrame {
   .supportGrid,
   .licenseList,
   .downloadPaths {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .downloadPathStrong {
+  .downloadPathStrong,
+  .downloadPath:first-child {
     padding-right: 0;
     border-right: 0;
   }

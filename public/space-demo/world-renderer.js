@@ -174,6 +174,31 @@ function drawScenery(ctx,world,art,localTime=0){
  }
 
 }
+// The planet body as raw RGBA in two-pixel cells: one putImageData per destination instead of ~200k
+// fillRects, which held up the first frame and stalled every new leg. Same banding, shade and rim as before.
+const planetSize=512,planetRadius=248,planetCell=2,shadeInk=[12,8,22],rimAlpha=0x88/255;
+function rgb(hex){return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];}
+function planetPixels(world){
+ const pixels=new Uint8ClampedArray(planetSize*planetSize*4),centre=planetSize/2,palette=world.palette.map(rgb);
+ for(let y=0;y<planetSize;y+=planetCell){for(let x=0;x<planetSize;x+=planetCell){
+  const nx=(x-centre)/planetRadius,ny=(y-centre)/planetRadius,d=nx*nx+ny*ny;if(d>1)continue;
+  const noise=Math.sin(x*.043*world.textureScale+world.terrain[0]*40)*Math.cos(y*.033*world.textureScale+world.terrain[1]*20);
+  let band=noise>.3?1:0;
+  if(world.biome==='ocean')band=Math.sin(x*.028+Math.sin(y*.035)*2)>0.35?1:0;
+  if(world.biome==='dunes')band=Math.sin(y*.08+Math.sin(x*.02)*2)>.2?1:0;
+  if(world.biome==='crystal')band=(Math.floor(x/32)+Math.floor(y/24))%3===0?1:0;
+  const shade=Math.max(0,nx*.6+ny*.25+.2)*.8,rim=d>.90&&nx<0;
+  const colour=palette[band].map((channel,i)=>{
+   const shaded=channel*(1-shade)+shadeInk[i]*shade;
+   return rim?shaded*(1-rimAlpha)+palette[2][i]*rimAlpha:shaded;
+  });
+  for(let row=y;row<y+planetCell;row++)for(let column=x;column<x+planetCell;column++){
+   const at=(row*planetSize+column)*4;
+   pixels[at]=colour[0];pixels[at+1]=colour[1];pixels[at+2]=colour[2];pixels[at+3]=255;
+  }
+ }}
+ return pixels;
+}
 function draw(ctx,world,art,pose,localTime=0){
  const base=engine.surfacePose;
  ctx.save();ctx.translate(pose.cx,pose.cy);ctx.scale(pose.rx/base.rx,pose.ry/base.ry);ctx.translate(-base.cx,-base.cy);
@@ -189,5 +214,5 @@ function draw(ctx,world,art,pose,localTime=0){
  ring(0,Math.PI,world.palette[2]+'88');
  ctx.restore();
 }
-root.SpaceWorld={draw,drawScenery,drawFlyby,drawFuelHose,depotPort,fuelFlowPoint};
+root.SpaceWorld={draw,drawScenery,drawFlyby,drawFuelHose,depotPort,fuelFlowPoint,planetPixels,planetSize};
 })(globalThis);

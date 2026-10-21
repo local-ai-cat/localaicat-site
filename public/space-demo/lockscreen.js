@@ -99,19 +99,10 @@ function circle(x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0
 // Cached once per destination, not generated on every frame.
 let planetArt,previousArt,starField;
 function makePlanet(w){
- const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d');
+ const size=SpaceWorld.planetSize,c=document.createElement('canvas');c.width=size;c.height=size;
+ const g=c.getContext('2d',{willReadFrequently:true});
  g.imageSmoothingEnabled=false;
- for(let y=0;y<512;y+=2){for(let x=0;x<512;x+=2){
-  const nx=(x-256)/248,ny=(y-256)/248,d=nx*nx+ny*ny;if(d>1)continue;
-  const noise=Math.sin(x*.043*w.textureScale+w.terrain[0]*40)*Math.cos(y*.033*w.textureScale+w.terrain[1]*20);
-  let band=noise>.3?1:0;
-  if(w.biome==='ocean')band=Math.sin(x*.028+Math.sin(y*.035)*2)>0.35?1:0;
-  if(w.biome==='dunes')band=Math.sin(y*.08+Math.sin(x*.02)*2)>.2?1:0;
-  if(w.biome==='crystal')band=(Math.floor(x/32)+Math.floor(y/24))%3===0?1:0;
-  g.fillStyle=w.palette[band];g.fillRect(x,y,2,2);
-  const shadow=Math.max(0,(nx*.6+ny*.25+.2));g.fillStyle=`rgba(12,8,22,${shadow*.8})`;g.fillRect(x,y,2,2);
-  if(d>.90&&nx<0){g.fillStyle=w.palette[2]+'88';g.fillRect(x,y,2,2);}
- }}
+ g.putImageData(new ImageData(SpaceWorld.planetPixels(w),size,size),0,0);
  if(w.biome==='crater'){g.save();g.beginPath();g.arc(256,256,248,0,Math.PI*2);g.clip();for(let i=0;i<8;i++){const x=100+w.terrain[i]*288,y=100+w.terrain[i+8]*288,r=12+w.terrain[i+16]*24;g.strokeStyle=w.palette[1];g.lineWidth=2;g.beginPath();g.ellipse(x,y,r,r*.65,0,0,Math.PI*2);g.stroke();g.fillStyle='#17132166';g.fill();}g.restore();}
  const pixels=g.getImageData(0,0,512,512).data;
  c.surface=Array.from({length:512},(_,x)=>{for(let y=0;y<512;y++){if(pixels[(y*512+x)*4+3])return y;}return 512;});
@@ -120,7 +111,13 @@ function makePlanet(w){
 function draw(){
  ctx.setTransform(backingScale,0,0,backingScale,0,0);
  const frameTime=now(),s=engine.state(frameTime);
- if(cachedLeg!==s.leg){cachedLeg=s.leg;world=routeWorld(s.leg);previous=routeWorld(s.leg-1);planetArt=makePlanet(world);previousArt=makePlanet(previous);starField=engine.destination(seed,0).stars;updateAntics();}
+ if(cachedLeg!==s.leg){
+  // Flying on to the next stop: the planet just left is already drawn. Any reset sets cachedLeg to -1.
+  const nextStop=cachedLeg>=0&&s.leg===cachedLeg+1;
+  cachedLeg=s.leg;world=routeWorld(s.leg);previous=routeWorld(s.leg-1);
+  previousArt=nextStop?planetArt:makePlanet(previous);planetArt=makePlanet(world);
+  starField=engine.destination(seed,0).stars;updateAntics();
+ }
  const activeAction=engine.actionAt(world,s.local);
  const grounded=['explore','rest','boarding'].includes(s.phase);
  const service=engine.fuelService(world,s.local);

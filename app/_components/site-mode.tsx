@@ -2,9 +2,8 @@
 
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { usePathname } from "next/navigation";
-import { EARTH_MODES, modeForWorld, nextEarthMode, resolveSiteMode, siteWorld, type Mode, type World } from "../../lib/site-personality";
+import { EARTH_MODES, SITE_MODE_STORAGE_KEY, modeForWorld, nextEarthMode, resolveSiteMode, siteWorld, type Mode, type World } from "../../lib/site-personality";
 
-const STORAGE_KEY = "space-preview-site-mode";
 const EVENT_NAME = "cat-site-mode";
 
 // Holds the choice for this visit when the browser refuses storage, since the address no longer carries it.
@@ -16,13 +15,13 @@ function readSaved(key: string): string | null {
 
 export function getInitialMode(): Mode {
   if (typeof window === "undefined") return "space";
-  return resolveSiteMode(new URLSearchParams(window.location.search).get("mode"), readSaved(STORAGE_KEY));
+  return resolveSiteMode(new URLSearchParams(window.location.search).get("mode"), readSaved(SITE_MODE_STORAGE_KEY));
 }
 
 export function persistSiteMode(mode: Mode): void {
   rememberedMode = mode;
   try {
-    localStorage.setItem(STORAGE_KEY, mode);
+    localStorage.setItem(SITE_MODE_STORAGE_KEY, mode);
   } catch { /* rememberedMode carries the choice for this visit. */ }
   document.body.dataset.homeMode = mode;
   document.documentElement.dataset.personality = mode;
@@ -48,6 +47,10 @@ export function useSiteMode(): [Mode, (mode: Mode) => void] {
       window.removeEventListener("popstate", update);
     };
   }, []);
+  useEffect(() => {
+    // React now renders the world initialModeScript showed before hydration; the page's own state takes over.
+    if (document.documentElement.dataset.modePending === mode) delete document.documentElement.dataset.modePending;
+  }, [mode]);
   return [mode, persistSiteMode];
 }
 

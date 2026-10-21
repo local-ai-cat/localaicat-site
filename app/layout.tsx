@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { getSiteUrl } from "../lib/env";
 import { spaceSharingMetadata } from "../lib/space-sharing";
+import { initialModeScript } from "../lib/site-personality";
 import { SiteAnalytics } from "./_components/site-analytics";
 import { ExplorerProvider } from "./_components/explorer-presence";
 import { GoatCounter } from "./goat-counter";
@@ -55,11 +56,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html data-personality="space" data-scroll-behavior="smooth" className={`${displayFont.variable} ${bodyFont.variable}`} lang="en">
+    // initialModeScript may switch the world attributes before hydration, so they can differ from the server's.
+    <html data-personality="space" data-scroll-behavior="smooth" className={`${displayFont.variable} ${bodyFont.variable}`} lang="en" suppressHydrationWarning>
       <head>
         <meta name="apple-itunes-app" content="app-id=6741502386" />
       </head>
-      <body data-home-mode="space">
+      <body data-home-mode="space" suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: initialModeScript }} />
         <ExplorerProvider>{children}</ExplorerProvider>
         <SiteAnalytics />
         <SiteSpeedInsights />

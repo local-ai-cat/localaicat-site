@@ -254,6 +254,19 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
 .spaceAtmosphere,.skyMotionControl {transition:opacity var(--world-fade) var(--world-ease),visibility 0s var(--world-fade);}
 .spaceAtmosphere[data-active="false"],.skyMotionControl[data-active="false"] {opacity:0;visibility:hidden;pointer-events:none;}
 .spaceAtmosphere[data-active="true"],.skyMotionControl[data-active="true"] {transition-delay:0s;}
+/* Before hydration a returning Earth visitor's world is <html data-mode-pending> (initialModeScript), while React's
+   markup still says Space. Show their world's server-rendered layers at once; layers follow MODES: personal, space, business. */
+html[data-mode-pending] .homeMode :is(.heroCopyLayer,.heroWorldPanel,.heroCatLayer,.spaceAtmosphere) {transition:none;}
+html[data-mode-pending] .homeMode :is(.heroCopyLayer,.heroWorldPanel,.spaceAtmosphere) {opacity:0;visibility:hidden;}
+html[data-mode-pending="personal"] .homeMode .heroCopyLayer:nth-child(1),
+html[data-mode-pending="business"] .homeMode .heroCopyLayer:nth-child(3),
+html[data-mode-pending] .homeMode .heroWorldPanel.heroEarthCompanion {opacity:1;visibility:visible;}
+html[data-mode-pending="business"] .homeMode .heroCatLayer {opacity:0;}
+html[data-mode-pending="business"] .homeMode .heroCatLayer:nth-child(3) {opacity:1;}
+/* Controls and pricing that only React's state can draw wait for it; if the app never loads they appear after 3 s. */
+html[data-mode-pending] .homeMode :is(.heroPersonalityControl,.earthPersonality),
+html[data-mode-pending="business"] .homeMode #pricing {visibility:hidden;animation:modePendingReveal 0s 3s forwards;}
+@keyframes modePendingReveal {to {visibility:visible;}}
 .siteHeaderInner,.personalitySwitch {transition:background-color var(--world-fade) var(--world-ease),border-color var(--world-fade) var(--world-ease);}
 @media(prefers-reduced-motion:reduce){
  .heroCopyLayer,.heroWorldPanel,.spaceAtmosphere,.skyMotionControl,.siteHeaderInner,.personalitySwitch {transition:none;}

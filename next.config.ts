@@ -130,6 +130,13 @@ const nextConfig: NextConfig = {
           if (header.key === "X-Frame-Options") return { ...header, value: "SAMEORIGIN" };
           return header;
         })
+      },
+      // Versioned voyage files (?v=, bumped when they change) come straight from the browser cache and refresh in
+      // the background, so a return visit skips ten revalidations and a forgotten bump costs one stale view at most.
+      {
+        source: "/space-demo/:path*",
+        has: [{ type: "query", key: "v" }],
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, stale-while-revalidate=604800" }]
       }
     ];
   }

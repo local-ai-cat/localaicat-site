@@ -25,6 +25,8 @@ declare global {
   interface Window { CadetModel?: CatRuntime["model"]; CadetPassport?: CatRuntime["passport"] }
 }
 export const catStorageKey = "space-cadet-appearance-v1";
+// Bump when cadet-model.js or cadet-passport.js change: versioned /space-demo files are served from the browser cache.
+const cadetScriptVersion = "20261019";
 let runtimePromise: Promise<CatRuntime> | null = null;
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -38,8 +40,8 @@ function loadScript(src: string): Promise<void> {
 export function loadCatRuntime(): Promise<CatRuntime> {
   if (!runtimePromise) {
     runtimePromise = (async () => {
-      if (!window.CadetModel) await loadScript("/space-demo/cadet-model.js");
-      if (!window.CadetPassport) await loadScript("/space-demo/cadet-passport.js");
+      if (!window.CadetModel) await loadScript(`/space-demo/cadet-model.js?v=${cadetScriptVersion}`);
+      if (!window.CadetPassport) await loadScript(`/space-demo/cadet-passport.js?v=${cadetScriptVersion}`);
       if (!window.CadetModel || !window.CadetPassport) throw new Error("The wardrobe could not load.");
       return {model: window.CadetModel, passport: window.CadetPassport};
     })().catch(error => { runtimePromise = null; throw error; });

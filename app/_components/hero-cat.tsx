@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { MODES, SITE_CREW, type Mode } from "../../lib/site-personality";
-import { PixelCat } from "./space-experience";
+import { PixelCat } from "./pixel-cat";
 
 export function HeroCat({ mode }: { mode: Mode }) {
   return (

@@ -1,23 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import pixels from "./cadet-pixels.json";
 import { CatPortrait } from "./cat-builder";
+import { PixelCat } from "./pixel-cat";
 import { CliInstall, DownloadPair } from "./home-downloads";
 import { loadCatRuntime, readSavedCat } from "../../lib/cadet-runtime";
 import type { CatDesign } from "../../lib/cadet-runtime";
 import { rocketArt, rocketColours, rocketFlameFrames } from "../../lib/rocket-art";
 import type { MouseEvent } from "react";
 
-type Palette = keyof typeof pixels;
 const LAUNCH_STAR_COUNT = 44;
 const LIFTOFF_MS = 2600;
-
-export function PixelCat({ palette = "classic", className = "", decorative = false }: {palette?: Palette; className?: string; decorative?: boolean}) {
-  return <svg className={`pixelCat ${className}`} viewBox="0 0 16 16" shapeRendering="crispEdges" role={decorative ? undefined : "img"} aria-hidden={decorative || undefined} aria-label={decorative ? undefined : "Space Cadet cat in a pixel astronaut helmet"}>
-    {pixels[palette].flatMap((row,y) => row.map((ink,x) => ink ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={ink}/> : null))}
-  </svg>;
-}
 
 /** The app's rocket in high-power mode: purple tank, blue flame cycling underneath. */
 export function PixelShip({className = ""}: {className?: string}) {

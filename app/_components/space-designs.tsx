@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { PixelCat, PixelShip } from "./space-experience";
+import { PixelCat } from "./pixel-cat";
+import { PixelShip } from "./space-experience";
 import { useCatStudio } from "./use-cat-studio";
 
 type Experience = "cockpit" | "voyage";

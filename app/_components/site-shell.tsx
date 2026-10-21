@@ -5,7 +5,7 @@ import { MobileNav } from "./mobile-nav";
 import { ScrollHeader } from "./scroll-header";
 import { ModeSelector, SiteMode } from "./site-mode";
 
-import { PixelCat } from "./space-experience";
+import { PixelCat } from "./pixel-cat";
 import { ExplorerCount } from "./explorer-presence";
 
 type SiteShellProps = {

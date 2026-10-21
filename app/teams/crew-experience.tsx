@@ -1,7 +1,7 @@
 "use client";
 
 import { TeamPlans } from "../_components/team-plans";
-import { PixelCat } from "../_components/space-experience";
+import { PixelCat } from "../_components/pixel-cat";
 import { useSiteMode } from "../_components/site-mode";
 
 export function CrewExperience() {

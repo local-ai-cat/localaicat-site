@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "./_components/site-shell";
-import { PixelCat } from "./_components/space-experience";
+import { PixelCat } from "./_components/pixel-cat";
 
 export const metadata: Metadata = {
   title: "Page not found",

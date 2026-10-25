@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
-import { PRINT_CARDS, PRINTER_DOTS, printedLengthMm, type PrintCard } from "../../lib/print-cards";
+import {
+  PRINT_CARDS,
+  PRINT_GROUPS,
+  PRINTER_DOTS,
+  printedLengthMm,
+  type PrintCard
+} from "../../lib/print-cards";
 import styles from "./print.module.css";
 
 export const metadata: Metadata = {
@@ -52,11 +58,17 @@ export default function PrintPage() {
           <li>open it in the printer&apos;s app (iPrint).</li>
           <li>print at original size: no fit to page, no scaling. print one sample before a batch.</li>
         </ol>
-        <div className={styles.grid}>
-          {PRINT_CARDS.map((card) => (
-            <CardPreview card={card} key={card.slug} />
-          ))}
-        </div>
+        {PRINT_GROUPS.map((group) => (
+          <section className={styles.group} id={group.id} key={group.id}>
+            <h2 className={styles.groupName}>{group.name}</h2>
+            <p className={styles.groupNote}>{group.note}</p>
+            <div className={styles.grid}>
+              {PRINT_CARDS.filter((card) => card.group === group.id).map((card) => (
+                <CardPreview card={card} key={card.slug} />
+              ))}
+            </div>
+          </section>
+        ))}
       </ContentPage>
     </SiteShell>
   );

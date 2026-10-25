@@ -8,6 +8,22 @@
   list-style-position: inside;
 }
 
+.group {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.groupName {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  font-size: 28px;
+}
+
+.groupNote {
+  margin: 4px 0 20px;
+  color: var(--text-dim);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));

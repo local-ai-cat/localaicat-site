@@ -70,7 +70,10 @@ const nextConfig: NextConfig = {
         permanent: true
       },
       { source: "/download", destination: "/#download", permanent: true },
-      { source: "/download/direct", destination: "/#download", permanent: true }
+      { source: "/download/direct", destination: "/#download", permanent: true },
+      // The QR on the PURRDAIN Space Cadet cards (/print). Short so it stays the originals' small QR;
+      // temporary, because printed cards outlive the promo and may need to point somewhere else later.
+      { source: "/p", destination: "/purrdain?src=card", permanent: false }
     ];
   },
   async headers() {

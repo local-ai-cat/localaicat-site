@@ -8,8 +8,8 @@ import { goatCounterEventUrl } from "../../lib/site-telemetry-privacy";
 /**
  * Counts where this visit came from as a GoatCounter event
  * (`purrdain-src-card`, `purrdain-src-lockscreen`, `purrdain-src-other`),
- * through the same first-party pixel as page views and under the same
- * opt-out. The source travels as the event name, and only as a known tag.
+ * through the same GoatCounter pixel as page views (no remote script) and
+ * under the same opt-out. The source travels as the event name, and only as a known tag.
  */
 export function PurrdainSourceCount({ source }: { source: PurrdainSource }): null {
   useEffect(() => {

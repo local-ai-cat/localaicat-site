@@ -41,13 +41,13 @@ export type PurrdainStock = { left: number; total: number };
 
 type PolarDiscount = { max_redemptions?: number | null; redemptions_count?: number | null };
 
-/** Null when the discount has no limit, so there is nothing to count down. */
+/** Null when the discount has no limit or no count, so there is nothing to count down. */
 export function purrdainStockFromDiscount(discount: PolarDiscount): PurrdainStock | null {
   const total = discount.max_redemptions;
-  if (!total || total < 1) {
+  const used = discount.redemptions_count;
+  if (!total || total < 1 || typeof used !== "number") {
     return null;
   }
-  const used = discount.redemptions_count ?? 0;
   return { left: Math.max(total - used, 0), total };
 }
 

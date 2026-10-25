@@ -37,6 +37,7 @@ test("stock counts down from the limit and never goes below zero", () => {
     total: 500
   });
   assert.equal(purrdainStockFromDiscount({ max_redemptions: null, redemptions_count: 3 }), null);
+  assert.equal(purrdainStockFromDiscount({ max_redemptions: 500 }), null);
 });
 
 function fakeFetch(status: number, body: unknown, seen: string[] = []): typeof fetch {

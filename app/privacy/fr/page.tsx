@@ -116,7 +116,7 @@ export default function PrivacyPageFr() {
             des URL envoyées et excluons les pages de compte, de paiement et les pages
             privées. Les noms, dates de naissance, codes et dessins des chats, ainsi que
             le contenu des conversations, ne sont jamais envoyés comme événements d’analyse.</p>
-          <p>Le panneau des explorateurs indique une estimation des visiteurs depuis
+          <p>Le panneau des explorateurs indique l’estimation GoatCounter des visiteurs depuis
             minuit UTC, pas un nombre de personnes présentes en direct. Nous respectons
             Do Not Track et Global Privacy Control. Vous pouvez aussi désactiver les
             statistiques ci-dessous. Ce choix et votre chat personnalisé restent dans ce navigateur.</p>

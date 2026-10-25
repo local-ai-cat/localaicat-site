@@ -102,7 +102,7 @@ export default function PrivacyPage() {
             We strip query strings and fragments from the page URLs we send and
             exclude account, checkout and private pages. We never send cat names,
             birthdays, cat codes, drawings or chat content as analytics events.</p>
-          <p>The explorer sign shows estimated visitors since midnight UTC. It is not
+          <p>The explorer sign shows GoatCounter’s estimate of visitors since midnight UTC. It is not
             a live headcount. Do Not Track and Global Privacy Control are respected;
             you can also turn website statistics off below. Your preference and your
             custom cat are saved only in this browser.</p>

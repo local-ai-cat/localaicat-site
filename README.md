@@ -127,6 +127,20 @@ workflow or stored Vercel token is involved.
   `staging` branch; it also posts no PR comments.
 - To put main on staging: `git push origin origin/main:staging` (fast-forward).
 
+### Previews
+
+Every pushed branch gets a preview on the production project, behind Vercel login.
+Previews have no Polar checkout links, so buy buttons fall back to `/contact`.
+
+1. Push a branch named `preview/<topic>`; the stable URL is
+   `https://localaicat-site-git-preview-<topic>-atlascodes.vercel.app`.
+2. When it has been looked at, merge or drop it, then delete the branch locally and on GitHub
+   and remove its deployments: `vercel ls localaicat-site --scope atlascodes`, then
+   `vercel remove <url> --yes --scope atlascodes`. Never remove production deployments or the
+   one aliased to `localaicat-site-git-staging-atlascodes.vercel.app`.
+3. Vercel's retention (30 days, keep 10) is the backstop, not the cleanup. 2026-10-25: 67 stale
+   previews from 20 branches were removed by hand.
+
 ## Health check
 
 - `GET /api/health`

@@ -1,0 +1,67 @@
+.howTo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.6;
+  list-style-position: inside;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 28px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* The paper: white, like the roll, so the preview reads as the print will. */
+.paper {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* 1-bit masters: keep every dot square when the preview is scaled. */
+.paper img {
+  display: block;
+  width: 100%;
+  max-width: 384px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.paperWide img {
+  max-width: 768px;
+}
+
+.cardName {
+  margin: 0;
+  font-weight: 700;
+}
+
+.cardNote {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.cardMeta {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+/* Cards in a row stretch to the tallest; the save buttons line up at the bottom. */
+.card > a {
+  margin-top: auto;
+}

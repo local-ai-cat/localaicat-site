@@ -1,42 +1,69 @@
-import { emptyAppStoreDay, loadAppStoreDays, type AppStoreDay, type AppStoreDays } from "./app-store-sales.ts";
+import {
+  appStoreUnits,
+  fillAppStoreHistory,
+  latestAppStoreDay,
+  readAppStoreHistory,
+  sumAppStoreUnits,
+  type AppStoreDay,
+  type AppStoreHistory,
+  type AppStoreSalesConfig
+} from "./app-store-sales.ts";
 import { getAppStoreSalesConfig, getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
 import { explorerAnalyticsConfig, type ExplorerAnalyticsConfig } from "./explorer-presence.ts";
-import { siteStatsStore, statsDays, type DailyCounts, type SiteStatsStore } from "./site-stats.ts";
+import { afterResponse, siteStatsStore, type DailyCounts, type SiteStatsStore } from "./site-stats.ts";
+import { rangeBuckets, utcDay, type Bucket, type RangeBuckets, type StatsRange } from "./stats-range.ts";
 
-/** Everything /stats shows, gathered on the server. Each source can be missing on its own. */
+/**
+ * Everything /stats shows for one range, gathered on the server. Each source can be missing on its own.
+ * Totals only: no amount of money, no person, no address.
+ */
 
-export const REPORT_DAYS = 30;
+/** The site began counting downloads, update checks and checkouts itself on this day. */
+export const COUNTING_STARTED = "2026-10-28";
+/** GitHub keeps only running totals; the site has written them down once a day since this day. */
+export const GITHUB_SNAPSHOTS_STARTED = "2026-10-29";
 const RELEASES_URL = "https://api.github.com/repos/local-ai-cat/localaicat-site/releases";
 const RELEASE_PAGES = 5;
-const SOURCE_TIMEOUT_MS = 5_000;
+const SOURCE_TIMEOUT_MS = 8_000;
+/** The stable DMG the site, Homebrew and first installs fetch; Sparkle updates fetch the versioned one. */
+const PLAIN_DMG = "LocalAIChatDirect.dmg";
 
 export type ReleaseChannel = "stable" | "beta" | "alpha";
 export type GitHubRelease = { tag: string; publishedAt: string | null; dmgDownloads: number };
 export type GitHubHistory = {
   channels: { channel: ReleaseChannel; releases: number; dmgDownloads: number }[];
   topStable: GitHubRelease[];
+  /** Stable plain-DMG downloads: new installs. */
+  newDownloads: number;
+  /** Stable versioned-DMG downloads: mostly Sparkle updating an installed app. */
+  updateDownloads: number;
+  /** The first direct release's day: a range starting by then holds every direct download. */
+  firstRelease: string | null;
 };
-export type DayValue = { day: string; value: number };
+/** The running totals written down once a day, to turn GitHub's totals into downloads per day. */
+export type GitHubTotals = { new: number; updates: number; beta: number; alpha: number };
+export type BucketValue = { key: string; value: number };
+/** Polar orders in the range, as counts: a first order (purchase or new subscription), and renewals. */
+export type OrdersReport = { newPaid: number; newFree: number; renewals: number };
 export type StatsReport = {
-  days: string[];
+  range: StatsRange;
+  granularity: RangeBuckets["granularity"];
+  buckets: string[];
   storage: "redis" | "memory" | "off";
-  downloads: { day: string; stable: number; beta: number }[] | null;
+  allTime: { downloads: number | null; appStore: number | null; direct: number | null; directUpdates: number | null };
+  /** Per bucket: App Store first downloads and direct (plain DMG) downloads; direct is null before the snapshots. */
+  downloads: { key: string; ios: number; mac: number; direct: number | null }[];
+  appStore: { units: AppStoreDay; latestDay: string | null } | null;
+  direct: number | null;
+  siteClicks: { key: string; stable: number; beta: number }[] | null;
   downloadsByVersion: { channel: string; version: string; count: number }[];
   macsToday: { version: string; macs: number }[];
-  macsByDay: DayValue[] | null;
+  /** Distinct Macs a day; for a month, its busiest day. */
+  macs: BucketValue[] | null;
   checkoutsByPlan: { plan: string; count: number }[];
-  visits: DayValue[] | null;
-  github: GitHubHistory | null;
-  appStore: AppStoreReport | null;
+  visits: BucketValue[] | null;
   orders: OrdersReport | null;
-};
-/** Polar orders over the window, as counts: a first order (purchase or new subscription) and renewals. */
-export type OrdersReport = { newPaid: number; newFree: number; renewals: number };
-export type AppStoreReport = {
-  daily: { day: string; ios: number; mac: number }[];
-  totals: AppStoreDay;
-  /** The newest day Apple has published; later days in the window are still to come. */
-  latestDay: string | null;
+  github: GitHubHistory | null;
 };
 
 export function releaseChannel(tag: string): ReleaseChannel {
@@ -49,22 +76,30 @@ function isCount(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
-/** GitHub's per-file totals (no dates): the only download history from before the site counted. */
+/** GitHub's per-file totals (no dates): the only direct-download history from before the site counted. */
 export function summariseReleases(raw: unknown[]): GitHubHistory {
   const releases: (GitHubRelease & { channel: ReleaseChannel })[] = [];
+  let newDownloads = 0;
+  let updateDownloads = 0;
   for (const item of raw) {
     if (!item || typeof item !== "object") continue;
     const release = item as { tag_name?: unknown; published_at?: unknown; draft?: unknown; assets?: unknown };
     if (typeof release.tag_name !== "string" || release.draft === true) continue;
-    const assets = Array.isArray(release.assets) ? release.assets : [];
-    const dmgDownloads = assets.reduce((sum: number, asset: { name?: unknown; download_count?: unknown }) =>
-      typeof asset?.name === "string" && asset.name.endsWith(".dmg") && isCount(asset.download_count)
-        ? sum + asset.download_count : sum, 0);
+    const channel = releaseChannel(release.tag_name);
+    const assets = (Array.isArray(release.assets) ? release.assets : []) as { name?: unknown; download_count?: unknown }[];
+    let dmgDownloads = 0;
+    for (const asset of assets) {
+      if (typeof asset?.name !== "string" || !asset.name.endsWith(".dmg") || !isCount(asset.download_count)) continue;
+      dmgDownloads += asset.download_count;
+      if (channel !== "stable") continue;
+      if (asset.name === PLAIN_DMG) newDownloads += asset.download_count;
+      else updateDownloads += asset.download_count;
+    }
     releases.push({
       tag: release.tag_name,
       publishedAt: typeof release.published_at === "string" ? release.published_at.slice(0, 10) : null,
       dmgDownloads,
-      channel: releaseChannel(release.tag_name)
+      channel
     });
   }
   const channels = (["stable", "beta", "alpha"] as const).map(channel => {
@@ -74,7 +109,13 @@ export function summariseReleases(raw: unknown[]): GitHubHistory {
   const topStable = releases.filter(release => release.channel === "stable")
     .sort((a, b) => b.dmgDownloads - a.dmgDownloads).slice(0, 5)
     .map(({ tag, publishedAt, dmgDownloads }) => ({ tag, publishedAt, dmgDownloads }));
-  return { channels, topStable };
+  const published = releases.flatMap(release => release.publishedAt ? [release.publishedAt] : []).sort();
+  return { channels, topStable, newDownloads, updateDownloads, firstRelease: published[0] ?? null };
+}
+
+export function githubTotals(history: GitHubHistory): GitHubTotals {
+  const channel = (name: ReleaseChannel): number => history.channels.find(entry => entry.channel === name)?.dmgDownloads ?? 0;
+  return { new: history.newDownloads, updates: history.updateDownloads, beta: channel("beta"), alpha: channel("alpha") };
 }
 
 async function fetchGitHubHistory(): Promise<GitHubHistory | null> {
@@ -99,8 +140,39 @@ async function fetchGitHubHistory(): Promise<GitHubHistory | null> {
   }
 }
 
-/** GoatCounter's daily visitors over the window, read with the explorer sign's token. */
-export function dailyVisits(payload: unknown, days: readonly string[]): DayValue[] | null {
+function storedTotals(json: string | undefined): GitHubTotals | null {
+  if (!json) return null;
+  try {
+    const value = JSON.parse(json) as Partial<GitHubTotals>;
+    return isCount(value.new) && isCount(value.updates) && isCount(value.beta) && isCount(value.alpha) ? value as GitHubTotals : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Plain-DMG downloads per day, from the totals written down each day: the next day's total minus the day's
+ * (today: the live total minus this morning's). Null for a day without both ends; never below zero, since a
+ * re-uploaded file starts its count again.
+ */
+export function directPerDay(
+  snapshots: Record<string, string>,
+  days: readonly string[],
+  today: string,
+  live: GitHubTotals | null
+): Map<string, number> {
+  const perDay = new Map<string, number>();
+  const dayAfter = (day: string): string => utcDay(Date.parse(`${day}T00:00:00Z`) + 86_400_000);
+  for (const day of days) {
+    const start = storedTotals(snapshots[day]);
+    const end = day === today ? live : storedTotals(snapshots[dayAfter(day)]);
+    if (start && end) perDay.set(day, Math.max(0, end.new - start.new));
+  }
+  return perDay;
+}
+
+/** GoatCounter's daily visitors by day. */
+export function dailyVisits(payload: unknown): Map<string, number> | null {
   if (!payload || typeof payload !== "object") return null;
   const stats = (payload as { stats?: unknown }).stats;
   if (!Array.isArray(stats)) return null;
@@ -109,13 +181,13 @@ export function dailyVisits(payload: unknown, days: readonly string[]): DayValue
     const { day, daily } = (entry ?? {}) as { day?: unknown; daily?: unknown };
     if (typeof day === "string" && isCount(daily)) byDay.set(day.slice(0, 10), daily);
   }
-  return days.map(day => ({ day, value: byDay.get(day) ?? 0 }));
+  return byDay;
 }
 
-async function fetchVisits(config: ExplorerAnalyticsConfig | null, days: readonly string[], now: number): Promise<DayValue[] | null> {
+async function fetchVisits(config: ExplorerAnalyticsConfig | null, firstDay: string, now: number): Promise<Map<string, number> | null> {
   if (!config) return null;
   const url = new URL(`https://${config.site}.goatcounter.com/api/v0/stats/total`);
-  url.searchParams.set("start", `${days[0]}T00:00:00Z`);
+  url.searchParams.set("start", `${firstDay}T00:00:00Z`);
   // Both ends are inclusive hour buckets; the current hour is the last one with data.
   url.searchParams.set("end", new Date(Math.floor(now / 3_600_000) * 3_600_000).toISOString().replace(/\.\d{3}Z$/, "Z"));
   try {
@@ -125,7 +197,7 @@ async function fetchVisits(config: ExplorerAnalyticsConfig | null, days: readonl
       redirect: "error",
       cache: "no-store"
     });
-    return response.ok ? dailyVisits(await response.json(), days) : null;
+    return response.ok ? dailyVisits(await response.json()) : null;
   } catch {
     return null;
   }
@@ -155,14 +227,14 @@ export function summariseOrders(items: unknown[]): OrdersReport {
   return report;
 }
 
-/** The window's orders, read with the site's Polar key (orders:read). */
-async function fetchOrders(adminKey: string | null, apiBase: string, days: readonly string[]): Promise<OrdersReport | null> {
+/** The range's orders, read with the site's Polar key (orders:read). */
+async function fetchOrders(adminKey: string | null, apiBase: string, firstDay: string): Promise<OrdersReport | null> {
   if (!adminKey) return null;
   const items: unknown[] = [];
   try {
     for (let page = 1; page <= ORDER_PAGES; page += 1) {
       const url = new URL(`${apiBase}/v1/orders/`);
-      url.searchParams.set("created_after", `${days[0]}T00:00:00Z`);
+      url.searchParams.set("created_after", `${firstDay}T00:00:00Z`);
       url.searchParams.set("limit", "100");
       url.searchParams.set("page", String(page));
       const response = await fetch(url, {
@@ -197,26 +269,61 @@ function totalsByField(daily: DailyCounts, days: readonly string[]): Map<string,
   return totals;
 }
 
+function sumDays(perDay: Map<string, number>, bucket: Bucket): number {
+  return bucket.days.reduce((sum, day) => sum + (perDay.get(day) ?? 0), 0);
+}
+
 export function buildReport(input: {
-  days: string[];
+  range: RangeBuckets;
+  now: number;
   storage: StatsReport["storage"];
   downloads: DailyCounts | null;
   macs: DailyCounts | null;
   checkouts: DailyCounts | null;
-  visits: DayValue[] | null;
+  visits: Map<string, number> | null;
   github: GitHubHistory | null;
-  appStore?: AppStoreDays | null;
-  orders?: OrdersReport | null;
+  snapshots: Record<string, string> | null;
+  appStore: AppStoreHistory | null;
+  orders: OrdersReport | null;
 }): StatsReport {
-  const { days, downloads, macs, checkouts, appStore } = input;
-  const today = days[days.length - 1];
+  const { range, downloads, macs, checkouts, appStore, github } = input;
+  const today = utcDay(input.now);
+  const { buckets, days } = range;
+  const live = github ? githubTotals(github) : null;
+  const direct = input.snapshots ? directPerDay(input.snapshots, days, today, live) : new Map<string, number>();
+  const directKnown = (bucket: Bucket): boolean => bucket.days.some(day => direct.has(day));
+  /** A range reaching back to the first direct release holds all of GitHub's total; otherwise the days written down. */
+  const directInRange = (): number | null => {
+    if (github?.firstRelease && days[0] <= github.firstRelease) return github.newDownloads;
+    return buckets.some(directKnown) ? days.reduce((sum, day) => sum + (direct.get(day) ?? 0), 0) : null;
+  };
+
+  const allTimeAppStore = appStore ? sumAppStoreUnits(appStore, rangeBuckets("all", input.now).buckets) : null;
+  const allTimeApp = allTimeAppStore ? allTimeAppStore.ios + allTimeAppStore.mac : null;
+  const allTimeDirect = github?.newDownloads ?? null;
+  const anyAllTime = allTimeApp !== null || allTimeDirect !== null;
+
   return {
-    days,
+    range: range.range,
+    granularity: range.granularity,
+    buckets: buckets.map(bucket => bucket.key),
     storage: input.storage,
-    downloads: downloads && days.map(day => ({
-      day,
-      stable: sumFields(downloads[day], field => field.startsWith("stable|")),
-      beta: sumFields(downloads[day], field => field.startsWith("beta|"))
+    allTime: {
+      downloads: anyAllTime ? (allTimeApp ?? 0) + (allTimeDirect ?? 0) : null,
+      appStore: allTimeApp,
+      direct: allTimeDirect,
+      directUpdates: github?.updateDownloads ?? null
+    },
+    downloads: buckets.map(bucket => {
+      const units = appStore ? appStoreUnits(appStore, bucket) : null;
+      return { key: bucket.key, ios: units?.ios ?? 0, mac: units?.mac ?? 0, direct: directKnown(bucket) ? sumDays(direct, bucket) : null };
+    }),
+    appStore: appStore ? { units: sumAppStoreUnits(appStore, buckets), latestDay: latestAppStoreDay(appStore) } : null,
+    direct: directInRange(),
+    siteClicks: downloads && buckets.map(bucket => ({
+      key: bucket.key,
+      stable: bucket.days.reduce((sum, day) => sum + sumFields(downloads[day], field => field.startsWith("stable|")), 0),
+      beta: bucket.days.reduce((sum, day) => sum + sumFields(downloads[day], field => field.startsWith("beta|")), 0)
     })),
     downloadsByVersion: downloads
       ? [...totalsByField(downloads, days)].map(([field, count]) => {
@@ -227,30 +334,13 @@ export function buildReport(input: {
     macsToday: Object.entries(macs?.[today] ?? {}).map(([version, count]) => ({ version, macs: count }))
       .sort((a, b) => b.macs - a.macs),
     // A Mac that updates during a day is counted under both versions that day.
-    macsByDay: macs && days.map(day => ({ day, value: sumFields(macs[day]) })),
+    macs: macs && buckets.map(bucket => ({ key: bucket.key, value: Math.max(0, ...bucket.days.map(day => sumFields(macs[day]))) })),
     checkoutsByPlan: checkouts
       ? [...totalsByField(checkouts, days)].map(([plan, count]) => ({ plan, count })).sort((a, b) => b.count - a.count)
       : [],
-    visits: input.visits,
-    github: input.github,
-    appStore: appStore ? appStoreReport(appStore, days) : null,
-    orders: input.orders ?? null
-  };
-}
-
-function appStoreReport(appStore: AppStoreDays, days: readonly string[]): AppStoreReport {
-  const totals = emptyAppStoreDay();
-  let latestDay: string | null = null;
-  for (const day of days) {
-    const summary = appStore[day];
-    if (!summary) continue;
-    latestDay = day;
-    for (const field of Object.keys(totals) as (keyof AppStoreDay)[]) totals[field] += summary[field];
-  }
-  return {
-    daily: days.map(day => ({ day, ios: appStore[day]?.ios ?? 0, mac: appStore[day]?.mac ?? 0 })),
-    totals,
-    latestDay
+    visits: input.visits && buckets.map(bucket => ({ key: bucket.key, value: sumDays(input.visits as Map<string, number>, bucket) })),
+    orders: input.orders,
+    github
   };
 }
 
@@ -262,36 +352,62 @@ async function orNull<T>(work: Promise<T>): Promise<T | null> {
   }
 }
 
-/** How long one gathered report is served, per server instance. */
+/** How long one gathered report is served, per server instance and range. */
 export const REPORT_CACHE_MS = 5 * 60_000;
-let cachedReport: { at: number; report: Promise<StatsReport> } | undefined;
+const cachedReports = new Map<StatsRange, { at: number; report: Promise<StatsReport> }>();
 
 /**
- * The public /stats page's report: gathered at most once per five minutes per instance, so visits to a
- * public page cannot turn into Redis, GoatCounter, GitHub, Polar and Apple calls one for one. Concurrent visits share it.
+ * The public /stats page's report: gathered at most once per five minutes per instance and range, so visits
+ * to a public page cannot turn into Redis, GoatCounter, GitHub, Polar and Apple calls one for one.
+ * Concurrent visits share it.
  */
-export function cachedStatsReport(now = Date.now(), load: (now: number) => Promise<StatsReport> = loadStatsReport): Promise<StatsReport> {
-  if (cachedReport && now - cachedReport.at < REPORT_CACHE_MS) return cachedReport.report;
-  const report = load(now);
-  cachedReport = { at: now, report };
+export function cachedStatsReport(
+  range: StatsRange,
+  now = Date.now(),
+  load: (range: StatsRange, now: number) => Promise<StatsReport> = loadStatsReport
+): Promise<StatsReport> {
+  const cached = cachedReports.get(range);
+  if (cached && now - cached.at < REPORT_CACHE_MS) return cached.report;
+  const report = load(range, now);
+  cachedReports.set(range, { at: now, report });
   // A failed gather is not kept: the next visit tries again.
-  report.catch(() => { if (cachedReport?.report === report) cachedReport = undefined; });
+  report.catch(() => { if (cachedReports.get(range)?.report === report) cachedReports.delete(range); });
   return report;
 }
 
-export async function loadStatsReport(
-  now = Date.now(),
-  store: SiteStatsStore | null = siteStatsStore()
-): Promise<StatsReport> {
-  const days = statsDays(now, REPORT_DAYS);
-  const [downloads, macs, checkouts, visits, github, appStore, orders] = await Promise.all([
-    store ? orNull(store.counts("downloads", days)) : null,
-    store ? orNull(store.macs(days)) : null,
-    store ? orNull(store.counts("checkouts", days)) : null,
-    fetchVisits(explorerAnalyticsConfig(), days, now),
+export type ReportDeps = {
+  store?: SiteStatsStore | null;
+  appStoreConfig?: AppStoreSalesConfig | null;
+  /** Work for after the response: the App Store backfill and today's GitHub totals. */
+  schedule?: (work: () => Promise<void>) => void;
+};
+
+export async function loadStatsReport(range: StatsRange, now = Date.now(), deps: ReportDeps = {}): Promise<StatsReport> {
+  const store = deps.store === undefined ? siteStatsStore() : deps.store;
+  const appStoreConfig = deps.appStoreConfig === undefined ? getAppStoreSalesConfig() : deps.appStoreConfig;
+  const schedule = deps.schedule ?? afterResponse;
+  const buckets = rangeBuckets(range, now);
+  const today = utcDay(now);
+  const countedDays = buckets.days.filter(day => day >= COUNTING_STARTED);
+  const snapshotDays = buckets.days.filter(day => day >= GITHUB_SNAPSHOTS_STARTED);
+  const [downloads, macs, checkouts, visits, github, snapshots, appStore, orders] = await Promise.all([
+    store ? orNull(store.counts("downloads", countedDays)) : null,
+    store ? orNull(store.macs(countedDays)) : null,
+    store ? orNull(store.counts("checkouts", countedDays)) : null,
+    fetchVisits(explorerAnalyticsConfig(), buckets.days[0], now),
     fetchGitHubHistory(),
-    orNull(loadAppStoreDays(getAppStoreSalesConfig(), days, now, store)),
-    fetchOrders(getPolarAdminKey(), getPolarApiBaseUrl(), days)
+    store ? orNull(store.history("github-totals", snapshotDays)) : null,
+    store && appStoreConfig ? orNull(readAppStoreHistory(store, now)) : null,
+    fetchOrders(getPolarAdminKey(), getPolarApiBaseUrl(), buckets.days[0])
   ]);
-  return buildReport({ days, storage: store?.kind ?? "off", downloads, macs, checkouts, visits, github, appStore, orders });
+  if (store) {
+    schedule(async () => {
+      // The day's first totals stay the day's, so each day's downloads are measured from the same point.
+      if (github) await store.saveHistory("github-totals", today, JSON.stringify(githubTotals(github)), { onlyIfAbsent: true });
+      await fillAppStoreHistory(appStoreConfig, store, now);
+    });
+  }
+  return buildReport({
+    range: buckets, now, storage: store?.kind ?? "off", downloads, macs, checkouts, visits, github, snapshots, appStore, orders
+  });
 }

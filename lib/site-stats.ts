@@ -5,13 +5,14 @@ import { getActivationTokenRedisConfig } from "./env.ts";
 
 /**
  * The site's own counts: downloads, update checks, Macs per app version and checkouts started.
- * Counters are kept per UTC day. No IP address, user agent or cookie is stored: a Mac is counted
- * through a day-salted hash added to a HyperLogLog, and the salt expires with the day.
+ * Counters are kept per UTC day, for good: they are totals, nothing about a person. No IP address,
+ * user agent or cookie is stored: a Mac is counted through a day-salted hash added to a HyperLogLog,
+ * and the salt expires with the day.
  */
 
 const DAY_MS = 86_400_000;
 const PREFIX = "stats:";
-/** Kept a little over a year, so a month can always be compared with the same month last year. */
+/** How long the per-Mac estimates are kept: a little over a year. Counters and history have no expiry. */
 export const STATS_RETENTION_SECONDS = 400 * 24 * 60 * 60;
 /** The salt outlives its UTC day only long enough for requests that straddle midnight. */
 const SALT_SECONDS = 2 * 24 * 60 * 60;
@@ -42,10 +43,17 @@ export interface SiteStatsStore {
   daySalt(day: string): Promise<string>;
   counts(counter: StatsCounter, days: readonly string[]): Promise<DailyCounts>;
   macs(days: readonly string[]): Promise<DailyCounts>;
-  /** Apple's daily App Store summaries already fetched, as stored JSON by day; days not stored are left out. */
-  appStoreDays(days: readonly string[]): Promise<Record<string, string>>;
-  saveAppStoreDay(day: string, summary: string): Promise<void>;
+  /** History gathered from other sources, as stored JSON by key (a day or a month); missing keys are left out. */
+  history(kind: HistoryKind, keys: readonly string[]): Promise<Record<string, string>>;
+  /** Kept for good. With `onlyIfAbsent`, an existing value wins (a day's first snapshot stays the day's). */
+  saveHistory(kind: HistoryKind, key: string, value: string, options?: { onlyIfAbsent?: boolean }): Promise<void>;
+  /** True for the one caller that gets `name` for `seconds`; false while someone else holds it. */
+  claim(name: string, seconds: number): Promise<boolean>;
+  release(name: string): Promise<void>;
 }
+
+/** "app-store": Apple's summaries by day or month. "github-totals": GitHub's download totals, once a day. */
+export type HistoryKind = "app-store" | "github-totals";
 
 export function statsDay(time: number): string {
   return new Date(time).toISOString().slice(0, 10);
@@ -163,7 +171,8 @@ class RedisStatsStore implements SiteStatsStore {
 
   async increment(counter: StatsCounter, day: string, field: string): Promise<void> {
     const key = `${PREFIX}${counter}:${day}`;
-    await this.redis.pipeline().hincrby(key, field, 1).expire(key, STATS_RETENTION_SECONDS).exec();
+    // persist also lifts the expiry that counters written before 2026-10-29 were given.
+    await this.redis.pipeline().hincrby(key, field, 1).persist(key).exec();
   }
 
   async admitVersion(day: string, version: string): Promise<string> {
@@ -221,15 +230,26 @@ class RedisStatsStore implements SiteStatsStore {
     return result;
   }
 
-  async appStoreDays(days: readonly string[]): Promise<Record<string, string>> {
-    if (days.length === 0) return {};
-    const stored = await this.redis.mget<unknown[]>(...days.map(day => `${PREFIX}app-store:${day}`));
-    return Object.fromEntries(days.flatMap((day, index) =>
-      typeof stored[index] === "string" ? [[day, stored[index] as string]] : []));
+  async history(kind: HistoryKind, keys: readonly string[]): Promise<Record<string, string>> {
+    if (keys.length === 0) return {};
+    const stored = await this.redis.mget<unknown[]>(...keys.map(key => `${PREFIX}${kind}:${key}`));
+    return Object.fromEntries(keys.flatMap((key, index) =>
+      typeof stored[index] === "string" ? [[key, stored[index] as string]] : []));
   }
 
-  async saveAppStoreDay(day: string, summary: string): Promise<void> {
-    await this.redis.set(`${PREFIX}app-store:${day}`, summary, { ex: STATS_RETENTION_SECONDS });
+  async saveHistory(kind: HistoryKind, key: string, value: string, options: { onlyIfAbsent?: boolean } = {}): Promise<void> {
+    const redisKey = `${PREFIX}${kind}:${key}`;
+    if (options.onlyIfAbsent) await this.redis.set(redisKey, value, { nx: true });
+    // A plain set also lifts the expiry that App Store days stored before 2026-10-29 were given.
+    else await this.redis.set(redisKey, value);
+  }
+
+  async claim(name: string, seconds: number): Promise<boolean> {
+    return await this.redis.set(`${PREFIX}lock:${name}`, "1", { nx: true, ex: seconds }) === "OK";
+  }
+
+  async release(name: string): Promise<void> {
+    await this.redis.del(`${PREFIX}lock:${name}`);
   }
 }
 
@@ -240,7 +260,8 @@ export class MemoryStatsStore implements SiteStatsStore {
   private readonly macSets = new Map<string, Map<string, Set<string>>>();
   private readonly salts = new Map<string, string>();
   private readonly admitted = new Map<string, Set<string>>();
-  private readonly appStore = new Map<string, string>();
+  private readonly stored = new Map<string, string>();
+  private readonly claims = new Map<string, number>();
 
   async increment(counter: StatsCounter, day: string, field: string): Promise<void> {
     const key = `${counter}:${day}`;
@@ -282,12 +303,27 @@ export class MemoryStatsStore implements SiteStatsStore {
     )]));
   }
 
-  async appStoreDays(days: readonly string[]): Promise<Record<string, string>> {
-    return Object.fromEntries(days.flatMap(day => this.appStore.has(day) ? [[day, this.appStore.get(day) as string]] : []));
+  async history(kind: HistoryKind, keys: readonly string[]): Promise<Record<string, string>> {
+    return Object.fromEntries(keys.flatMap(key => {
+      const value = this.stored.get(`${kind}:${key}`);
+      return value === undefined ? [] : [[key, value]];
+    }));
   }
 
-  async saveAppStoreDay(day: string, summary: string): Promise<void> {
-    this.appStore.set(day, summary);
+  async saveHistory(kind: HistoryKind, key: string, value: string, options: { onlyIfAbsent?: boolean } = {}): Promise<void> {
+    if (options.onlyIfAbsent && this.stored.has(`${kind}:${key}`)) return;
+    this.stored.set(`${kind}:${key}`, value);
+  }
+
+  async claim(name: string, seconds: number): Promise<boolean> {
+    const now = Date.now();
+    if ((this.claims.get(name) ?? 0) > now) return false;
+    this.claims.set(name, now + seconds * 1000);
+    return true;
+  }
+
+  async release(name: string): Promise<void> {
+    this.claims.delete(name);
   }
 }
 

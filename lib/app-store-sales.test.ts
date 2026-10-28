@@ -5,9 +5,14 @@ import { gzipSync } from "node:zlib";
 import {
   LOCAL_AI_CHAT_APP_ID,
   LOCAL_AI_CHAT_SKU,
+  APP_STORE_DAILY_DAYS,
+  appStorePeriods,
   appStoreToken,
+  appStoreUnits,
   emptyAppStoreDay,
-  loadAppStoreDays,
+  fillAppStoreHistory,
+  latestAppStoreDay,
+  readAppStoreHistory,
   summariseSalesReport,
   type AppStoreSalesConfig
 } from "./app-store-sales.ts";
@@ -57,13 +62,13 @@ function testConfig(): AppStoreSalesConfig {
   };
 }
 
-test("the bearer token is an ES256 JWT Apple can verify, valid for five minutes", () => {
+test("the bearer token is an ES256 JWT Apple can verify, valid for ten minutes", () => {
   const config = testConfig();
   const now = Date.parse("2026-10-28T12:00:00Z");
   const [header, claims, signature] = appStoreToken(config, now).split(".");
   assert.deepEqual(JSON.parse(Buffer.from(header, "base64url").toString()), { alg: "ES256", kid: "TESTKEY123", typ: "JWT" });
   assert.deepEqual(JSON.parse(Buffer.from(claims, "base64url").toString()), {
-    iss: config.issuerId, iat: now / 1000, exp: now / 1000 + 300, aud: "appstoreconnect-v1"
+    iss: config.issuerId, iat: now / 1000, exp: now / 1000 + 600, aud: "appstoreconnect-v1"
   });
   const signed = Buffer.from(signature, "base64url");
   assert.equal(signed.length, 64, "raw r||s, not DER");
@@ -72,57 +77,110 @@ test("the bearer token is an ES256 JWT Apple can verify, valid for five minutes"
   assert.equal(verified, true);
 });
 
-test("without a key there is no App Store section", async () => {
-  assert.equal(await loadAppStoreDays(null, ["2026-10-27"], Date.now(), null), null);
+const NOW = Date.parse("2026-10-28T12:00:00Z");
+
+test("history is every finished month since launch, then the last 90 days but today", () => {
+  const periods = appStorePeriods(NOW);
+  const months = periods.filter(period => period.length === 7);
+  const days = periods.filter(period => period.length === 10);
+  assert.equal(months[0], "2025-02");
+  assert.equal(months.at(-1), "2026-09", "this month is still running");
+  assert.equal(months.length, 20);
+  assert.equal(days.length, APP_STORE_DAILY_DAYS);
+  assert.equal(days.at(-1), "2026-10-27", "today is never asked");
 });
 
-test("past days are asked of Apple once and stored; recent days without a report are asked again", async () => {
+/** Apple stand-in: answers by report date, and records what was asked. */
+function fakeApple(answers: Record<string, () => Response>): { asked: string[]; restore: () => void } {
   const realFetch = globalThis.fetch;
   const asked: string[] = [];
-  const now = Date.parse("2026-10-28T12:00:00Z");
-  const days = ["2026-10-20", "2026-10-21", "2026-10-22", "2026-10-26", "2026-10-27", "2026-10-28"];
   globalThis.fetch = async (input: string | URL | Request, init?: RequestInit) => {
     const url = new URL(String(input));
-    const day = url.searchParams.get("filter[reportDate]") ?? "";
-    asked.push(day);
+    const period = url.searchParams.get("filter[reportDate]") ?? "";
+    asked.push(period);
     assert.equal(url.searchParams.get("filter[vendorNumber]"), "81234567");
+    assert.equal(url.searchParams.get("filter[frequency]"), period.length === 7 ? "MONTHLY" : "DAILY");
     assert.match(String((init?.headers as Record<string, string>).Authorization), /^Bearer [\w-]+\.[\w-]+\.[\w-]+$/);
-    if (day === "2026-10-20") return new Response(gzipSync(REPORT), { status: 200 });
-    if (day === "2026-10-21") return new Response("server error", { status: 500 });
-    return Response.json({ errors: [{ status: "404" }] }, { status: 404 });
+    return (answers[period] ?? (() => Response.json({ errors: [{ status: "404" }] }, { status: 404 })))();
   };
+  return { asked, restore: () => { globalThis.fetch = realFetch; } };
+}
+
+test("a fill stores each settled period for good and asks again only what isn't settled", async () => {
+  const apple = fakeApple({
+    "2025-03": () => new Response(gzipSync(REPORT), { status: 200 }),
+    "2026-10-20": () => new Response(gzipSync(REPORT), { status: 200 }),
+    "2026-10-21": () => new Response("server error", { status: 500 })
+  });
   const store = new MemoryStatsStore();
   const config = testConfig();
   try {
-    const first = await loadAppStoreDays(config, days, now, store);
-    assert.deepEqual(asked.sort(), ["2026-10-20", "2026-10-21", "2026-10-22", "2026-10-26", "2026-10-27"], "today is never asked");
-    assert.deepEqual(first, {
-      "2026-10-20": { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 },
-      "2026-10-21": null,
-      "2026-10-22": emptyAppStoreDay(),
-      "2026-10-26": null,
-      "2026-10-27": null,
-      "2026-10-28": null
-    });
+    const saved = await fillAppStoreHistory(config, store, NOW);
+    const periods = appStorePeriods(NOW);
+    assert.equal(apple.asked.length, periods.length, "the whole backfill fits in one fill");
+    // Not stored: a failed call, and the three days Apple may not have published yet (2026-10-25 to -27).
+    assert.equal(saved, periods.length - 4);
+    const history = await readAppStoreHistory(store, NOW);
+    assert.deepEqual(history["2025-03"], { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
+    assert.deepEqual(history["2026-10-20"], { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
+    assert.deepEqual(history["2025-02"], emptyAppStoreDay(), "a long-past month with no report had no units");
+    assert.equal("2026-10-21" in history, false);
+    assert.equal("2026-10-27" in history, false);
+    assert.equal(latestAppStoreDay(history), "2026-10-24");
 
-    asked.length = 0;
-    const second = await loadAppStoreDays(config, days, now, store);
-    assert.deepEqual(asked.sort(), ["2026-10-21", "2026-10-26", "2026-10-27"], "stored days are not asked again");
-    assert.deepEqual(second, first);
+    apple.asked.length = 0;
+    // A finished fill lets the next one start straight away.
+    await fillAppStoreHistory(config, store, NOW);
+    assert.deepEqual(apple.asked.sort(), ["2026-10-21", "2026-10-25", "2026-10-26", "2026-10-27"]);
   } finally {
-    globalThis.fetch = realFetch;
+    apple.restore();
   }
 });
 
-test("a key that can't sign leaves the days empty instead of failing the page", async () => {
-  const realFetch = globalThis.fetch;
-  let calls = 0;
-  globalThis.fetch = async () => { calls += 1; return new Response("", { status: 500 }); };
+test("only one fill runs at a time", async () => {
+  const apple = fakeApple({});
+  const store = new MemoryStatsStore();
   try {
-    const days = await loadAppStoreDays({ ...testConfig(), privateKey: "not a key" }, ["2026-10-20"], Date.parse("2026-10-28T12:00:00Z"), null);
-    assert.deepEqual(days, { "2026-10-20": null });
-    assert.equal(calls, 0);
+    assert.equal(await store.claim("app-store-fill", 300), true);
+    assert.equal(await fillAppStoreHistory(testConfig(), store, NOW), 0);
+    assert.equal(apple.asked.length, 0);
   } finally {
-    globalThis.fetch = realFetch;
+    apple.restore();
+  }
+});
+
+test("a month just ended without a report is asked again, not stored as zero", async () => {
+  const apple = fakeApple({});
+  const store = new MemoryStatsStore();
+  const earlyNovember = Date.parse("2026-11-03T12:00:00Z");
+  try {
+    await fillAppStoreHistory(testConfig(), store, earlyNovember);
+    const history = await readAppStoreHistory(store, earlyNovember);
+    assert.equal("2026-10" in history, false, "Apple publishes a month in the first days of the next");
+    assert.deepEqual(history["2026-09"], emptyAppStoreDay());
+  } finally {
+    apple.restore();
+  }
+});
+
+test("a month is Apple's monthly report when there is one, else the sum of its stored days", () => {
+  const unit = (ios: number) => ({ ios, mac: 1, redownloads: 0, updates: 0, purchases: 0 });
+  const history = { "2026-09": unit(40), "2026-09-01": unit(1), "2026-10-01": unit(2), "2026-10-02": unit(3) };
+  assert.equal(appStoreUnits(history, { key: "2026-09", days: ["2026-09-01"] })?.ios, 40);
+  assert.deepEqual(appStoreUnits(history, { key: "2026-10", days: ["2026-10-01", "2026-10-02", "2026-10-03"] }),
+    { ios: 5, mac: 2, redownloads: 0, updates: 0, purchases: 0 });
+  assert.equal(appStoreUnits(history, { key: "2026-08", days: ["2026-08-01"] }), null);
+  assert.equal(appStoreUnits(history, { key: "2026-10-03", days: ["2026-10-03"] }), null);
+});
+
+test("no key or no store means no fill; a key that can't sign asks nothing", async () => {
+  const apple = fakeApple({});
+  try {
+    assert.equal(await fillAppStoreHistory(null, new MemoryStatsStore(), NOW), 0);
+    assert.equal(await fillAppStoreHistory(testConfig(), null, NOW), 0);
+    assert.equal(await fillAppStoreHistory({ ...testConfig(), privateKey: "not a key" }, new MemoryStatsStore(), NOW), 0);
+    assert.equal(apple.asked.length, 0);
+  } finally {
+    apple.restore();
   }
 });

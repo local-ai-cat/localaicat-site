@@ -7,6 +7,7 @@
   --lavender: #bda4eb;
   --mint: #91cbb3;
   --amber: #eebe7a;
+  --periwinkle: #8fa6e8;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   max-width: 1080px;
   margin: 0 auto;
@@ -111,7 +112,7 @@
   border-bottom: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
 }
 
-/* Months that only share a yearly total: a quiet hatch behind the curves, named above them. */
+/* Months known only as App Store Connect totals: a quiet band behind the curves, named above them. */
 .spreadBand {
   fill: color-mix(in srgb, var(--text) 4%, transparent);
 }
@@ -197,6 +198,10 @@
 .tipPart[data-tone="amber"]::before,
 .key span[data-tone="amber"]::before {
   background: var(--amber);
+}
+.tipPart[data-tone="periwinkle"]::before,
+.key span[data-tone="periwinkle"]::before {
+  background: var(--periwinkle);
 }
 
 .axis {

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./stats.module.css";
 import { niceTicks } from "../../lib/stats-range";
 
-export type ExplorerSeries = { name: string; tone: "lavender" | "mint" | "amber"; values: number[] };
+export type ExplorerSeries = { name: string; tone: "lavender" | "mint" | "amber" | "periwinkle"; values: number[] };
 export type ExplorerMetric = {
   id: string;
   label: string;
@@ -34,7 +34,7 @@ export type ExplorerProps = {
 const WIDTH = 1000;
 const HEIGHT = 360;
 const MORPH_MS = 720;
-const TONES = { lavender: "#bda4eb", mint: "#91cbb3", amber: "#eebe7a" } as const;
+const TONES = { lavender: "#bda4eb", mint: "#91cbb3", amber: "#eebe7a", periwinkle: "#8fa6e8" } as const;
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -234,8 +234,8 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
               <b>{labels[hover]}</b>
               <span>{totals[hover].toLocaleString("en-US")} {metric.unit}</span>
               {metric.spread?.points[hover] && <span className={styles.tipNote}>{metric.spread.label}</span>}
-              {series.length > 1 && series.map(entry => (
-                <span key={entry.name} className={styles.tipPart} data-tone={entry.tone}>{entry.name} {entry.values[hover] ?? 0}</span>
+              {series.length > 1 && series.filter(entry => (entry.values[hover] ?? 0) > 0).map(entry => (
+                <span key={entry.name} className={styles.tipPart} data-tone={entry.tone}>{entry.name} {entry.values[hover]}</span>
               ))}
             </div>
           </>

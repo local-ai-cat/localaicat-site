@@ -7,6 +7,7 @@ import {
   dailyVisits,
   loadStatsReport,
   releaseChannel,
+  summariseOrders,
   summariseReleases
 } from "./site-stats-report.ts";
 import { MemoryStatsStore, recordDownload, recordUpdateCheck } from "./site-stats.ts";
@@ -131,4 +132,30 @@ test("a store's counts reach the report", async () => {
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+test("orders are counted, never priced: paid first orders, free ones and renewals apart", () => {
+  const orders = summariseOrders([
+    { paid: true, billing_reason: "purchase", total_amount: 4900, customer: { email: "x@example.com" } },
+    { paid: true, billing_reason: "subscription_create", total_amount: 0 },
+    { paid: true, billing_reason: "subscription_create", total_amount: 900 },
+    { paid: true, billing_reason: "subscription_cycle", total_amount: 900 },
+    { paid: false, billing_reason: "purchase", total_amount: 4900 },
+    { paid: true, billing_reason: "subscription_update", total_amount: 300 },
+    null
+  ]);
+  assert.deepEqual(orders, { newPaid: 2, newFree: 1, renewals: 1 });
+});
+
+test("the App Store section totals the published days and names the latest", () => {
+  const report = buildReport({
+    days: DAYS, storage: "redis", downloads: null, macs: null, checkouts: null, visits: null, github: null,
+    appStore: { "2026-10-27": { ios: 2, mac: 1, redownloads: 1, updates: 5, purchases: 1 }, "2026-10-28": null }
+  });
+  assert.deepEqual(report.appStore, {
+    daily: [{ day: "2026-10-27", ios: 2, mac: 1 }, { day: "2026-10-28", ios: 0, mac: 0 }],
+    totals: { ios: 2, mac: 1, redownloads: 1, updates: 5, purchases: 1 },
+    latestDay: "2026-10-27"
+  });
+  assert.equal(report.orders, null);
 });

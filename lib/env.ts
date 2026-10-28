@@ -173,6 +173,20 @@ export function getActivationTokenRedisConfig() {
   return url && token ? { url, token } : null;
 }
 
+/**
+ * The read-only App Store Connect key (role Sales) behind the App Store numbers on /stats. Set by
+ * workflow infra/migrations/asc-localaicat-sales-store.sh. Unset means the page shows no App Store section.
+ */
+export function getAppStoreSalesConfig() {
+  const keyId = optionalValue(process.env.ASC_SALES_KEY_ID);
+  const issuerId = optionalValue(process.env.ASC_SALES_ISSUER_ID);
+  const vendorNumber = optionalValue(process.env.ASC_VENDOR_NUMBER);
+  // A PEM pasted as one line keeps its line breaks as literal "\n".
+  const privateKey = optionalValue(process.env.ASC_SALES_PRIVATE_KEY)?.replace(/\\n/g, "\n");
+
+  return keyId && issuerId && vendorNumber && privateKey ? { keyId, issuerId, vendorNumber, privateKey } : null;
+}
+
 export function getPolarApiBaseUrl() {
   return optionalValue(process.env.POLAR_API_BASE_URL)?.replace(/\/+$/, "")
     || "https://api.polar.sh";

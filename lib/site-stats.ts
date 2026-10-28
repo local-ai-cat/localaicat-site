@@ -42,6 +42,9 @@ export interface SiteStatsStore {
   daySalt(day: string): Promise<string>;
   counts(counter: StatsCounter, days: readonly string[]): Promise<DailyCounts>;
   macs(days: readonly string[]): Promise<DailyCounts>;
+  /** Apple's daily App Store summaries already fetched, as stored JSON by day; days not stored are left out. */
+  appStoreDays(days: readonly string[]): Promise<Record<string, string>>;
+  saveAppStoreDay(day: string, summary: string): Promise<void>;
 }
 
 export function statsDay(time: number): string {
@@ -217,6 +220,17 @@ class RedisStatsStore implements SiteStatsStore {
     });
     return result;
   }
+
+  async appStoreDays(days: readonly string[]): Promise<Record<string, string>> {
+    if (days.length === 0) return {};
+    const stored = await this.redis.mget<unknown[]>(...days.map(day => `${PREFIX}app-store:${day}`));
+    return Object.fromEntries(days.flatMap((day, index) =>
+      typeof stored[index] === "string" ? [[day, stored[index] as string]] : []));
+  }
+
+  async saveAppStoreDay(day: string, summary: string): Promise<void> {
+    await this.redis.set(`${PREFIX}app-store:${day}`, summary, { ex: STATS_RETENTION_SECONDS });
+  }
 }
 
 /** The local dev server's store; exact sets stand in for HyperLogLogs. */
@@ -226,6 +240,7 @@ export class MemoryStatsStore implements SiteStatsStore {
   private readonly macSets = new Map<string, Map<string, Set<string>>>();
   private readonly salts = new Map<string, string>();
   private readonly admitted = new Map<string, Set<string>>();
+  private readonly appStore = new Map<string, string>();
 
   async increment(counter: StatsCounter, day: string, field: string): Promise<void> {
     const key = `${counter}:${day}`;
@@ -265,6 +280,14 @@ export class MemoryStatsStore implements SiteStatsStore {
     return Object.fromEntries(days.map(day => [day, Object.fromEntries(
       [...(this.macSets.get(day) ?? new Map<string, Set<string>>())].map(([version, members]) => [version, members.size])
     )]));
+  }
+
+  async appStoreDays(days: readonly string[]): Promise<Record<string, string>> {
+    return Object.fromEntries(days.flatMap(day => this.appStore.has(day) ? [[day, this.appStore.get(day) as string]] : []));
+  }
+
+  async saveAppStoreDay(day: string, summary: string): Promise<void> {
+    this.appStore.set(day, summary);
   }
 }
 

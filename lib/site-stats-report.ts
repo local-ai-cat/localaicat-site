@@ -1,7 +1,9 @@
+import { emptyAppStoreDay, loadAppStoreDays, type AppStoreDay, type AppStoreDays } from "./app-store-sales.ts";
+import { getAppStoreSalesConfig, getPolarAdminKey, getPolarApiBaseUrl } from "./env.ts";
 import { explorerAnalyticsConfig, type ExplorerAnalyticsConfig } from "./explorer-presence.ts";
 import { siteStatsStore, statsDays, type DailyCounts, type SiteStatsStore } from "./site-stats.ts";
 
-/** Everything /internal/stats shows, gathered on the server. Each source can be missing on its own. */
+/** Everything /stats shows, gathered on the server. Each source can be missing on its own. */
 
 export const REPORT_DAYS = 30;
 const RELEASES_URL = "https://api.github.com/repos/local-ai-cat/localaicat-site/releases";
@@ -25,6 +27,16 @@ export type StatsReport = {
   checkoutsByPlan: { plan: string; count: number }[];
   visits: DayValue[] | null;
   github: GitHubHistory | null;
+  appStore: AppStoreReport | null;
+  orders: OrdersReport | null;
+};
+/** Polar orders over the window, as counts: a first order (purchase or new subscription) and renewals. */
+export type OrdersReport = { newPaid: number; newFree: number; renewals: number };
+export type AppStoreReport = {
+  daily: { day: string; ios: number; mac: number }[];
+  totals: AppStoreDay;
+  /** The newest day Apple has published; later days in the window are still to come. */
+  latestDay: string | null;
 };
 
 export function releaseChannel(tag: string): ReleaseChannel {
@@ -119,6 +131,59 @@ async function fetchVisits(config: ExplorerAnalyticsConfig | null, days: readonl
   }
 }
 
+const ORDER_PAGES = 5;
+const FIRST_ORDER_REASONS = new Set(["purchase", "subscription_create"]);
+
+/**
+ * Counts paid orders only: no amount, customer or product leaves this function. A first order that cost
+ * nothing (a full discount such as PURRDAIN, or a free trial) is counted apart from paying ones.
+ */
+export function summariseOrders(items: unknown[]): OrdersReport {
+  const report: OrdersReport = { newPaid: 0, newFree: 0, renewals: 0 };
+  for (const item of items) {
+    const { paid, billing_reason: reason, total_amount: total } = (item ?? {}) as {
+      paid?: unknown; billing_reason?: unknown; total_amount?: unknown;
+    };
+    if (paid !== true || typeof reason !== "string") continue;
+    if (FIRST_ORDER_REASONS.has(reason)) {
+      if (typeof total === "number" && total > 0) report.newPaid += 1;
+      else report.newFree += 1;
+    } else if (reason === "subscription_cycle") {
+      report.renewals += 1;
+    }
+  }
+  return report;
+}
+
+/** The window's orders, read with the site's Polar key (orders:read). */
+async function fetchOrders(adminKey: string | null, apiBase: string, days: readonly string[]): Promise<OrdersReport | null> {
+  if (!adminKey) return null;
+  const items: unknown[] = [];
+  try {
+    for (let page = 1; page <= ORDER_PAGES; page += 1) {
+      const url = new URL(`${apiBase}/v1/orders/`);
+      url.searchParams.set("created_after", `${days[0]}T00:00:00Z`);
+      url.searchParams.set("limit", "100");
+      url.searchParams.set("page", String(page));
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${adminKey}`, Accept: "application/json" },
+        signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS),
+        redirect: "error",
+        cache: "no-store"
+      });
+      if (!response.ok) return null;
+      const payload = (await response.json()) as { items?: unknown; pagination?: { max_page?: unknown } };
+      if (!Array.isArray(payload.items)) return null;
+      items.push(...payload.items);
+      const lastPage = typeof payload.pagination?.max_page === "number" ? payload.pagination.max_page : page;
+      if (page >= lastPage) break;
+    }
+    return summariseOrders(items);
+  } catch {
+    return null;
+  }
+}
+
 function sumFields(counts: Record<string, number> | undefined, keep: (field: string) => boolean = () => true): number {
   return Object.entries(counts ?? {}).reduce((sum, [field, count]) => keep(field) ? sum + count : sum, 0);
 }
@@ -139,8 +204,10 @@ export function buildReport(input: {
   checkouts: DailyCounts | null;
   visits: DayValue[] | null;
   github: GitHubHistory | null;
+  appStore?: AppStoreDays | null;
+  orders?: OrdersReport | null;
 }): StatsReport {
-  const { days, downloads, macs, checkouts } = input;
+  const { days, downloads, macs, checkouts, appStore } = input;
   const today = days[days.length - 1];
   return {
     days,
@@ -164,7 +231,25 @@ export function buildReport(input: {
       ? [...totalsByField(checkouts, days)].map(([plan, count]) => ({ plan, count })).sort((a, b) => b.count - a.count)
       : [],
     visits: input.visits,
-    github: input.github
+    github: input.github,
+    appStore: appStore ? appStoreReport(appStore, days) : null,
+    orders: input.orders ?? null
+  };
+}
+
+function appStoreReport(appStore: AppStoreDays, days: readonly string[]): AppStoreReport {
+  const totals = emptyAppStoreDay();
+  let latestDay: string | null = null;
+  for (const day of days) {
+    const summary = appStore[day];
+    if (!summary) continue;
+    latestDay = day;
+    for (const field of Object.keys(totals) as (keyof AppStoreDay)[]) totals[field] += summary[field];
+  }
+  return {
+    daily: days.map(day => ({ day, ios: appStore[day]?.ios ?? 0, mac: appStore[day]?.mac ?? 0 })),
+    totals,
+    latestDay
   };
 }
 
@@ -182,7 +267,7 @@ let cachedReport: { at: number; report: Promise<StatsReport> } | undefined;
 
 /**
  * The public /stats page's report: gathered at most once per five minutes per instance, so visits to a
- * public page cannot turn into Redis, GoatCounter and GitHub calls one for one. Concurrent visits share it.
+ * public page cannot turn into Redis, GoatCounter, GitHub, Polar and Apple calls one for one. Concurrent visits share it.
  */
 export function cachedStatsReport(now = Date.now(), load: (now: number) => Promise<StatsReport> = loadStatsReport): Promise<StatsReport> {
   if (cachedReport && now - cachedReport.at < REPORT_CACHE_MS) return cachedReport.report;
@@ -198,12 +283,14 @@ export async function loadStatsReport(
   store: SiteStatsStore | null = siteStatsStore()
 ): Promise<StatsReport> {
   const days = statsDays(now, REPORT_DAYS);
-  const [downloads, macs, checkouts, visits, github] = await Promise.all([
+  const [downloads, macs, checkouts, visits, github, appStore, orders] = await Promise.all([
     store ? orNull(store.counts("downloads", days)) : null,
     store ? orNull(store.macs(days)) : null,
     store ? orNull(store.counts("checkouts", days)) : null,
     fetchVisits(explorerAnalyticsConfig(), days, now),
-    fetchGitHubHistory()
+    fetchGitHubHistory(),
+    orNull(loadAppStoreDays(getAppStoreSalesConfig(), days, now, store)),
+    fetchOrders(getPolarAdminKey(), getPolarApiBaseUrl(), days)
   ]);
-  return buildReport({ days, storage: store?.kind ?? "off", downloads, macs, checkouts, visits, github });
+  return buildReport({ days, storage: store?.kind ?? "off", downloads, macs, checkouts, visits, github, appStore, orders });
 }

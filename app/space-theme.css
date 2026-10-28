@@ -378,9 +378,6 @@ html[data-mode-pending="business"] .homeMode #pricing {visibility:hidden;animati
 .explorerLinks { display:flex; flex-wrap:wrap; gap:6px 16px; }
 .explorerLinks a { color:var(--text); text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--text-faint); }
 .explorerLinks a:hover { text-decoration-color:currentColor; }
-.analyticsPreference { display:flex; flex-wrap:wrap; align-items:center; gap:10px; font-size:14px; margin-top:20px; }
-.analyticsPreference input { accent-color:var(--accent); }
-.analyticsPreference small { flex-basis:100%; color:var(--text-dim); }
 @media (max-width:600px) {
   .previewRibbon { flex-wrap:wrap; gap:10px; }
   .previewRibbonRight { width:100%; justify-content:space-between; gap:10px; }

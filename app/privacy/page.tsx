@@ -1,4 +1,3 @@
-import { AnalyticsPreference } from "../_components/site-analytics";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPage } from "../_components/content-page";
@@ -103,9 +102,9 @@ export default function PrivacyPage() {
             exclude account, checkout and private pages. We never send cat names,
             birthdays, cat codes, drawings or chat content as analytics events.</p>
           <p>The explorer sign shows GoatCounter’s estimate of visitors since midnight UTC. It is not
-            a live headcount. Do Not Track and Global Privacy Control are respected;
-            you can also turn website statistics off below. Your preference and your
-            custom cat are saved only in this browser.</p>
+            a live headcount. With Do Not Track or Global Privacy Control on in your browser,
+            you are not counted at all; to object otherwise, write to us. Your custom cat is
+            saved only in this browser.</p>
           <p>This applies to the website, not the native app. Read more about{" "}
             <a href="https://vercel.com/docs/analytics/privacy-policy">Vercel’s analytics privacy</a>.</p>
           <p>We also count public page views with cookie-free GoatCounter, using a small
@@ -122,7 +121,6 @@ export default function PrivacyPage() {
             We do not load it on checkout, activation or account pages, or send it your
             checkout details or current page URL. Information you choose to send in chat
             is handled by Chatwoot.</p>
-          <AnalyticsPreference />
         </section>
 
         <section className="contentCard">

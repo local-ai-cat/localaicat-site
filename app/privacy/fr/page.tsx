@@ -1,4 +1,3 @@
-import { AnalyticsPreference } from "../../_components/site-analytics";
 import type { Metadata } from "next";
 import { getSiteUrl } from "../../../lib/env";
 import { spaceSharingMetadata } from "../../../lib/space-sharing";
@@ -117,9 +116,9 @@ export default function PrivacyPageFr() {
             privées. Les noms, dates de naissance, codes et dessins des chats, ainsi que
             le contenu des conversations, ne sont jamais envoyés comme événements d’analyse.</p>
           <p>Le panneau des explorateurs indique l’estimation GoatCounter des visiteurs depuis
-            minuit UTC, pas un nombre de personnes présentes en direct. Nous respectons
-            Do Not Track et Global Privacy Control. Vous pouvez aussi désactiver les
-            statistiques ci-dessous. Ce choix et votre chat personnalisé restent dans ce navigateur.</p>
+            minuit UTC, pas un nombre de personnes présentes en direct. Si Do Not Track ou
+            Global Privacy Control est activé dans votre navigateur, vous n&rsquo;êtes pas compté du
+            tout ; pour vous y opposer autrement, écrivez-nous. Votre chat personnalisé reste dans ce navigateur.</p>
           <p>Cela concerne le site web, pas l’application native. En savoir plus sur{" "}
             <a href="https://vercel.com/docs/analytics/privacy-policy">la confidentialité de Vercel Analytics</a>.</p>
           <p>Nous comptons aussi les pages publiques avec GoatCounter, sans cookie,
@@ -137,7 +136,6 @@ export default function PrivacyPageFr() {
             Elle n’est pas chargée sur les pages de paiement, d’activation ou de compte.
             Le site ne lui transmet ni les détails de votre paiement ni l’URL de la page.
             Les informations que vous envoyez dans le chat sont traitées par Chatwoot.</p>
-          <AnalyticsPreference french />
         </section>
 
         <section className="contentCard">

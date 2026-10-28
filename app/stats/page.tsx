@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 import styles from "./stats.module.css";
-import { cachedStatsReport, REPORT_DAYS, type DayValue, type StatsReport } from "../../lib/site-stats-report";
+import { cachedStatsReport, COUNTING_STARTED, GITHUB_SNAPSHOTS_STARTED, type BucketValue, type StatsReport } from "../../lib/site-stats-report";
+import { STATS_RANGES, parseRange, type StatsRange } from "../../lib/stats-range";
 
 // Public, and only ever totals: no address, browser or visitor is stored, so none can be shown.
 export const dynamic = "force-dynamic";
@@ -23,36 +24,49 @@ function sum(values: readonly number[]): number {
   return values.reduce((total, value) => total + value, 0);
 }
 
-function shortDay(day: string): string {
-  return new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+function count(value: number | null): string {
+  return value === null ? "–" : value.toLocaleString("en-US");
 }
 
-function Tile({ value, label }: { value: number | null; label: string }) {
-  return <div className={styles.tile}><b>{value === null ? "–" : value.toLocaleString("en-US")}</b><span>{label}</span></div>;
+/** "28 Oct" for a day, "Oct 2026" for a month. */
+function bucketLabel(key: string): string {
+  if (key.length === 7) {
+    return new Date(`${key}-01T00:00:00Z`).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+  }
+  return new Date(`${key}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
-/** One bar per day; a second series stacks on top of the first. */
-function DailyBars({ days, primary, secondary, label }: {
-  days: string[]; primary: number[]; secondary?: number[]; label: string;
-}) {
-  const totals = primary.map((value, index) => value + (secondary?.[index] ?? 0));
+function Tile({ value, label, detail, headline = false }: { value: number | null; label: string; detail?: string; headline?: boolean }) {
+  return (
+    <div className={headline ? `${styles.tile} ${styles.headline}` : styles.tile}>
+      <b>{count(value)}</b><span>{label}</span>{detail && <small>{detail}</small>}
+    </div>
+  );
+}
+
+const SERIES_CLASSES = [styles.primary, styles.secondary, styles.tertiary];
+
+/** One bar per bucket; the series stack in order from the bottom. */
+function Bars({ keys, series, label }: { keys: string[]; series: number[][]; label: string }) {
+  const totals = keys.map((_, index) => sum(series.map(values => values[index] ?? 0)));
   const peak = Math.max(1, ...totals);
   return (
     <>
-      <div className={styles.bars} role="img" aria-label={`${label}, ${sum(totals)} over ${days.length} days`}>
-        {days.map((day, index) => (
-          <div key={day} className={styles.bar} title={`${shortDay(day)}: ${totals[index]}`}>
-            <i className={styles.primary} style={{ height: `${(primary[index] / peak) * 100}%` }} />
-            {secondary && <i className={styles.secondary} style={{ height: `${(secondary[index] / peak) * 100}%` }} />}
+      <div className={styles.bars} role="img" aria-label={`${label}, ${sum(totals)} in all`}>
+        {keys.map((key, index) => (
+          <div key={key} className={styles.bar} title={`${bucketLabel(key)}: ${totals[index]}`}>
+            {series.map((values, seriesIndex) => (
+              <i key={seriesIndex} className={SERIES_CLASSES[seriesIndex]} style={{ height: `${((values[index] ?? 0) / peak) * 100}%` }} />
+            ))}
           </div>
         ))}
       </div>
-      <div className={styles.axis}><span>{shortDay(days[0])}</span><span>{shortDay(days[days.length - 1])}</span></div>
+      <div className={styles.axis}><span>{bucketLabel(keys[0])}</span><span>{bucketLabel(keys[keys.length - 1])}</span></div>
     </>
   );
 }
 
-function values(series: DayValue[]): number[] {
+function values(series: BucketValue[]): number[] {
   return series.map(entry => entry.value);
 }
 
@@ -64,98 +78,105 @@ function Funnel({ steps }: { steps: { label: string; value: number | null }[] })
         <div key={step.label} className={styles.step}>
           <span>{step.label}</span>
           <div className={styles.track}><i style={{ width: `${((step.value ?? 0) / top) * 100}%` }} /></div>
-          <b>{step.value === null ? "–" : step.value.toLocaleString("en-US")}</b>
+          <b>{count(step.value)}</b>
         </div>
       ))}
     </div>
   );
 }
 
-export default async function StatsPage() {
-  const report = await cachedStatsReport();
-  const { days } = report;
-  const downloads30 = report.downloads ? sum(report.downloads.map(day => day.stable + day.beta)) : null;
-  const macsToday = report.macsByDay ? report.macsByDay[report.macsByDay.length - 1].value : null;
-  const visits30 = report.visits ? sum(values(report.visits)) : null;
-  const checkouts30 = report.storage === "off" ? null : sum(report.checkoutsByPlan.map(plan => plan.count));
-  const orders30 = report.orders ? report.orders.newPaid + report.orders.newFree : null;
+function RangeFilter({ current }: { current: StatsRange }) {
+  return (
+    <nav className={styles.ranges} aria-label="Range">
+      {STATS_RANGES.map(option => (
+        <a key={option.range} href={`/stats?range=${option.range}`} aria-current={option.range === current ? "page" : undefined}>
+          {option.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+export default async function StatsPage({ searchParams }: { searchParams: Promise<{ range?: string | string[] }> }) {
+  const range = parseRange((await searchParams).range);
+  const report = await cachedStatsReport(range);
+  const rangeLabel = STATS_RANGES.find(option => option.range === range)?.label ?? range;
+  const bucketWord = report.granularity === "month" ? "month" : "day";
   const appStore = report.appStore;
-  const appStore30 = appStore ? appStore.totals.ios + appStore.totals.mac : null;
+  const appStoreRange = appStore ? appStore.units.ios + appStore.units.mac : null;
+  const downloadsRange = appStoreRange === null && report.direct === null ? null : (appStoreRange ?? 0) + (report.direct ?? 0);
+  const siteClicks = report.siteClicks ? sum(report.siteClicks.map(bucket => bucket.stable + bucket.beta)) : null;
+  const macsToday = report.storage === "off" ? null : sum(report.macsToday.map(row => row.macs));
+  const visits = report.visits ? sum(values(report.visits)) : null;
+  const checkouts = report.storage === "off" ? null : sum(report.checkoutsByPlan.map(plan => plan.count));
+  const orders = report.orders ? report.orders.newPaid + report.orders.newFree : null;
+  const { allTime } = report;
 
   return (
     <SiteShell siteMode="personal">
       <ContentPage
-        kicker={`stats · last ${REPORT_DAYS} days, UTC`}
+        kicker={`stats · ${rangeLabel}, UTC`}
         title="how the cat is doing"
-        intro={`downloads, macs checking for updates, visits, checkouts and orders, as totals: ${STORAGE_NOTE[report.storage]} visits come from goatcounter, app store numbers from apple's daily sales reports, orders from polar, the history from github's own download counts. counts only, never money or people. updated every few minutes.`}
+        intro={`downloads, macs checking for updates, visits, checkouts and orders, as totals: ${STORAGE_NOTE[report.storage]} visits come from goatcounter, app store numbers from apple's sales reports, orders from polar, direct downloads from github's own counts. counts only, never money or people. updated every few minutes.`}
       >
+      <RangeFilter current={range} />
+
       <div className={styles.tiles}>
-        <Tile value={downloads30} label="Mac downloads from the site" />
-        <Tile value={appStore30} label="App Store downloads" />
+        <Tile headline value={allTime.downloads} label="downloads, all time"
+          detail={`App Store ${count(allTime.appStore)} · direct ${count(allTime.direct)}`} />
+        <Tile value={downloadsRange} label={`downloads, ${rangeLabel}`}
+          detail={`App Store ${count(appStoreRange)} · direct ${count(report.direct)}`} />
+        <Tile value={visits} label={`visits, ${rangeLabel}`} />
+        <Tile value={checkouts} label={`checkouts started, ${rangeLabel}`} />
+        <Tile value={orders} label={`orders, ${rangeLabel}`} />
         <Tile value={macsToday} label="Macs checked for updates today" />
-        <Tile value={visits30} label="visits" />
-        <Tile value={checkouts30} label="checkouts started" />
-        <Tile value={orders30} label="orders" />
       </div>
 
       <div className={styles.grid}>
         <section className={styles.panel}>
           <h2>Downloads</h2>
-          <p className={styles.note}>Clicks on the site&rsquo;s download buttons that went on to GitHub. Link previews are left out.</p>
-          {report.downloads ? (
-            <>
-              <DailyBars days={days} label="Downloads per day" primary={report.downloads.map(day => day.stable)}
-                secondary={report.downloads.map(day => day.beta)} />
-              <div className={styles.legend}><span>stable</span><span>beta</span></div>
-            </>
-          ) : <p className={styles.off}>Not counted on this deployment.</p>}
-        </section>
-
-        <section className={styles.panel}>
-          <h2>App Store</h2>
           <p className={styles.note}>
-            First-time downloads of Local AI Chat, from Apple&rsquo;s daily sales reports. Apple publishes a day the next
-            morning, Pacific time{appStore?.latestDay ? `; the latest here is ${shortDay(appStore.latestDay)}` : ""}.
+            First-time App Store downloads of Local AI Chat, and direct Mac downloads of the plain DMG, per {bucketWord}.
+            Apple publishes a day the next morning, Pacific time{appStore?.latestDay ? `; its latest here is ${bucketLabel(appStore.latestDay)}` : ""}.
+            GitHub only keeps running totals, so direct downloads have dates from {bucketLabel(GITHUB_SNAPSHOTS_STARTED)}.
           </p>
-          {appStore ? (
-            <>
-              <DailyBars days={days} label="App Store downloads per day" primary={appStore.daily.map(day => day.ios)}
-                secondary={appStore.daily.map(day => day.mac)} />
-              <div className={styles.legend}><span>iPhone and iPad</span><span>Mac</span></div>
-              <table className={styles.table} style={{ marginTop: 18 }}>
-                <tbody>
-                  <tr><td>first downloads</td><td>{(appStore.totals.ios + appStore.totals.mac).toLocaleString("en-US")}</td></tr>
-                  <tr><td>downloads again</td><td>{appStore.totals.redownloads.toLocaleString("en-US")}</td></tr>
-                  <tr><td>updates</td><td>{appStore.totals.updates.toLocaleString("en-US")}</td></tr>
-                  <tr><td>in-app purchases</td><td>{appStore.totals.purchases.toLocaleString("en-US")}</td></tr>
-                </tbody>
-              </table>
-            </>
-          ) : <p className={styles.off}>Not connected on this deployment yet.</p>}
-        </section>
-
-        <section className={styles.panel}>
-          <h2>Macs</h2>
-          <p className={styles.note}>Distinct Macs a day whose app asked for updates through the site. Starts with the first build whose feed is localaicat.com/updates/appcast.xml.</p>
-          {report.macsByDay ? <DailyBars days={days} label="Macs per day" primary={values(report.macsByDay)} />
-            : <p className={styles.off}>Not counted on this deployment.</p>}
+          <Bars keys={report.buckets} label={`Downloads per ${bucketWord}`} series={[
+            report.downloads.map(bucket => bucket.ios),
+            report.downloads.map(bucket => bucket.mac),
+            report.downloads.map(bucket => bucket.direct ?? 0)
+          ]} />
+          <div className={styles.legend}><span>App Store, iPhone and iPad</span><span>App Store, Mac</span><span>direct, Mac</span></div>
+          <table className={styles.table} style={{ marginTop: 18 }}>
+            <tbody>
+              <tr><td>App Store first downloads</td><td>{count(appStoreRange)}</td></tr>
+              <tr><td>App Store downloads again</td><td>{count(appStore?.units.redownloads ?? null)}</td></tr>
+              <tr><td>App Store updates</td><td>{count(appStore?.units.updates ?? null)}</td></tr>
+              <tr><td>App Store in-app purchases</td><td>{count(appStore?.units.purchases ?? null)}</td></tr>
+              <tr><td>direct downloads (plain DMG)</td><td>{count(report.direct)}</td></tr>
+              <tr><td>site download buttons</td><td>{count(siteClicks)}</td></tr>
+            </tbody>
+          </table>
+          {!appStore && <p className={styles.off} style={{ marginTop: 12 }}>App Store numbers are not connected on this deployment.</p>}
         </section>
 
         <section className={styles.panel}>
           <h2>Visits</h2>
-          <p className={styles.note}>GoatCounter&rsquo;s daily visitors on public pages.</p>
-          {report.visits ? <DailyBars days={days} label="Visits per day" primary={values(report.visits)} />
+          <p className={styles.note}>GoatCounter&rsquo;s daily visitors on public pages, per {bucketWord}.</p>
+          {report.visits ? <Bars keys={report.buckets} label={`Visits per ${bucketWord}`} series={[values(report.visits)]} />
             : <p className={styles.off}>GoatCounter didn&rsquo;t answer, or no read token is set.</p>}
         </section>
 
         <section className={styles.panel}>
           <h2>Funnel</h2>
-          <p className={styles.note}>The site&rsquo;s own path, from a visit to a Polar order. Totals over the window, not the same people followed through.</p>
+          <p className={styles.note}>
+            The site&rsquo;s own path, from a visit to a Polar order. Totals over the range, not the same people followed
+            through; download buttons and checkouts are counted from {bucketLabel(COUNTING_STARTED)}.
+          </p>
           <Funnel steps={[
-            { label: "visits", value: visits30 },
-            { label: "downloads", value: downloads30 },
-            { label: "checkouts started", value: checkouts30 },
-            { label: "orders", value: orders30 }
+            { label: "visits", value: visits },
+            { label: "download buttons", value: siteClicks },
+            { label: "checkouts started", value: checkouts },
+            { label: "orders", value: orders }
           ]} />
           {report.orders ? (
             <table className={styles.table} style={{ marginTop: 18 }}>
@@ -170,8 +191,18 @@ export default async function StatsPage() {
         </section>
 
         <section className={styles.panel}>
+          <h2>Macs</h2>
+          <p className={styles.note}>
+            Distinct Macs a day whose app asked for updates through the site{report.granularity === "month" ? "; for a month, its busiest day" : ""}.
+            Starts with the first build whose feed is localaicat.com/updates/appcast.xml.
+          </p>
+          {report.macs ? <Bars keys={report.buckets} label={`Macs per ${bucketWord}`} series={[values(report.macs)]} />
+            : <p className={styles.off}>Not counted on this deployment.</p>}
+        </section>
+
+        <section className={styles.panel}>
           <h2>By version</h2>
-          <p className={styles.note}>Downloads over the window, and Macs on each version today.</p>
+          <p className={styles.note}>Download buttons over the range, and Macs on each version today.</p>
           <table className={styles.table}>
             <thead><tr><th>download</th><th>version</th><th>count</th></tr></thead>
             <tbody>
@@ -188,37 +219,40 @@ export default async function StatsPage() {
               {report.macsToday.map(row => <tr key={row.version}><td>{row.version}</td><td>{row.macs}</td></tr>)}
             </tbody>
           </table>
-        </section>
-
-        <section className={styles.panel}>
-          <h2>GitHub history</h2>
-          <p className={styles.note}>All-time DMG downloads per release file, as GitHub counts them. No dates.</p>
-          {report.github ? (
-            <>
-              <table className={styles.table}>
-                <thead><tr><th>channel</th><th>releases</th><th>DMG downloads</th></tr></thead>
-                <tbody>
-                  {report.github.channels.map(row => (
-                    <tr key={row.channel}><td>{row.channel}</td><td>{row.releases}</td><td>{row.dmgDownloads}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-              <table className={styles.table} style={{ marginTop: 18 }}>
-                <thead><tr><th>busiest stable</th><th>published</th><th>DMG downloads</th></tr></thead>
-                <tbody>
-                  {report.github.topStable.map(row => (
-                    <tr key={row.tag}><td>{row.tag}</td><td>{row.publishedAt ?? "–"}</td><td>{row.dmgDownloads}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          ) : <p className={styles.off}>GitHub didn&rsquo;t answer; it allows 60 unauthenticated calls an hour.</p>}
           {report.checkoutsByPlan.length > 0 && (
             <table className={styles.table} style={{ marginTop: 18 }}>
               <thead><tr><th>checkouts started</th><th>count</th></tr></thead>
               <tbody>{report.checkoutsByPlan.map(row => <tr key={row.plan}><td>{row.plan}</td><td>{row.count}</td></tr>)}</tbody>
             </table>
           )}
+        </section>
+
+        <section className={styles.panel}>
+          <h2>All time</h2>
+          <p className={styles.note}>
+            App Store since launch in February 2025; direct downloads per DMG file as GitHub counts them, since the first
+            direct release. The plain DMG is a new install; a versioned DMG is mostly Sparkle updating an installed app.
+          </p>
+          <table className={styles.table}>
+            <tbody>
+              <tr><td>App Store first downloads</td><td>{count(allTime.appStore)}</td></tr>
+              <tr><td>direct downloads (plain DMG)</td><td>{count(allTime.direct)}</td></tr>
+              <tr><td>direct updates (versioned DMG)</td><td>{count(allTime.directUpdates)}</td></tr>
+              {report.github?.channels.filter(row => row.channel !== "stable").map(row => (
+                <tr key={row.channel}><td>{row.channel} DMGs ({row.releases} releases)</td><td>{row.dmgDownloads}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          {report.github ? (
+            <table className={styles.table} style={{ marginTop: 18 }}>
+              <thead><tr><th>busiest stable</th><th>published</th><th>DMG downloads</th></tr></thead>
+              <tbody>
+                {report.github.topStable.map(row => (
+                  <tr key={row.tag}><td>{row.tag}</td><td>{row.publishedAt ?? "–"}</td><td>{row.dmgDownloads}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          ) : <p className={styles.off} style={{ marginTop: 12 }}>GitHub didn&rsquo;t answer; it allows 60 unauthenticated calls an hour.</p>}
         </section>
       </div>
       </ContentPage>

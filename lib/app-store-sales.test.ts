@@ -141,9 +141,48 @@ test("only one fill runs at a time", async () => {
   const apple = fakeApple({});
   const store = new MemoryStatsStore();
   try {
-    assert.equal(await store.claim("app-store-fill", 300), true);
+    const lease = await store.claim("app-store-fill", 300);
+    assert.ok(lease);
     assert.equal(await fillAppStoreHistory(testConfig(), store, NOW), 0);
     assert.equal(apple.asked.length, 0);
+  } finally {
+    apple.restore();
+  }
+});
+
+test("a lease that has been replaced cannot free the new holder's lock", async () => {
+  const store = new MemoryStatsStore();
+  const first = await store.claim("app-store-fill", 300);
+  assert.ok(first);
+  await store.release("app-store-fill", first);
+  const second = await store.claim("app-store-fill", 300);
+  assert.ok(second);
+  await store.release("app-store-fill", first);
+  assert.equal(await store.claim("app-store-fill", 300), null, "the old lease let go of nothing");
+});
+
+test("a failed write doesn't stop the fill, and the lock is let go only once every write is done", async () => {
+  const apple = fakeApple({});
+  const store = new MemoryStatsStore();
+  const realSave = store.saveHistory.bind(store);
+  let writing = 0;
+  let writingAtRelease = -1;
+  store.saveHistory = async (kind, key, value, options) => {
+    writing += 1;
+    await new Promise(resolve => setTimeout(resolve, key === "2025-02" ? 1 : 5));
+    writing -= 1;
+    if (key === "2025-02") throw new Error("redis hiccup");
+    return realSave(kind, key, value, options);
+  };
+  const realRelease = store.release.bind(store);
+  store.release = async (name, lease) => { writingAtRelease = writing; return realRelease(name, lease); };
+  try {
+    const saved = await fillAppStoreHistory(testConfig(), store, NOW);
+    assert.equal(writingAtRelease, 0);
+    const history = await readAppStoreHistory(store, NOW);
+    assert.equal("2025-02" in history, false);
+    assert.deepEqual(history["2025-03"], emptyAppStoreDay());
+    assert.equal(saved, Object.keys(history).length);
   } finally {
     apple.restore();
   }

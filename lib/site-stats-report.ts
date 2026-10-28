@@ -22,6 +22,8 @@ import { rangeBuckets, utcDay, type Bucket, type RangeBuckets, type StatsRange }
 export const COUNTING_STARTED = "2026-10-28";
 /** GitHub keeps only running totals; the site has written them down once a day since this day. */
 export const GITHUB_SNAPSHOTS_STARTED = "2026-10-29";
+/** Longer than the old 400-day counter expiry, so lifting it runs once and never again. */
+const KEEP_COUNTERS_LEASE_SECONDS = 500 * 24 * 60 * 60;
 const RELEASES_URL = "https://api.github.com/repos/local-ai-cat/localaicat-site/releases";
 const RELEASE_PAGES = 5;
 const SOURCE_TIMEOUT_MS = 8_000;
@@ -403,7 +405,13 @@ export async function loadStatsReport(range: StatsRange, now = Date.now(), deps:
   if (store) {
     schedule(async () => {
       // The day's first totals stay the day's, so each day's downloads are measured from the same point.
-      if (github) await store.saveHistory("github-totals", today, JSON.stringify(githubTotals(github)), { onlyIfAbsent: true });
+      if (github) {
+        await orNull(store.saveHistory("github-totals", today, JSON.stringify(githubTotals(github)), { onlyIfAbsent: true }));
+      }
+      // Once: counters written before they were kept for good still carry an expiry.
+      if (await orNull(store.claim("counters-kept", KEEP_COUNTERS_LEASE_SECONDS))) {
+        await orNull(store.keepCounters(rangeBuckets("all", now).days.filter(day => day >= COUNTING_STARTED)));
+      }
       await fillAppStoreHistory(appStoreConfig, store, now);
     });
   }

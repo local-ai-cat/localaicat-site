@@ -29,6 +29,7 @@ const BOT_PATTERN = /bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|
 
 export type DownloadChannel = "stable" | "beta";
 export type StatsCounter = "downloads" | "update-checks" | "checkouts";
+const COUNTERS: readonly StatsCounter[] = ["downloads", "update-checks", "checkouts"];
 /** UTC day (YYYY-MM-DD) → field → count. */
 export type DailyCounts = Record<string, Record<string, number>>;
 export type StatsRequest = { ip: string; userAgent: string };
@@ -47,9 +48,12 @@ export interface SiteStatsStore {
   history(kind: HistoryKind, keys: readonly string[]): Promise<Record<string, string>>;
   /** Kept for good. With `onlyIfAbsent`, an existing value wins (a day's first snapshot stays the day's). */
   saveHistory(kind: HistoryKind, key: string, value: string, options?: { onlyIfAbsent?: boolean }): Promise<void>;
-  /** True for the one caller that gets `name` for `seconds`; false while someone else holds it. */
-  claim(name: string, seconds: number): Promise<boolean>;
-  release(name: string): Promise<void>;
+  /** A lease on `name` for `seconds` for the one caller that gets it; null while someone else holds it. */
+  claim(name: string, seconds: number): Promise<string | null>;
+  /** Lets go of `name` only if `lease` still holds it. */
+  release(name: string, lease: string): Promise<void>;
+  /** Lifts the expiry that counters written before 2026-10-29 were given, so they are kept for good too. */
+  keepCounters(days: readonly string[]): Promise<void>;
 }
 
 /** "app-store": Apple's summaries by day or month. "github-totals": GitHub's download totals, once a day. */
@@ -244,12 +248,24 @@ class RedisStatsStore implements SiteStatsStore {
     else await this.redis.set(redisKey, value);
   }
 
-  async claim(name: string, seconds: number): Promise<boolean> {
-    return await this.redis.set(`${PREFIX}lock:${name}`, "1", { nx: true, ex: seconds }) === "OK";
+  async claim(name: string, seconds: number): Promise<string | null> {
+    const lease = randomBytes(12).toString("hex");
+    return await this.redis.set(`${PREFIX}lock:${name}`, lease, { nx: true, ex: seconds }) === "OK" ? lease : null;
   }
 
-  async release(name: string): Promise<void> {
-    await this.redis.del(`${PREFIX}lock:${name}`);
+  async release(name: string, lease: string): Promise<void> {
+    // Atomic compare-and-delete: a lease that has run out cannot free the next holder's lock.
+    await this.redis.eval<[string], unknown>(
+      "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0",
+      [`${PREFIX}lock:${name}`], [lease]
+    );
+  }
+
+  async keepCounters(days: readonly string[]): Promise<void> {
+    if (days.length === 0) return;
+    const pipeline = this.redis.pipeline();
+    for (const counter of COUNTERS) for (const day of days) pipeline.persist(`${PREFIX}${counter}:${day}`);
+    await pipeline.exec();
   }
 }
 
@@ -261,7 +277,7 @@ export class MemoryStatsStore implements SiteStatsStore {
   private readonly salts = new Map<string, string>();
   private readonly admitted = new Map<string, Set<string>>();
   private readonly stored = new Map<string, string>();
-  private readonly claims = new Map<string, number>();
+  private readonly claims = new Map<string, { lease: string; until: number }>();
 
   async increment(counter: StatsCounter, day: string, field: string): Promise<void> {
     const key = `${counter}:${day}`;
@@ -315,15 +331,21 @@ export class MemoryStatsStore implements SiteStatsStore {
     this.stored.set(`${kind}:${key}`, value);
   }
 
-  async claim(name: string, seconds: number): Promise<boolean> {
+  async claim(name: string, seconds: number): Promise<string | null> {
     const now = Date.now();
-    if ((this.claims.get(name) ?? 0) > now) return false;
-    this.claims.set(name, now + seconds * 1000);
-    return true;
+    const held = this.claims.get(name);
+    if (held && held.until > now) return null;
+    const lease = randomBytes(12).toString("hex");
+    this.claims.set(name, { lease, until: now + seconds * 1000 });
+    return lease;
   }
 
-  async release(name: string): Promise<void> {
-    this.claims.delete(name);
+  async release(name: string, lease: string): Promise<void> {
+    if (this.claims.get(name)?.lease === lease) this.claims.delete(name);
+  }
+
+  async keepCounters(): Promise<void> {
+    // Nothing expires in memory.
   }
 }
 

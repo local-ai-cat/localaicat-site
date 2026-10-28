@@ -192,22 +192,26 @@ export async function fillAppStoreHistory(
     // A malformed key stores nothing rather than failing anything.
     return 0;
   }
-  if (!await store.claim(FILL_LOCK, FILL_LOCK_SECONDS)) return 0;
+  const lease = await store.claim(FILL_LOCK, FILL_LOCK_SECONDS);
+  if (!lease) return 0;
   let saved = 0;
-  try {
-    for (let start = 0; start < missing.length; start += FETCH_CONCURRENCY) {
-      await Promise.all(missing.slice(start, start + FETCH_CONCURRENCY).map(async period => {
-        const answer = await fetchSalesReport(config, token, period);
-        if (answer === null || (answer === "none" && !settled(period, now))) return;
-        const summary = answer === "none" ? emptyAppStoreDay() : answer;
-        await store.saveHistory("app-store", period, JSON.stringify(summary));
-        saved += 1;
-      }));
+  // Each period settles on its own, so no write is still running when the lock is let go.
+  const fillOne = async (period: string): Promise<void> => {
+    try {
+      const answer = await fetchSalesReport(config, token, period);
+      if (answer === null || (answer === "none" && !settled(period, now))) return;
+      const summary = answer === "none" ? emptyAppStoreDay() : answer;
+      await store.saveHistory("app-store", period, JSON.stringify(summary));
+      saved += 1;
+    } catch {
+      // A failed write is asked again by the next fill.
     }
-  } finally {
-    // The lock only guards a fill in progress; the lock's expiry covers a fill that died half way.
-    await store.release(FILL_LOCK);
+  };
+  for (let start = 0; start < missing.length; start += FETCH_CONCURRENCY) {
+    await Promise.all(missing.slice(start, start + FETCH_CONCURRENCY).map(fillOne));
   }
+  // Only this fill's own lease is let go; a fill that outlived it cannot free a later fill's lock.
+  await store.release(FILL_LOCK, lease).catch(() => undefined);
   return saved;
 }
 

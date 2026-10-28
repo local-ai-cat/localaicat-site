@@ -375,6 +375,9 @@ html[data-mode-pending="business"] .homeMode #pricing {visibility:hidden;animati
 .explorerTotal { display:flex; align-items:baseline; gap:10px; margin:12px 0; }
 .explorerTotal b { color:var(--text); font-size:32px; font-weight:500; }
 .explorerFinePrint { color:var(--text-faint); font-size:11px; }
+.explorerLinks { display:flex; flex-wrap:wrap; gap:6px 16px; }
+.explorerLinks a { color:var(--text); text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--text-faint); }
+.explorerLinks a:hover { text-decoration-color:currentColor; }
 .analyticsPreference { display:flex; flex-wrap:wrap; align-items:center; gap:10px; font-size:14px; margin-top:20px; }
 .analyticsPreference input { accent-color:var(--accent); }
 .analyticsPreference small { flex-basis:100%; color:var(--text-dim); }

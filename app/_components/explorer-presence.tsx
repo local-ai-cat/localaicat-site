@@ -68,7 +68,10 @@ export function ExplorerCount() {
       <div className="explorerTotal"><b>{count.toLocaleString()}</b><span>{count === 1 ? "explorer today" : "explorers today"}</span></div>
       <p>Visitors to this website since midnight UTC. A daily estimate, not the number here right now.</p>
       <p className="explorerFinePrint">Cookie-free visitor counts from GoatCounter. Reporting can take a little time to catch up.</p>
-      <a href="/privacy#website-analytics">How we count visits</a>
+      <div className="explorerLinks">
+        <a href="/stats">All our stats, public</a>
+        <a href="/privacy#website-analytics">How we count visits</a>
+      </div>
     </div>
   </details>;
 }

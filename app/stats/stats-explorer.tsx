@@ -18,6 +18,8 @@ export type ExplorerMetric = {
   note: string;
   /** Said instead of a chart when the metric isn't available on this deployment. */
   off: string;
+  /** Points that are a share of a longer total rather than their own count, and what to call them. */
+  spread?: { points: boolean[]; label: string };
 };
 export type ExplorerProps = {
   range: string;
@@ -161,6 +163,11 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
   const count = labels.length;
   const x = (index: number): number => count <= 1 ? WIDTH / 2 : (index / (count - 1)) * WIDTH;
   const y = (value: number): number => HEIGHT - (value / peak) * HEIGHT;
+  const spreadPoints = metric.spread?.points.flatMap((spread, index) => spread ? [index] : []) ?? [];
+  const halfStep = count > 1 ? WIDTH / (count - 1) / 2 : 0;
+  const spreadBand = spreadPoints.length > 0
+    ? { from: Math.max(0, x(spreadPoints[0]) - halfStep), to: Math.min(WIDTH, x(spreadPoints[spreadPoints.length - 1]) + halfStep) }
+    : null;
 
   return (
     <section className={styles.explorer} aria-label="Stats over time">
@@ -181,6 +188,9 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
               </linearGradient>
             ))}
           </defs>
+          {spreadBand && (
+            <rect className={styles.spreadBand} x={spreadBand.from} width={spreadBand.to - spreadBand.from} y="0" height={HEIGHT} />
+          )}
           {ticks.slice(1).map(tick => (
             <line key={tick} className={styles.gridLine} x1="0" x2={WIDTH} y1={y(tick)} y2={y(tick)} />
           ))}
@@ -197,6 +207,11 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
           ))}
         </svg>
 
+        {spreadBand && metric.spread && (
+          <span className={styles.spreadLabel} style={{ left: `${(spreadBand.from / WIDTH) * 100}%`, width: `${((spreadBand.to - spreadBand.from) / WIDTH) * 100}%` }}>
+            {metric.spread.label}
+          </span>
+        )}
         {series.length > 0 && (
           <div className={styles.scale} aria-hidden="true">
             {ticks.map((tick, index) => (
@@ -218,6 +233,7 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
               style={{ left: `${(x(hover) / WIDTH) * 100}%` }}>
               <b>{labels[hover]}</b>
               <span>{totals[hover].toLocaleString("en-US")} {metric.unit}</span>
+              {metric.spread?.points[hover] && <span className={styles.tipNote}>{metric.spread.label}</span>}
               {series.length > 1 && series.map(entry => (
                 <span key={entry.name} className={styles.tipPart} data-tone={entry.tone}>{entry.name} {entry.values[hover] ?? 0}</span>
               ))}

@@ -111,6 +111,23 @@
   border-bottom: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
 }
 
+/* Months that only share a yearly total: a quiet hatch behind the curves, named above them. */
+.spreadBand {
+  fill: color-mix(in srgb, var(--text) 4%, transparent);
+}
+.spreadLabel {
+  position: absolute;
+  top: 6px;
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+  pointer-events: none;
+}
+.tipNote {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
 .targets {
   position: absolute;
   inset: 0;

@@ -10,6 +10,8 @@ import {
   appStoreToken,
   appStoreUnits,
   emptyAppStoreDay,
+  isSpreadMonth,
+  sumAppStoreUnits,
   fillAppStoreHistory,
   latestAppStoreDay,
   readAppStoreHistory,
@@ -79,15 +81,19 @@ test("the bearer token is an ES256 JWT Apple can verify, valid for ten minutes",
 
 const NOW = Date.parse("2026-10-28T12:00:00Z");
 
-test("history is every finished month since launch, then the last 90 days but today", () => {
+test("history is the years before Apple's monthly window, its finished months, then the last 90 days but today", () => {
   const periods = appStorePeriods(NOW);
+  const years = periods.filter(period => period.length === 4);
   const months = periods.filter(period => period.length === 7);
   const days = periods.filter(period => period.length === 10);
-  assert.equal(months[0], "2025-02");
+  assert.deepEqual(years, ["2025"], "2025 reaches back past the monthly window");
+  assert.equal(months[0], "2025-10", "Apple keeps monthly reports for twelve months");
   assert.equal(months.at(-1), "2026-09", "this month is still running");
-  assert.equal(months.length, 20);
+  assert.equal(months.length, 12);
   assert.equal(days.length, APP_STORE_DAILY_DAYS);
   assert.equal(days.at(-1), "2026-10-27", "today is never asked");
+  // In March 2028 the window starts at March 2027, so January and February 2027 need 2027's yearly report.
+  assert.deepEqual(appStorePeriods(Date.parse("2028-03-10T12:00:00Z")).filter(period => period.length === 4), ["2025", "2026", "2027"]);
 });
 
 /** Apple stand-in: answers by report date, and records what was asked. */
@@ -99,7 +105,7 @@ function fakeApple(answers: Record<string, () => Response>): { asked: string[]; 
     const period = url.searchParams.get("filter[reportDate]") ?? "";
     asked.push(period);
     assert.equal(url.searchParams.get("filter[vendorNumber]"), "81234567");
-    assert.equal(url.searchParams.get("filter[frequency]"), period.length === 7 ? "MONTHLY" : "DAILY");
+    assert.equal(url.searchParams.get("filter[frequency]"), period.length === 4 ? "YEARLY" : period.length === 7 ? "MONTHLY" : "DAILY");
     assert.match(String((init?.headers as Record<string, string>).Authorization), /^Bearer [\w-]+\.[\w-]+\.[\w-]+$/);
     return (answers[period] ?? (() => Response.json({ errors: [{ status: "404" }] }, { status: 404 })))();
   };
@@ -108,7 +114,7 @@ function fakeApple(answers: Record<string, () => Response>): { asked: string[]; 
 
 test("a fill stores each settled period for good and asks again only what isn't settled", async () => {
   const apple = fakeApple({
-    "2025-03": () => new Response(gzipSync(REPORT), { status: 200 }),
+    "2025-11": () => new Response(gzipSync(REPORT), { status: 200 }),
     "2026-10-20": () => new Response(gzipSync(REPORT), { status: 200 }),
     "2026-10-21": () => new Response("server error", { status: 500 })
   });
@@ -122,9 +128,10 @@ test("a fill stores each settled period for good and asks again only what isn't 
     // Not stored: a failed call, and the three days Apple may not have published yet (2026-10-25 to -27).
     assert.equal(saved, periods.length - 4);
     const history = await readAppStoreHistory(store, NOW);
-    assert.deepEqual(history["2025-03"], { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
+    assert.deepEqual(history["2025-11"], { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
     assert.deepEqual(history["2026-10-20"], { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
-    assert.deepEqual(history["2025-02"], emptyAppStoreDay(), "a long-past month with no report had no units");
+    assert.deepEqual(history["2025"], emptyAppStoreDay(), "a long-past year with no report had no units");
+    assert.equal("2025-03" in history, false, "months older than Apple's monthly window are never asked");
     assert.equal("2026-10-21" in history, false);
     assert.equal("2026-10-27" in history, false);
     assert.equal(latestAppStoreDay(history), "2026-10-24");
@@ -170,9 +177,9 @@ test("a failed write doesn't stop the fill, and the lock is let go only once eve
   let writingAtRelease = -1;
   store.saveHistory = async (kind, key, value, options) => {
     writing += 1;
-    await new Promise(resolve => setTimeout(resolve, key === "2025-02" ? 1 : 5));
+    await new Promise(resolve => setTimeout(resolve, key === "2025-10" ? 1 : 5));
     writing -= 1;
-    if (key === "2025-02") throw new Error("redis hiccup");
+    if (key === "2025-10") throw new Error("redis hiccup");
     return realSave(kind, key, value, options);
   };
   const realRelease = store.release.bind(store);
@@ -181,8 +188,8 @@ test("a failed write doesn't stop the fill, and the lock is let go only once eve
     const saved = await fillAppStoreHistory(testConfig(), store, NOW);
     assert.equal(writingAtRelease, 0);
     const history = await readAppStoreHistory(store, NOW);
-    assert.equal("2025-02" in history, false);
-    assert.deepEqual(history["2025-03"], emptyAppStoreDay());
+    assert.equal("2025-10" in history, false);
+    assert.deepEqual(history["2025-11"], emptyAppStoreDay());
     assert.equal(saved, Object.keys(history).length);
   } finally {
     apple.restore();
@@ -206,11 +213,28 @@ test("a month just ended without a report is asked again, not stored as zero", a
 test("a month is Apple's monthly report when there is one, else the sum of its stored days", () => {
   const unit = (ios: number) => ({ ios, mac: 1, redownloads: 0, updates: 0, purchases: 0 });
   const history = { "2026-09": unit(40), "2026-09-01": unit(1), "2026-10-01": unit(2), "2026-10-02": unit(3) };
-  assert.equal(appStoreUnits(history, { key: "2026-09", days: ["2026-09-01"] })?.ios, 40);
-  assert.deepEqual(appStoreUnits(history, { key: "2026-10", days: ["2026-10-01", "2026-10-02", "2026-10-03"] }),
+  assert.equal(appStoreUnits(history, { key: "2026-09", days: ["2026-09-01"] }, NOW)?.ios, 40);
+  assert.deepEqual(appStoreUnits(history, { key: "2026-10", days: ["2026-10-01", "2026-10-02", "2026-10-03"] }, NOW),
     { ios: 5, mac: 2, redownloads: 0, updates: 0, purchases: 0 });
-  assert.equal(appStoreUnits(history, { key: "2026-08", days: ["2026-08-01"] }), null);
-  assert.equal(appStoreUnits(history, { key: "2026-10-03", days: ["2026-10-03"] }), null);
+  assert.equal(appStoreUnits(history, { key: "2026-08", days: ["2026-08-01"] }, NOW), null);
+  assert.equal(appStoreUnits(history, { key: "2026-10-03", days: ["2026-10-03"] }, NOW), null);
+});
+
+test("months older than Apple's monthly reports share the rest of the year evenly, and the year adds up", () => {
+  const unit = (ios: number, mac = 0) => ({ ios, mac, redownloads: 0, updates: 0, purchases: 0 });
+  // 2025: 400 first downloads in the year, 100 of them in October to December (reported by month).
+  const history = { "2025": unit(400, 17), "2025-10": unit(60, 4), "2025-11": unit(25), "2025-12": unit(15) };
+  const spread = ["2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09"]
+    .map(month => appStoreUnits(history, { key: month, days: [] }, NOW));
+  assert.deepEqual(spread.map(units => units?.ios), [38, 38, 38, 38, 37, 37, 37, 37], "300 over eight months");
+  assert.deepEqual(spread.map(units => units?.mac), [2, 2, 2, 2, 2, 1, 1, 1], "13 over eight months");
+  assert.equal(sumAppStoreUnits(history, [
+    ...["2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"]
+      .map(month => ({ key: month, days: [] }))
+  ], NOW).ios, 400, "the year adds up to Apple's yearly total");
+  assert.equal(isSpreadMonth("2025-09", NOW), true);
+  assert.equal(isSpreadMonth("2025-10", NOW), false);
+  assert.equal(appStoreUnits({}, { key: "2025-05", days: [] }, NOW), null, "no yearly report yet: nothing known");
 });
 
 test("no key or no store means no fill; a key that can't sign asks nothing", async () => {

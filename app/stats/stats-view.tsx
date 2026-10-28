@@ -57,8 +57,11 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
         { name: "mac app store", tone: "mint", values: report.downloads.map(bucket => bucket.mac) },
         { name: "mac, from the site", tone: "amber", values: report.downloads.map(bucket => bucket.direct ?? 0) }
       ],
-      note: `first downloads only, never updates. apple publishes a day the next morning, pacific time${appStore?.latestDay ? `; the newest here is ${longDay(appStore.latestDay)}` : ""}. github only keeps running totals, so site downloads get their own bars from ${longDay(GITHUB_SNAPSHOTS_STARTED)}.`,
-      off: "downloads aren't connected on this deployment"
+      note: `first downloads only, never updates. apple keeps months for a year; older months share their year's total evenly, so the shaded stretch adds up but isn't month by month. apple publishes a day the next morning, pacific time${appStore?.latestDay ? `; the newest here is ${longDay(appStore.latestDay)}` : ""}. github only keeps running totals, so site downloads get their own bars from ${longDay(GITHUB_SNAPSHOTS_STARTED)}.`,
+      off: "downloads aren't connected on this deployment",
+      spread: report.downloads.some(bucket => bucket.spread)
+        ? { points: report.downloads.map(bucket => bucket.spread), label: "apple's yearly total, shared evenly" }
+        : undefined
     },
     {
       id: "visits",

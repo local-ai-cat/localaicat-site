@@ -1,7 +1,7 @@
 import { createSign } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import type { SiteStatsStore } from "./site-stats.ts";
-import { HISTORY_START_MONTH, addMonths, lastDays, monthsBetween, utcDay } from "./stats-range.ts";
+import { HISTORY_START_MONTH, addMonths, daysOfMonth, lastDays, monthsBetween, utcDay } from "./stats-range.ts";
 
 /**
  * Local AI Chat's App Store units, from Apple's sales summaries (Sales and Trends): monthly reports for the
@@ -16,8 +16,13 @@ const SALES_REPORTS_URL = "https://api.appstoreconnect.apple.com/v1/salesReports
 const REPORT_VERSIONS = ["1_1", "1_0"] as const;
 /** Apple allows tokens up to 20 minutes; one fill needs far less. */
 const TOKEN_SECONDS = 10 * 60;
-/** Days kept day by day: enough for the 90-day view. Older history is kept by month. */
+/** Days kept day by day: enough for the 90-day view. Older history is kept by month, then by year. */
 export const APP_STORE_DAILY_DAYS = 90;
+/**
+ * Apple keeps monthly sales reports for the last 12 months only: on 2026-10-29 October 2025 answered and
+ * September 2025 did not. Older months come from the yearly report, which gives one total for the year.
+ */
+export const APP_STORE_MONTHLY_MONTHS = 12;
 /**
  * Apple publishes a day's report the next morning, Pacific time, and a month's in the first days of the next.
  * A period this long past with no report had no units, and is stored as zero; a younger one is asked again.
@@ -106,7 +111,7 @@ export function appStoreToken(config: AppStoreSalesConfig, now: number): string 
  * report for it, or null when the call failed.
  */
 async function fetchSalesReport(config: AppStoreSalesConfig, token: string, period: string): Promise<AppStoreDay | "none" | null> {
-  const frequency = isMonth(period) ? "MONTHLY" : "DAILY";
+  const frequency = isYear(period) ? "YEARLY" : isMonth(period) ? "MONTHLY" : "DAILY";
   // Daily summaries answer to version 1_1; on 2026-10-29 every monthly request with 1_1 failed, so a refused
   // version is retried with the older 1_0 before the period is given up for this fill.
   for (const version of REPORT_VERSIONS) {
@@ -163,12 +168,35 @@ function isMonth(period: string): boolean {
   return period.length === 7;
 }
 
-/** Every period worth keeping: the last 90 days but today, and every finished month since launch. */
+function isYear(period: string): boolean {
+  return period.length === 4;
+}
+
+/** The oldest month Apple still keeps a monthly report for. */
+export function monthlyWindowStart(now: number): string {
+  return addMonths(utcDay(now).slice(0, 7), -APP_STORE_MONTHLY_MONTHS);
+}
+
+/** A month older than Apple's monthly reports: its units are the year's remainder, spread evenly. */
+export function isSpreadMonth(month: string, now: number): boolean {
+  return isMonth(month) && month < monthlyWindowStart(now);
+}
+
+/**
+ * Every period worth keeping: each finished year since launch that reaches past the monthly window, the
+ * finished months Apple still reports by month, and the last 90 days but today.
+ */
 export function appStorePeriods(now: number): string[] {
   const today = utcDay(now);
+  const windowStart = monthlyWindowStart(now);
+  const firstMonth = HISTORY_START_MONTH > windowStart ? HISTORY_START_MONTH : windowStart;
+  const years: string[] = [];
+  for (let year = Number(HISTORY_START_MONTH.slice(0, 4)); `${year}-01` < windowStart && year < Number(today.slice(0, 4)); year += 1) {
+    years.push(String(year));
+  }
   const days = lastDays(now, APP_STORE_DAILY_DAYS + 1).filter(day => day < today);
-  const months = monthsBetween(HISTORY_START_MONTH, addMonths(today.slice(0, 7), -1));
-  return [...months, ...days];
+  const months = monthsBetween(firstMonth, addMonths(today.slice(0, 7), -1));
+  return [...years, ...months, ...days];
 }
 
 /** What is stored so far; a value that doesn't read back as a summary is left out, so it is fetched again. */
@@ -184,6 +212,7 @@ export async function readAppStoreHistory(store: SiteStatsStore, now: number): P
 
 /** Whether Apple has had time to publish the period, so that no report means no units. */
 function settled(period: string, now: number): boolean {
+  if (isYear(period)) return now - Date.UTC(Number(period) + 1, 0, 1) > SETTLED_MONTH_DAYS * DAY_MS;
   if (!isMonth(period)) return period < utcDay(now - SETTLED_DAYS * DAY_MS);
   const monthEnd = Date.parse(`${addMonths(period, 1)}-01T00:00:00Z`);
   return now - monthEnd > SETTLED_MONTH_DAYS * DAY_MS;
@@ -241,7 +270,8 @@ function addUnits(total: AppStoreDay, more: AppStoreDay): void {
  * A bucket's units: a day's own summary; for a month, Apple's monthly report when there is one, else the sum
  * of the month's stored days (this month, or a month Apple hasn't reported yet). Null when nothing is known.
  */
-export function appStoreUnits(history: AppStoreHistory, bucket: { key: string; days: readonly string[] }): AppStoreDay | null {
+export function appStoreUnits(history: AppStoreHistory, bucket: { key: string; days: readonly string[] }, now: number): AppStoreDay | null {
+  if (isSpreadMonth(bucket.key, now)) return spreadMonthUnits(history, bucket.key, now);
   if (history[bucket.key]) return history[bucket.key];
   if (!isMonth(bucket.key)) return null;
   const known = bucket.days.filter(day => history[day]);
@@ -251,11 +281,41 @@ export function appStoreUnits(history: AppStoreHistory, bucket: { key: string; d
   return total;
 }
 
+/**
+ * A month older than Apple's monthly reports: the year's total less its months Apple still reports by month,
+ * shared evenly between the older months (any leftover unit goes to the earliest ones), so the year adds up.
+ */
+function spreadMonthUnits(history: AppStoreHistory, month: string, now: number): AppStoreDay | null {
+  const year = month.slice(0, 4);
+  const yearly = history[year];
+  if (!yearly) return null;
+  const today = utcDay(now);
+  const first = `${year}-01` < HISTORY_START_MONTH ? HISTORY_START_MONTH : `${year}-01`;
+  const months = monthsBetween(first, `${year}-12`).filter(entry => entry <= today.slice(0, 7));
+  const spread = months.filter(entry => isSpreadMonth(entry, now));
+  const remainder = { ...yearly };
+  for (const reported of months.filter(entry => !isSpreadMonth(entry, now))) {
+    const units = appStoreUnits(history, { key: reported, days: daysOfMonth(reported, today) }, now);
+    if (units) for (const field of Object.keys(remainder) as (keyof AppStoreDay)[]) remainder[field] -= units[field];
+  }
+  const position = spread.indexOf(month);
+  const share = emptyAppStoreDay();
+  for (const field of Object.keys(share) as (keyof AppStoreDay)[]) {
+    const left = Math.max(0, remainder[field]);
+    share[field] = Math.floor(left / spread.length) + (position < left % spread.length ? 1 : 0);
+  }
+  return share;
+}
+
 /** Units over several buckets; buckets with nothing known count as zero. */
-export function sumAppStoreUnits(history: AppStoreHistory, buckets: readonly { key: string; days: readonly string[] }[]): AppStoreDay {
+export function sumAppStoreUnits(
+  history: AppStoreHistory,
+  buckets: readonly { key: string; days: readonly string[] }[],
+  now: number
+): AppStoreDay {
   const total = emptyAppStoreDay();
   for (const bucket of buckets) {
-    const units = appStoreUnits(history, bucket);
+    const units = appStoreUnits(history, bucket, now);
     if (units) addUnits(total, units);
   }
   return total;
@@ -263,6 +323,6 @@ export function sumAppStoreUnits(history: AppStoreHistory, buckets: readonly { k
 
 /** The newest day with a stored report, for "Apple's latest day" on the page. */
 export function latestAppStoreDay(history: AppStoreHistory): string | null {
-  const days = Object.keys(history).filter(period => !isMonth(period)).sort();
+  const days = Object.keys(history).filter(period => period.length === 10).sort();
   return days.at(-1) ?? null;
 }

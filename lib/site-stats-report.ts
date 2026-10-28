@@ -1,6 +1,7 @@
 import {
   appStoreUnits,
   fillAppStoreHistory,
+  isSpreadMonth,
   latestAppStoreDay,
   readAppStoreHistory,
   sumAppStoreUnits,
@@ -60,7 +61,8 @@ export type StatsReport = {
   storage: "redis" | "memory" | "off";
   allTime: { downloads: number | null; appStore: number | null; direct: number | null; directUpdates: number | null };
   /** Per bucket: App Store first downloads and direct (plain DMG) downloads; direct is null before the snapshots. */
-  downloads: { key: string; ios: number; mac: number; direct: number | null }[];
+  /** `spread`: a month older than Apple's monthly reports, its share of the year's total. */
+  downloads: { key: string; ios: number; mac: number; direct: number | null; spread: boolean }[];
   appStore: { units: AppStoreDay; latestDay: string | null } | null;
   direct: number | null;
   siteClicks: { key: string; stable: number; beta: number }[] | null;
@@ -313,7 +315,7 @@ export function buildReport(input: {
     return buckets.some(directKnown) ? days.reduce((sum, day) => sum + (direct.get(day) ?? 0), 0) : null;
   };
 
-  const allTimeAppStore = appStore ? sumAppStoreUnits(appStore, rangeBuckets("all", input.now).buckets) : null;
+  const allTimeAppStore = appStore ? sumAppStoreUnits(appStore, rangeBuckets("all", input.now).buckets, input.now) : null;
   const allTimeApp = allTimeAppStore ? allTimeAppStore.ios + allTimeAppStore.mac : null;
   const allTimeDirect = github?.newDownloads ?? null;
   const anyAllTime = allTimeApp !== null || allTimeDirect !== null;
@@ -330,10 +332,16 @@ export function buildReport(input: {
       directUpdates: github?.updateDownloads ?? null
     },
     downloads: buckets.map(bucket => {
-      const units = appStore ? appStoreUnits(appStore, bucket) : null;
-      return { key: bucket.key, ios: units?.ios ?? 0, mac: units?.mac ?? 0, direct: directKnown(bucket) ? sumDays(direct, bucket) : null };
+      const units = appStore ? appStoreUnits(appStore, bucket, input.now) : null;
+      return {
+        key: bucket.key,
+        ios: units?.ios ?? 0,
+        mac: units?.mac ?? 0,
+        direct: directKnown(bucket) ? sumDays(direct, bucket) : null,
+        spread: units !== null && isSpreadMonth(bucket.key, input.now)
+      };
     }),
-    appStore: appStore ? { units: sumAppStoreUnits(appStore, buckets), latestDay: latestAppStoreDay(appStore) } : null,
+    appStore: appStore ? { units: sumAppStoreUnits(appStore, buckets, input.now), latestDay: latestAppStoreDay(appStore) } : null,
     direct: directInRange(),
     siteClicks: downloads && buckets.map(bucket => ({
       key: bucket.key,

@@ -109,6 +109,12 @@ test("a 1.4.0 client following the redirect reads the identical appcast it reads
   assert.deepEqual(viaSite.hops, [GITHUB_FEED_URL, ...direct.hops]);
 });
 
+test("the update feed stays the app's SUFeedURL even when the download env points elsewhere", () => {
+  process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_URL = "https://downloads.example/releases/latest/download/LocalAIChatDirect.dmg";
+  const { response } = updateFeedRedirect(request("/updates/appcast.xml", SPARKLE), deps());
+  assertUncachedRedirect(response, GITHUB_FEED_URL);
+});
+
 test("only Sparkle's GET is an update check", async () => {
   const d = deps();
   for (const req of [request("/updates/appcast.xml", SAFARI), request("/updates/appcast.xml", SPARKLE, "HEAD"),

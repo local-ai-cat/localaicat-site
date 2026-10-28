@@ -88,7 +88,8 @@ export async function downloadRedirect(
  * so it gets the identical appcast; only a request that says it is Sparkle is counted.
  */
 export function updateFeedRedirect(request: Request, deps: CountedRedirectDeps = defaultDeps()): CountedRedirect {
-  const response = redirectTo(feedUrl());
+  // Pinned, not derived from the download env: it must stay the app's own SUFeedURL whatever that env says.
+  const response = redirectTo(GITHUB_FEED_URL);
   const version = request.method === "GET" ? sparkleAppVersion(request.headers.get("user-agent")) : null;
   if (!version) return { response, record: nothingToRecord };
   const now = deps.now();

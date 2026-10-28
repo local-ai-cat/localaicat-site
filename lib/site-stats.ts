@@ -16,6 +16,14 @@ export const STATS_RETENTION_SECONDS = 400 * 24 * 60 * 60;
 /** The salt outlives its UTC day only long enough for requests that straddle midnight. */
 const SALT_SECONDS = 2 * 24 * 60 * 60;
 const VERSION_PATTERN = /^[0-9A-Za-z][0-9A-Za-z.+-]{0,31}$/;
+/** What the app's display versions look like: 1.4.0, 1.4.0-b17, 1.4.0-a256. */
+const APP_VERSION_PATTERN = /^\d{1,3}\.\d{1,3}(?:\.\d{1,3})?(?:-[ab]\d{1,5})?$/;
+/**
+ * Update checks are unauthenticated, so the version a client claims is capped: past this many versions
+ * in a day, new ones are counted as "other" instead of each making its own Redis keys.
+ */
+export const MAX_APP_VERSIONS_PER_DAY = 40;
+export const OTHER_VERSION = "other";
 const BOT_PATTERN = /bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|headless|monitor|uptime/i;
 
 export type DownloadChannel = "stable" | "beta";
@@ -27,7 +35,9 @@ export type StatsRequest = { ip: string; userAgent: string };
 export interface SiteStatsStore {
   readonly kind: "redis" | "memory";
   increment(counter: StatsCounter, day: string, field: string): Promise<void>;
-  /** Counts `member` once per day and version; only an estimate of distinct members is kept. */
+  /** The label to count an app version under today: itself, or "other" once the day's cap is reached. */
+  admitVersion(day: string, version: string): Promise<string>;
+  /** Counts `member` once per day and admitted version; only an estimate of distinct members is kept. */
   addMac(day: string, version: string, member: string): Promise<void>;
   daySalt(day: string): Promise<string>;
   counts(counter: StatsCounter, days: readonly string[]): Promise<DailyCounts>;
@@ -55,7 +65,8 @@ export function isLikelyBot(userAgent: string | null): boolean {
 /** Sparkle sends "<app name>/<display version> Sparkle/<sparkle version>" (SPUUserAgent+Private.m). */
 export function sparkleAppVersion(userAgent: string | null): string | null {
   const match = userAgent?.match(/^.+\/(\S+) Sparkle\/\S+$/);
-  return match ? versionLabel(match[1]) : null;
+  if (!match) return null;
+  return APP_VERSION_PATTERN.test(match[1]) ? match[1] : "unknown";
 }
 
 export function statsRequest(headers: Headers): StatsRequest {
@@ -91,16 +102,21 @@ export function recordCheckout(store: SiteStatsStore | null, plan: string, now: 
   return quietly("checkout", () => store.increment("checkouts", statsDay(now), versionLabel(plan)));
 }
 
+/** Runs counting after the response has gone out; nothing it does can reach the response. */
+export function afterResponse(work: () => Promise<void>): void {
+  const guarded = (): Promise<void> => quietly("after response", work);
+  try {
+    after(guarded);
+  } catch {
+    // Outside a request (route unit tests) there is no "after"; count straight away.
+    void guarded();
+  }
+}
+
 /** Counts a checkout once the redirect to Polar has gone out. */
 export function countCheckout(plan: string): void {
   const now = Date.now();
-  const work = (): Promise<void> => recordCheckout(siteStatsStore(), plan, now);
-  try {
-    after(work);
-  } catch {
-    // Outside a request (the route's unit tests) there is no "after"; count straight away.
-    void work();
-  }
+  afterResponse(() => recordCheckout(siteStatsStore(), plan, now));
 }
 
 /** One update check from Sparkle: the raw check, and this Mac once for the day. */
@@ -110,23 +126,29 @@ export function recordUpdateCheck(
   if (!store) return Promise.resolve();
   const day = statsDay(now);
   return quietly("update check", async () => {
-    const salt = await store.daySalt(day);
+    const [salt, label] = await Promise.all([store.daySalt(day), store.admitVersion(day, version)]);
     await Promise.all([
-      store.increment("update-checks", day, version),
-      store.addMac(day, version, macMember(salt, request))
+      store.increment("update-checks", day, label),
+      store.addMac(day, label, macMember(salt, request))
     ]);
   });
 }
 
-function toCounts(value: unknown): Record<string, number> {
+/** HGETALL as Redis answers it (a flat field, value list) or as an object. */
+export function hashCounts(value: unknown): Record<string, number> {
   const counts: Record<string, number> = {};
   if (!value || typeof value !== "object") return counts;
-  for (const [field, raw] of Object.entries(value)) {
+  const entries = Array.isArray(value)
+    ? Array.from({ length: Math.floor(value.length / 2) }, (_, index) => [String(value[index * 2]), value[index * 2 + 1]])
+    : Object.entries(value);
+  for (const [field, raw] of entries) {
     const count = Number(raw);
     if (Number.isSafeInteger(count) && count > 0) counts[field] = count;
   }
   return counts;
 }
+
+let cachedSalt: { day: string; salt: string } | undefined;
 
 class RedisStatsStore implements SiteStatsStore {
   readonly kind = "redis";
@@ -141,20 +163,31 @@ class RedisStatsStore implements SiteStatsStore {
     await this.redis.pipeline().hincrby(key, field, 1).expire(key, STATS_RETENTION_SECONDS).exec();
   }
 
+  async admitVersion(day: string, version: string): Promise<string> {
+    // Atomic, so concurrent checks cannot push the day past its cap.
+    const label = await this.redis.eval<[string, number, number, string], unknown>(
+      "if redis.call('SISMEMBER', KEYS[1], ARGV[1]) == 1 then return ARGV[1] end " +
+      "local label = ARGV[1] " +
+      "if redis.call('SCARD', KEYS[1]) >= tonumber(ARGV[2]) then label = ARGV[4] end " +
+      "redis.call('SADD', KEYS[1], label); redis.call('EXPIRE', KEYS[1], ARGV[3]); return label",
+      [`${PREFIX}macs-versions:${day}`], [version, MAX_APP_VERSIONS_PER_DAY, STATS_RETENTION_SECONDS, OTHER_VERSION]
+    );
+    return label === version ? version : OTHER_VERSION;
+  }
+
   async addMac(day: string, version: string, member: string): Promise<void> {
     const key = `${PREFIX}macs:${day}:${version}`;
-    const versions = `${PREFIX}macs-versions:${day}`;
-    await this.redis.pipeline()
-      .pfadd(key, member).expire(key, STATS_RETENTION_SECONDS)
-      .sadd(versions, version).expire(versions, STATS_RETENTION_SECONDS)
-      .exec();
+    await this.redis.pipeline().pfadd(key, member).expire(key, STATS_RETENTION_SECONDS).exec();
   }
 
   async daySalt(day: string): Promise<string> {
+    // One salt per day per instance once read: hourly checks from every Mac need not fetch it each time.
+    if (cachedSalt?.day === day) return cachedSalt.salt;
     const key = `${PREFIX}salt:${day}`;
     await this.redis.set(key, randomBytes(16).toString("hex"), { nx: true, ex: SALT_SECONDS });
     const salt = await this.redis.get<string>(key);
     if (typeof salt !== "string" || !salt) throw new Error("Missing day salt");
+    cachedSalt = { day, salt };
     return salt;
   }
 
@@ -163,7 +196,7 @@ class RedisStatsStore implements SiteStatsStore {
     const pipeline = this.redis.pipeline();
     for (const day of days) pipeline.hgetall(`${PREFIX}${counter}:${day}`);
     const results = await pipeline.exec<unknown[]>();
-    return Object.fromEntries(days.map((day, index) => [day, toCounts(results[index])]));
+    return Object.fromEntries(days.map((day, index) => [day, hashCounts(results[index])]));
   }
 
   async macs(days: readonly string[]): Promise<DailyCounts> {
@@ -192,12 +225,22 @@ export class MemoryStatsStore implements SiteStatsStore {
   private readonly counters = new Map<string, Map<string, number>>();
   private readonly macSets = new Map<string, Map<string, Set<string>>>();
   private readonly salts = new Map<string, string>();
+  private readonly admitted = new Map<string, Set<string>>();
 
   async increment(counter: StatsCounter, day: string, field: string): Promise<void> {
     const key = `${counter}:${day}`;
     const fields = this.counters.get(key) ?? new Map<string, number>();
     fields.set(field, (fields.get(field) ?? 0) + 1);
     this.counters.set(key, fields);
+  }
+
+  async admitVersion(day: string, version: string): Promise<string> {
+    const admitted = this.admitted.get(day) ?? new Set<string>();
+    this.admitted.set(day, admitted);
+    if (admitted.has(version)) return version;
+    const label = admitted.size >= MAX_APP_VERSIONS_PER_DAY ? OTHER_VERSION : version;
+    admitted.add(label);
+    return label;
   }
 
   async addMac(day: string, version: string, member: string): Promise<void> {
@@ -238,6 +281,13 @@ export function siteStatsStore(): SiteStatsStore | null {
     return holder[devStoreKey];
   }
   const config = getActivationTokenRedisConfig();
-  // Raw strings back: a salt that happens to look like a number must stay a string.
-  return config ? new RedisStatsStore(new Redis({ ...config, automaticDeserialization: false })) : null;
+  if (!config) return null;
+  try {
+    // Raw strings back: a salt that happens to look like a number must stay a string.
+    return new RedisStatsStore(new Redis({ ...config, automaticDeserialization: false }));
+  } catch {
+    // A malformed Redis URL turns counting off; it must not turn the redirect into an error.
+    return null;
+  }
 }
+

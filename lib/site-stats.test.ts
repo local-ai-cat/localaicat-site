@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  MAX_APP_VERSIONS_PER_DAY,
   MemoryStatsStore,
+  OTHER_VERSION,
+  afterResponse,
+  hashCounts,
   isLikelyBot,
   recordCheckout,
   recordDownload,
@@ -89,6 +93,40 @@ test("a failing store never throws into the redirect", async () => {
     await recordCheckout(broken, "pro-monthly", NOW);
     await recordUpdateCheck(broken, "1.4.0", { ip: "x", userAgent: "y" }, NOW);
     await recordDownload(null, "stable", "1.4.0", NOW);
+  } finally {
+    console.warn = warn;
+  }
+});
+
+test("HGETALL's raw flat answer and the object form read the same", () => {
+  assert.deepEqual(hashCounts(["stable|1.4.0", "3", "beta|1.4.0-b17", "1"]), { "stable|1.4.0": 3, "beta|1.4.0-b17": 1 });
+  assert.deepEqual(hashCounts({ "stable|1.4.0": "3" }), { "stable|1.4.0": 3 });
+  assert.deepEqual(hashCounts(["odd"]), {});
+  assert.deepEqual(hashCounts(null), {});
+});
+
+test("a client cannot mint versions: odd ones are unknown, and past the day's cap they are other", async () => {
+  assert.equal(sparkleAppVersion("Local AI Chat/1.4.0junk Sparkle/2.6.4"), "unknown");
+  assert.equal(sparkleAppVersion("Local AI Chat/1.4.0-a256 Sparkle/2.6.4"), "1.4.0-a256");
+  const store = new MemoryStatsStore();
+  for (let patch = 0; patch < MAX_APP_VERSIONS_PER_DAY + 5; patch += 1) {
+    await recordUpdateCheck(store, `9.9.${patch}`, { ip: `198.51.100.${patch}`, userAgent: "ua" }, NOW);
+  }
+  await recordUpdateCheck(store, "9.9.0", { ip: "198.51.100.200", userAgent: "ua" }, NOW);
+  const macs = (await store.macs(["2026-10-28"]))["2026-10-28"];
+  assert.equal(Object.keys(macs).length, MAX_APP_VERSIONS_PER_DAY + 1);
+  assert.equal(macs[OTHER_VERSION], 5);
+  assert.equal(macs["9.9.0"], 2, "a version admitted earlier in the day keeps counting under its own name");
+});
+
+test("counting after the response swallows its own failures, even outside a request", async () => {
+  const warn = console.warn;
+  console.warn = () => {};
+  try {
+    let ran = false;
+    afterResponse(async () => { ran = true; throw new Error("boom"); });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(ran, true);
   } finally {
     console.warn = warn;
   }

@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildReport, dailyVisits, loadStatsReport, releaseChannel, summariseReleases } from "./site-stats-report.ts";
+import {
+  REPORT_CACHE_MS,
+  buildReport,
+  cachedStatsReport,
+  dailyVisits,
+  loadStatsReport,
+  releaseChannel,
+  summariseReleases
+} from "./site-stats-report.ts";
 import { MemoryStatsStore, recordDownload, recordUpdateCheck } from "./site-stats.ts";
 
 const DAYS = ["2026-10-27", "2026-10-28"];
@@ -72,6 +80,37 @@ test("without a store the report says counting is off instead of showing zeros",
     assert.equal(report.macsByDay, null);
     assert.equal(report.github, null);
     assert.equal(report.days.length, 30);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("the public page gathers at most once per five minutes, and visits in between share it", async () => {
+  let loads = 0;
+  const load = async (now: number) => { loads += 1; return buildReport({ days: [String(now)], storage: "redis", downloads: null, macs: null, checkouts: null, visits: null, github: null }); };
+  const start = Date.parse("2026-10-28T12:00:00Z") + 1_000_000_007;
+  const first = await cachedStatsReport(start, load);
+  const again = await Promise.all([cachedStatsReport(start + 1_000, load), cachedStatsReport(start + REPORT_CACHE_MS - 1, load)]);
+  assert.equal(loads, 1);
+  assert.deepEqual(again, [first, first]);
+  await cachedStatsReport(start + REPORT_CACHE_MS, load);
+  assert.equal(loads, 2);
+});
+
+test("what the public page is given holds totals only, never a visitor", async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("unavailable", { status: 503 });
+  const now = Date.parse("2026-10-28T12:00:00Z");
+  const store = new MemoryStatsStore();
+  const ip = "203.0.113.77";
+  const userAgent = "Local AI Chat/1.4.0 Sparkle/2.6.4 (secret-marker)";
+  await recordUpdateCheck(store, "1.4.0", { ip, userAgent }, now);
+  await recordDownload(store, "stable", "1.4.0", now);
+  try {
+    const shown = JSON.stringify(await loadStatsReport(now, store));
+    assert.equal(shown.includes(ip), false);
+    assert.equal(shown.includes("secret-marker"), false);
+    assert.equal(/[0-9a-f]{32}/.test(shown), false, "no visitor hash");
   } finally {
     globalThis.fetch = realFetch;
   }

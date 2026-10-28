@@ -176,6 +176,23 @@ async function orNull<T>(work: Promise<T>): Promise<T | null> {
   }
 }
 
+/** How long one gathered report is served, per server instance. */
+export const REPORT_CACHE_MS = 5 * 60_000;
+let cachedReport: { at: number; report: Promise<StatsReport> } | undefined;
+
+/**
+ * The public /stats page's report: gathered at most once per five minutes per instance, so visits to a
+ * public page cannot turn into Redis, GoatCounter and GitHub calls one for one. Concurrent visits share it.
+ */
+export function cachedStatsReport(now = Date.now(), load: (now: number) => Promise<StatsReport> = loadStatsReport): Promise<StatsReport> {
+  if (cachedReport && now - cachedReport.at < REPORT_CACHE_MS) return cachedReport.report;
+  const report = load(now);
+  cachedReport = { at: now, report };
+  // A failed gather is not kept: the next visit tries again.
+  report.catch(() => { if (cachedReport?.report === report) cachedReport = undefined; });
+  return report;
+}
+
 export async function loadStatsReport(
   now = Date.now(),
   store: SiteStatsStore | null = siteStatsStore()

@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
-import internal from "../internal.module.css";
+import { ContentPage } from "../_components/content-page";
+import { SiteShell } from "../_components/site-shell";
 import styles from "./stats.module.css";
-import { loadStatsReport, REPORT_DAYS, type DayValue, type StatsReport } from "../../../lib/site-stats-report";
+import { cachedStatsReport, REPORT_DAYS, type DayValue, type StatsReport } from "../../lib/site-stats-report";
 
+// Public, and only ever totals: no address, browser or visitor is stored, so none can be shown.
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Stats · Internal · Local AI Cat",
+  title: "Stats",
+  description: "Downloads, Macs checking for updates, visits and checkouts on localaicat.com.",
+  // Open to anyone with the link, but not something to land on from search; not in the sitemap either.
   robots: { index: false, follow: false }
 };
 
 const STORAGE_NOTE: Record<StatsReport["storage"], string> = {
-  redis: "Counted by the site in Upstash Redis.",
-  memory: "Local dev server: counted in memory, gone on restart.",
-  off: "Counting is off: no Redis is configured for this deployment."
+  redis: "the site counts these itself.",
+  memory: "local dev server: counted in memory, gone on restart.",
+  off: "counting is off on this deployment."
 };
 
 function sum(values: readonly number[]): number {
@@ -68,7 +72,7 @@ function Funnel({ steps }: { steps: { label: string; value: number | null }[] })
 }
 
 export default async function StatsPage() {
-  const report = await loadStatsReport();
+  const report = await cachedStatsReport();
   const { days } = report;
   const downloads30 = report.downloads ? sum(report.downloads.map(day => day.stable + day.beta)) : null;
   const macsToday = report.macsByDay ? report.macsByDay[report.macsByDay.length - 1].value : null;
@@ -76,16 +80,12 @@ export default async function StatsPage() {
   const checkouts30 = report.storage === "off" ? null : sum(report.checkoutsByPlan.map(plan => plan.count));
 
   return (
-    <>
-      <div className={internal.pageHead}>
-        <p className={internal.pageEyebrow}>Local AI Cat · Internal · last {REPORT_DAYS} days, UTC</p>
-        <h1 className={internal.pageTitle}>Stats.</h1>
-        <p className={internal.pageIntro}>
-          Downloads, Macs checking for updates, visits and checkouts. {STORAGE_NOTE[report.storage]} Visits come
-          from GoatCounter; the history from GitHub&rsquo;s own download counts.
-        </p>
-      </div>
-
+    <SiteShell siteMode="personal">
+      <ContentPage
+        kicker={`stats · last ${REPORT_DAYS} days, UTC`}
+        title="how the cat is doing"
+        intro={`downloads, macs checking for updates, visits and checkouts, as totals: ${STORAGE_NOTE[report.storage]} visits come from goatcounter, the history from github's own download counts. updated every few minutes.`}
+      >
       <div className={styles.tiles}>
         <Tile value={downloads30} label="Mac downloads" />
         <Tile value={macsToday} label="Macs checked for updates today" />
@@ -182,6 +182,7 @@ export default async function StatsPage() {
           )}
         </section>
       </div>
-    </>
+      </ContentPage>
+    </SiteShell>
   );
 }

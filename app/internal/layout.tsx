@@ -5,7 +5,6 @@ import styles from "./internal.module.css";
 const NAV = [
   { href: "/internal/matrix", label: "Feature Matrix" },
   { href: "/internal/architecture", label: "Architecture" },
-  { href: "/internal/stats", label: "Stats" },
 ];
 
 export default function InternalLayout({ children }: { children: ReactNode }) {

@@ -16,12 +16,6 @@ const CARDS = [
     title: "Architecture",
     body: "How the pieces fit — the release ladder, feature-gating model, and subsystem diagrams.",
   },
-  {
-    href: "/internal/stats",
-    eyebrow: "Site",
-    title: "Stats",
-    body: "Downloads, Macs checking for updates, visits and checkouts over the last 30 days, with GitHub's download history.",
-  },
 ];
 
 export default function InternalHome() {

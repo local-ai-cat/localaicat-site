@@ -40,8 +40,11 @@ function isPurchaseType(type: string): boolean {
   return type.startsWith("IA") || type === "FI1";
 }
 
-/** Sums one daily SUMMARY report (tab-separated, header first) into Local AI Chat's units. */
-export function summariseSalesReport(tsv: string, appId = LOCAL_AI_CHAT_APP_ID, sku = LOCAL_AI_CHAT_SKU): AppStoreDay {
+/**
+ * Sums one daily SUMMARY report (tab-separated, header first) into Local AI Chat's units. Null when the
+ * report lacks the columns it needs, so a malformed answer is asked again rather than stored as zero.
+ */
+export function summariseSalesReport(tsv: string, appId = LOCAL_AI_CHAT_APP_ID, sku = LOCAL_AI_CHAT_SKU): AppStoreDay | null {
   const [header, ...lines] = tsv.split(/\r?\n/).filter(line => line.trim() !== "");
   const columns = (header ?? "").split("\t");
   const column = (name: string): number => columns.indexOf(name);
@@ -51,7 +54,7 @@ export function summariseSalesReport(tsv: string, appId = LOCAL_AI_CHAT_APP_ID, 
   const parentAt = column("Parent Identifier");
   const deviceAt = column("Device");
   const day = emptyAppStoreDay();
-  if (typeAt < 0 || unitsAt < 0 || appAt < 0) return day;
+  if (typeAt < 0 || unitsAt < 0 || appAt < 0) return null;
   for (const line of lines) {
     const cells = line.split("\t");
     const type = cells[typeAt]?.trim() ?? "";

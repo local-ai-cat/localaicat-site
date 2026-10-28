@@ -41,9 +41,10 @@ test("a daily summary keeps only Local AI Chat's units, split by iPhone and iPad
   assert.deepEqual(summariseSalesReport(REPORT), { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
 });
 
-test("a report without the expected columns counts nothing", () => {
-  assert.deepEqual(summariseSalesReport("not\ta\treport\n1\t2\t3"), emptyAppStoreDay());
-  assert.deepEqual(summariseSalesReport(""), emptyAppStoreDay());
+test("a report without the expected columns is not a summary, so it is never stored as zero", () => {
+  assert.equal(summariseSalesReport("not\ta\treport\n1\t2\t3"), null);
+  assert.equal(summariseSalesReport(""), null);
+  assert.deepEqual(summariseSalesReport(HEADER), emptyAppStoreDay(), "a real report with no rows is a day of zero");
 });
 
 function testConfig(): AppStoreSalesConfig {

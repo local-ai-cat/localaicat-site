@@ -176,9 +176,10 @@ async function fetchOrders(adminKey: string | null, apiBase: string, days: reado
       if (!Array.isArray(payload.items)) return null;
       items.push(...payload.items);
       const lastPage = typeof payload.pagination?.max_page === "number" ? payload.pagination.max_page : page;
-      if (page >= lastPage) break;
+      // Past the page cap a total would be short, so none is shown rather than a wrong one.
+      if (page >= lastPage) return summariseOrders(items);
     }
-    return summariseOrders(items);
+    return null;
   } catch {
     return null;
   }

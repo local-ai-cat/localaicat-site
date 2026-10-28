@@ -239,5 +239,11 @@ test("orders are counted, never priced: paid first orders, free ones and renewal
     { paid: true, billing_reason: "subscription_update", total_amount: 300 },
     null
   ]);
-  assert.deepEqual(orders, { newPaid: 2, newFree: 1, renewals: 1 });
+  assert.deepEqual(orders, { newPaid: 2, newFree: 1, renewals: 1, firstByDay: {} });
+  const dated = summariseOrders([
+    { paid: true, billing_reason: "purchase", total_amount: 4900, created_at: "2026-10-12T09:00:00Z" },
+    { paid: true, billing_reason: "subscription_create", total_amount: 0, created_at: "2026-10-12T22:00:00Z" },
+    { paid: true, billing_reason: "subscription_cycle", total_amount: 900, created_at: "2026-10-13T09:00:00Z" }
+  ]);
+  assert.deepEqual(dated.firstByDay, { "2026-10-12": 2 }, "first orders by day, renewals left out");
 });

@@ -46,7 +46,13 @@ export type GitHubHistory = {
 export type GitHubTotals = { new: number; updates: number; beta: number; alpha: number };
 export type BucketValue = { key: string; value: number };
 /** Polar orders in the range, as counts: a first order (purchase or new subscription), and renewals. */
-export type OrdersReport = { newPaid: number; newFree: number; renewals: number };
+export type OrdersReport = {
+  newPaid: number;
+  newFree: number;
+  renewals: number;
+  /** First orders (paid or free) by UTC day, for the chart. */
+  firstByDay: Record<string, number>;
+};
 export type StatsReport = {
   range: StatsRange;
   granularity: RangeBuckets["granularity"];
@@ -63,6 +69,9 @@ export type StatsReport = {
   /** Distinct Macs a day; for a month, its busiest day. */
   macs: BucketValue[] | null;
   checkoutsByPlan: { plan: string; count: number }[];
+  /** Checkouts started per bucket (counted from 2026-10-28), and first Polar orders per bucket. */
+  checkouts: BucketValue[] | null;
+  firstOrders: BucketValue[] | null;
   visits: BucketValue[] | null;
   orders: OrdersReport | null;
   github: GitHubHistory | null;
@@ -213,15 +222,19 @@ const FIRST_ORDER_REASONS = new Set(["purchase", "subscription_create"]);
  * nothing (a full discount such as PURRDAIN, or a free trial) is counted apart from paying ones.
  */
 export function summariseOrders(items: unknown[]): OrdersReport {
-  const report: OrdersReport = { newPaid: 0, newFree: 0, renewals: 0 };
+  const report: OrdersReport = { newPaid: 0, newFree: 0, renewals: 0, firstByDay: {} };
   for (const item of items) {
-    const { paid, billing_reason: reason, total_amount: total } = (item ?? {}) as {
-      paid?: unknown; billing_reason?: unknown; total_amount?: unknown;
+    const { paid, billing_reason: reason, total_amount: total, created_at: created } = (item ?? {}) as {
+      paid?: unknown; billing_reason?: unknown; total_amount?: unknown; created_at?: unknown;
     };
     if (paid !== true || typeof reason !== "string") continue;
     if (FIRST_ORDER_REASONS.has(reason)) {
       if (typeof total === "number" && total > 0) report.newPaid += 1;
       else report.newFree += 1;
+      if (typeof created === "string" && /^\d{4}-\d{2}-\d{2}/.test(created)) {
+        const day = created.slice(0, 10);
+        report.firstByDay[day] = (report.firstByDay[day] ?? 0) + 1;
+      }
     } else if (reason === "subscription_cycle") {
       report.renewals += 1;
     }
@@ -341,6 +354,14 @@ export function buildReport(input: {
       ? [...totalsByField(checkouts, days)].map(([plan, count]) => ({ plan, count })).sort((a, b) => b.count - a.count)
       : [],
     visits: input.visits && buckets.map(bucket => ({ key: bucket.key, value: sumDays(input.visits as Map<string, number>, bucket) })),
+    checkouts: checkouts && buckets.map(bucket => ({
+      key: bucket.key,
+      value: bucket.days.reduce((sum, day) => sum + sumFields(checkouts[day]), 0)
+    })),
+    firstOrders: input.orders && buckets.map(bucket => ({
+      key: bucket.key,
+      value: bucket.days.reduce((sum, day) => sum + (input.orders?.firstByDay[day] ?? 0), 0)
+    })),
     orders: input.orders,
     github
   };

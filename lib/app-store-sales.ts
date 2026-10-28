@@ -13,6 +13,7 @@ import { HISTORY_START_MONTH, addMonths, lastDays, monthsBetween, utcDay } from 
 export const LOCAL_AI_CHAT_APP_ID = "6741502386";
 export const LOCAL_AI_CHAT_SKU = "pldev.Seek-Deep-Local-AI";
 const SALES_REPORTS_URL = "https://api.appstoreconnect.apple.com/v1/salesReports";
+const REPORT_VERSIONS = ["1_1", "1_0"] as const;
 /** Apple allows tokens up to 20 minutes; one fill needs far less. */
 const TOKEN_SECONDS = 10 * 60;
 /** Days kept day by day: enough for the 90-day view. Older history is kept by month. */
@@ -105,25 +106,42 @@ export function appStoreToken(config: AppStoreSalesConfig, now: number): string 
  * report for it, or null when the call failed.
  */
 async function fetchSalesReport(config: AppStoreSalesConfig, token: string, period: string): Promise<AppStoreDay | "none" | null> {
-  const url = new URL(SALES_REPORTS_URL);
-  url.searchParams.set("filter[frequency]", isMonth(period) ? "MONTHLY" : "DAILY");
-  url.searchParams.set("filter[reportType]", "SALES");
-  url.searchParams.set("filter[reportSubType]", "SUMMARY");
-  url.searchParams.set("filter[version]", "1_1");
-  url.searchParams.set("filter[vendorNumber]", config.vendorNumber);
-  url.searchParams.set("filter[reportDate]", period);
+  const frequency = isMonth(period) ? "MONTHLY" : "DAILY";
+  // Daily summaries answer to version 1_1; on 2026-10-29 every monthly request with 1_1 failed, so a refused
+  // version is retried with the older 1_0 before the period is given up for this fill.
+  for (const version of REPORT_VERSIONS) {
+    const url = new URL(SALES_REPORTS_URL);
+    url.searchParams.set("filter[frequency]", frequency);
+    url.searchParams.set("filter[reportType]", "SALES");
+    url.searchParams.set("filter[reportSubType]", "SUMMARY");
+    url.searchParams.set("filter[version]", version);
+    url.searchParams.set("filter[vendorNumber]", config.vendorNumber);
+    url.searchParams.set("filter[reportDate]", period);
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/a-gzip" },
+        signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS),
+        redirect: "error",
+        cache: "no-store"
+      });
+      if (response.status === 404) return "none";
+      if (response.ok) return summariseSalesReport(gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8"));
+      // Apple's error code and title only: no token, key or report content.
+      console.warn(`[stats] App Store ${frequency} ${period} v${version}: ${response.status} ${await appleError(response)}`);
+    } catch (error) {
+      console.warn(`[stats] App Store ${frequency} ${period} v${version}: ${error instanceof Error ? error.name : "failed"}`);
+    }
+  }
+  return null;
+}
+
+async function appleError(response: Response): Promise<string> {
   try {
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/a-gzip" },
-      signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS),
-      redirect: "error",
-      cache: "no-store"
-    });
-    if (response.status === 404) return "none";
-    if (!response.ok) return null;
-    return summariseSalesReport(gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8"));
+    const body = await response.json() as { errors?: { code?: unknown; title?: unknown }[] };
+    const first = body.errors?.[0];
+    return [first?.code, first?.title].filter(part => typeof part === "string").join(" ").slice(0, 160);
   } catch {
-    return null;
+    return "";
   }
 }
 

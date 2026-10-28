@@ -117,7 +117,8 @@ test("a fill stores each settled period for good and asks again only what isn't 
   try {
     const saved = await fillAppStoreHistory(config, store, NOW);
     const periods = appStorePeriods(NOW);
-    assert.equal(apple.asked.length, periods.length, "the whole backfill fits in one fill");
+    // One fill asks every period; the one that fails is asked again with the older report version.
+    assert.equal(apple.asked.length, periods.length + 1, "the whole backfill fits in one fill");
     // Not stored: a failed call, and the three days Apple may not have published yet (2026-10-25 to -27).
     assert.equal(saved, periods.length - 4);
     const history = await readAppStoreHistory(store, NOW);
@@ -131,7 +132,7 @@ test("a fill stores each settled period for good and asks again only what isn't 
     apple.asked.length = 0;
     // A finished fill lets the next one start straight away.
     await fillAppStoreHistory(config, store, NOW);
-    assert.deepEqual(apple.asked.sort(), ["2026-10-21", "2026-10-25", "2026-10-26", "2026-10-27"]);
+    assert.deepEqual(apple.asked.sort(), ["2026-10-21", "2026-10-21", "2026-10-25", "2026-10-26", "2026-10-27"]);
   } finally {
     apple.restore();
   }
@@ -221,5 +222,33 @@ test("no key or no store means no fill; a key that can't sign asks nothing", asy
     assert.equal(apple.asked.length, 0);
   } finally {
     apple.restore();
+  }
+});
+
+test("a monthly report refused at version 1_1 is asked again at 1_0", async () => {
+  const realFetch = globalThis.fetch;
+  const versions: string[] = [];
+  const warn = console.warn;
+  const warned: string[] = [];
+  console.warn = (message: string) => { warned.push(message); };
+  globalThis.fetch = async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    const version = url.searchParams.get("filter[version]") ?? "";
+    if (url.searchParams.get("filter[reportDate]") === "2026-09") versions.push(version);
+    if (version === "1_1" && url.searchParams.get("filter[frequency]") === "MONTHLY") {
+      return Response.json({ errors: [{ code: "PARAMETER_ERROR.INVALID", title: "A parameter has an invalid value" }] }, { status: 400 });
+    }
+    return new Response(gzipSync(REPORT), { status: 200 });
+  };
+  const store = new MemoryStatsStore();
+  try {
+    await fillAppStoreHistory(testConfig(), store, NOW);
+    assert.deepEqual(versions, ["1_1", "1_0"]);
+    assert.deepEqual((await readAppStoreHistory(store, NOW))["2026-09"], { ios: 3, mac: 3, redownloads: 4, updates: 9, purchases: 2 });
+    assert.ok(warned.some(line => line === "[stats] App Store MONTHLY 2026-09 v1_1: 400 PARAMETER_ERROR.INVALID A parameter has an invalid value"));
+    assert.equal(warned.some(line => /BEGIN|Bearer|eyJ/.test(line)), false, "no key or token in the logs");
+  } finally {
+    globalThis.fetch = realFetch;
+    console.warn = warn;
   }
 });

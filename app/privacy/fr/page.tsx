@@ -126,6 +126,11 @@ export default function PrivacyPageFr() {
             via une petite image plutôt qu’un script tiers. Seul le chemin public est
             envoyé, sans paramètres, titre ni URL de provenance.
             Vercel Speed Insights mesure les performances avec les mêmes préférences.</p>
+          <p>Le site compte lui-même les téléchargements Mac, les paiements commencés et les
+            vérifications de mise à jour de l&rsquo;application en téléchargement direct, en totaux
+            quotidiens par canal et par version. Il ne garde pour cela ni adresse IP, ni détails du
+            navigateur, ni cookie. Pour compter chaque Mac une fois par jour, il garde une empreinte de
+            l&rsquo;adresse et de la version, faite avec une clé supprimée au bout de deux jours.</p>
           <p>L’assistance Chatwoot se charge dans un panneau isolé uniquement à votre demande.
             Elle n’est pas chargée sur les pages de paiement, d’activation ou de compte.
             Le site ne lui transmet ni les détails de votre paiement ni l’URL de la page.

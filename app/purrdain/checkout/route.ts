@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCheckoutUrl } from "../../../lib/env";
 import { purrdainCheckoutUrl, purrdainSource } from "../../../lib/purrdain";
+import { countCheckout } from "../../../lib/site-stats";
 
 /** Hands off to the Pro Annual checkout with PURRDAIN prefilled. */
 export async function GET(request: Request) {
@@ -13,5 +14,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(fallback, { status: 302 });
   }
 
+  countCheckout("purrdain");
   return NextResponse.redirect(purrdainCheckoutUrl(checkoutLink, source), { status: 302 });
 }

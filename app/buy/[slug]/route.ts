@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server.js";
 import { getCheckoutUrl, type BuySlug } from "../../../lib/env.ts";
+import { countCheckout } from "../../../lib/site-stats.ts";
 
 const VALID_SLUGS: ReadonlySet<string> = new Set<BuySlug>([
   "pro-monthly",
@@ -28,6 +29,7 @@ export async function GET(
   const checkoutUrl = getCheckoutUrl(slug as BuySlug);
 
   if (checkoutUrl) {
+    countCheckout(slug);
     return NextResponse.redirect(checkoutUrl, { status: 302 });
   }
 

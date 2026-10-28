@@ -115,7 +115,9 @@ export default function PrivacyPage() {
           <p>The site counts Mac downloads, checkouts started and the direct-download app&rsquo;s update
             checks itself, as daily totals per channel and app version. It keeps no IP address,
             browser details or cookie for this. To count each Mac once a day, it keeps a hash of the
-            address and app version made with a key that is deleted after two days.</p>
+            address and app version made with a key that is deleted after two days. These totals are
+            public at <a href="/stats">localaicat.com/stats</a>, with App Store downloads and the number of
+            orders: counts only, never amounts or people.</p>
           <p>Chat support loads Chatwoot in an isolated panel only when you select it.
             We do not load it on checkout, activation or account pages, or send it your
             checkout details or current page URL. Information you choose to send in chat

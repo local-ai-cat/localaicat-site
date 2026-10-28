@@ -8,7 +8,7 @@ import { cachedStatsReport, REPORT_DAYS, type DayValue, type StatsReport } from 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Stats",
-  description: "Downloads, Macs checking for updates, visits and checkouts on localaicat.com.",
+  description: "Downloads from the site and the App Store, Macs checking for updates, visits, checkouts and orders.",
   // Open to anyone with the link, but not something to land on from search; not in the sitemap either.
   robots: { index: false, follow: false }
 };
@@ -78,19 +78,24 @@ export default async function StatsPage() {
   const macsToday = report.macsByDay ? report.macsByDay[report.macsByDay.length - 1].value : null;
   const visits30 = report.visits ? sum(values(report.visits)) : null;
   const checkouts30 = report.storage === "off" ? null : sum(report.checkoutsByPlan.map(plan => plan.count));
+  const orders30 = report.orders ? report.orders.newPaid + report.orders.newFree : null;
+  const appStore = report.appStore;
+  const appStore30 = appStore ? appStore.totals.ios + appStore.totals.mac : null;
 
   return (
     <SiteShell siteMode="personal">
       <ContentPage
         kicker={`stats · last ${REPORT_DAYS} days, UTC`}
         title="how the cat is doing"
-        intro={`downloads, macs checking for updates, visits and checkouts, as totals: ${STORAGE_NOTE[report.storage]} visits come from goatcounter, the history from github's own download counts. updated every few minutes.`}
+        intro={`downloads, macs checking for updates, visits, checkouts and orders, as totals: ${STORAGE_NOTE[report.storage]} visits come from goatcounter, app store numbers from apple's daily sales reports, orders from polar, the history from github's own download counts. counts only, never money or people. updated every few minutes.`}
       >
       <div className={styles.tiles}>
-        <Tile value={downloads30} label="Mac downloads" />
+        <Tile value={downloads30} label="Mac downloads from the site" />
+        <Tile value={appStore30} label="App Store downloads" />
         <Tile value={macsToday} label="Macs checked for updates today" />
         <Tile value={visits30} label="visits" />
         <Tile value={checkouts30} label="checkouts started" />
+        <Tile value={orders30} label="orders" />
       </div>
 
       <div className={styles.grid}>
@@ -104,6 +109,29 @@ export default async function StatsPage() {
               <div className={styles.legend}><span>stable</span><span>beta</span></div>
             </>
           ) : <p className={styles.off}>Not counted on this deployment.</p>}
+        </section>
+
+        <section className={styles.panel}>
+          <h2>App Store</h2>
+          <p className={styles.note}>
+            First-time downloads of Local AI Chat, from Apple&rsquo;s daily sales reports. Apple publishes a day the next
+            morning, Pacific time{appStore?.latestDay ? `; the latest here is ${shortDay(appStore.latestDay)}` : ""}.
+          </p>
+          {appStore ? (
+            <>
+              <DailyBars days={days} label="App Store downloads per day" primary={appStore.daily.map(day => day.ios)}
+                secondary={appStore.daily.map(day => day.mac)} />
+              <div className={styles.legend}><span>iPhone and iPad</span><span>Mac</span></div>
+              <table className={styles.table} style={{ marginTop: 18 }}>
+                <tbody>
+                  <tr><td>first downloads</td><td>{(appStore.totals.ios + appStore.totals.mac).toLocaleString("en-US")}</td></tr>
+                  <tr><td>downloads again</td><td>{appStore.totals.redownloads.toLocaleString("en-US")}</td></tr>
+                  <tr><td>updates</td><td>{appStore.totals.updates.toLocaleString("en-US")}</td></tr>
+                  <tr><td>in-app purchases</td><td>{appStore.totals.purchases.toLocaleString("en-US")}</td></tr>
+                </tbody>
+              </table>
+            </>
+          ) : <p className={styles.off}>Not connected on this deployment yet.</p>}
         </section>
 
         <section className={styles.panel}>
@@ -122,12 +150,23 @@ export default async function StatsPage() {
 
         <section className={styles.panel}>
           <h2>Funnel</h2>
-          <p className={styles.note}>Totals over the window, not the same people followed through.</p>
+          <p className={styles.note}>The site&rsquo;s own path, from a visit to a Polar order. Totals over the window, not the same people followed through.</p>
           <Funnel steps={[
             { label: "visits", value: visits30 },
             { label: "downloads", value: downloads30 },
-            { label: "checkouts started", value: checkouts30 }
+            { label: "checkouts started", value: checkouts30 },
+            { label: "orders", value: orders30 }
           ]} />
+          {report.orders ? (
+            <table className={styles.table} style={{ marginTop: 18 }}>
+              <thead><tr><th>Polar orders</th><th>count</th></tr></thead>
+              <tbody>
+                <tr><td>paid</td><td>{report.orders.newPaid}</td></tr>
+                <tr><td>free (full discount or trial)</td><td>{report.orders.newFree}</td></tr>
+                <tr><td>renewals</td><td>{report.orders.renewals}</td></tr>
+              </tbody>
+            </table>
+          ) : <p className={styles.off} style={{ marginTop: 18 }}>Polar didn&rsquo;t answer, or no key is set.</p>}
         </section>
 
         <section className={styles.panel}>

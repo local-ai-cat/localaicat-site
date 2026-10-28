@@ -7,7 +7,7 @@ export type StatsRange = "7d" | "30d" | "90d" | "12m" | "all";
 export type Bucket = { key: string; days: string[] };
 export type RangeBuckets = { range: StatsRange; granularity: "day" | "month"; buckets: Bucket[]; days: string[] };
 
-export const DEFAULT_RANGE: StatsRange = "30d";
+export const DEFAULT_RANGE: StatsRange = "all";
 export const STATS_RANGES: { range: StatsRange; label: string }[] = [
   { range: "7d", label: "7 days" },
   { range: "30d", label: "30 days" },
@@ -71,4 +71,17 @@ export function rangeBuckets(range: StatsRange, now: number): RangeBuckets {
   const first = range === "12m" ? addMonths(thisMonth, 1 - MONTHS_IN_YEAR) : HISTORY_START_MONTH;
   const buckets = monthsBetween(first, thisMonth).map(month => ({ key: month, days: daysOfMonth(month, today) }));
   return { range, granularity: "month", buckets, days: buckets.flatMap(bucket => bucket.days) };
+}
+
+/** About this many steps up a chart's y axis; the step itself is a round 1, 2 or 5 times a power of ten. */
+const TICK_STEPS = 3;
+
+/** Round steps from zero to just above `max`: 0, 20, 40, 60. Counts are whole, so a step is never below one. */
+export function niceTicks(max: number): number[] {
+  if (max <= 0) return [0, 1];
+  const rough = max / TICK_STEPS;
+  const power = 10 ** Math.floor(Math.log10(rough));
+  const step = Math.max(1, [1, 2, 5, 10].map(multiple => multiple * power).find(candidate => candidate >= rough) ?? 10 * power);
+  const top = Math.ceil(max / step) * step;
+  return Array.from({ length: Math.round(top / step) + 1 }, (_, index) => index * step);
 }

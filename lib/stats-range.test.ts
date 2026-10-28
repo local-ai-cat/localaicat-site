@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { DEFAULT_RANGE, addMonths, daysOfMonth, monthsBetween, parseRange, rangeBuckets } from "./stats-range.ts";
+import { DEFAULT_RANGE, addMonths, daysOfMonth, monthsBetween, niceTicks, parseRange, rangeBuckets } from "./stats-range.ts";
 
 const NOW = Date.parse("2026-10-28T12:00:00Z");
 
@@ -9,7 +9,7 @@ test("only the listed ranges are accepted; anything else is the default", () => 
   assert.equal(parseRange("all"), "all");
   assert.equal(parseRange(["7d"]), DEFAULT_RANGE);
   assert.equal(parseRange("1d; drop"), DEFAULT_RANGE);
-  assert.equal(parseRange(undefined), "30d");
+  assert.equal(parseRange(undefined), "all");
 });
 
 test("months count across years and list in order", () => {
@@ -36,4 +36,13 @@ test("short ranges are days ending today; long ones are months", () => {
   assert.equal(all.buckets.length, 21);
   assert.equal(all.days[0], "2025-02-01");
   assert.equal(all.days.at(-1), "2026-10-28");
+});
+
+test("the y axis climbs in round steps to just above the tallest point", () => {
+  assert.deepEqual(niceTicks(4), [0, 2, 4]);
+  assert.deepEqual(niceTicks(71), [0, 50, 100]);
+  assert.deepEqual(niceTicks(42), [0, 20, 40, 60]);
+  assert.deepEqual(niceTicks(1), [0, 1]);
+  assert.deepEqual(niceTicks(0), [0, 1]);
+  assert.deepEqual(niceTicks(1135), [0, 500, 1000, 1500]);
 });

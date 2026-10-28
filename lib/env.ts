@@ -69,6 +69,15 @@ export function getDirectDownloadUrl() {
   );
 }
 
+/**
+ * Where the site's download buttons point. With NEXT_PUBLIC_COUNTED_DOWNLOADS=1 they go through
+ * /download/mac, which counts the click and redirects to the same DMG; otherwise straight to the DMG.
+ * Structured data keeps the DMG's own URL either way.
+ */
+export function getDownloadLinkUrl() {
+  return process.env.NEXT_PUBLIC_COUNTED_DOWNLOADS === "1" ? "/download/mac" : getDirectDownloadUrl();
+}
+
 export function getDirectDownloadVersion() {
   return optionalValue(process.env.NEXT_PUBLIC_DIRECT_DOWNLOAD_VERSION);
 }

@@ -2,7 +2,7 @@
 
 import { SpaceMotionControl } from "./space-atmosphere";
 import { CatPortrait } from "./cat-builder";
-import { getDirectDownloadUrl } from "../../lib/env";
+import { getDownloadLinkUrl } from "../../lib/env";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSpaceMotion } from "./use-space-motion";
 import { useCatStudio } from "./use-cat-studio";
@@ -189,7 +189,7 @@ export function HomeVoyage({ active = true }: { active?: boolean }) {
             </div>
             <p id="voyage-speed-hint" className="voyageSettingsHint">Just the animation. Your Mac’s power stays the same.</p>
             <SpaceMotionControl />
-            <a className="voyagePyramidLink" onClick={() => trackSiteAction("download_clicked", "mac")} href={getDirectDownloadUrl()} title="Download Local AI Cat"><span className="spacePyramidIcon" aria-hidden="true" /> Find out more about the pyramids</a>
+            <a className="voyagePyramidLink" onClick={() => trackSiteAction("download_clicked", "mac")} href={getDownloadLinkUrl()} title="Download Local AI Cat"><span className="spacePyramidIcon" aria-hidden="true" /> Find out more about the pyramids</a>
           </div>}
         </div>
       </div>

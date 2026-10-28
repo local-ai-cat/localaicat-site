@@ -8,7 +8,7 @@ import {
   getCustomerPortalUrl,
   getDirectDownloadFilename,
   getDirectDownloadSha256,
-  getDirectDownloadUrl,
+  getDownloadLinkUrl,
   getDirectDownloadVersion,
   getDirectInstallScriptCommand,
   getHomebrewInstallCommand
@@ -67,7 +67,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
 
         <DownloadExperience
           appStoreUrl={getAppStoreUrl()}
-          downloadUrl={getDirectDownloadUrl()}
+          downloadUrl={getDownloadLinkUrl()}
           filename={getDirectDownloadFilename()}
           homebrewCmd={getHomebrewInstallCommand() || DEFAULT_BREW_CMD}
           scriptCmd={getDirectInstallScriptCommand()}

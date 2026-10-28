@@ -4,7 +4,7 @@ import { ContentPage } from "../_components/content-page";
 import { SiteShell } from "../_components/site-shell";
 import { DownloadLink } from "../_components/download-link";
 import {
-  getDirectDownloadUrl,
+  getDownloadLinkUrl,
   getDirectDownloadVersion,
   getHomebrewInstallCommand
 } from "../../lib/env";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const DEFAULT_BREW_CMD = "brew install --cask local-ai-cat";
 
 export default function OutdoorPage() {
-  const downloadUrl = getDirectDownloadUrl();
+  const downloadUrl = getDownloadLinkUrl();
   const version = getDirectDownloadVersion();
   const brewCmd = getHomebrewInstallCommand() || DEFAULT_BREW_CMD;
 

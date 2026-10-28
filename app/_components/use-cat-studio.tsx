@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { CatBuilder } from "./cat-builder";
 import { catStorageKey, loadCatRuntime, readSavedCat, saveCat } from "../../lib/cadet-runtime";
 import type { CatDesign, CatRuntime } from "../../lib/cadet-runtime";
-import { getDirectDownloadUrl } from "../../lib/env";
+import { getDownloadLinkUrl } from "../../lib/env";
 import { trackSiteAction } from "../../lib/site-analytics";
 
 type CatReceipt = { code: string; copied: boolean; persisted: boolean };
@@ -103,7 +103,7 @@ export function useCatStudio(): CatStudio {
     {receipt && <div className="catHomeReceipt">
       <div role="status"><strong>{cat?.appearance.name} is home.</strong><span>{receipt.copied ? "Cat code copied. Paste it into Customise / Import cat code in the app." : "Your cat is ready. Copy the code below to bring it into the app."}</span>
         {!receipt.persisted && <span>This browser could not save it. Keep your cat code before leaving.</span>}</div>
-      <div className="catHomeReceiptActions"><a onClick={() => trackSiteAction("download_clicked", "mac")} href={getDirectDownloadUrl()}>Download Local AI Cat</a><button onClick={copyAgain}>{receipt.copied ? "Copy code again" : "Copy cat code"}</button></div>
+      <div className="catHomeReceiptActions"><a onClick={() => trackSiteAction("download_clicked", "mac")} href={getDownloadLinkUrl()}>Download Local AI Cat</a><button onClick={copyAgain}>{receipt.copied ? "Copy code again" : "Copy cat code"}</button></div>
       <details open={!receipt.copied}><summary>Your cat code</summary><textarea aria-label="Your saved cat code" readOnly value={receipt.code} onFocus={event => event.currentTarget.select()}/></details>
       <button className="catReceiptDismiss" aria-label="Dismiss cat confirmation" onClick={() => setReceipt(null)}>×</button>
     </div>}

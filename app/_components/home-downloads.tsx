@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { trackSiteAction } from "../../lib/site-analytics";
 import {
   getAppStoreUrl,
-  getDirectDownloadUrl,
+  getDownloadLinkUrl,
   getDirectInstallScriptCommand,
   getHomebrewInstallCommand
 } from "../../lib/env";
@@ -60,7 +60,7 @@ export function AppStoreBadge({ href }: { href: string }) {
 export function DownloadPair({ id }: { id?: string }) {
   return (
     <div className="heroDownloads" id={id} aria-label="Get Local AI Cat">
-      <a className="heroDownloadMac" href={getDirectDownloadUrl()} onClick={() => trackSiteAction("download_clicked", "mac")}>
+      <a className="heroDownloadMac" href={getDownloadLinkUrl()} onClick={() => trackSiteAction("download_clicked", "mac")}>
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>
         Download for Mac
       </a>

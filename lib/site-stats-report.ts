@@ -409,8 +409,11 @@ export async function loadStatsReport(range: StatsRange, now = Date.now(), deps:
         await orNull(store.saveHistory("github-totals", today, JSON.stringify(githubTotals(github)), { onlyIfAbsent: true }));
       }
       // Once: counters written before they were kept for good still carry an expiry.
-      if (await orNull(store.claim("counters-kept", KEEP_COUNTERS_LEASE_SECONDS))) {
-        await orNull(store.keepCounters(rangeBuckets("all", now).days.filter(day => day >= COUNTING_STARTED)));
+      const keepLease = await orNull(store.claim("counters-kept", KEEP_COUNTERS_LEASE_SECONDS));
+      if (keepLease) {
+        const kept = await orNull(store.keepCounters(rangeBuckets("all", now).days.filter(day => day >= COUNTING_STARTED)).then(() => true));
+        // A failed run lets go, so the next view tries again.
+        if (!kept) await orNull(store.release("counters-kept", keepLease));
       }
       await fillAppStoreHistory(appStoreConfig, store, now);
     });

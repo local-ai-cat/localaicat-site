@@ -1,7 +1,6 @@
 import {
   appStoreUnits,
   fillAppStoreHistory,
-  unsplitAppStoreUnits,
   latestAppStoreDay,
   readAppStoreHistory,
   sumAppStoreUnits,
@@ -61,9 +60,8 @@ export type StatsReport = {
   storage: "redis" | "memory" | "off";
   allTime: { downloads: number | null; appStore: number | null; direct: number | null; directUpdates: number | null };
   /** Per bucket: App Store first downloads and direct (plain DMG) downloads; direct is null before the snapshots. */
-  /** `unsplit`: App Store first downloads known only as a month's total, from the seed. */
-  downloads: { key: string; ios: number; mac: number; unsplit: number; direct: number | null }[];
-  appStore: { units: AppStoreDay; unsplit: number; latestDay: string | null } | null;
+  downloads: { key: string; ios: number; mac: number; direct: number | null }[];
+  appStore: { units: AppStoreDay; latestDay: string | null } | null;
   direct: number | null;
   siteClicks: { key: string; stable: number; beta: number }[] | null;
   downloadsByVersion: { channel: string; version: string; count: number }[];
@@ -317,9 +315,7 @@ export function buildReport(input: {
 
   const allBuckets = rangeBuckets("all", input.now).buckets;
   const allTimeAppStore = appStore ? sumAppStoreUnits(appStore, allBuckets) : null;
-  const allTimeApp = allTimeAppStore
-    ? allTimeAppStore.ios + allTimeAppStore.mac + allBuckets.reduce((sum, bucket) => sum + unsplitAppStoreUnits(bucket), 0)
-    : null;
+  const allTimeApp = allTimeAppStore ? allTimeAppStore.ios + allTimeAppStore.mac : null;
   const allTimeDirect = github?.newDownloads ?? null;
   const anyAllTime = allTimeApp !== null || allTimeDirect !== null;
 
@@ -340,13 +336,11 @@ export function buildReport(input: {
         key: bucket.key,
         ios: units?.ios ?? 0,
         mac: units?.mac ?? 0,
-        unsplit: appStore ? unsplitAppStoreUnits(bucket) : 0,
         direct: directKnown(bucket) ? sumDays(direct, bucket) : null
       };
     }),
     appStore: appStore ? {
       units: sumAppStoreUnits(appStore, buckets),
-      unsplit: buckets.reduce((sum, bucket) => sum + unsplitAppStoreUnits(bucket), 0),
       latestDay: latestAppStoreDay(appStore)
     } : null,
     direct: directInRange(),

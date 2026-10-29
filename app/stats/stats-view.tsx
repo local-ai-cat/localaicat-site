@@ -41,8 +41,7 @@ function percent(part: number | null, whole: number | null): string | null {
 
 function metricsFor(report: StatsReport): ExplorerMetric[] {
   const appStore = report.appStore;
-  const appStoreRange = appStore ? appStore.units.ios + appStore.units.mac + appStore.unsplit : null;
-  const unsplit = report.downloads.some(bucket => bucket.unsplit > 0);
+  const appStoreRange = appStore ? appStore.units.ios + appStore.units.mac : null;
   const downloads = appStoreRange === null && report.direct === null ? null : (appStoreRange ?? 0) + (report.direct ?? 0);
   const perBucket = report.granularity === "month" ? "a month" : "a day";
   const per = (unit: string): string => `${unit} ${perBucket}`;
@@ -54,16 +53,12 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       axis: per("downloads"),
       total: downloads,
       series: [
-        ...(unsplit ? [{ name: "app store, any device", tone: "periwinkle" as const, values: report.downloads.map(bucket => bucket.unsplit) }] : []),
         { name: "iphone and ipad", tone: "lavender", values: report.downloads.map(bucket => bucket.ios) },
         { name: "mac app store", tone: "mint", values: report.downloads.map(bucket => bucket.mac) },
         { name: "mac, from the site", tone: "amber", values: report.downloads.map(bucket => bucket.direct ?? 0) }
       ],
-      note: `first downloads only, never updates. apple's api keeps a year of months, so february to september 2025 come from app store connect's own chart, as totals not split by device. apple publishes a day the next morning, pacific time${appStore?.latestDay ? `; the newest here is ${longDay(appStore.latestDay)}` : ""}. github only keeps running totals, so site downloads get their own bars from ${longDay(GITHUB_SNAPSHOTS_STARTED)}.`,
-      off: "downloads aren't connected on this deployment",
-      spread: unsplit
-        ? { points: report.downloads.map(bucket => bucket.unsplit > 0), label: "from app store connect's chart, any device" }
-        : undefined
+      note: `first downloads only, never updates. apple's api keeps a year of months, so february to september 2025 come from app store connect's own chart. apple publishes a day the next morning, pacific time${appStore?.latestDay ? `; the newest here is ${longDay(appStore.latestDay)}` : ""}. github only keeps running totals, so site downloads get their own bars from ${longDay(GITHUB_SNAPSHOTS_STARTED)}.`,
+      off: "downloads aren't connected on this deployment"
     },
     {
       id: "visits",

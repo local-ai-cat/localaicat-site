@@ -258,12 +258,14 @@ function addUnits(total: AppStoreDay, more: AppStoreDay): void {
 }
 
 /**
- * A bucket's units: a day's own summary; for a month, Apple's monthly report when there is one, else the sum
- * of the month's stored days (this month, or a month Apple hasn't reported yet). Null when nothing is known.
+ * A bucket's units: a day's own summary; for a month, the App Store Connect export when it is seeded, else
+ * Apple's monthly report when there is one, else the sum of the month's stored days (this month, or a month Apple
+ * hasn't reported yet). Null when nothing is known.
  */
 export function appStoreUnits(history: AppStoreHistory, bucket: { key: string; days: readonly string[] }): AppStoreDay | null {
-  // Seeded months come apart from the device split: see unsplitAppStoreUnits.
-  if (seededAppStoreUnits(bucket.key) !== null) return null;
+  // The export wins over anything stored for its months: a zero stored before the window was known must not hide it.
+  const seeded = seededAppStoreUnits(bucket.key);
+  if (seeded) return { ...emptyAppStoreDay(), ...seeded };
   if (history[bucket.key]) return history[bucket.key];
   if (!isMonth(bucket.key)) return null;
   const known = bucket.days.filter(day => history[day]);
@@ -271,11 +273,6 @@ export function appStoreUnits(history: AppStoreHistory, bucket: { key: string; d
   const total = emptyAppStoreDay();
   for (const day of known) addUnits(total, history[day]);
   return total;
-}
-
-/** First downloads for a month known only as a total (the seed), else zero. */
-export function unsplitAppStoreUnits(bucket: { key: string }): number {
-  return seededAppStoreUnits(bucket.key) ?? 0;
 }
 
 /** Units over several buckets; buckets with nothing known count as zero. */

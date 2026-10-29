@@ -10,7 +10,6 @@ import {
   appStoreToken,
   appStoreUnits,
   emptyAppStoreDay,
-  unsplitAppStoreUnits,
   sumAppStoreUnits,
   fillAppStoreHistory,
   latestAppStoreDay,
@@ -223,16 +222,15 @@ test("a month is Apple's monthly report when there is one, else the sum of its s
   assert.equal(appStoreUnits(history, { key: "2026-10-03", days: ["2026-10-03"] }), null);
 });
 
-test("months Apple's api no longer has come from the App Store Connect export, whatever was stored for them", () => {
+test("months Apple's api no longer has come from the App Store Connect export, split by device, whatever was stored for them", () => {
   const unit = (ios: number) => ({ ios, mac: 0, redownloads: 0, updates: 0, purchases: 0 });
   // A zero stored before the window was known must not hide the export's 111.
   const history = { "2025-08": unit(0), "2025-10": unit(83) };
-  assert.equal(appStoreUnits(history, { key: "2025-08", days: [] }), null);
-  assert.equal(unsplitAppStoreUnits({ key: "2025-08" }), 111);
-  assert.equal(unsplitAppStoreUnits({ key: "2025-10" }), 0, "a month Apple reported keeps its own split");
+  assert.deepEqual(appStoreUnits(history, { key: "2025-08", days: [] }), { ios: 109, mac: 2, redownloads: 0, updates: 0, purchases: 0 });
+  assert.equal(appStoreUnits(history, { key: "2025-10", days: [] })?.ios, 83, "a month Apple reported keeps its own report");
   const months = ["2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09"];
-  assert.equal(months.reduce((sum, key) => sum + unsplitAppStoreUnits({ key }), 0), 317);
-  assert.equal(sumAppStoreUnits(history, [{ key: "2025-08", days: [] }, { key: "2025-10", days: [] }]).ios, 83);
+  const exported = sumAppStoreUnits({}, months.map(key => ({ key, days: [] })));
+  assert.deepEqual([exported.ios, exported.mac], [303, 14], "App Store Connect's 317 for those months");
 });
 
 test("no key or no store means no fill; a key that can't sign asks nothing", async () => {

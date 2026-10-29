@@ -127,10 +127,9 @@ test("downloads join the App Store and direct; all time adds Apple's history sin
     snapshots: { "2026-10-28": JSON.stringify({ new: 84, updates: 85, beta: 28, alpha: 9 }) },
     appStore: { "2026-09": unit(20, 5), "2026-10-27": unit(2, 1), "2026-10-26": unit(1, 0) }
   });
-  assert.deepEqual(report.downloads.at(-2), { key: "2026-10-27", ios: 2, mac: 1, unsplit: 0, direct: null });
-  assert.deepEqual(report.downloads.at(-1), { key: "2026-10-28", ios: 0, mac: 0, unsplit: 0, direct: 2 });
+  assert.deepEqual(report.downloads.at(-2), { key: "2026-10-27", ios: 2, mac: 1, direct: null });
+  assert.deepEqual(report.downloads.at(-1), { key: "2026-10-28", ios: 0, mac: 0, direct: 2 });
   assert.deepEqual(report.appStore?.units, { ios: 3, mac: 1, redownloads: 2, updates: 0, purchases: 0 });
-  assert.equal(report.appStore?.unsplit, 0, "no exported month falls in the last 30 days");
   assert.equal(report.appStore?.latestDay, "2026-10-27");
   assert.equal(report.direct, 2);
   // App Store: Feb–Sep 2025 from the export (317) + Sep 2026 (25) + October so far, from its days (4); direct: GitHub's plain DMG (86).

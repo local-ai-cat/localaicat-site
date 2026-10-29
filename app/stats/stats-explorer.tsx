@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./stats.module.css";
 import { niceTicks } from "../../lib/stats-range";
 
-export type ExplorerSeries = { name: string; tone: "lavender" | "mint" | "amber" | "periwinkle"; values: number[] };
+export type ExplorerSeries = { name: string; tone: "lavender" | "mint" | "amber"; values: number[] };
 export type ExplorerMetric = {
   id: string;
   label: string;
@@ -18,8 +18,6 @@ export type ExplorerMetric = {
   note: string;
   /** Said instead of a chart when the metric isn't available on this deployment. */
   off: string;
-  /** Points that are a share of a longer total rather than their own count, and what to call them. */
-  spread?: { points: boolean[]; label: string };
 };
 export type ExplorerProps = {
   range: string;
@@ -34,7 +32,7 @@ export type ExplorerProps = {
 const WIDTH = 1000;
 const HEIGHT = 360;
 const MORPH_MS = 720;
-const TONES = { lavender: "#bda4eb", mint: "#91cbb3", amber: "#eebe7a", periwinkle: "#8fa6e8" } as const;
+const TONES = { lavender: "#bda4eb", mint: "#91cbb3", amber: "#eebe7a" } as const;
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -54,13 +52,15 @@ function easeOut(progress: number): number {
 
 /**
  * Tweens to the target layers: every metric or range switch reshapes the curves from where they were. A layer
- * that appears grows from the baseline; a different number of points starts from the baseline too.
+ * that appears grows from the baseline; a different number of points starts from the baseline too. The first
+ * render already holds the target, so the page arrives drawn and the CSS roll-in reveals it.
  */
 function useMorph(target: number[][], reduced: boolean): number[][] {
-  const [shown, setShown] = useState<number[][]>(() => target.map(layer => layer.map(() => 0)));
+  const [shown, setShown] = useState<number[][]>(target);
   const current = useRef(shown);
   const key = JSON.stringify(target);
   useEffect(() => {
+    if (JSON.stringify(current.current) === key) return;
     const goal = JSON.parse(key) as number[][];
     if (reduced) { current.current = goal; setShown(goal); return; }
     const from = goal.map((layer, layerIndex) => layer.map((_, index) => {
@@ -163,11 +163,6 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
   const count = labels.length;
   const x = (index: number): number => count <= 1 ? WIDTH / 2 : (index / (count - 1)) * WIDTH;
   const y = (value: number): number => HEIGHT - (value / peak) * HEIGHT;
-  const spreadPoints = metric.spread?.points.flatMap((spread, index) => spread ? [index] : []) ?? [];
-  const halfStep = count > 1 ? WIDTH / (count - 1) / 2 : 0;
-  const spreadBand = spreadPoints.length > 0
-    ? { from: Math.max(0, x(spreadPoints[0]) - halfStep), to: Math.min(WIDTH, x(spreadPoints[spreadPoints.length - 1]) + halfStep) }
-    : null;
 
   return (
     <section className={styles.explorer} aria-label="Stats over time">
@@ -188,9 +183,6 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
               </linearGradient>
             ))}
           </defs>
-          {spreadBand && (
-            <rect className={styles.spreadBand} x={spreadBand.from} width={spreadBand.to - spreadBand.from} y="0" height={HEIGHT} />
-          )}
           {ticks.slice(1).map(tick => (
             <line key={tick} className={styles.gridLine} x1="0" x2={WIDTH} y1={y(tick)} y2={y(tick)} />
           ))}
@@ -207,11 +199,6 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
           ))}
         </svg>
 
-        {spreadBand && metric.spread && (
-          <span className={styles.spreadLabel} style={{ left: `${(spreadBand.from / WIDTH) * 100}%`, width: `${((spreadBand.to - spreadBand.from) / WIDTH) * 100}%` }}>
-            {metric.spread.label}
-          </span>
-        )}
         {series.length > 0 && (
           <div className={styles.scale} aria-hidden="true">
             {ticks.map((tick, index) => (
@@ -233,7 +220,6 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
               style={{ left: `${(x(hover) / WIDTH) * 100}%` }}>
               <b>{labels[hover]}</b>
               <span>{totals[hover].toLocaleString("en-US")} {metric.unit}</span>
-              {metric.spread?.points[hover] && <span className={styles.tipNote}>{metric.spread.label}</span>}
               {series.length > 1 && series.filter(entry => (entry.values[hover] ?? 0) > 0).map(entry => (
                 <span key={entry.name} className={styles.tipPart} data-tone={entry.tone}>{entry.name} {entry.values[hover]}</span>
               ))}

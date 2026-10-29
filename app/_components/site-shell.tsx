@@ -94,7 +94,7 @@ export function SiteShell({
             </span>
           </Link>
 
-          <div className="headerPersonality">{showWorldSelector && <ModeSelector compact />}</div>
+          <div className="headerPersonality">{showWorldSelector && <ModeSelector compact earthChoices={false} />}</div>
           <nav aria-label="Primary" className="siteNav siteNavDesktop">
             {navLinks.map((link) => (
               <Link

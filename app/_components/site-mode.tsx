@@ -71,10 +71,14 @@ function isNavigationKey(event: KeyboardEvent<HTMLButtonElement>): boolean {
   return ["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key);
 }
 
-export function ModeSelector({ compact = false }: { compact?: boolean }) {
+/**
+ * The Space/Earth switch. Personal and Business follow it on Earth (`earthChoices`), except on the homepage, whose
+ * hero carries its own; the desktop header leaves them out so its switch never moves when the world changes.
+ */
+export function ModeSelector({ compact = false, earthChoices = true }: { compact?: boolean; earthChoices?: boolean }) {
   const [mode, selectMode] = useSiteMode();
   const world = siteWorld(mode);
-  const showEarthChoices = usePathname() !== "/";
+  const showEarthChoices = usePathname() !== "/" && earthChoices;
   function selectWorld(nextWorld: World): void {
     if (nextWorld !== world) selectMode(modeForWorld(nextWorld));
   }

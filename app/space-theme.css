@@ -145,7 +145,6 @@ body[data-home-mode="space"] .mobileNavDropdown {background:#25202f;}
 .skyMotionControl:disabled {cursor:default;}
 .skyMotionControl:focus-visible {outline:2px solid var(--accent);outline-offset:4px;}
 @keyframes skyShootingStar {0%{opacity:0;transform:translate3d(-60px,-30px,0) rotate(26deg)}.5%{opacity:.6}2.5%{opacity:0;transform:translate3d(260px,130px,0) rotate(26deg)}100%{opacity:0;transform:translate3d(260px,130px,0) rotate(26deg)}}
-@media(max-width:1100px){.headerPersonality .siteWorldControlsCompact{flex-direction:column;gap:2px;}.headerPersonality .earthPersonality{border-left:0;padding:0;}}
 @media(max-width:650px){
   .siteWorldControls:not(.siteWorldControlsCompact) .personalitySwitch button{min-width:108px;}
   .heroPersonalityControl{min-height:50px;}
@@ -440,10 +439,12 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
   .launchGantry i,.spaceLaunchPad .launchCraft,.spaceLaunchPad[data-launched="true"] .launchCraft{animation:none!important;}
 }
 
-/* Explorer presence stays separate from the main navigation. */
-.explorerSign {position:relative;z-index:12;display:flex;justify-content:flex-end;max-width:1200px;margin:auto;padding:12px 20px 0;}
-.explorerSign:has(.explorerPresence) {min-height:44px;}
-.explorerSign:not(:has(.explorerPresence)) {display:none;}
+/* Explorer presence stays separate from the main navigation. Its row keeps its height while the count loads, so the
+   page never shifts down when the sign arrives; the sign fades in. */
+.explorerSign {position:relative;z-index:12;display:flex;justify-content:flex-end;max-width:1200px;min-height:44px;margin:auto;padding:12px 20px 0;}
+.explorerSign .explorerPresence {animation:explorerSignIn 360ms ease-out both;}
+@keyframes explorerSignIn {from {opacity:0;}}
+@media(prefers-reduced-motion:reduce){.explorerSign .explorerPresence{animation:none;}}
 .spaceDesigns {padding:32px 0 60px;}
 .designsIntro {text-align:center;margin:28px auto 64px;}
 .designsIntro h1 {font-size:clamp(48px,6.8vw,86px);line-height:1.02;letter-spacing:-.045em;font-weight:500;margin:24px 0;}
@@ -521,6 +522,9 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 .footerTextSpace { display:none; }
 body[data-home-mode="space"] .footerTextSpace { display:inline; }
 body[data-home-mode="space"] .footerTextEarth { display:none; }
+/* Explore is the space cat's tour, so the Earth worlds leave it out of the header, the phone menu and the footer. */
+body:not([data-home-mode="space"]) :is(.siteNav, .mobileNavDropdown) a[href="/space"],
+body:not([data-home-mode="space"]) .footerLinks li:has(> a[href="/space"]) { display:none; }
 .appDemo { max-width:1000px; margin:88px auto 0; }
 .appDemo video { display:block; width:100%; aspect-ratio:16/9; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
 @media(prefers-reduced-motion:no-preference) {

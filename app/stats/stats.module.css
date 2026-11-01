@@ -98,6 +98,11 @@
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
+/* The bars still filling in, drawn on pace: faded and dotted, so they read as a guess and not a drop. */
+.pending .curve {
+  stroke-dasharray: 2 6;
+  opacity: 0.8;
+}
 .gridLine {
   stroke: color-mix(in srgb, var(--text) 12%, transparent);
   stroke-dasharray: 3 6;
@@ -195,6 +200,14 @@
 .tipPart[data-tone="amber"]::before,
 .key span[data-tone="amber"]::before {
   background: var(--amber);
+}
+.key span[data-tone="pending"]::before {
+  width: 16px;
+  height: 0;
+  border-top: 2px dotted var(--text-dim);
+  border-radius: 0;
+  background: none;
+  vertical-align: middle;
 }
 
 .axis {

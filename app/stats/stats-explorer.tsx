@@ -5,7 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./stats.module.css";
 import { niceTicks } from "../../lib/stats-range";
 
-export type ExplorerSeries = { name: string; tone: "lavender" | "mint" | "amber"; values: number[] };
+export type ExplorerSeries = {
+  name: string;
+  tone: "lavender" | "mint" | "amber";
+  values: number[];
+  /** What the chart draws: the values, with the bars still filling in carried on at the recent pace. */
+  pace?: number[];
+};
 export type ExplorerMetric = {
   id: string;
   label: string;
@@ -14,6 +20,8 @@ export type ExplorerMetric = {
   /** The y axis's top label after its number: "downloads a month". */
   axis: string;
   total: number | null;
+  /** How far along the bars the counts are known (3.5: halfway into the fifth); past it the curve is dashed. */
+  knownUpTo: number;
   series: ExplorerSeries[] | null;
   note: string;
   /** Said instead of a chart when the metric isn't available on this deployment. */
@@ -25,6 +33,8 @@ export type ExplorerProps = {
   /** "in the last 30 days", "since february 2025". */
   span: string;
   labels: string[];
+  /** "the last 30 days": what the dashed part's pace is taken over. */
+  paceWindow: string;
   metrics: ExplorerMetric[];
 };
 
@@ -33,6 +43,8 @@ const WIDTH = 1000;
 const HEIGHT = 360;
 const MORPH_MS = 720;
 const TONES = { lavender: "#bda4eb", mint: "#91cbb3", amber: "#eebe7a" } as const;
+/** Room around the drawing for the strokes, so a clip at its edges never shaves them. */
+const CLIP_BLEED = 10;
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -144,18 +156,19 @@ function axisLabels(labels: string[]): { index: number; label: string }[] {
   return [0, middle, labels.length - 1].map(index => ({ index, label: labels[index] }));
 }
 
-export function StatsExplorer({ range, ranges, span, labels, metrics }: ExplorerProps) {
+export function StatsExplorer({ range, ranges, span, labels, paceWindow, metrics }: ExplorerProps) {
   const [active, setActive] = useState(metrics[0]?.id);
   const [hover, setHover] = useState<number | null>(null);
   const reduced = useReducedMotion();
   const metric = metrics.find(entry => entry.id === active) ?? metrics[0];
   const series = metric.series ?? [];
 
-  // Layers stack bottom up: each is the running total of the series under it and itself.
+  // Layers stack bottom up: each is the running total of the series under it and itself, drawn on pace.
   const target = series.map((_, layerIndex) => labels.map((__, index) =>
-    series.slice(0, layerIndex + 1).reduce((sum, entry) => sum + (entry.values[index] ?? 0), 0)));
+    series.slice(0, layerIndex + 1).reduce((sum, entry) => sum + ((entry.pace ?? entry.values)[index] ?? 0), 0)));
   const layers = useMorph(target, reduced);
   const totals = labels.map((_, index) => target.at(-1)?.[index] ?? 0);
+  const soFar = labels.map((_, index) => series.reduce((sum, entry) => sum + (entry.values[index] ?? 0), 0));
   const ticks = niceTicks(Math.max(0, ...totals));
   // The scale eases with the curves, so a switch never jumps the axis under them.
   const peak = useMorph([[ticks[ticks.length - 1]]], reduced)[0]?.[0] || 1;
@@ -163,6 +176,28 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
   const count = labels.length;
   const x = (index: number): number => count <= 1 ? WIDTH / 2 : (index / (count - 1)) * WIDTH;
   const y = (value: number): number => HEIGHT - (value / peak) * HEIGHT;
+  const pending = series.length > 0 && metric.knownUpTo < count - 1;
+  const cut = x(Math.min(metric.knownUpTo, count - 1));
+  const isPending = (index: number): boolean => pending && index > metric.knownUpTo;
+
+  /** The stacked fills and their outlines; drawn once for the known part and once, dashed, for the rest. */
+  const drawing = (part: "known" | "pending") => (
+    <g clipPath={`url(#stats-${part})`} className={part === "pending" ? styles.pending : undefined}>
+      <g mask={part === "pending" ? "url(#stats-fade)" : undefined}>
+        {layers.map((layer, layerIndex) => {
+          const upper = layer.map((value, index) => ({ x: x(index), y: y(value) }));
+          const lower = (layers[layerIndex - 1] ?? layer.map(() => 0)).map((value, index) => ({ x: x(index), y: y(value) })).reverse();
+          const tone = series[layerIndex]?.tone ?? "lavender";
+          return <path key={layerIndex} d={`${smoothPath(upper)} ${smoothPath(lower, false)} Z`} fill={`url(#stats-fill-${tone})`} />;
+        })}
+      </g>
+      {/* Outlines top layer first, so where an upper layer is empty its line gives way to the one it rests on. */}
+      {[...layers.keys()].reverse().map(layerIndex => (
+        <path key={`line-${layerIndex}`} className={styles.curve} stroke={TONES[series[layerIndex]?.tone ?? "lavender"]}
+          d={smoothPath(layers[layerIndex].map((value, index) => ({ x: x(index), y: y(value) })))} />
+      ))}
+    </g>
+  );
 
   return (
     <section className={styles.explorer} aria-label="Stats over time">
@@ -182,21 +217,26 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
                 <stop offset="100%" stopColor={color} stopOpacity="0.04" />
               </linearGradient>
             ))}
+            <clipPath id="stats-known">
+              <rect x={-CLIP_BLEED} y={-CLIP_BLEED} width={(pending ? cut : WIDTH) + CLIP_BLEED} height={HEIGHT + 2 * CLIP_BLEED} />
+            </clipPath>
+            <clipPath id="stats-pending">
+              <rect x={cut} y={-CLIP_BLEED} width={WIDTH - cut + CLIP_BLEED} height={HEIGHT + 2 * CLIP_BLEED} />
+            </clipPath>
+            {/* The guessed part's fill fades out across it, so the known part doesn't end in a hard edge. */}
+            <linearGradient id="stats-fade-ramp" gradientUnits="userSpaceOnUse" x1={cut} x2={WIDTH} y1="0" y2="0">
+              <stop offset="0%" stopColor="white" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="white" stopOpacity="0.15" />
+            </linearGradient>
+            <mask id="stats-fade" maskUnits="userSpaceOnUse" x={cut} y={-CLIP_BLEED} width={WIDTH - cut + CLIP_BLEED} height={HEIGHT + 2 * CLIP_BLEED}>
+              <rect x={cut} y={-CLIP_BLEED} width={WIDTH - cut + CLIP_BLEED} height={HEIGHT + 2 * CLIP_BLEED} fill="url(#stats-fade-ramp)" />
+            </mask>
           </defs>
           {ticks.slice(1).map(tick => (
             <line key={tick} className={styles.gridLine} x1="0" x2={WIDTH} y1={y(tick)} y2={y(tick)} />
           ))}
-          {layers.map((layer, layerIndex) => {
-            const upper = layer.map((value, index) => ({ x: x(index), y: y(value) }));
-            const lower = (layers[layerIndex - 1] ?? layer.map(() => 0)).map((value, index) => ({ x: x(index), y: y(value) })).reverse();
-            const tone = series[layerIndex]?.tone ?? "lavender";
-            return <path key={layerIndex} d={`${smoothPath(upper)} ${smoothPath(lower, false)} Z`} fill={`url(#stats-fill-${tone})`} />;
-          })}
-          {/* Outlines top layer first, so where an upper layer is empty its line gives way to the one it rests on. */}
-          {[...layers.keys()].reverse().map(layerIndex => (
-            <path key={`line-${layerIndex}`} className={styles.curve} stroke={TONES[series[layerIndex]?.tone ?? "lavender"]}
-              d={smoothPath(layers[layerIndex].map((value, index) => ({ x: x(index), y: y(value) })))} />
-          ))}
+          {drawing("known")}
+          {pending && drawing("pending")}
         </svg>
 
         {series.length > 0 && (
@@ -219,7 +259,8 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
             <div className={styles.tip} data-edge={hover > count * 0.75 ? "end" : hover < count * 0.25 ? "start" : undefined}
               style={{ left: `${(x(hover) / WIDTH) * 100}%` }}>
               <b>{labels[hover]}</b>
-              <span>{totals[hover].toLocaleString("en-US")} {metric.unit}</span>
+              <span>{soFar[hover].toLocaleString("en-US")} {metric.unit}{isPending(hover) ? " so far" : ""}</span>
+              {isPending(hover) && <span>on pace for about {Math.round(totals[hover]).toLocaleString("en-US")}</span>}
               {series.length > 1 && series.filter(entry => (entry.values[hover] ?? 0) > 0).map(entry => (
                 <span key={entry.name} className={styles.tipPart} data-tone={entry.tone}>{entry.name} {entry.values[hover]}</span>
               ))}
@@ -258,8 +299,11 @@ export function StatsExplorer({ range, ranges, span, labels, metrics }: Explorer
         </nav>
       </div>
 
-      {series.length > 1 && (
-        <p className={styles.key}>{series.map(entry => <span key={entry.name} data-tone={entry.tone}>{entry.name}</span>)}</p>
+      {(series.length > 1 || pending) && (
+        <p className={styles.key}>
+          {series.length > 1 && series.map(entry => <span key={entry.name} data-tone={entry.tone}>{entry.name}</span>)}
+          {pending && <span data-tone="pending">still coming in, drawn at the pace of {paceWindow}</span>}
+        </p>
       )}
       <p className={styles.note}>{metric.note}</p>
     </section>

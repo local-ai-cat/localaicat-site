@@ -1,8 +1,9 @@
 import styles from "./stats.module.css";
-import { StatsExplorer, type ExplorerMetric } from "./stats-explorer";
+import { StatsExplorer, type ExplorerMetric, type ExplorerSeries } from "./stats-explorer";
 import { SiteShell } from "../_components/site-shell";
 import { COUNTING_STARTED, GITHUB_SNAPSHOTS_STARTED, type BucketValue, type StatsReport } from "../../lib/site-stats-report";
 import { HISTORY_START_MONTH, STATS_RANGES, type StatsRange } from "../../lib/stats-range";
+import { endOfDay, knownShares, knownUpTo, onPace } from "../../lib/stats-forecast";
 
 function count(value: number | null | undefined): string {
   return value === null || value === undefined ? "–" : value.toLocaleString("en-US");
@@ -45,6 +46,16 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
   const downloads = appStoreRange === null && report.direct === null ? null : (appStoreRange ?? 0) + (report.direct ?? 0);
   const perBucket = report.granularity === "month" ? "a month" : "a day";
   const per = (unit: string): string => `${unit} ${perBucket}`;
+  const iosValues = report.downloads.map(bucket => bucket.ios);
+  const macValues = report.downloads.map(bucket => bucket.mac);
+  // Live counts are known up to now; apple's up to the end of its newest published day.
+  const live = knownShares(report.buckets, report.now);
+  const apple = appStore?.latestDay ? knownShares(report.buckets, endOfDay(appStore.latestDay)) : live;
+  const pace = (values: number[], shares: number[]): number[] => onPace(values, shares, report.granularity);
+  const liveSeries = (name: string, tone: ExplorerSeries["tone"], values: number[]): ExplorerSeries =>
+    ({ name, tone, values, pace: pace(values, live) });
+  // A month's macs is its busiest day, which doesn't add up over days, so only days are paced.
+  const macsKnown = report.granularity === "day" ? live : report.buckets.map(() => 1);
   return [
     {
       id: "downloads",
@@ -52,10 +63,11 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       unit: "downloads",
       axis: per("downloads"),
       total: downloads,
+      knownUpTo: knownUpTo(apple),
       series: [
-        { name: "iphone and ipad", tone: "lavender", values: report.downloads.map(bucket => bucket.ios) },
-        { name: "mac app store", tone: "mint", values: report.downloads.map(bucket => bucket.mac) },
-        { name: "mac, from the site", tone: "amber", values: report.downloads.map(bucket => bucket.direct ?? 0) }
+        { name: "iphone and ipad", tone: "lavender", values: iosValues, pace: pace(iosValues, apple) },
+        { name: "mac app store", tone: "mint", values: macValues, pace: pace(macValues, apple) },
+        liveSeries("mac, from the site", "amber", report.downloads.map(bucket => bucket.direct ?? 0))
       ],
       note: `first downloads only, never updates. apple's api keeps a year of months, so february to september 2025 come from app store connect's own chart. apple publishes a day the next morning, pacific time${appStore?.latestDay ? `; the newest here is ${longDay(appStore.latestDay)}` : ""}. github only keeps running totals, so site downloads get their own bars from ${longDay(GITHUB_SNAPSHOTS_STARTED)}.`,
       off: "downloads aren't connected on this deployment"
@@ -66,7 +78,8 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       unit: "visits",
       axis: per("visits"),
       total: report.visits ? sum(values(report.visits)) : null,
-      series: report.visits && [{ name: "visits", tone: "lavender", values: values(report.visits) }],
+      knownUpTo: knownUpTo(live),
+      series: report.visits && [liveSeries("visits", "lavender", values(report.visits))],
       note: "goatcounter's daily visitors on public pages, without cookies.",
       off: "goatcounter didn't answer just now"
     },
@@ -76,7 +89,8 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       unit: report.granularity === "month" ? "macs on the busiest day" : "macs today",
       axis: "macs a day",
       total: report.macs ? (report.granularity === "month" ? Math.max(0, ...values(report.macs)) : report.macs.at(-1)?.value ?? 0) : null,
-      series: report.macs && [{ name: "macs", tone: "mint", values: values(report.macs) }],
+      knownUpTo: knownUpTo(macsKnown),
+      series: report.macs && [{ name: "macs", tone: "mint", values: values(report.macs), pace: pace(values(report.macs), macsKnown) }],
       note: `distinct macs ${perBucket === "a day" ? "a day" : "on each month's busiest day"} whose app asked the site for updates. it starts with the first build whose feed is localaicat.com.`,
       off: "macs aren't counted on this deployment"
     },
@@ -86,9 +100,10 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       unit: "clicks",
       axis: per("clicks"),
       total: report.siteClicks ? sum(report.siteClicks.map(bucket => bucket.stable + bucket.beta)) : null,
+      knownUpTo: knownUpTo(live),
       series: report.siteClicks && [
-        { name: "stable", tone: "lavender", values: report.siteClicks.map(bucket => bucket.stable) },
-        { name: "beta", tone: "mint", values: report.siteClicks.map(bucket => bucket.beta) }
+        liveSeries("stable", "lavender", report.siteClicks.map(bucket => bucket.stable)),
+        liveSeries("beta", "mint", report.siteClicks.map(bucket => bucket.beta))
       ],
       note: `clicks on the site's download buttons that went on to github, link previews left out. counted from ${longDay(COUNTING_STARTED)}.`,
       off: "download buttons aren't counted on this deployment"
@@ -99,7 +114,8 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       unit: "checkouts started",
       axis: per("checkouts"),
       total: report.checkouts ? sum(values(report.checkouts)) : null,
-      series: report.checkouts && [{ name: "checkouts", tone: "amber", values: values(report.checkouts) }],
+      knownUpTo: knownUpTo(live),
+      series: report.checkouts && [liveSeries("checkouts", "amber", values(report.checkouts))],
       note: `people who went from a plan to polar's checkout. counted from ${longDay(COUNTING_STARTED)}.`,
       off: "checkouts aren't counted on this deployment"
     },
@@ -109,7 +125,8 @@ function metricsFor(report: StatsReport): ExplorerMetric[] {
       unit: "orders",
       axis: per("orders"),
       total: report.orders ? report.orders.newPaid + report.orders.newFree : null,
-      series: report.firstOrders && [{ name: "orders", tone: "amber", values: values(report.firstOrders) }],
+      knownUpTo: knownUpTo(live),
+      series: report.firstOrders && [liveSeries("orders", "amber", values(report.firstOrders))],
       note: "first orders on polar, paid or free with a full discount; renewals are listed below. never an amount.",
       off: "polar didn't answer just now"
     }
@@ -154,6 +171,7 @@ export function StatsView({ report, range }: { report: StatsReport; range: Stats
           ranges={STATS_RANGES}
           span={span}
           labels={report.buckets.map(bucketLabel)}
+          paceWindow={report.granularity === "month" ? "the last 30 days" : "the last week"}
           metrics={metricsFor(report)}
         />
 

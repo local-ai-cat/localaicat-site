@@ -55,6 +55,8 @@ export type OrdersReport = {
 };
 export type StatsReport = {
   range: StatsRange;
+  /** When it was gathered: the live counts are known up to here. */
+  now: number;
   granularity: RangeBuckets["granularity"];
   buckets: string[];
   storage: "redis" | "memory" | "off";
@@ -321,6 +323,7 @@ export function buildReport(input: {
 
   return {
     range: range.range,
+    now: input.now,
     granularity: range.granularity,
     buckets: buckets.map(bucket => bucket.key),
     storage: input.storage,

@@ -522,8 +522,7 @@ body[data-home-mode="space"] .featureBadgeOutdoor {border-radius:4px;letter-spac
 .footerTextSpace { display:none; }
 body[data-home-mode="space"] .footerTextSpace { display:inline; }
 body[data-home-mode="space"] .footerTextEarth { display:none; }
-/* Explore is the space cat's tour, so the Earth worlds leave it out of the header, the phone menu and the footer. */
-body:not([data-home-mode="space"]) :is(.siteNav, .mobileNavDropdown) a[href="/space"],
+/* Explore is the space cat's tour, so only the space footer links it. The header leaves it out so switching worlds doesn't shift the nav. */
 body:not([data-home-mode="space"]) .footerLinks li:has(> a[href="/space"]) { display:none; }
 .appDemo { max-width:1000px; margin:88px auto 0; }
 .appDemo video { display:block; width:100%; aspect-ratio:16/9; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
